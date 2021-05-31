@@ -1,3 +1,3 @@
 # OpenBDS
-Open Brownian Dynamics Simulator
-TO ADD
+Open-source Brownian Dynamics Simulator
+Implements a Brownian Dynamics Simulator in modern FORTRAN
