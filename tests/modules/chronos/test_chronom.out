@@ -1,0 +1,15 @@
+
+
+Output shows that the real-time reported by time is consistent
+with that computed by the chronometer.
+
+$ time ./test-chronometer-class 
+ total:            4294967296           4294967296
+ test: passed
+ elapsed-time (millis):    6689.0567830000009     
+
+ real	0m6.691s
+ user	0m6.637s
+ sys	0m0.044s
+
+
