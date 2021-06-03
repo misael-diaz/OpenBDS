@@ -2,7 +2,7 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-05-31
+# date:   2021-06-02
 #
 # Synopsis:
 # Builds the OpenBDS modules
@@ -24,12 +24,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include modules-inc
 
-all: $(MODULES)
+all: chronos_mod
 
-$(CHRONOS_MODULE_OBJ): $(CHRONOS_MODULE_SRC)
-	$(FC) $(FC_OPT) -c $(CHRONOS_MODULE_SRC) -o $(CHRONOS_MODULE_OBJ)
+chronos_mod:
+	@$(MAKE) -C chronos
 
 clean:
-	rm -f *.mod *.o
+	@$(MAKE) -C chronos clean
