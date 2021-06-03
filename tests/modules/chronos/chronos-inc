@@ -23,11 +23,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include ../../../modules/modules-inc
+include ../../../modules/chronos/chronos-inc
 
 # modules directory
 # modules include
-MODULES_DIR = ../../../modules
+MODULES_DIR = ../../../modules/chronos
 MODULES_INC = -I$(MODULES_DIR)
 
 # defines relative path for needed modules
