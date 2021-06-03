@@ -4,7 +4,8 @@
 # date:   2021-05-31
 #
 # Synopsis:
-# Include for GNU make, defines source and object files to build tests.
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -23,28 +24,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include ../../../modules/chronos/chronos-inc
-
-# modules directory
-# modules include
-MODULES_DIR = ../../../modules/chronos
-MODULES_INC = -I$(MODULES_DIR)
-
-# defines relative path for needed modules
-CHRONOS_MOD_OBJ = $(MODULES_DIR)/$(CHRONOS_MODULE_OBJ)
-
-
 # src
-TEST_CHRONOM_SRC = test_chronom.for
+CHRONOS_MODULE_SRC = chronos.for
 
 
 # objects
-TEST_CHRONOM_OBJ = test_chronom.o
-
-
-# excutables
-TEST_CHRONOM_EXE = test-chronometer-class
+CHRONOS_MODULE_OBJ = chronos.o
 
 
 # bundle
-TESTS = $(TEST_CHRONOM_EXE)
+MODULES = $(CHRONOS_MODULE_OBJ)

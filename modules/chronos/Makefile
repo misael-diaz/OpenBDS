@@ -1,10 +1,11 @@
+#!/usr/bin/make
 #
-# source: chronos-inc
+# source: Makefile
 # author: misael-diaz
 # date:   2021-05-31
 #
 # Synopsis:
-# Include for GNU make, defines source and object files to build tests.
+# Builds the OpenBDS modules
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -23,28 +24,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include ../../../modules/chronos/chronos-inc
+include chronos-inc
 
-# modules directory
-# modules include
-MODULES_DIR = ../../../modules/chronos
-MODULES_INC = -I$(MODULES_DIR)
+all: $(MODULES)
 
-# defines relative path for needed modules
-CHRONOS_MOD_OBJ = $(MODULES_DIR)/$(CHRONOS_MODULE_OBJ)
+$(CHRONOS_MODULE_OBJ): $(CHRONOS_MODULE_SRC)
+	$(FC) $(FC_OPT) -c $(CHRONOS_MODULE_SRC) -o $(CHRONOS_MODULE_OBJ)
 
-
-# src
-TEST_CHRONOM_SRC = test_chronom.for
-
-
-# objects
-TEST_CHRONOM_OBJ = test_chronom.o
-
-
-# excutables
-TEST_CHRONOM_EXE = test-chronometer-class
-
-
-# bundle
-TESTS = $(TEST_CHRONOM_EXE)
+clean:
+	rm -f *.mod *.o
