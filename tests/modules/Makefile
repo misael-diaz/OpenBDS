@@ -5,7 +5,7 @@
 # date:   2021-06-02
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Builds OpenBDS tests.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -25,13 +25,14 @@
 #
 
 
-all: chronos_mod random_mod
+all: test_chronos test_random
 
-chronos_mod:
+test_chronos:
 	@$(MAKE) -C chronos
-random_mod:
+
+test_random:
 	@$(MAKE) -C random
 
 clean:
 	@$(MAKE) -C chronos clean
-	@$(MAKE) -C random clean
+	@$(MAKE) -C random  clean

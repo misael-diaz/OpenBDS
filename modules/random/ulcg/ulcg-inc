@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: ulcg-inc
 # author: misael-diaz
 # date:   2021-06-02
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,14 +24,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# src
+ULCG_MODULE_SRC = ulcg.for
 
-all: chronos_mod random_mod
 
-chronos_mod:
-	@$(MAKE) -C chronos
-random_mod:
-	@$(MAKE) -C random
+# objects
+ULCG_MODULE_OBJ = ulcg.o
 
-clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C random clean
+
+# bundle
+MODULES = $(ULCG_MODULE_OBJ)

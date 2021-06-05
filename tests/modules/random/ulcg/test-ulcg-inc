@@ -1,11 +1,10 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: test-ulcg-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-05
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Include for GNU make, defines source and object files to build tests.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,14 +23,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include ../../../../modules/random/ulcg/ulcg-inc
 
-all: chronos_mod random_mod
+# modules directory
+# modules include
+MODULES_DIR = ../../../../modules/random/ulcg
+MODULES_INC = -I$(MODULES_DIR)
 
-chronos_mod:
-	@$(MAKE) -C chronos
-random_mod:
-	@$(MAKE) -C random
+# defines relative path for needed modules
+ULCG_MOD_OBJ = $(MODULES_DIR)/$(ULCG_MODULE_OBJ)
 
-clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C random clean
+
+# src
+TEST_SMALL_LCG_SRC = test_small_lcg.for
+
+
+# objects
+TEST_SMALL_LCG_OBJ = test_small_lcg.o
+
+
+# excutables
+TEST_SMALL_LCG_EXE = test-small-lcg
+
+
+# bundle
+TESTS = $(TEST_SMALL_LCG_EXE)
