@@ -24,14 +24,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include ulcg-inc
 
-all: chronos_mod random_mod
+all: $(MODULES)
 
-chronos_mod:
-	@$(MAKE) -C chronos
-random_mod:
-	@$(MAKE) -C random
+$(ULCG_MODULE_OBJ): $(ULCG_MODULE_SRC)
+	$(FC) $(FC_OPT) -c $(ULCG_MODULE_SRC) -o $(ULCG_MODULE_OBJ)
 
 clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C random clean
+	rm -f *.mod *.o

@@ -42,7 +42,7 @@ all: mods tests
 mods:
 	@$(MAKE) -C modules
 tests: mods
-	@$(MAKE) -C tests/modules/chronos
+	@$(MAKE) -C tests
 clean:
 	@$(MAKE) -C modules clean
-	@$(MAKE) -C tests/modules/chronos clean
+	@$(MAKE) -C tests   clean

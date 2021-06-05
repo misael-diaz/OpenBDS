@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-05
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Builds the programs for testing Linear Congruential Generators.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,14 +24,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include test-ulcg-inc
 
-all: chronos_mod random_mod
+all: $(TESTS)
 
-chronos_mod:
-	@$(MAKE) -C chronos
-random_mod:
-	@$(MAKE) -C random
+
+$(TEST_SMALL_LCG_EXE): $(TEST_SMALL_LCG_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(ULCG_MOD_OBJ)\
+	       	$(TEST_SMALL_LCG_OBJ) -o $(TEST_SMALL_LCG_EXE)
+
+$(TEST_SMALL_LCG_OBJ): $(ULCG_MOD_OBJ) $(TEST_SMALL_LCG_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_SMALL_LCG_SRC) -o\
+	       	                          $(TEST_SMALL_LCG_OBJ)
+
 
 clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C random clean
+	rm -f *.mod *.o $(TESTS)

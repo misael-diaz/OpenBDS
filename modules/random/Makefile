@@ -25,13 +25,10 @@
 #
 
 
-all: chronos_mod random_mod
+all: ulcg_mod
 
-chronos_mod:
-	@$(MAKE) -C chronos
-random_mod:
-	@$(MAKE) -C random
+ulcg_mod:
+	@$(MAKE) -C ulcg
 
 clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C random clean
+	@$(MAKE) -C ulcg clean
