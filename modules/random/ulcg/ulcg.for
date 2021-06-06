@@ -255,8 +255,7 @@ module ulcg
 
 
             if (is_not_small_lcg) then
-                print *, "medium and large LCGs have yet to be implemented"
-                stop
+                errorstop ("unimplemented medium and large LCGs")
             else
                 call ulcg_create_gen_small (gen)
             end if
