@@ -72,8 +72,8 @@ module linkedlists
 
             call allocator(list % head)
             it => list % head
-            it % value = value
-            it % next  => null()
+            it % value  = value
+            it % next   => null()
             list % tail => list % head
             return
         end subroutine
