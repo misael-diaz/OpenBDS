@@ -35,16 +35,19 @@ LINKED_LIST_MOD_OBJ = $(MODULES_DIR)/$(LINKED_LIST_MODULE_OBJ)
 
 
 # src
+TEST_LINKING_SRC     = test_linking.for
 TEST_LINKED_LIST_SRC = test_linked_list.for
 
 
 # objects
+TEST_LINKING_OBJ     = test_linking.o
 TEST_LINKED_LIST_OBJ = test_linked_list.o
 
 
 # excutables
+TEST_LINKING_EXE     = test-linking
 TEST_LINKED_LIST_EXE = test-linked-list
 
 
 # bundle
-TESTS = $(TEST_LINKED_LIST_EXE)
+TESTS = $(TEST_LINKING_EXE) $(TEST_LINKED_LIST_EXE)

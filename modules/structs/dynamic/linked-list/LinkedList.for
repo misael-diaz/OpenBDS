@@ -52,10 +52,21 @@ module linkedlists
 
 
     private
+    public :: linkedlist_initializer
     contains
 
 
+        subroutine linkedlist_initializer(list, value)
+            ! Synopsis: Constructor
+            type(linkedlist), intent(inout) :: list
+            integer(kind = int32), intent(in) :: value
+            call create(list, value)
+            return
+        end subroutine
+
+
         function initializer(value) result(list)
+            ! Synopsis: Python-like Constructor.
             type(linkedlist):: list
             integer(kind = int32), intent(in) :: value
             call create(list, value)
@@ -67,14 +78,12 @@ module linkedlists
             ! Synopsis:
             ! Creates the first link of the linked-list.
             type(linkedlist), intent(inout) :: list
-            type(node), pointer :: it => null()                 ! iterator
             integer(kind = int32), intent(in) :: value
 
             call allocator(list % head)
-            it => list % head
-            it % value  = value
-            it % next   => null()
             list % tail => list % head
+            list % tail % value =  value
+            list % tail % next  => null()
             return
         end subroutine
 
@@ -82,15 +91,16 @@ module linkedlists
         subroutine insert_back(self, value)
             ! Synopsis:
             ! Inserts value at the back of the list.
-            class(linkedlist), intent(inout) :: self
+            class(linkedlist), intent(inout):: self
             type(node), pointer :: tail => null()
             integer(kind = int32), intent(in) :: value
 
             call allocator(self % tail % next)
             self % tail => self % tail % next
             tail => self % tail
-            tail % value = value
+            tail % value =  value
             tail % next  => null()
+
             return
         end subroutine
 
@@ -197,3 +207,14 @@ end module
 ! References:
 ! SJ Chapman, FORTRAN for Scientists and Engineers, fourth edition
 ! github.com/tomedunn/fortran-linked-list
+!
+!
+! Known Issues:
+! Using the Python-like constructor might incurr in a segmentation fault
+! when compiling the code with the Intel FORTRAN Compiler:
+!
+! ifort (IFORT) 2021.1 Beta 20201112
+!
+! Solution:
+! To avoid the segfault invoke the linkedlist_initializer() procedure.
+! See the linked-list test.

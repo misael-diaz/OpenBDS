@@ -29,6 +29,17 @@ include LinkedList-test-inc
 all: $(TESTS)
 
 
+
+$(TEST_LINKING_EXE): $(TEST_LINKING_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(LINKING_MOD_OBJ)\
+                $(TEST_LINKING_OBJ) -o $(TEST_LINKING_EXE)
+
+$(TEST_LINKING_OBJ): $(LINKING_MOD_OBJ) $(TEST_LINKING_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_LINKING_SRC) -o\
+                                          $(TEST_LINKING_OBJ)
+
+
+
 $(TEST_LINKED_LIST_EXE): $(TEST_LINKED_LIST_OBJ)
 	$(FC) $(FC_OPT) $(MODULES_INC) $(LINKED_LIST_MOD_OBJ)\
 	       	$(TEST_LINKED_LIST_OBJ) -o $(TEST_LINKED_LIST_EXE)

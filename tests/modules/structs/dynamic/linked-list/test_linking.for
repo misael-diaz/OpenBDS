@@ -1,11 +1,11 @@
 !
-!   source: test_linked_list.for
+!   source: test_linking.for
 !   author: misael-diaz
-!   date:   2021-06-06
+!   date:   2021-06-07
 !
 !
 !   Synopsis:
-!   Tests the linked-list class.
+!   Tests linking of nodes.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
@@ -23,28 +23,69 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-program test_linked_list
+module testlinking
     use, intrinsic :: iso_fortran_env, only: int32
-    use linkedlists, only: linkedlist, linkedlist_initializer
+    implicit none
+
+    type :: node
+        integer(kind = int32) :: value = 0
+        type(node), pointer :: next => null()
+    end type
+
+
+    type :: linkedlist
+        type(node), pointer :: head => null()
+        type(node), pointer :: tail => null()
+    end type
+
+
+    public
+end module
+
+program test_linking
+    use, intrinsic :: iso_fortran_env, only: int32
+    use testlinking, only: node, linkedlist
     implicit none
     type(linkedlist):: list
-!   type(linkedlist):: empty_list
-!   type(linkedlist):: single_valued_list
-    integer(kind = int32):: i = 0
+
+    type(node), pointer :: link => null()
+    type(node), pointer :: newlink => null()
+
+    integer(kind = int32):: mstat
     integer(kind = int32):: value = 0
-    integer(kind = int32), parameter :: n = 256
 
 
-    call linkedlist_initializer(list, value) ! ifort-friendly constructor
-    do while (i /= n - 1)
-        value = i + 1
-        call list % push_back(value)
-        i = i + 1
-    end do
+    allocate(list % head, stat = mstat)
+    if (mstat /= 0) error stop "memory allocation failure"
+    list % tail => list % head
+    list % tail % value =  value
+    list % tail % next  => null()
 
-    print *, 'size: ', n, list % size()
 
-!   single_valued_list = linkedlist(value)
+    allocate(list % tail % next, stat = mstat)
+    if (mstat /= 0) error stop "memory allocation failure"
+    list % tail => list % tail % next
+    print *, 'associated: ', associated(list % head % next)
+
+    deallocate(list % tail)
+    deallocate(list % head)
+
+
+    allocate(link, stat = mstat)
+    if (mstat /= 0) error stop "memory allocation failure"
+    link % value = value
+
+
+    allocate(link % next, stat = mstat)
+    if (mstat /= 0) error stop "memory allocation failure"
+    newlink => link % next
+    newlink % value = value
+    newlink % next  => null()
+
+
+    deallocate(link % next)
+    deallocate(link)
+
 
 end program
 
@@ -61,32 +102,13 @@ end program
 !
 !
 ! Empty linked-list test:
-!
 ! To check if the linked-list implementation handles empty lists
 ! correctly (does not attempt to deallocate an unassociated pointer)
 ! we had to relax the compilation options so that unused variables
 ! are not treated as errors. In fact, the only option used to compile
 ! main is the free-form option (since F90) to tell the compiler that
-! source layout is free (or not fixed as in F77 and former).
+! source layout is free (or not fixed as in F77 and former). 
 ! To achieve this we modified the local Makefile.
 !
 ! We have reverted the source and the Makefile so that building the code
 ! with other compilers does not require tweeking Makefiles.
-
-
-
-! Known Issues:
-!
-! Code segfaults when invoking the python-like constructor in a program
-! compiled with the Intel FORTRAN Compiler ifort.
-!
-! I had a hard time debugging the code when compiling with the Intel
-! FORTRAN Compiler. The source of the problem was using the python-like
-! constructor, which is implemented as a function that returns a
-! linked-list object. The GNU FORTRAN Compiler and Flang-7 were able
-! to intepret my intention and produced a code that met my expectations.
-!
-! I do not have the insight to tell what was ifort doing under the
-! covers. All that I know is that if I want to compile the code with
-! ifort I must use the linkedlist_initialzer() procedure as in this
-! testing program.
