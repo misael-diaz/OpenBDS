@@ -5,7 +5,7 @@
 # date:   2021-06-02
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Builds the OpenBDS modules
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +24,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include LinkedList-inc
 
-all: test_chronos test_structs test_random
+all: $(MODULES)
 
-test_chronos:
-	@$(MAKE) -C chronos
-
-test_structs:
-	@$(MAKE) -C structs
-
-test_random:
-	@$(MAKE) -C random
+$(LINKED_LIST_MODULE_OBJ): $(LINKED_LIST_MODULE_SRC)
+	$(FC) $(FC_OPT) -c $(LINKED_LIST_MODULE_SRC) -o\
+	        	   $(LINKED_LIST_MODULE_OBJ)
 
 clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C structs clean
-	@$(MAKE) -C random  clean
+	rm -f *.mod *.o

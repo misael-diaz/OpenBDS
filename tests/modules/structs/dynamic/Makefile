@@ -25,18 +25,10 @@
 #
 
 
-all: test_chronos test_structs test_random
+all: test_linked_list
 
-test_chronos:
-	@$(MAKE) -C chronos
-
-test_structs:
-	@$(MAKE) -C structs
-
-test_random:
-	@$(MAKE) -C random
+test_linked_list:
+	@$(MAKE) -C linked-list
 
 clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C structs clean
-	@$(MAKE) -C random  clean
+	@$(MAKE) -C linked-list clean

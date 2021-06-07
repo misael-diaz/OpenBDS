@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: LinkedList-inc
 # author: misael-diaz
 # date:   2021-06-02
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +24,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# src
+LINKED_LIST_MODULE_SRC = LinkedList.for
 
-all: test_chronos test_structs test_random
 
-test_chronos:
-	@$(MAKE) -C chronos
+# objects
+LINKED_LIST_MODULE_OBJ = linkedlist.o
 
-test_structs:
-	@$(MAKE) -C structs
 
-test_random:
-	@$(MAKE) -C random
-
-clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C structs clean
-	@$(MAKE) -C random  clean
+# bundle
+MODULES = $(LINKED_LIST_MODULE_OBJ)

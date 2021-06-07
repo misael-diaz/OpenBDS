@@ -1,11 +1,10 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: test-linked-list-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-05
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Include for GNU make, defines source and object files to build tests.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +23,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include ../../../../../modules/structs/dynamic/linked-list/LinkedList-inc
 
-all: test_chronos test_structs test_random
+# modules directory
+# modules include
+MODULES_DIR = ../../../../../modules/structs/dynamic/linked-list
+MODULES_INC = -I$(MODULES_DIR)
 
-test_chronos:
-	@$(MAKE) -C chronos
+# defines relative path for needed modules
+LINKED_LIST_MOD_OBJ = $(MODULES_DIR)/$(LINKED_LIST_MODULE_OBJ)
 
-test_structs:
-	@$(MAKE) -C structs
 
-test_random:
-	@$(MAKE) -C random
+# src
+TEST_LINKED_LIST_SRC = test_linked_list.for
 
-clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C structs clean
-	@$(MAKE) -C random  clean
+
+# objects
+TEST_LINKED_LIST_OBJ = test_linked_list.o
+
+
+# excutables
+TEST_LINKED_LIST_EXE = test-linked-list
+
+
+# bundle
+TESTS = $(TEST_LINKED_LIST_EXE)

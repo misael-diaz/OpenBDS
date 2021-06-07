@@ -5,7 +5,7 @@
 # date:   2021-06-02
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Builds the OpenBDS modules
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -25,18 +25,10 @@
 #
 
 
-all: test_chronos test_structs test_random
+all: dynamic_mod
 
-test_chronos:
-	@$(MAKE) -C chronos
-
-test_structs:
-	@$(MAKE) -C structs
-
-test_random:
-	@$(MAKE) -C random
+dynamic_mod:
+	@$(MAKE) -C dynamic
 
 clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C structs clean
-	@$(MAKE) -C random  clean
+	@$(MAKE) -C dynamic clean

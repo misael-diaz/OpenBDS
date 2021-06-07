@@ -25,13 +25,16 @@
 #
 
 
-all: chronos_mod random_mod
+all: chronos_mod structs_mod random_mod
 
 chronos_mod:
 	@$(MAKE) -C chronos
+structs_mod:
+	@$(MAKE) -C structs
 random_mod:
 	@$(MAKE) -C random
 
 clean:
 	@$(MAKE) -C chronos clean
-	@$(MAKE) -C random clean
+	@$(MAKE) -C structs clean
+	@$(MAKE) -C random  clean

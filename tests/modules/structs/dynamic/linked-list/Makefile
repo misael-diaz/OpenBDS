@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-06
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Builds the programs for testing the LinkedList Class.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +24,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include LinkedList-test-inc
 
-all: test_chronos test_structs test_random
+all: $(TESTS)
 
-test_chronos:
-	@$(MAKE) -C chronos
 
-test_structs:
-	@$(MAKE) -C structs
+$(TEST_LINKED_LIST_EXE): $(TEST_LINKED_LIST_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(LINKED_LIST_MOD_OBJ)\
+	       	$(TEST_LINKED_LIST_OBJ) -o $(TEST_LINKED_LIST_EXE)
 
-test_random:
-	@$(MAKE) -C random
+$(TEST_LINKED_LIST_OBJ): $(LINKED_LIST_MOD_OBJ) $(TEST_LINKED_LIST_SRC)
+	$(FC) -ffree-form $(MODULES_INC) -c $(TEST_LINKED_LIST_SRC) -o\
+	       	                          $(TEST_LINKED_LIST_OBJ)
+
 
 clean:
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C structs clean
-	@$(MAKE) -C random  clean
+	rm -f *.mod *.o $(TESTS)
