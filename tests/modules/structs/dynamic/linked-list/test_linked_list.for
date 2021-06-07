@@ -36,11 +36,13 @@ program test_linked_list
 
 
     list = linkedlist(value)
-    do while (i /= n)
+    do while (i /= n - 1)
         value = i + 1
         call list % push_back(value)
         i = i + 1
     end do
+
+    print *, 'size: ', n, list % size()
 
 !   single_valued_list = linkedlist(value)
 
