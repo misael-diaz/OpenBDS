@@ -28,8 +28,8 @@ program test_linked_list
     use linkedlists, only: linkedlist
     implicit none
     type(linkedlist):: list
-    type(linkedlist):: empty_list
-    type(linkedlist):: single_valued_list
+!   type(linkedlist):: empty_list
+!   type(linkedlist):: single_valued_list
     integer(kind = int32):: i = 0
     integer(kind = int32):: value = 0
     integer(kind = int32), parameter :: n = 256
@@ -42,7 +42,7 @@ program test_linked_list
         i = i + 1
     end do
 
-    single_valued_list = linkedlist(value)
+!   single_valued_list = linkedlist(value)
 
 end program
 
@@ -58,6 +58,7 @@ end program
 ! The output from valgrind has been logged to: leaks.out
 !
 !
+! Empty linked-list test:
 ! To check if the linked-list implementation handles empty lists
 ! correctly (does not attempt to deallocate an unassociated pointer)
 ! we had to relax the compilation options so that unused variables
@@ -65,3 +66,6 @@ end program
 ! main is the free-form option (since F90) to tell the compiler that
 ! source layout is free (or not fixed as in F77 and former). 
 ! To achieve this we modified the local Makefile.
+!
+! We have reverted the source and the Makefile so that building the code
+! with other compilers does not require tweeking Makefiles.
