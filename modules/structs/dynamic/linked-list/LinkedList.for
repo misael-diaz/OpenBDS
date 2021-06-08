@@ -53,6 +53,7 @@ module linkedlists
             procedure, public :: copy => return_copy
             procedure, public :: push_back => insert_back
             procedure, public :: push_front => insert_front
+            procedure, public :: insort => insert_sort
             final :: finalizer
     end type
 
@@ -165,6 +166,37 @@ module linkedlists
             call allocator(self % head % node)
             self % head % node % value = value
             self % head % node % next % node => node
+
+            return
+        end subroutine
+
+
+        subroutine insert_sort(self, value)
+            ! Synopsis:
+            ! Inserts values so that these are in non-decreasing order.
+            class(linkedlist), intent(inout):: self
+            integer(kind = int32), intent(in) :: value
+            type(node_t), pointer :: it => null()
+            type(node_t), pointer :: node => null()
+
+            if (value <= self % head % node % value) then
+                call insert_front(self, value)
+            else if (value > self % tail % node % value) then
+                call insert_back(self, value)
+            else
+
+                it => self % head % node
+                do while (value > it % next % node % value)
+                    it => it % next % node
+                end do
+
+                node => it % next % node
+                it % next % node => null()
+                call allocator(it % next % node)
+                it % next % node % value = value
+                it % next % node % next % node => node
+
+            end if
 
             return
         end subroutine
