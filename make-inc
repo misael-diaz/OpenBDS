@@ -26,6 +26,7 @@
 
 # GNU FORTRAN Compiler
 FC = /opt/gcc/gcc-11.1.0/bin/gfortran
+FC = gfortran-10
 
 # FORTRAN Compiler Options
 FC_OPT = -std=f2018 -ffree-form -fall-intrinsics -g -fbacktrace\
