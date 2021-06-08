@@ -52,6 +52,7 @@ module linkedlists
             procedure, public :: print => display
             procedure, public :: copy => return_copy
             procedure, public :: push_back => insert_back
+            procedure, public :: push_front => insert_front
             final :: finalizer
     end type
 
@@ -144,13 +145,26 @@ module linkedlists
             ! Synopsis:
             ! Inserts value at the back of the list.
             class(linkedlist), intent(inout):: self
-            type(link_t):: tail
             integer(kind = int32), intent(in) :: value
 
             call allocator(self % tail % node % next % node)
             self % tail % node => self % tail % node % next % node
-            tail % node => self % tail % node
-            tail % node % value = value
+            self % tail % node % value = value
+
+            return
+        end subroutine
+
+
+        subroutine insert_front(self, value)
+            class(linkedlist), intent(inout):: self
+            type(node_t), pointer :: node => null()
+            integer(kind = int32), intent(in) :: value
+
+            node => self % head % node
+            self % head % node => null()
+            call allocator(self % head % node)
+            self % head % node % value = value
+            self % head % node % next % node => node
 
             return
         end subroutine
