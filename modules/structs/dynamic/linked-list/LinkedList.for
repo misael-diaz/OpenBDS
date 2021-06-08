@@ -28,17 +28,22 @@ module linkedlists
     implicit none
 
 
-    type :: node
+    type :: link_t
+        type(node_t), pointer :: node => null()
+    end type
+
+
+    type :: node_t
         integer(kind = int32) :: value = 0
-        type(node), pointer :: next => null()
+        type(link_t) :: next
     end type
 
 
     type, public :: linkedlist
         private
-        type(node), pointer :: iter => null()           ! iterator
-        type(node), pointer :: head => null()           ! begin
-        type(node), pointer :: tail => null()           ! end
+        type(link_t):: iter     ! iterator
+        type(link_t):: head     ! begin
+        type(link_t):: tail     ! end
         contains
             procedure, public :: begin => iterator_begin
             procedure, public :: next => iterator_advance
@@ -85,33 +90,32 @@ module linkedlists
             type(linkedlist), intent(inout) :: list
             integer(kind = int32), intent(in) :: value
 
-            call allocator(list % head)
-            list % iter => list % head
-            list % tail => list % head
-            list % tail % value =  value
-            list % tail % next  => null()
+            call allocator(list % head % node)
+            list % iter % node => list % head % node
+            list % tail % node => list % head % node
+            list % tail % node % value = value
             return
         end subroutine
 
 
         subroutine iterator_begin(self)
             class(linkedlist), intent(inout) :: self
-            self % iter => self % head
+            self % iter % node => self % head % node
             return
         end subroutine
 
 
         subroutine iterator_end(self)
             class(linkedlist), intent(inout) :: self
-            self % iter => self % tail
+            self % iter % node => self % tail % node
             return
         end subroutine
 
 
         subroutine iterator_advance(self)
             class(linkedlist), intent(inout) :: self
-            if ( associated(self % iter % next) ) then
-                self % iter => self % iter % next
+            if ( associated(self % iter % node % next % node) ) then
+                self % iter % node => self % iter % node % next % node
             else
                 print *, 'linkedlist_warning(): there are no more elements'
             end if
@@ -121,7 +125,7 @@ module linkedlists
 
         subroutine display(self)
             class(linkedlist), intent(in) :: self
-            print *, self % iter % value
+            print *, self % iter % node % value
             return
         end subroutine
 
@@ -131,7 +135,7 @@ module linkedlists
             ! Returns a copy of the value in link.
             class(linkedlist), intent(in) :: self
             integer(kind = int32):: value
-            value = self % iter % value
+            value = self % iter % node % value
             return
         end function
 
@@ -140,14 +144,13 @@ module linkedlists
             ! Synopsis:
             ! Inserts value at the back of the list.
             class(linkedlist), intent(inout):: self
-            type(node), pointer :: tail => null()
+            type(link_t):: tail
             integer(kind = int32), intent(in) :: value
 
-            call allocator(self % tail % next)
-            self % tail => self % tail % next
-            tail => self % tail
-            tail % value =  value
-            tail % next  => null()
+            call allocator(self % tail % node % next % node)
+            self % tail % node => self % tail % node % next % node
+            tail % node => self % tail % node
+            tail % node % value = value
 
             return
         end subroutine
@@ -158,22 +161,22 @@ module linkedlists
             ! Returns the size of the list.
             class(linkedlist), intent(in) :: self
             integer(kind=int32) :: sz
-            sz = numel(self % head)
+            sz = numel(self)
             return
         end function
 
 
-        function numel(head) result(n)
+        function numel(list) result(n)
             ! Synopsis:
             ! Returns the number of elements in the list.
-            type(node), pointer, intent(in) :: head
-            type(node), pointer :: it => null()
+            type(linkedlist), intent(in) :: list
+            type(node_t), pointer :: it => null()
             integer(kind=int32) :: n
 
             n = 0
-            it => head
+            it => list % head % node
             do while( associated(it) )
-                it => it % next
+                it => it % next % node
                 n = n + 1
             end do
 
@@ -181,12 +184,12 @@ module linkedlists
         end function
 
 
-        subroutine allocator(link)
-            type(node), intent(inout), pointer :: link
+        subroutine allocator(node)
+            type(node_t), intent(inout), pointer :: node
             integer(kind = int32):: alloc_stat = 0
 
-            if ( unassociated(link) ) then
-                allocate(link, stat = alloc_stat)
+            if ( unassociated(node) ) then
+                allocate(node, stat = alloc_stat)
             end if
 
             if (alloc_stat /= 0) then
@@ -197,11 +200,11 @@ module linkedlists
         end subroutine
 
 
-        function unassociated(link) result(stat)
-            type(node), intent(inout), pointer :: link
+        function unassociated(node) result(stat)
+            type(node_t), intent(inout), pointer :: node
             logical(kind = int32):: stat
 
-            if ( .not. associated(link) ) then
+            if ( .not. associated(node) ) then
                 stat = .true.
             else
                 stat = .false.
@@ -214,7 +217,7 @@ module linkedlists
         subroutine finalizer(list)
             type(linkedlist), intent(inout) :: list
 
-            if ( associated(list % head) ) then
+            if ( associated(list % head % node) ) then
                 call destructor(list)
             end if
 
@@ -226,27 +229,27 @@ module linkedlists
             ! Synopsis:
             ! Destroys the linked-list from tail to head.
             type(linkedlist), intent(inout) :: list
-            type(node), pointer :: it => null()
+            type(node_t), pointer :: it => null()
             integer(kind = int32):: i = 0
             integer(kind = int32):: n = 0
 
-            n = numel(list % head)
+            n = numel(list)
             do while (n /= 1)
                 i = 0
-                it => list % head
+                it => list % head % node
                 do while (i /= n - 2)
-                    it => it % next
+                    it => it % next % node
                     i = i + 1
                 end do
-                deallocate(it % next)
-                it % next => null()
+                deallocate(it % next % node)
+                it % next % node => null()
                 n = n - 1
             end do
 
-            deallocate(list % head)
-            list % head => null()
-            list % tail => null()
-            list % iter => null()
+            deallocate(list % head % node)
+            list % head % node => null()
+            list % tail % node => null()
+            list % iter % node => null()
 
             return
         end subroutine
@@ -256,6 +259,9 @@ end module
 ! SJ Chapman, FORTRAN for Scientists and Engineers, fourth edition
 ! github.com/tomedunn/fortran-linked-list
 !
+! Wrapping pointers in derived-types:
+! Wrapping the pointers to nodes in a derived-type has the advantage of
+! default nullifying them upon allocation of a new node.
 !
 ! Known Issues:
 ! Using the Python-like constructor might incurr in a segmentation fault
