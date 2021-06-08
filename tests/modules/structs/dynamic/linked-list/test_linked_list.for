@@ -27,7 +27,8 @@ program test_linked_list
     use, intrinsic :: iso_fortran_env, only: int32, real64
     use linkedlists, only: linkedlist, linkedlist_initializer
     implicit none
-    type(linkedlist):: list
+    type(linkedlist):: blist
+    type(linkedlist):: flist
 !   type(linkedlist):: empty_list
 !   type(linkedlist):: single_valued_list
     integer(kind = int32):: i = 0
@@ -38,35 +39,71 @@ program test_linked_list
     integer(kind = int32), dimension(lb:ub) :: values
 
 
-    call linkedlist_initializer(list, value) ! ifort-friendly constructor
+    call linkedlist_initializer(blist, value) ! ifort-friendly constructor
     do while (i /= n - 1)
         value = i + 1
-        call list % push_back(value)    ! pushes values into linked-list
+        call blist % push_back(value)         ! pushes unto back of list
         i = i + 1
     end do
 
 
-    print *, 'size: ', n, list % size()
+    print *, ""
+    print *, 'size: ', n, blist % size()
+    print *, ""
 
 
     i = 0
-    call list % begin()
-    do while ( i /= list % size() )
-        call list % print()             ! displays values
-        call list % next()
+    value = 0
+    call linkedlist_initializer(flist, value) ! ifort-friendly constructor
+    do while (i /= n - 1)
+        value = i + 1
+        call flist % push_front(value)        ! pushes unto front of list
         i = i + 1
     end do
 
 
+    print *, ""
+    print *, 'size: ', n, flist % size()
+    print *, ""
+
+
     i = 0
-    call list % begin()
+    call blist % begin()
+    do while ( i /= blist % size() )
+        call blist % print()             ! displays values
+        call blist % next()
+        i = i + 1
+    end do
+
+
+    print *, ""
+    print *, ""
+
+
+    i = 0
+    call flist % begin()
+    do while ( i /= flist % size() )
+        call flist % print()             ! displays values
+        call flist % next()
+        i = i + 1
+    end do
+
+
+    print *, ""
+    print *, ""
+
+
+    i = 0
+    call blist % begin()
     do while (i /= n)
-        values(i) = list % copy()       ! copies values into array elements
-        call list % next()
+        values(i) = blist % copy()       ! copies values into array elements
+        call blist % next()
         i = i + 1
     end do
 
+    print *, ""
     print *, sum(values), real(n * (n - 1), kind = real64) / 2.0_real64
+    print *, ""
 
 
 !   single_valued_list = linkedlist(value)
