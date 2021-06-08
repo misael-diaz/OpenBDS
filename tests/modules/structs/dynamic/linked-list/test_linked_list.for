@@ -23,14 +23,71 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+module test_linked_list_supporting
+    use, intrinsic :: iso_fortran_env, only: int32
+    implicit none
+
+    interface test_sort
+        module procedure nondecreasing
+    end interface
+
+    private
+    public :: test_sort
+    contains
+
+
+        subroutine nondecreasing(values)
+            integer(kind = int32), intent(in) :: values(:)
+
+            if ( is_sorted(values) ) then
+                print *, 'sort-test: pass'
+            else
+                print *, 'sort-test: fail'
+            end if
+
+            return
+        end subroutine
+
+
+        function is_sorted(values)
+            ! Synopsis:
+            ! Checks if the values are organized in non-decreasing order.
+            integer(kind = int32), intent(in) :: values(:)
+            logical(kind = int32):: is_sorted
+            integer(kind = int32):: b
+            integer(kind = int32):: e
+            integer(kind = int32):: i
+
+            b = lbound(array = values, dim = 1, kind = int32)
+            e = ubound(array = values, dim = 1, kind = int32)
+            is_sorted = .false.
+            do while (b /= e)
+                i = b
+                if ( values(i) > values(i + 1) ) then
+                    is_sorted = .false.
+                    exit
+                else
+                    is_sorted = .true.
+                end if
+                b = b + 1
+            end do
+
+            return
+        end function
+end module
+
 program test_linked_list
     use, intrinsic :: iso_fortran_env, only: int32, real64
+    use test_linked_list_supporting, only: test_sort
     use linkedlists, only: linkedlist, linkedlist_initializer
     implicit none
+    type(linkedlist):: list
     type(linkedlist):: blist
     type(linkedlist):: flist
 !   type(linkedlist):: empty_list
 !   type(linkedlist):: single_valued_list
+    real(kind = real64):: r
+    real(kind = real64), parameter :: int32_max = 2147483647.0_real64
     integer(kind = int32):: i = 0
     integer(kind = int32):: value = 0
     integer(kind = int32), parameter :: n = 256
@@ -54,7 +111,7 @@ program test_linked_list
 
     i = 0
     value = 0
-    call linkedlist_initializer(flist, value) ! ifort-friendly constructor
+    call linkedlist_initializer(flist, value)
     do while (i /= n - 1)
         value = i + 1
         call flist % push_front(value)        ! pushes unto front of list
@@ -68,6 +125,28 @@ program test_linked_list
 
 
     i = 0
+    call random_number(r)
+    value = int(r * int32_max, kind = int32)
+    call linkedlist_initializer(list, value)
+    do while (i /= n - 1)
+        call random_number(r)
+        value = int(r * int32_max, kind = int32)
+        call list % insort(value) ! inserts values in non-decreasing order
+        i = i + 1
+    end do
+
+
+    print *, ""
+    print *, 'size: ', n, list % size()
+    print *, ""
+
+
+    print *, ""
+    print *, "insert-back:"
+    print *, ""
+
+
+    i = 0
     call blist % begin()
     do while ( i /= blist % size() )
         call blist % print()             ! displays values
@@ -77,18 +156,37 @@ program test_linked_list
 
 
     print *, ""
+    print *, "insert-front:"
     print *, ""
 
 
     i = 0
     call flist % begin()
     do while ( i /= flist % size() )
-        call flist % print()             ! displays values
+        call flist % print()
         call flist % next()
         i = i + 1
     end do
 
 
+    print *, ""
+    print *, "sorted-list:"
+    print *, ""
+
+
+    i = 0
+    call list % begin()
+    do while ( i /= list % size() )
+        values(i) = list % copy()
+        call list % print()
+        call list % next()
+        i = i + 1
+    end do
+
+
+    print *, ""
+    print *, ""
+    call test_sort(values)
     print *, ""
     print *, ""
 
@@ -109,6 +207,7 @@ program test_linked_list
 !   single_valued_list = linkedlist(value)
 
 end program
+
 
 
 ! Runtime tests:
@@ -134,6 +233,10 @@ end program
 !
 ! We have reverted the source and the Makefile so that building the code
 ! with other compilers does not require tweeking Makefiles.
+!
+!
+! Sorting:
+! Tests shows that the insertion-sorting implementation was successful.
 
 
 
