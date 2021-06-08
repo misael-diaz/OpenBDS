@@ -146,13 +146,7 @@ program test_linked_list
     print *, ""
 
 
-    i = 0
-    call blist % begin()
-    do while ( i /= blist % size() )
-        call blist % print()             ! displays values
-        call blist % next()
-        i = i + 1
-    end do
+    call blist % print()             ! displays values
 
 
     print *, ""
@@ -160,13 +154,7 @@ program test_linked_list
     print *, ""
 
 
-    i = 0
-    call flist % begin()
-    do while ( i /= flist % size() )
-        call flist % print()
-        call flist % next()
-        i = i + 1
-    end do
+    call flist % print()
 
 
     print *, ""

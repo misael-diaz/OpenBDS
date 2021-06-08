@@ -127,7 +127,14 @@ module linkedlists
 
         subroutine display(self)
             class(linkedlist), intent(in) :: self
-            print *, self % iter % node % value
+            type(node_t), pointer :: it => null()
+
+            it => self % head % node
+            do while ( associated(it) )
+                print *, it % value
+                it => it % next % node
+            end do
+
             return
         end subroutine
 
