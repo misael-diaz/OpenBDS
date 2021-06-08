@@ -40,7 +40,12 @@ module linkedlists
         type(node), pointer :: head => null()           ! begin
         type(node), pointer :: tail => null()           ! end
         contains
+            procedure, public :: begin => iterator_begin
+            procedure, public :: next => iterator_advance
+            procedure, public :: end => iterator_end
             procedure, public :: size => size_method
+            procedure, public :: print => display
+            procedure, public :: copy => return_copy
             procedure, public :: push_back => insert_back
             final :: finalizer
     end type
@@ -81,11 +86,54 @@ module linkedlists
             integer(kind = int32), intent(in) :: value
 
             call allocator(list % head)
+            list % iter => list % head
             list % tail => list % head
             list % tail % value =  value
             list % tail % next  => null()
             return
         end subroutine
+
+
+        subroutine iterator_begin(self)
+            class(linkedlist), intent(inout) :: self
+            self % iter => self % head
+            return
+        end subroutine
+
+
+        subroutine iterator_end(self)
+            class(linkedlist), intent(inout) :: self
+            self % iter => self % tail
+            return
+        end subroutine
+
+
+        subroutine iterator_advance(self)
+            class(linkedlist), intent(inout) :: self
+            if ( associated(self % iter % next) ) then
+                self % iter => self % iter % next
+            else
+                print *, 'linkedlist_warning(): there are no more elements'
+            end if
+            return
+        end subroutine
+
+
+        subroutine display(self)
+            class(linkedlist), intent(in) :: self
+            print *, self % iter % value
+            return
+        end subroutine
+
+
+        function return_copy(self) result(value)
+            ! Synopsis:
+            ! Returns a copy of the value in link.
+            class(linkedlist), intent(in) :: self
+            integer(kind = int32):: value
+            value = self % iter % value
+            return
+        end function
 
 
         subroutine insert_back(self, value)
@@ -113,7 +161,7 @@ module linkedlists
             sz = numel(self % head)
             return
         end function
-        
+
 
         function numel(head) result(n)
             ! Synopsis:
