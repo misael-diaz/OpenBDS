@@ -281,33 +281,3 @@ end program
 ! The code will display a warning about having no more elements but
 ! it's safe to ignore. In the near future I shall write code to
 ! suppress warning messages for production settings.
-
-
-
-
-! Known Issues:
-!
-!
-! Summary:
-! Code segfaults when invoking the python-like constructor in a program
-! compiled with the Intel FORTRAN Compiler ifort.
-!
-!
-! Long Description:
-! I had a hard time debugging the code when compiling with the Intel
-! FORTRAN Compiler. The source of the problem was using the python-like
-! constructor, which is implemented as a function that returns a
-! linked-list object. The GNU FORTRAN Compiler and Flang-7 were able
-! to intepret my intention and produced a code that met my expectations.
-! I have researched for the right way to return a derived-type object
-! but really there's nothing special about that. Perhaps is a compiler
-! bug, which could be the case since it's a beta:
-!
-! ifort (IFORT) 2021.1 Beta 20201112
-!
-!
-! Closure:
-! I do not have the insight to tell what was ifort doing under the
-! covers. All that I know is that if I want to compile the code with
-! ifort I must use the linkedlist_initialzer() procedure as in this
-! testing program.

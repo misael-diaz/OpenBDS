@@ -70,7 +70,6 @@ module linkedlists
 
 
     private
-!   public :: linkedlist_initializer
     contains
 
 
@@ -84,15 +83,6 @@ module linkedlists
 
             return
         end function
-
-
-!       subroutine linkedlist_initializer(list, value)
-!           ! Synopsis: Constructor
-!           type(linkedlist), intent(inout) :: list
-!           integer(kind = int32), intent(in) :: value
-!           call create(list, value)
-!           return
-!       end subroutine
 
 
         subroutine initializer(list, value)
@@ -404,12 +394,3 @@ end module
 ! Wrapping the pointers to nodes in a derived-type has the advantage of
 ! default nullifying them upon allocation of a new node.
 !
-! Known Issues:
-! Using the Python-like constructor might incurr in a segmentation fault
-! when compiling the code with the Intel FORTRAN Compiler:
-!
-! ifort (IFORT) 2021.1 Beta 20201112
-!
-! Solution:
-! To avoid the segfault invoke the linkedlist_initializer() procedure.
-! See the linked-list test.
