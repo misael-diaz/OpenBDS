@@ -80,7 +80,7 @@ program test_linked_list
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use test_linked_list_supporting, only: test_sort
     use chronos, only: chronom
-    use linkedlists, only: linkedlist, linkedlist_initializer
+    use linkedlists, only: linkedlist
     implicit none
     type(linkedlist):: list
     type(linkedlist):: blist
@@ -100,22 +100,33 @@ program test_linked_list
     integer(kind = int32):: e
 
 
+    ! instantiations
+    list  = linkedlist()
+    blist = linkedlist()
+    flist = linkedlist()
+
+    stopwatch = chronom()
+
+
     print *, ""
     print *, "pushing values unto back of list ... "
     print *, ""
 
 
     value = 0
-    call linkedlist_initializer(blist, value) ! ifort-friendly constructor
-    do while (i /= n - 1_int64)
-        value = value + 1
+    i = 0_int64
+    call stopwatch % tic()
+    do while (i /= n)
         call blist % push_back(value)         ! pushes unto back of list
+        value = value + 1
         i = i + 1_int64
     end do
+    call stopwatch % toc()
 
 
     print *, ""
     print *, 'size: ', n, blist % size()
+    print *, 'elapsed-time (millis): ', stopwatch % etime()
     print *, ""
 
 
@@ -124,18 +135,20 @@ program test_linked_list
     print *, ""
 
 
-    i = 0_int64
     value = 0
-    call linkedlist_initializer(flist, value)
-    do while (i /= n - 1_int64)
-        value = value + 1
+    i = 0_int64
+    call stopwatch % tic()
+    do while (i /= n)
         call flist % push_front(value)        ! pushes unto front of list
+        value = value + 1
         i = i + 1_int64
     end do
+    call stopwatch % toc()
 
 
     print *, ""
     print *, 'size: ', n, flist % size()
+    print *, 'elapsed-time (millis): ', stopwatch % etime()
     print *, ""
 
 
@@ -153,7 +166,6 @@ program test_linked_list
     end if
 
 
-    stopwatch = chronom()
     call stopwatch % tic()
     b = lbound(array = values, dim = 1, kind = int32)
     e = ubound(array = values, dim = 1, kind = int32)
@@ -171,7 +183,6 @@ program test_linked_list
 
 
     call stopwatch % tic()
-    call linkedlist_initializer(list, value)
     do j = b, e
         call list % insort( values(j) )
     end do

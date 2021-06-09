@@ -39,51 +39,68 @@ module linkedlists
     end type
 
 
+    type :: stat_t
+        logical(kind = int32) :: init = .false.
+    end type
+
+
     type, public :: linkedlist
         private
         type(link_t):: iter     ! iterator
         type(link_t):: head     ! begin
         type(link_t):: tail     ! end
+        type(stat_t):: stat     ! status
         contains
-            procedure, public :: begin => iterator_begin
-            procedure, public :: next => iterator_advance
-            procedure, public :: end => iterator_end
+            procedure, public :: begin => iterator_begin_method
+            procedure, public :: next => iterator_advance_method
+            procedure, public :: end => iterator_end_method
             procedure, public :: size => size_method
-            procedure, public :: print => display
-            procedure, public :: copy => to_array
-            procedure, public :: push_back => insert_back
-            procedure, public :: push_front => insert_front
-            procedure, public :: insort => insert_sort
+            procedure, public :: print => display_method
+            procedure, public :: copy => to_array_method
+            procedure, public :: push_back => push_back_method
+            procedure, public :: push_front => push_front_method
+            procedure, public :: insort => insertion_sort_method
             final :: finalizer
     end type
 
 
     interface linkedlist
-        module procedure initializer
+        module procedure default_constructor
     end interface
 
 
     private
-    public :: linkedlist_initializer
+!   public :: linkedlist_initializer
     contains
 
 
-        subroutine linkedlist_initializer(list, value)
-            ! Synopsis: Constructor
+        function default_constructor() result(list)
+            type(linkedlist):: list
+
+            list % iter % node => null()
+            list % head % node => null()
+            list % tail % node => null()
+            list % stat % init = .false.
+
+            return
+        end function
+
+
+!       subroutine linkedlist_initializer(list, value)
+!           ! Synopsis: Constructor
+!           type(linkedlist), intent(inout) :: list
+!           integer(kind = int32), intent(in) :: value
+!           call create(list, value)
+!           return
+!       end subroutine
+
+
+        subroutine initializer(list, value)
             type(linkedlist), intent(inout) :: list
             integer(kind = int32), intent(in) :: value
             call create(list, value)
             return
         end subroutine
-
-
-        function initializer(value) result(list)
-            ! Synopsis: Python-like Constructor.
-            type(linkedlist):: list
-            integer(kind = int32), intent(in) :: value
-            call create(list, value)
-            return
-        end function
 
 
         subroutine create(list, value)
@@ -96,25 +113,27 @@ module linkedlists
             list % iter % node => list % head % node
             list % tail % node => list % head % node
             list % tail % node % value = value
+            list % stat % init = .true.
+
             return
         end subroutine
 
 
-        subroutine iterator_begin(self)
+        subroutine iterator_begin_method (self)
             class(linkedlist), intent(inout) :: self
             self % iter % node => self % head % node
             return
         end subroutine
 
 
-        subroutine iterator_end(self)
+        subroutine iterator_end_method (self)
             class(linkedlist), intent(inout) :: self
             self % iter % node => self % tail % node
             return
         end subroutine
 
 
-        subroutine iterator_advance(self)
+        subroutine iterator_advance_method (self)
             class(linkedlist), intent(inout) :: self
             if ( associated(self % iter % node % next % node) ) then
                 self % iter % node => self % iter % node % next % node
@@ -125,7 +144,7 @@ module linkedlists
         end subroutine
 
 
-        subroutine display(self)
+        subroutine display_method (self)
             class(linkedlist), intent(in) :: self
             type(node_t), pointer :: it => null()
 
@@ -139,7 +158,7 @@ module linkedlists
         end subroutine
 
 
-        subroutine to_array(self, values)
+        subroutine to_array_method (self, values)
             ! Synopsis:
             ! Copies values into an array.
             class(linkedlist), intent(in) :: self
@@ -151,11 +170,13 @@ module linkedlists
             integer(kind = int32):: e
 
 
-            if ( .not. allocated(values) ) then
-                allocate (values( numel(self) ), stat=mstat)
-                if (mstat /= 0) then
-                    error stop "copy: insufficient memory"
-                end if
+            if ( allocated(values) ) then
+                deallocate(values)
+            end if
+
+            allocate (values( numel(self) ), stat=mstat)
+            if (mstat /= 0) then
+                error stop "copy: insufficient memory"
             end if
 
 
@@ -169,33 +190,76 @@ module linkedlists
 
 
             return
-        end subroutine to_array
+        end subroutine to_array_method
 
 
-        subroutine insert_back(self, value)
-            ! Synopsis:
-            ! Inserts value at the back of the list.
+        subroutine push_back_method (self, value)
             class(linkedlist), intent(inout):: self
             integer(kind = int32), intent(in) :: value
 
-            call allocator(self % tail % node % next % node)
-            self % tail % node => self % tail % node % next % node
-            self % tail % node % value = value
+            if (self % stat % init) then
+                call insert_back (self, value)
+            else
+                call initializer (self, value)
+            end if
 
             return
         end subroutine
 
 
-        subroutine insert_front(self, value)
+        subroutine push_front_method (self, value)
             class(linkedlist), intent(inout):: self
+            integer(kind = int32), intent(in) :: value
+
+            if (self % stat % init) then
+                call insert_front (self, value)
+            else
+                call initializer (self, value)
+            end if
+
+            return
+        end subroutine
+
+
+        subroutine insertion_sort_method (self, value)
+            class(linkedlist), intent(inout):: self
+            integer(kind = int32), intent(in) :: value
+
+            if (self % stat % init) then
+                call insert_sort (self, value)
+            else
+                call initializer (self, value)
+            end if
+
+            return
+        end subroutine
+
+
+
+        subroutine insert_back (list, value)
+            ! Synopsis:
+            ! Inserts value at the back of the list.
+            type(linkedlist), intent(inout):: list
+            integer(kind = int32), intent(in) :: value
+
+            call allocator(list % tail % node % next % node)
+            list % tail % node => list % tail % node % next % node
+            list % tail % node % value = value
+
+            return
+        end subroutine
+
+
+        subroutine insert_front (list, value)
+            type(linkedlist), intent(inout):: list
             type(node_t), pointer :: node => null()
             integer(kind = int32), intent(in) :: value
 
-            node => self % head % node
-            self % head % node => null()
-            call allocator(self % head % node)
-            self % head % node % value = value
-            self % head % node % next % node => node
+            node => list % head % node
+            list % head % node => null()
+            call allocator(list % head % node)
+            list % head % node % value = value
+            list % head % node % next % node => node
 
             return
         end subroutine
@@ -326,6 +390,7 @@ module linkedlists
             list % head % node => null()
             list % tail % node => null()
             list % iter % node => null()
+            list % stat % init = .false.
 
             return
         end subroutine
