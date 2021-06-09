@@ -79,6 +79,7 @@ end module
 program test_linked_list
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use test_linked_list_supporting, only: test_sort
+    use chronos, only: chronom
     use linkedlists, only: linkedlist, linkedlist_initializer
     implicit none
     type(linkedlist):: list
@@ -86,12 +87,17 @@ program test_linked_list
     type(linkedlist):: flist
 !   type(linkedlist):: empty_list
 !   type(linkedlist):: single_valued_list
+    type(chronom):: stopwatch
     real(kind = real64):: r
     real(kind = real64), parameter :: int32_max = 2147483647.0_real64
     integer(kind = int64):: i = 0_int64
     integer(kind = int64), parameter :: n = 65536_int64
     integer(kind = int32), allocatable :: values(:)
     integer(kind = int32):: value = 0
+    integer(kind = int32):: alloc_stat
+    integer(kind = int32):: j
+    integer(kind = int32):: b
+    integer(kind = int32):: e
 
 
     print *, ""
@@ -135,20 +141,44 @@ program test_linked_list
 
 
     print *, ""
+    print *, "generating pseudo-random numbers ... "
+    print *, ""
+
+
+    if ( allocated(values) ) then
+        deallocate(values)
+    else
+        allocate(values(n), stat = alloc_stat)
+        if (alloc_stat /= 0) error stop ("insufficient memory for array")
+    end if
+
+
+    stopwatch = chronom()
+    call stopwatch % tic()
+    b = lbound(array = values, dim = 1, kind = int32)
+    e = ubound(array = values, dim = 1, kind = int32)
+    do j = b, e
+        call random_number(r)
+        values(j) = int(r * int32_max, kind = int32)
+    end do
+    call stopwatch % toc()
+    print *, 'elapsed-time (millis): ', stopwatch % etime()
+
+
+    print *, ""
     print *, "sorting pseudo-random numbers ... "
     print *, ""
 
 
-    i = 0_int64
-    call random_number(r)
-    value = int(r * int32_max, kind = int32)
+    call stopwatch % tic()
     call linkedlist_initializer(list, value)
-    do while (i /= n - 1_int64)
-        call random_number(r)
-        value = int(r * int32_max, kind = int32)
-        call list % insort(value) ! inserts values in non-decreasing order
-        i = i + 1_int64
+    do j = b, e
+        call list % insort( values(j) )
     end do
+    call stopwatch % toc()
+    print *, 'insort :: elapsed-time (millis): ', stopwatch % etime()
+    print *, 'insort :: average speed (values / millis): ', &
+        & real(n, kind = real64) / stopwatch % etime()
 
 
     print *, ""
