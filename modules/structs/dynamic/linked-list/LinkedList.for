@@ -334,7 +334,7 @@ module linkedlists
 
             call deallocator(values)
 
-            allocate (values(n), stat=mstat)
+            allocate (values(n), stat = mstat)
             if (mstat /= 0) then
                 error stop "copy: insufficient memory"
             end if
@@ -348,7 +348,7 @@ module linkedlists
             integer(kind = int32) :: mstat = 0
 
             if ( allocated(values) ) then
-                deallocate(values, stat=mstat)
+                deallocate(values, stat = mstat)
             end if
 
             if (mstat /= 0) then
@@ -361,13 +361,13 @@ module linkedlists
 
         subroutine allocate_node (node)
             type(node_t), intent(inout), pointer :: node
-            integer(kind = int32):: alloc_stat = 0
+            integer(kind = int32):: mstat = 0
 
             if ( unassociated(node) ) then
-                allocate(node, stat = alloc_stat)
+                allocate(node, stat = mstat)
             end if
 
-            if (alloc_stat /= 0) then
+            if (mstat /= 0) then
                 error stop ("insufficient memory to allocate link")
             end if
 
@@ -377,13 +377,13 @@ module linkedlists
 
         subroutine deallocate_node (node)
             type(node_t), intent(inout), pointer :: node
-            integer(kind = int32):: alloc_stat = 0
+            integer(kind = int32):: mstat = 0
 
             if ( associated(node) ) then
-                deallocate(node, stat = alloc_stat)
+                deallocate(node, stat = mstat)
             end if
 
-            if (alloc_stat /= 0) then
+            if (mstat /= 0) then
                 error stop ("unexpected node deallocation error")
             end if
 
