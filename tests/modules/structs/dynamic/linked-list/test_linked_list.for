@@ -77,6 +77,7 @@ module test_linked_list_supporting
 end module
 
 program test_linked_list
+    use, intrinsic :: iso_c_binding, only: c_size_t
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use test_linked_list_supporting, only: test_sort
     use chronos, only: chronom
@@ -97,6 +98,11 @@ program test_linked_list
     integer(kind = int64):: i = 0_int64
     integer(kind = int64):: b
     integer(kind = int64):: e
+
+
+    print *, ""
+    print *, "limits: ", huge(0_c_size_t), huge(0_int64)
+    print *, ""
 
 
     ! instantiations
