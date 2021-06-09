@@ -77,7 +77,7 @@ module test_linked_list_supporting
 end module
 
 program test_linked_list
-    use, intrinsic :: iso_fortran_env, only: int32, real64
+    use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use test_linked_list_supporting, only: test_sort
     use linkedlists, only: linkedlist, linkedlist_initializer
     implicit none
@@ -88,19 +88,23 @@ program test_linked_list
 !   type(linkedlist):: single_valued_list
     real(kind = real64):: r
     real(kind = real64), parameter :: int32_max = 2147483647.0_real64
-    integer(kind = int32):: i = 0
+    integer(kind = int64):: i = 0_int64
+    integer(kind = int64), parameter :: n = 65536_int64
+    integer(kind = int32), pointer :: values(:) => null()
     integer(kind = int32):: value = 0
-    integer(kind = int32), parameter :: n = 256
-    integer(kind = int32), parameter :: lb = 0
-    integer(kind = int32), parameter :: ub = n - 1
-    integer(kind = int32), dimension(lb:ub) :: values
 
 
+    print *, ""
+    print *, "pushing values unto back of list ... "
+    print *, ""
+
+
+    value = 0
     call linkedlist_initializer(blist, value) ! ifort-friendly constructor
-    do while (i /= n - 1)
-        value = i + 1
+    do while (i /= n - 1_int64)
+        value = value + 1
         call blist % push_back(value)         ! pushes unto back of list
-        i = i + 1
+        i = i + 1_int64
     end do
 
 
@@ -109,13 +113,18 @@ program test_linked_list
     print *, ""
 
 
-    i = 0
+    print *, ""
+    print *, "pushing values unto front of list ... "
+    print *, ""
+
+
+    i = 0_int64
     value = 0
     call linkedlist_initializer(flist, value)
-    do while (i /= n - 1)
-        value = i + 1
+    do while (i /= n - 1_int64)
+        value = value + 1
         call flist % push_front(value)        ! pushes unto front of list
-        i = i + 1
+        i = i + 1_int64
     end do
 
 
@@ -124,15 +133,21 @@ program test_linked_list
     print *, ""
 
 
-    i = 0
+
+    print *, ""
+    print *, "sorting pseudo-random numbers ... "
+    print *, ""
+
+
+    i = 0_int64
     call random_number(r)
     value = int(r * int32_max, kind = int32)
     call linkedlist_initializer(list, value)
-    do while (i /= n - 1)
+    do while (i /= n - 1_int64)
         call random_number(r)
         value = int(r * int32_max, kind = int32)
         call list % insort(value) ! inserts values in non-decreasing order
-        i = i + 1
+        i = i + 1_int64
     end do
 
 
@@ -142,7 +157,7 @@ program test_linked_list
 
 
     print *, ""
-    print *, "insert-back:"
+    print *, "insert-back values:"
     print *, ""
 
 
@@ -150,7 +165,7 @@ program test_linked_list
 
 
     print *, ""
-    print *, "insert-front:"
+    print *, "insert-front values:"
     print *, ""
 
 
@@ -158,18 +173,12 @@ program test_linked_list
 
 
     print *, ""
-    print *, "sorted-list:"
+    print *, "sorted pseudo-random numbers:"
     print *, ""
 
 
-    i = 0
-    call list % begin()
-    do while ( i /= list % size() )
-        values(i) = list % copy()
-        call list % print()
-        call list % next()
-        i = i + 1
-    end do
+    call list % copy(values)    ! copies values into array
+    call list % print()
 
 
     print *, ""
@@ -179,13 +188,8 @@ program test_linked_list
     print *, ""
 
 
-    i = 0
-    call blist % begin()
-    do while (i /= n)
-        values(i) = blist % copy()       ! copies values into array elements
-        call blist % next()
-        i = i + 1
-    end do
+    call blist % copy(values)
+
 
     print *, ""
     print *, sum(values), real(n * (n - 1), kind = real64) / 2.0_real64

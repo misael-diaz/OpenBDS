@@ -50,7 +50,7 @@ module linkedlists
             procedure, public :: end => iterator_end
             procedure, public :: size => size_method
             procedure, public :: print => display
-            procedure, public :: copy => return_copy
+            procedure, public :: copy => to_array
             procedure, public :: push_back => insert_back
             procedure, public :: push_front => insert_front
             procedure, public :: insort => insert_sort
@@ -139,14 +139,37 @@ module linkedlists
         end subroutine
 
 
-        function return_copy(self) result(value)
+        subroutine to_array(self, values)
             ! Synopsis:
-            ! Returns a copy of the value in link.
+            ! Copies values into an array.
             class(linkedlist), intent(in) :: self
-            integer(kind = int32):: value
-            value = self % iter % node % value
+            type(node_t), pointer :: it => null()
+            integer(kind = int32), intent(inout), pointer :: values(:)
+            integer(kind = int32):: mstat
+            integer(kind = int32):: i
+            integer(kind = int32):: b
+            integer(kind = int32):: e
+
+
+            if ( .not. associated(values) ) then
+                allocate (values( numel(self) ), stat=mstat)
+                if (mstat /= 0) then
+                    error stop "copy: insufficient memory"
+                end if
+            end if
+
+
+            it => self % head % node
+            b = lbound(array = values, dim = 1, kind = int32)
+            e = ubound(array = values, dim = 1, kind = int32)
+            do i = b, e
+                values(i) = it % value
+                it => it % next % node
+            end do
+
+
             return
-        end function
+        end subroutine to_array
 
 
         subroutine insert_back(self, value)
