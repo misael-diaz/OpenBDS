@@ -69,6 +69,18 @@ module linkedlists
         module procedure default_constructor
     end interface
 
+    interface allocator
+        module procedure allocate_node
+    end interface
+
+    interface reallocator
+        module procedure reallocate_array
+    end interface
+
+    interface deallocator
+        module procedure deallocate_node
+        module procedure deallocate_array
+    end interface
 
     private
     contains
@@ -155,21 +167,11 @@ module linkedlists
             class(linkedlist), intent(in) :: self
             type(node_t), pointer :: it => null()
             integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32):: mstat
             integer(kind = int64):: i
             integer(kind = int64):: b
             integer(kind = int64):: e
 
-
-            if ( allocated(values) ) then
-                deallocate(values)
-            end if
-
-            allocate (values( numel(self) ), stat=mstat)
-            if (mstat /= 0) then
-                error stop "copy: insufficient memory"
-            end if
-
+            call reallocator(numel(self), values)
 
             it => self % head % node
             b = lbound(array = values, dim = 1, kind = int64)
@@ -178,7 +180,6 @@ module linkedlists
                 values(i) = it % value
                 it => it % next % node
             end do
-
 
             return
         end subroutine to_array_method
@@ -326,7 +327,39 @@ module linkedlists
         end function
 
 
-        subroutine allocator(node)
+        subroutine reallocate_array (n, values)
+            integer(kind = int64), intent(in) :: n
+            integer(kind = int32), intent(inout), allocatable :: values(:)
+            integer(kind = int32) :: mstat
+
+            call deallocator(values)
+
+            allocate (values(n), stat=mstat)
+            if (mstat /= 0) then
+                error stop "copy: insufficient memory"
+            end if
+
+            return
+        end subroutine
+
+
+        subroutine deallocate_array (values)
+            integer(kind = int32), intent(inout), allocatable :: values(:)
+            integer(kind = int32) :: mstat = 0
+
+            if ( allocated(values) ) then
+                deallocate(values, stat=mstat)
+            end if
+
+            if (mstat /= 0) then
+                error stop ("unexpected array deallocation error")
+            end if
+
+            return
+        end subroutine
+
+
+        subroutine allocate_node (node)
             type(node_t), intent(inout), pointer :: node
             integer(kind = int32):: alloc_stat = 0
 
@@ -336,6 +369,22 @@ module linkedlists
 
             if (alloc_stat /= 0) then
                 error stop ("insufficient memory to allocate link")
+            end if
+
+            return
+        end subroutine
+
+
+        subroutine deallocate_node (node)
+            type(node_t), intent(inout), pointer :: node
+            integer(kind = int32):: alloc_stat = 0
+
+            if ( associated(node) ) then
+                deallocate(node, stat = alloc_stat)
+            end if
+
+            if (alloc_stat /= 0) then
+                error stop ("unexpected node deallocation error")
             end if
 
             return
@@ -383,12 +432,12 @@ module linkedlists
                     it => it % next % node
                     i = i + 1_int64
                 end do
-                deallocate(it % next % node)
+                call deallocator(it % next % node)
                 it % next % node => null()
                 n = n - 1_int64
             end do
 
-            deallocate(list % head % node)
+            call deallocator(list % head % node)
             list % head % node => null()
             list % tail % node => null()
             list % iter % node => null()
