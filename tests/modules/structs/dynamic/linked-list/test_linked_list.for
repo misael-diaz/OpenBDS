@@ -231,8 +231,14 @@ program test_linked_list
     call blist % copy(values)
 
 
+    call stopwatch % tic()
+    call blist % clear()
+    call stopwatch % toc()
+
+
     print *, ""
     print *, sum(values), real(n * (n - 1), kind = real64) / 2.0_real64
+    print *, "clear :: elapsed-time (millis): ", stopwatch % etime()
     print *, ""
 
 

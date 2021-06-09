@@ -55,6 +55,7 @@ module linkedlists
             procedure, public :: next => iterator_advance_method
             procedure, public :: end => iterator_end_method
             procedure, public :: size => size_method
+            procedure, public :: clear => clear_method
             procedure, public :: print => display_method
             procedure, public :: copy => to_array_method
             procedure, public :: push_back => push_back_method
@@ -294,6 +295,17 @@ module linkedlists
             n = numel(self)
             return
         end function
+
+
+        subroutine clear_method (self)
+            class(linkedlist), intent(inout) :: self
+
+            if ( associated(self % head % node) ) then
+                call destructor(self)
+            end if
+
+            return
+        end subroutine
 
 
         function numel(list) result(n)
