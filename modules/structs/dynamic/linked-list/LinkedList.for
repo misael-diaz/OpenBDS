@@ -24,7 +24,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module linkedlists
-    use, intrinsic :: iso_fortran_env, only: int32
+    use, intrinsic :: iso_fortran_env, only: int32, int64
     implicit none
 
 
@@ -155,9 +155,9 @@ module linkedlists
             type(node_t), pointer :: it => null()
             integer(kind = int32), intent(inout), allocatable :: values(:)
             integer(kind = int32):: mstat
-            integer(kind = int32):: i
-            integer(kind = int32):: b
-            integer(kind = int32):: e
+            integer(kind = int64):: i
+            integer(kind = int64):: b
+            integer(kind = int64):: e
 
 
             if ( allocated(values) ) then
@@ -171,8 +171,8 @@ module linkedlists
 
 
             it => self % head % node
-            b = lbound(array = values, dim = 1, kind = int32)
-            e = ubound(array = values, dim = 1, kind = int32)
+            b = lbound(array = values, dim = 1, kind = int64)
+            e = ubound(array = values, dim = 1, kind = int64)
             do i = b, e
                 values(i) = it % value
                 it => it % next % node
@@ -286,12 +286,12 @@ module linkedlists
         end subroutine
 
 
-        function size_method(self) result(sz)
+        function size_method(self) result(n)
             ! Synopsis:
             ! Returns the size of the list.
             class(linkedlist), intent(in) :: self
-            integer(kind=int32) :: sz
-            sz = numel(self)
+            integer(kind=int64) :: n
+            n = numel(self)
             return
         end function
 
@@ -301,13 +301,13 @@ module linkedlists
             ! Returns the number of elements in the list.
             type(linkedlist), intent(in) :: list
             type(node_t), pointer :: it => null()
-            integer(kind=int32) :: n
+            integer(kind=int64) :: n
 
-            n = 0
+            n = 0_int64
             it => list % head % node
             do while( associated(it) )
                 it => it % next % node
-                n = n + 1
+                n = n + 1_int64
             end do
 
             return
@@ -360,20 +360,20 @@ module linkedlists
             ! Destroys the linked-list from tail to head.
             type(linkedlist), intent(inout) :: list
             type(node_t), pointer :: it => null()
-            integer(kind = int32):: i = 0
-            integer(kind = int32):: n = 0
+            integer(kind = int64):: i = 0_int64
+            integer(kind = int64):: n = 0_int64
 
             n = numel(list)
-            do while (n /= 1)
-                i = 0
+            do while (n /= 1_int64)
+                i = 0_int64
                 it => list % head % node
-                do while (i /= n - 2)
+                do while (i /= n - 2_int64)
                     it => it % next % node
-                    i = i + 1
+                    i = i + 1_int64
                 end do
                 deallocate(it % next % node)
                 it % next % node => null()
-                n = n - 1
+                n = n - 1_int64
             end do
 
             deallocate(list % head % node)

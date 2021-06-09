@@ -24,7 +24,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module test_linked_list_supporting
-    use, intrinsic :: iso_fortran_env, only: int32
+    use, intrinsic :: iso_fortran_env, only: int32, int64
     implicit none
 
     interface test_sort
@@ -54,12 +54,12 @@ module test_linked_list_supporting
             ! Checks if the values are organized in non-decreasing order.
             integer(kind = int32), intent(in) :: values(:)
             logical(kind = int32):: is_sorted
-            integer(kind = int32):: b
-            integer(kind = int32):: e
-            integer(kind = int32):: i
+            integer(kind = int64):: b
+            integer(kind = int64):: e
+            integer(kind = int64):: i
 
-            b = lbound(array = values, dim = 1, kind = int32)
-            e = ubound(array = values, dim = 1, kind = int32)
+            b = lbound(array = values, dim = 1, kind = int64)
+            e = ubound(array = values, dim = 1, kind = int64)
             is_sorted = .false.
             do while (b /= e)
                 i = b
@@ -90,14 +90,13 @@ program test_linked_list
     type(chronom):: stopwatch
     real(kind = real64):: r
     real(kind = real64), parameter :: int32_max = 2147483647.0_real64
-    integer(kind = int64):: i = 0_int64
     integer(kind = int64), parameter :: n = 65536_int64
     integer(kind = int32), allocatable :: values(:)
     integer(kind = int32):: value = 0
     integer(kind = int32):: alloc_stat
-    integer(kind = int32):: j
-    integer(kind = int32):: b
-    integer(kind = int32):: e
+    integer(kind = int64):: i = 0_int64
+    integer(kind = int64):: b
+    integer(kind = int64):: e
 
 
     ! instantiations
@@ -167,11 +166,11 @@ program test_linked_list
 
 
     call stopwatch % tic()
-    b = lbound(array = values, dim = 1, kind = int32)
-    e = ubound(array = values, dim = 1, kind = int32)
-    do j = b, e
+    b = lbound(array = values, dim = 1, kind = int64)
+    e = ubound(array = values, dim = 1, kind = int64)
+    do i = b, e
         call random_number(r)
-        values(j) = int(r * int32_max, kind = int32)
+        values(i) = int(r * int32_max, kind = int32)
     end do
     call stopwatch % toc()
     print *, 'elapsed-time (millis): ', stopwatch % etime()
@@ -183,8 +182,8 @@ program test_linked_list
 
 
     call stopwatch % tic()
-    do j = b, e
-        call list % insort( values(j) )
+    do i = b, e
+        call list % insort( values(i) )
     end do
     call stopwatch % toc()
     print *, 'insort :: elapsed-time (millis): ', stopwatch % etime()
