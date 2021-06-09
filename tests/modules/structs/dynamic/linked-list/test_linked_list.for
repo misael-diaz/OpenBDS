@@ -90,7 +90,7 @@ program test_linked_list
     real(kind = real64), parameter :: int32_max = 2147483647.0_real64
     integer(kind = int64):: i = 0_int64
     integer(kind = int64), parameter :: n = 65536_int64
-    integer(kind = int32), pointer :: values(:) => null()
+    integer(kind = int32), allocatable :: values(:)
     integer(kind = int32):: value = 0
 
 
@@ -196,6 +196,9 @@ program test_linked_list
     print *, ""
 
 
+    if ( allocated(values) ) then
+        deallocate(values)
+    end if
 !   single_valued_list = linkedlist(value)
 
 end program

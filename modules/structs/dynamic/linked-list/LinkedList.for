@@ -144,14 +144,14 @@ module linkedlists
             ! Copies values into an array.
             class(linkedlist), intent(in) :: self
             type(node_t), pointer :: it => null()
-            integer(kind = int32), intent(inout), pointer :: values(:)
+            integer(kind = int32), intent(inout), allocatable :: values(:)
             integer(kind = int32):: mstat
             integer(kind = int32):: i
             integer(kind = int32):: b
             integer(kind = int32):: e
 
 
-            if ( .not. associated(values) ) then
+            if ( .not. allocated(values) ) then
                 allocate (values( numel(self) ), stat=mstat)
                 if (mstat /= 0) then
                     error stop "copy: insufficient memory"
