@@ -79,39 +79,39 @@ module chronos
         end subroutine clockspecs
 
 
-        subroutine start_method(this)
+        subroutine start_method(self)
             ! Synopsis:
             ! Starts the chronometer.
 
-            class(chronom), target :: this
+            class(chronom), target :: self
             integer(kind = int64), pointer :: p_beg
 
-            p_beg  => this % b
+            p_beg  => self % b
             call system_clock(p_beg)
 
             return
         end subroutine
 
 
-        subroutine stop_method(this)
+        subroutine stop_method(self)
             ! Synopsis:
             ! Stops the chronometer.
 
-            class(chronom), target :: this
+            class(chronom), target :: self
             integer(kind = int64), pointer :: p_end
 
-            p_end => this % e
+            p_end => self % e
             call system_clock(p_end)
 
             return
         end subroutine
 
 
-        function elapsed_time_method(this) result(etime)
+        function elapsed_time_method(self) result(etime)
             ! Synopsis:
             ! Returns the elapsed-time in milliseconds.
 
-            class(chronom), target :: this
+            class(chronom), target :: self
             
             integer(kind = int64), pointer :: p_beg
             integer(kind = int64), pointer :: p_end
@@ -121,10 +121,10 @@ module chronos
             real(kind = real64), pointer :: p_period
 
 
-            p_beg    => this % b
-            p_end    => this % e
-            p_etime  => this % lapse
-            p_period => this % period
+            p_beg    => self % b
+            p_end    => self % e
+            p_etime  => self % lapse
+            p_period => self % period
 
 
             p_etime = real( (p_end - p_beg), kind = real64 ) * p_period
