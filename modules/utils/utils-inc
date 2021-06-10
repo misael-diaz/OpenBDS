@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: utils-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-10
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,20 +24,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# src
+UTILS_MODULE_SRC = utilities.for
 
-all: utils_mod chronos_mod structs_mod random_mod
 
-utils_mod:
-	@$(MAKE) -C utils
-chronos_mod:
-	@$(MAKE) -C chronos
-structs_mod:
-	@$(MAKE) -C structs
-random_mod:
-	@$(MAKE) -C random
+# objects
+UTILS_MODULE_OBJ = utilities.o
 
-clean:
-	@$(MAKE) -C utils clean
-	@$(MAKE) -C chronos clean
-	@$(MAKE) -C structs clean
-	@$(MAKE) -C random  clean
+
+# bundle
+MODULES = $(UTILS_MODULE_OBJ)
