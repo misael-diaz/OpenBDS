@@ -25,14 +25,18 @@
 #
 
 
-all: test_chronos test_random
+all: test_chronos test_structs test_random
 
 test_chronos:
 	@$(MAKE) -C chronos
+
+test_structs:
+	@$(MAKE) -C structs
 
 test_random:
 	@$(MAKE) -C random
 
 clean:
 	@$(MAKE) -C chronos clean
+	@$(MAKE) -C structs clean
 	@$(MAKE) -C random  clean
