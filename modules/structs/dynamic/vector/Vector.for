@@ -25,8 +25,8 @@
 
 module vectors
     use, intrinsic :: iso_fortran_env, only: int32, int64
-    use utils, only: allocate_array   => util_allocate_array
-    use utils, only: deallocate_array => util_deallocate_array
+    use utils, only: allocator   => util_allocate_array
+    use utils, only: deallocator => util_deallocate_array
     implicit none
 
 
@@ -63,14 +63,14 @@ module vectors
     end interface
 
 
-    interface allocator
-        module procedure allocate_array
-    end interface
+!   interface allocator
+!       module procedure allocate_array
+!   end interface
 
 
-    interface deallocator
-        module procedure deallocate_array
-    end interface
+!   interface deallocator
+!       module procedure deallocate_array
+!   end interface
 
 
     private
@@ -95,7 +95,8 @@ module vectors
             integer(kind = int32), intent(in) :: value
 
             if (self % state % init) then
-                call insert_back (self, value)
+                error stop "unimplemented"
+!               call insert_back (self, value)
             else
                 call initializer (self, value)
             end if
@@ -115,21 +116,28 @@ module vectors
         subroutine create(vector, value)
             ! Synopsis: Creates the first element in vector.
             type(vector_t), intent(inout) :: vector
+            integer(kind = int64) :: idx
             integer(kind = int64) :: bounds(0:1)
             integer(kind = int64), parameter :: lb = 0_int64
             integer(kind = int64), parameter :: ub = 8_int64
             integer(kind = int32), intent(in) :: value
 
+
             bounds(0) = lb
             bounds(1) = ub
             call allocator(bounds, vector % array % values)
 
-            vector % begin % idx  = 0_int64
-            vector % avail % idx  = 0_int64
+
+            idx = vector % avail % idx
+            vector % array % values = 0
+            vector % array % values(idx) = value
+
+
+!           vector % begin % idx  = 0_int64
+            vector % avail % idx  = 1_int64
             vector % limit % idx  = 8_int64
             vector % state % init = .true.
 
-            vector % array % values = 0
 
             return
         end subroutine        
@@ -157,6 +165,14 @@ end module
 !
 
 
+! Experiments:
+! I tried to place an interface to a procedure in an interface
+! but could not make it work. I do not know if what I tried is
+! possible. I am inclined to believe it is but I need to study
+! this further.
+
+
+! Comments on Procedures:
 ! subroutine create()
 ! Allocates an array of 9 elements on purpose to make the
 ! vector class similar to that defined in the c++ standard
@@ -166,4 +182,4 @@ end module
 
 ! TODO:
 ! [x] Move the array (de)allocator to a module.
-! [ ] Initialize array values to zero.
+! [x] Initialize array values to zero.
