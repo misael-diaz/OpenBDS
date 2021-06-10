@@ -83,9 +83,9 @@ program test_linked_list
     use chronos, only: chronom
     use linkedlists, only: linkedlist
     implicit none
-    type(linkedlist):: list
-    type(linkedlist):: blist
-    type(linkedlist):: flist
+    type(linkedlist), pointer :: list  => null()
+    type(linkedlist), pointer :: blist => null()
+    type(linkedlist), pointer :: flist => null()
 !   type(linkedlist):: empty_list
 !   type(linkedlist):: single_valued_list
     type(chronom):: stopwatch
@@ -104,6 +104,9 @@ program test_linked_list
     print *, "limits: ", huge(0_c_size_t), huge(0_int64)
     print *, ""
 
+
+    allocate(list, blist, flist, stat = alloc_stat)
+    if (alloc_stat /= 0) error stop "allocation failure"
 
     ! instantiations
     list  = linkedlist()
@@ -248,9 +251,17 @@ program test_linked_list
     print *, ""
 
 
+    print *, ""
+    print *, ""
+    write (*, '(1X,A)', advance='no') 'freeing memory buffers ... '
+
     if ( allocated(values) ) then
         deallocate(values)
     end if
+
+    deallocate(list, blist, flist)
+    
+    print *, "done"
 !   single_valued_list = linkedlist(value)
 
 end program
