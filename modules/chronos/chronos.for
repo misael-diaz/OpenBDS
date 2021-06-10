@@ -45,6 +45,8 @@ module chronos
 
     private
     contains
+
+
         function constructor() result(chron)
             type(chronom):: chron
             
@@ -52,6 +54,7 @@ module chronos
             
             return
         end function
+
 
         subroutine clockspecs(chronometer)
             ! Synopsis:
@@ -75,6 +78,7 @@ module chronos
             return
         end subroutine clockspecs
 
+
         subroutine start_method(this)
             ! Synopsis:
             ! Starts the chronometer.
@@ -88,6 +92,7 @@ module chronos
             return
         end subroutine
 
+
         subroutine stop_method(this)
             ! Synopsis:
             ! Stops the chronometer.
@@ -100,6 +105,7 @@ module chronos
 
             return
         end subroutine
+
 
         function elapsed_time_method(this) result(etime)
             ! Synopsis:
