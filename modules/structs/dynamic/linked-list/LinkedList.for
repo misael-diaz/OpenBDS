@@ -25,7 +25,7 @@
 
 module linkedlists
     use, intrinsic :: iso_fortran_env, only: int32, int64
-    use utils, only: reallocate_array => util_reallocate_array
+    use utils, only: reallocator => util_reallocate_array
     use utils, only: deallocate_array => util_deallocate_array
     implicit none
 
@@ -75,9 +75,9 @@ module linkedlists
         module procedure allocate_node
     end interface
 
-    interface reallocator
-        module procedure reallocate_array
-    end interface
+!   interface reallocator
+!       module procedure reallocate_array
+!   end interface
 
     interface deallocator
         module procedure deallocate_node
