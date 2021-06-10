@@ -1,7 +1,7 @@
 #
-# source: LinkedList-inc
+# source: utils-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-10
 #
 # Synopsis:
 # Include for GNU make, defines source and object files for compilation
@@ -24,19 +24,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# modules directory
-# modules include
-MODULES_DIR = ../../../../modules/utils
-MODULES_INC = -I$(MODULES_DIR)
-
-
 # src
-LINKED_LIST_MODULE_SRC = LinkedList.for
+UTILS_MODULE_SRC = utilities.for
 
 
 # objects
-LINKED_LIST_MODULE_OBJ = linkedlist.o
+UTILS_MODULE_OBJ = utilities.o
 
 
-# bundles
-MODULES = $(LINKED_LIST_MODULE_OBJ)
+# bundle
+MODULES = $(UTILS_MODULE_OBJ)

@@ -1,11 +1,11 @@
+#!/usr/bin/make
 #
-# source: LinkedList-inc
+# source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-05-31
 #
 # Synopsis:
-# Include for GNU make, defines source and object files for compilation
-# of the modules which lay the foundation of the project.
+# Builds the OpenBDS modules
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +24,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# modules directory
-# modules include
-MODULES_DIR = ../../../../modules/utils
-MODULES_INC = -I$(MODULES_DIR)
+include utils-inc
 
+all: $(MODULES)
 
-# src
-LINKED_LIST_MODULE_SRC = LinkedList.for
+$(UTILS_MODULE_OBJ): $(UTILS_MODULE_SRC)
+	$(FC) $(FC_OPT) -c $(UTILS_MODULE_SRC) -o $(UTILS_MODULE_OBJ)
 
-
-# objects
-LINKED_LIST_MODULE_OBJ = linkedlist.o
-
-
-# bundles
-MODULES = $(LINKED_LIST_MODULE_OBJ)
+clean:
+	rm -f *.mod *.o
