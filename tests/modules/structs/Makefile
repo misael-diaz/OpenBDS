@@ -1,10 +1,11 @@
+#!/usr/bin/make
 #
-# source: make-inc
+# source: Makefile
 # author: misael-diaz
-# date:   2021-05-31
+# date:   2021-06-02
 #
 # Synopsis:
-# Include for GNU make, defines the FORTRAN Compiler and its Options.
+# Builds OpenBDS tests.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +25,10 @@
 #
 
 
-# GNU FORTRAN Compiler
-FC = /opt/gcc/gcc-11.1.0/bin/gfortran
-FC = gfortran-10
+all: test_dynamic
 
-# FORTRAN Compiler Options
-FC_OPT = -std=f2018 -ffree-form -fall-intrinsics -g -fbacktrace\
-         -fcheck=all -ffpe-trap=invalid,zero,overflow -O0\
-         -Wall -Wextra -Wimplicit-interface -Warray-temporaries\
-         -Wuse-without-only -Wrealloc-lhs-all -Wunderflow -Wtabs\
-         -Wsurprising -Wreal-q-constant -Winteger-division\
-         -Wconversion-extra -Wfrontend-loop-interchange\
-         -Wcharacter-truncation -Wampersand -Waliasing -Wpedantic\
-         -Werror
+test_dynamic:
+	@$(MAKE) -C dynamic
 
-# libraries
-LIB =
+clean:
+	@$(MAKE) -C dynamic clean
