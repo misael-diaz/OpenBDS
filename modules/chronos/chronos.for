@@ -45,10 +45,10 @@ module chronos
 
     private
     contains
-        function constructor()
-            type(chronom):: constructor
+        function constructor() result(chron)
+            type(chronom):: chron
             
-            call clockspecs(constructor)
+            call clockspecs(chron)
             
             return
         end function
