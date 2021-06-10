@@ -69,6 +69,7 @@ module chronos
 
             chronometer % b      = 0_int64
             chronometer % e      = 0_int64
+            chronometer % lapse  = 0.0_real64
             chronometer % period = clock_period
 
             return
