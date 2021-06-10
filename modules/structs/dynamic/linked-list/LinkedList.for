@@ -25,6 +25,8 @@
 
 module linkedlists
     use, intrinsic :: iso_fortran_env, only: int32, int64
+    use utils, only: reallocate_array => util_reallocate_array
+    use utils, only: deallocate_array => util_deallocate_array
     implicit none
 
 
@@ -325,38 +327,6 @@ module linkedlists
 
             return
         end function
-
-
-        subroutine reallocate_array (n, values)
-            integer(kind = int64), intent(in) :: n
-            integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
-
-            call deallocator(values)
-
-            allocate (values(n), stat = mstat)
-            if (mstat /= 0) then
-                error stop "copy: insufficient memory"
-            end if
-
-            return
-        end subroutine
-
-
-        subroutine deallocate_array (values)
-            integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat = 0
-
-            if ( allocated(values) ) then
-                deallocate(values, stat = mstat)
-            end if
-
-            if (mstat /= 0) then
-                error stop ("unexpected array deallocation error")
-            end if
-
-            return
-        end subroutine
 
 
         subroutine allocate_node (node)

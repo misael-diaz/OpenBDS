@@ -31,7 +31,7 @@ utils_mod:
 	@$(MAKE) -C utils
 chronos_mod:
 	@$(MAKE) -C chronos
-structs_mod:
+structs_mod: utils_mod
 	@$(MAKE) -C structs
 random_mod:
 	@$(MAKE) -C random

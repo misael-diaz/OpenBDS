@@ -29,7 +29,7 @@ include LinkedList-inc
 all: $(MODULES)
 
 $(LINKED_LIST_MODULE_OBJ): $(LINKED_LIST_MODULE_SRC)
-	$(FC) $(FC_OPT) -c $(LINKED_LIST_MODULE_SRC) -o\
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(LINKED_LIST_MODULE_SRC) -o\
 	        	   $(LINKED_LIST_MODULE_OBJ)
 
 clean:
