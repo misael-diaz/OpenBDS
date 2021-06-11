@@ -55,6 +55,7 @@ module vectors
         type(stat_t):: state
         contains
             procedure, public :: size => size_method
+            procedure, public :: clear => clear_method
             procedure, public :: push_back => push_back_method
             final :: finalizer
     end type
@@ -103,6 +104,13 @@ module vectors
 
             return
         end function
+
+
+        subroutine clear_method(self)
+            class(vector_t), intent(inout) :: self
+            self % avail % idx = 0_int64
+            return
+        end subroutine
 
 
         subroutine push_back_method (self, value)
