@@ -25,10 +25,14 @@
 #
 
 
-all: test_linked_list
+all: test_vector test_linked_list
+
+test_vector:
+	@$(MAKE) -C vector
 
 test_linked_list:
 	@$(MAKE) -C linked-list
 
 clean:
+	@$(MAKE) -C vector      clean
 	@$(MAKE) -C linked-list clean

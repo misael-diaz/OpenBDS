@@ -27,10 +27,42 @@ module utils
     use, intrinsic :: iso_fortran_env, only: int32, int64
     implicit none
     public
+
+
+    interface util_allocate_array
+        module procedure util_allocate_array_by_size
+        module procedure util_allocate_array_by_bounds
+    end interface
+
+
+    interface util_reallocate_array
+        module procedure util_reallocate_array_by_size
+        module procedure util_reallocate_array_by_bounds
+    end interface
+
+
     contains
 
 
-        subroutine util_allocate_array (n, values)
+        subroutine util_allocate_array_by_bounds (bounds, values)
+            integer(kind = int64), intent(in) :: bounds(0:1)
+            integer(kind = int64) :: lb
+            integer(kind = int64) :: ub
+            integer(kind = int32), intent(inout), allocatable :: values(:)
+            integer(kind = int32) :: mstat
+
+            lb = bounds(0)
+            ub = bounds(1)
+            allocate (values(lb:ub), stat = mstat)
+            if (mstat /= 0) then
+                error stop "util_allocate_array: insufficient memory"
+            end if
+
+            return
+        end subroutine
+
+
+        subroutine util_allocate_array_by_size (n, values)
             integer(kind = int64), intent(in) :: n
             integer(kind = int32), intent(inout), allocatable :: values(:)
             integer(kind = int32) :: mstat
@@ -43,8 +75,26 @@ module utils
             return
         end subroutine
 
+        subroutine util_reallocate_array_by_bounds (bounds, values)
+            integer(kind = int64), intent(in) :: bounds(0:1)
+            integer(kind = int64) :: lb
+            integer(kind = int64) :: ub
+            integer(kind = int32), intent(inout), allocatable :: values(:)
+            integer(kind = int32) :: mstat
 
-        subroutine util_reallocate_array (n, values)
+            call util_deallocate_array (values)
+
+            lb = bounds(0)
+            ub = bounds(1)
+            allocate (values(lb:ub), stat = mstat)
+            if (mstat /= 0) then
+                error stop "util_reallocate_array: insufficient memory"
+            end if
+
+            return
+        end subroutine
+
+        subroutine util_reallocate_array_by_size (n, values)
             integer(kind = int64), intent(in) :: n
             integer(kind = int32), intent(inout), allocatable :: values(:)
             integer(kind = int32) :: mstat

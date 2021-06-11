@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-10
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Builds the programs for testing the Vector Class.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,15 +24,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include Vector-test-inc
 
-all: Vector LinkedList
+all: $(TESTS)
 
-Vector:
-	@$(MAKE) -C vector
+$(TEST_VECTOR_EXE): $(TEST_VECTOR_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(UTILS_MOD_OBJ) $(CHRONOS_MOD_OBJ)\
+		$(VECTOR_MOD_OBJ) $(TEST_VECTOR_OBJ) -o $(TEST_VECTOR_EXE)
 
-LinkedList:
-	@$(MAKE) -C linked-list
+$(TEST_VECTOR_OBJ): $(MODS) $(TEST_VECTOR_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_VECTOR_SRC) -o\
+	        $(TEST_VECTOR_OBJ)
+
 
 clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
+	rm -f *.mod *.o $(TESTS)

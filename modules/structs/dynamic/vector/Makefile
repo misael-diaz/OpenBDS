@@ -2,7 +2,7 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-10
 #
 # Synopsis:
 # Builds the OpenBDS modules
@@ -24,15 +24,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include Vector-inc
 
-all: Vector LinkedList
+all: $(MODULES)
 
-Vector:
-	@$(MAKE) -C vector
-
-LinkedList:
-	@$(MAKE) -C linked-list
+$(VECTOR_MODULE_OBJ): $(VECTOR_MODULE_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MODULE_SRC) -o\
+	        	   $(VECTOR_MODULE_OBJ)
 
 clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
+	rm -f *.mod *.o

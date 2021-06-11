@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: Vector-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-10
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,15 +24,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# modules directory
+# modules include
+MODULES_DIR = ../../../../modules/utils
+MODULES_INC = -I$(MODULES_DIR)
 
-all: Vector LinkedList
 
-Vector:
-	@$(MAKE) -C vector
+# src
+VECTOR_MODULE_SRC = Vector.for
 
-LinkedList:
-	@$(MAKE) -C linked-list
 
-clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
+# objects
+VECTOR_MODULE_OBJ = Vector.o
+
+
+# bundles
+MODULES = $(VECTOR_MODULE_OBJ)
