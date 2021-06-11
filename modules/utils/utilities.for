@@ -30,7 +30,8 @@ module utils
 
 
     interface util_allocate_array
-        module procedure util_allocate_array_by_size
+        module procedure util_allocate_array_int32_by_size
+        module procedure util_allocate_array_int64_by_size
         module procedure util_allocate_array_by_bounds
     end interface
 
@@ -38,6 +39,12 @@ module utils
     interface util_reallocate_array
         module procedure util_reallocate_array_by_size
         module procedure util_reallocate_array_by_bounds
+    end interface
+
+
+    interface util_deallocate_array
+        module procedure util_deallocate_array_int32
+        module procedure util_deallocate_array_int64
     end interface
 
 
@@ -62,7 +69,21 @@ module utils
         end subroutine
 
 
-        subroutine util_allocate_array_by_size (n, values)
+        subroutine util_allocate_array_int64_by_size (n, values)
+            integer(kind = int64), intent(in) :: n
+            integer(kind = int64), intent(inout), allocatable :: values(:)
+            integer(kind = int32) :: mstat
+
+            allocate (values(n), stat = mstat)
+            if (mstat /= 0) then
+                error stop "util_allocate_array: insufficient memory"
+            end if
+
+            return
+        end subroutine
+
+
+        subroutine util_allocate_array_int32_by_size (n, values)
             integer(kind = int64), intent(in) :: n
             integer(kind = int32), intent(inout), allocatable :: values(:)
             integer(kind = int32) :: mstat
@@ -74,6 +95,7 @@ module utils
 
             return
         end subroutine
+
 
         subroutine util_reallocate_array_by_bounds (bounds, values)
             integer(kind = int64), intent(in) :: bounds(0:1)
@@ -94,6 +116,7 @@ module utils
             return
         end subroutine
 
+
         subroutine util_reallocate_array_by_size (n, values)
             integer(kind = int64), intent(in) :: n
             integer(kind = int32), intent(inout), allocatable :: values(:)
@@ -110,7 +133,7 @@ module utils
         end subroutine
 
 
-        subroutine util_deallocate_array (values)
+        subroutine util_deallocate_array_int32 (values)
             integer(kind = int32), intent(inout), allocatable :: values(:)
             integer(kind = int32) :: mstat = 0
 
@@ -124,4 +147,22 @@ module utils
 
             return
         end subroutine
+
+
+        subroutine util_deallocate_array_int64 (values)
+            integer(kind = int64), intent(inout), allocatable :: values(:)
+            integer(kind = int32) :: mstat = 0
+
+            if ( allocated(values) ) then
+                deallocate(values, stat = mstat)
+            end if
+
+            if (mstat /= 0) then
+                error stop "util_deallocate_array: unexpected error"
+            end if
+
+            return
+        end subroutine
+
+
 end module
