@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-11
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Builds the programs for testing the particle class.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,23 +24,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include particles-inc
 
-all: test_chronos test_structs test_random test_particles
+all: $(TESTS)
 
-test_chronos:
-	@$(MAKE) -C chronos
 
-test_structs:
-	@$(MAKE) -C structs
+$(TEST_PARTICLES_EXE): $(TEST_PARTICLES_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(MODS) $(TEST_PARTICLES_OBJ) -o\
+	       	$(TEST_PARTICLES_EXE)
 
-test_random:
-	@$(MAKE) -C random
+$(TEST_PARTICLES_OBJ): $(MODS) $(TEST_PARTICLES_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_PARTICLES_SRC) -o\
+	       	                          $(TEST_PARTICLES_OBJ)
 
-test_particles:
-	@$(MAKE) -C particles
 
 clean:
-	@$(MAKE) -C chronos   clean
-	@$(MAKE) -C structs   clean
-	@$(MAKE) -C random    clean
-	@$(MAKE) -C particles clean
+	rm -f *.mod *.o $(TESTS)
