@@ -26,6 +26,7 @@
 module vectors
     use, intrinsic :: iso_fortran_env, only: int32, int64
     use utils, only: allocator   => util_allocate_array
+    use utils, only: reallocator => util_reallocate_array
     use utils, only: deallocator => util_deallocate_array
     implicit none
 
@@ -53,6 +54,7 @@ module vectors
         type(data_t):: array
         type(stat_t):: state
         contains
+            procedure, public :: size => size_method
             procedure, public :: push_back => push_back_method
             final :: finalizer
     end type
@@ -90,13 +92,26 @@ module vectors
         end function
 
 
+        function size_method(self) result(vector_size)
+            class(vector_t), intent(in) :: self
+            integer(kind = int64) :: vector_size
+
+            associate (begin => self % begin % idx, &
+                     & end   => self % avail % idx)
+                vector_size = end - begin
+            end associate
+
+            return
+        end function
+
+
         subroutine push_back_method (self, value)
+            ! Synopsis: Pushes value unto back of vector.
             class(vector_t), intent(inout) :: self
             integer(kind = int32), intent(in) :: value
 
             if (self % state % init) then
-                error stop "unimplemented"
-!               call insert_back (self, value)
+                call insert_back (self, value)
             else
                 call initializer (self, value)
             end if
@@ -105,15 +120,68 @@ module vectors
         end subroutine
 
 
-        subroutine initializer(vector, value)
+        subroutine insert_back (vector, value)
+            ! Synopsis: Inserts value unto back, vector grows as needed.
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
-            call create(vector, value)
+
+            if (vector % avail % idx == vector % limit % idx) then
+                call grow (vector)
+            end if
+
+            associate(avail => vector % avail % idx)
+                vector % array % values(avail) = value
+                avail = avail + 1_int64
+            end associate
+
             return
-        end subroutine        
+        end subroutine
 
 
-        subroutine create(vector, value)
+        subroutine grow (vector)
+            ! Synopsis: Doubles the vector size.
+            type(vector_t), intent(inout) :: vector
+            integer(kind = int64):: lb
+            integer(kind = int64):: ub
+            integer(kind = int64):: bounds(0:1)
+            integer(kind = int32), allocatable :: values(:)
+
+
+            lb = vector % begin % idx
+            ub = vector % limit % idx
+            bounds(0) = lb
+            bounds(1) = ub
+            call allocator (bounds, values)
+            ! copies existing values into placeholder
+            values(lb:ub) = vector % array % values(lb:ub)
+
+
+            vector % limit % idx = 2_int64 * vector % limit % idx
+
+
+!           bounds(0) = vector % begin % idx
+            bounds(1) = vector % limit % idx
+            call reallocator (bounds, vector % array % values)
+            ! copies values in placeholder into (reallocated) vector
+            vector % array % values = 0
+            vector % array % values(lb:ub) = values(lb:ub)
+
+
+            call deallocator (values)
+
+            return
+        end subroutine
+
+
+        subroutine initializer (vector, value)
+            type(vector_t), intent(inout) :: vector
+            integer(kind = int32), intent(in) :: value
+            call create (vector, value)
+            return
+        end subroutine
+
+
+        subroutine create (vector, value)
             ! Synopsis: Creates the first element in vector.
             type(vector_t), intent(inout) :: vector
             integer(kind = int64) :: idx
@@ -125,7 +193,7 @@ module vectors
 
             bounds(0) = lb
             bounds(1) = ub
-            call allocator(bounds, vector % array % values)
+            call allocator (bounds, vector % array % values)
 
 
             idx = vector % avail % idx
@@ -140,14 +208,14 @@ module vectors
 
 
             return
-        end subroutine        
+        end subroutine
 
 
         subroutine finalizer (vector)
             type(vector_t), intent(inout) :: vector
 
             if ( allocated(vector % array % values) ) then
-                call deallocator(vector % array % values)
+                call deallocator (vector % array % values)
             end if
 
             return
