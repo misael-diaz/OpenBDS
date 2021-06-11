@@ -4,9 +4,10 @@
 !   author:  misael-diaz
 !
 !   Synopsis:
-!   Defines particle data structures.
+!   Defines the particle class.
 !
-!   Copyright (C) 2016 - 2021 Misael Diaz
+!
+!   Copyright (C) 2016 - 2021 Misael Diaz-Maldonado
 !
 !   This program is free software: you can redistribute it and/or modify
 !   it under the terms of the GNU General Public License as published by
@@ -23,11 +24,16 @@
 !
 
 module particles
-    use, intrinsic :: iso_fortran_env
+    use, intrinsic :: iso_fortran_env, only: int64, real64
     implicit none
 
-    ! defines the particle data structure for spheres
-    type sph
+
+    type, abstract :: particle_t
+        integer(kind = int64), allocatable :: id(:)
+    end type
+
+
+    type, extends(particle_t) :: sphere_t
         ! position
         real(kind = real64), allocatable :: r_x(:)
         real(kind = real64), allocatable :: r_y(:)
@@ -47,10 +53,7 @@ module particles
         real(kind = real64), allocatable :: dr_x(:)
         real(kind = real64), allocatable :: dr_y(:)
         real(kind = real64), allocatable :: dr_z(:)
-
-        ! particle ID
-        integer(kind = int32), allocatable :: id(:)
-    end type sph
+    end type
 
     public
 end module particles
