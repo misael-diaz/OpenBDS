@@ -1,11 +1,11 @@
+#!/usr/bin/make
 #
-# source: particles-inc
+# source: Makefile
 # author: misael-diaz
 # date:   2021-06-11
 #
 # Synopsis:
-# Include for GNU make, defines source and object files for compilation
-# of the modules which lay the foundation of the project.
+# Builds the programs for testing the particle class.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +24,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# modules directory
-# modules include
-MODULES_DIR = ../../modules/utils
-MODULES_INC = -I$(MODULES_DIR)
+include particles-inc
+
+all: $(TESTS)
 
 
-# src
-PARTICLES_MODULE_SRC = particles.for
+$(TEST_PARTICLES_EXE): $(TEST_PARTICLES_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(MODS) $(TEST_PARTICLES_OBJ) -o\
+	       	$(TEST_PARTICLES_EXE)
+
+$(TEST_PARTICLES_OBJ): $(MODS) $(TEST_PARTICLES_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_PARTICLES_SRC) -o\
+	       	                          $(TEST_PARTICLES_OBJ)
 
 
-# objects
-PARTICLES_MODULE_OBJ = particles.o
-
-
-# bundle
-MODULES = $(PARTICLES_MODULE_OBJ)
+clean:
+	rm -f *.mod *.o $(TESTS)

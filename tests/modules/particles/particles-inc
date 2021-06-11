@@ -4,8 +4,7 @@
 # date:   2021-06-11
 #
 # Synopsis:
-# Include for GNU make, defines source and object files for compilation
-# of the modules which lay the foundation of the project.
+# Include for GNU make, defines source and object files to build tests.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +23,32 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include ../../../modules/utils/utils-inc
+include ../../../modules/particles/particles-inc
+
 # modules directory
 # modules include
-MODULES_DIR = ../../modules/utils
-MODULES_INC = -I$(MODULES_DIR)
+UTILS_MOD_DIR     = ../../../modules/utils
+PARTICLES_MOD_DIR = ../../../modules/particles
+MODULES_INC       = -I$(UTILS_MOD_DIR) -I$(PARTICLES_MOD_DIR)
+
+# defines relative path for needed modules
+UTILS_MOD_OBJ     = $(UTILS_MOD_DIR)/$(UTILS_MODULE_OBJ)
+PARTICLES_MOD_OBJ = $(PARTICLES_MOD_DIR)/$(PARTICLES_MODULE_OBJ)
 
 
 # src
-PARTICLES_MODULE_SRC = particles.for
+TEST_PARTICLES_SRC = test_particles.for
 
 
 # objects
-PARTICLES_MODULE_OBJ = particles.o
+TEST_PARTICLES_OBJ = test_particles.o
+
+
+# excutables
+TEST_PARTICLES_EXE = test-particle-class
 
 
 # bundle
-MODULES = $(PARTICLES_MODULE_OBJ)
+MODS  = $(UTILS_MOD_OBJ) $(PARTICLES_MOD_OBJ)
+TESTS = $(TEST_PARTICLES_EXE)
