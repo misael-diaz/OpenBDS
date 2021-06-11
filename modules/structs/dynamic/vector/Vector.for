@@ -54,6 +54,9 @@ module vectors
         type(data_t):: array
         type(stat_t):: state
         contains
+            private
+            procedure :: addressing_method
+            generic, public :: operator (<) => addressing_method
             procedure, public :: size => size_method
             procedure, public :: clear => clear_method
             procedure, public :: push_back => push_back_method
@@ -89,6 +92,15 @@ module vectors
             vector % limit % idx  = 0_int64
             vector % state % init = .false.
 
+            return
+        end function
+
+
+        function addressing_method(self, idx) result(value)
+            class(vector_t), intent(in) :: self
+            integer(kind = int64), intent(in) :: idx
+            integer(kind = int32) :: value
+            value = self % array % values(idx)
             return
         end function
 

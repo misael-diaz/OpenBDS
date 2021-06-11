@@ -116,6 +116,14 @@ program test_vector_class
     print *, ""
 
 
+    i = 0_int64
+    ! tests element addressing
+    do while ( i /= vector % size() )
+        print *, vector < i!>    ! returns the value at the ith element
+        i = i + 1_int64
+    end do
+
+
     write (*, '(1X,A)', advance='no') 'freeing memory buffers ... '
 
     deallocate(vector)
