@@ -5,7 +5,7 @@
 # date:   2021-06-11
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Builds the programs for testing the particle class.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -26,11 +26,17 @@
 
 include particles-inc
 
-all: $(MODULES)
+all: $(TESTS)
 
-$(PARTICLES_MODULE_OBJ): $(PARTICLES_MODULE_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(PARTICLES_MODULE_SRC) -o
-	                                  $(PARTICLES_MODULE_OBJ)
+
+$(TEST_PARTICLES_EXE): $(TEST_PARTICLES_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(MODS) $(TEST_PARTICLES_OBJ) -o\
+	       	$(TEST_PARTICLES_EXE)
+
+$(TEST_PARTICLES_OBJ): $(MODS) $(TEST_PARTICLES_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_PARTICLES_SRC) -o\
+	       	                          $(TEST_PARTICLES_OBJ)
+
 
 clean:
-	rm -f *.mod *.o
+	rm -f *.mod *.o $(TESTS)
