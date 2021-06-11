@@ -24,6 +24,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# modules directory
+# modules include
+MODULES_DIR = ../../modules/utils
+MODULES_INC = -I$(MODULES_DIR)
+
+
 # src
 PARTICLES_MODULE_SRC = particles.for
 
