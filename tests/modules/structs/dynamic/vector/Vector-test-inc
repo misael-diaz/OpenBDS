@@ -31,7 +31,7 @@ include ../../../../../modules/structs/dynamic/vector/Vector-inc
 # modules include
 UTILS_MOD_DIR       = ../../../../../modules/utils
 CHRONOS_MOD_DIR     = ../../../../../modules/chronos
-VECTOR_MOD_DIR = ../../../../../modules/structs/dynamic/vector
+VECTOR_MOD_DIR      = ../../../../../modules/structs/dynamic/vector
 MODULES_INC         = -I$(UTILS_MOD_DIR) -I$(CHRONOS_MOD_DIR)\
                       -I$(VECTOR_MOD_DIR)
 

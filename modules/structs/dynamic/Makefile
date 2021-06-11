@@ -25,12 +25,12 @@
 #
 
 
-all: Vector LinkedList
+all: Vectors LinkedLists
 
-Vector:
+Vectors:
 	@$(MAKE) -C vector
 
-LinkedList:
+LinkedLists:
 	@$(MAKE) -C linked-list
 
 clean:
