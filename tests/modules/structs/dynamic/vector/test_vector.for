@@ -78,6 +78,52 @@ program test_vector_class
     print *, ""
 
 
+
+    write (*, '(1X,A)', advance='no') "clearing ... "
+    call vector % clear()
+    print *, "done"
+
+
+    print *, ""
+    print *, ""
+    write (*, '(1X,A)', advance='no') &
+        & "pushing values unto back of vector ... "
+
+
+    value = 0
+    i = 0_int64
+    call stopwatch % tic()
+    do while (i /= n)
+        if (value == huge(0)) value = 0
+        call vector % push_back(value)
+        value = value + 1
+        i = i + 1_int64
+    end do
+    call stopwatch % toc()
+
+
+    print *, "done"
+    print *, ""
+    print *, ""
+
+
+
+    print *, ""
+    print *, ""
+    print *, "size: ", n, vector % size()
+    print *, "push_back :: elapsed-time (millis): ", stopwatch % etime()
+    print *, ""
+    print *, ""
+
+
+    i = 0_int64
+    ! tests element addressing
+    do while ( i /= vector % size() )
+        print *, vector < i!>    ! returns the value at the ith element
+        i = i + 1_int64
+    end do
+
+
     write (*, '(1X,A)', advance='no') 'freeing memory buffers ... '
 
     deallocate(vector)
