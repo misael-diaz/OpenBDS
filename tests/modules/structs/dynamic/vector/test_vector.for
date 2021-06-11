@@ -33,7 +33,8 @@ program test_vector_class
     type(chronom) :: stopwatch
     
     integer(kind = int64) :: i = 0_int64
-    integer(kind = int64), parameter :: n = 2147483648_int64
+    integer(kind = int64), parameter :: n = 65536_int64
+!   integer(kind = int64), parameter :: n = 2147483648_int64
 
     integer(kind = int32) :: value = 0
     integer(kind = int32) :: alloc_stat = 0
@@ -122,6 +123,12 @@ program test_vector_class
         print *, vector < i!>    ! returns the value at the ith element
         i = i + 1_int64
     end do
+
+
+    print *, ""
+    print *, ""
+    print *, ""
+    print *, ""
 
 
     write (*, '(1X,A)', advance='no') 'freeing memory buffers ... '
