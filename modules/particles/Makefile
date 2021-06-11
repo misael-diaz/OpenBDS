@@ -29,7 +29,7 @@ include particles-inc
 all: $(MODULES)
 
 $(PARTICLES_MODULE_OBJ): $(PARTICLES_MODULE_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(PARTICLES_MODULE_SRC) -o
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(PARTICLES_MODULE_SRC) -o\
 	                                  $(PARTICLES_MODULE_OBJ)
 
 clean:
