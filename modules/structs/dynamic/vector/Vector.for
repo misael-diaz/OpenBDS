@@ -54,6 +54,7 @@ module vectors
         type(data_t):: array
         type(stat_t):: state
         contains
+            procedure, public :: size => size_method
             procedure, public :: push_back => push_back_method
             final :: finalizer
     end type
@@ -86,6 +87,19 @@ module vectors
             vector % avail % idx  = 0_int64
             vector % limit % idx  = 0_int64
             vector % state % init = .false.
+
+            return
+        end function
+
+
+        function size_method(self) result(vector_size)
+            class(vector_t), intent(in) :: self
+            integer(kind = int64) :: vector_size
+
+            associate (begin => self % begin % idx, &
+                     & end   => self % avail % idx)
+                vector_size = end - begin
+            end associate
 
             return
         end function
