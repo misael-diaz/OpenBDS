@@ -93,25 +93,15 @@ submodule (chronos) chronos_implementations
             ! Synopsis:
             ! Returns the elapsed-time in milliseconds.
 
-            class(chronom), intent(inout), target :: self
-            
-            integer(kind = int64), pointer :: p_beg
-            integer(kind = int64), pointer :: p_end
-
+            class(chronom), intent(inout) :: self
             real(kind = real64):: etime
-            real(kind = real64), pointer :: p_etime
-            real(kind = real64), pointer :: p_period
 
-
-            p_beg    => self % b
-            p_end    => self % e
-            p_etime  => self % lapse
-            p_period => self % period
-
-
-            p_etime = real( (p_end - p_beg), kind = real64 ) * p_period
-            p_etime = 1.0e+3_real64 * p_etime
-            etime   = p_etime
+            associate (begin => self % b,        end => self % e, &
+                     & lapse => self % lapse, period => self % period)
+                lapse = real( (end - begin), kind = real64 ) * period
+                lapse = 1.0e+3_real64 * lapse
+                etime = lapse
+            end associate
 
             return
         end function
