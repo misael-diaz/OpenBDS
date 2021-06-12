@@ -24,12 +24,23 @@
 !
 
 module particles
-    use, intrinsic :: iso_fortran_env, only: int64
+    use, intrinsic :: iso_fortran_env, only: int64, real64
     implicit none
     private
 
 
+    type :: string_t
+        character (:), allocatable :: str
+    end type
+
+
     type, abstract, public :: particle_t
+        type(string_t) :: shape
+        ! position
+        real(kind = real64), allocatable :: r_x(:)
+        real(kind = real64), allocatable :: r_y(:)
+        real(kind = real64), allocatable :: r_z(:)
+
         integer(kind = int64), allocatable :: id(:)
         contains
             private
@@ -52,7 +63,7 @@ end module particles
 
 
 module spheres
-    use, intrinsic :: iso_fortran_env, only: int64, real64
+    use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use particles, only: particle_t
     use utils, only: allocator   => util_allocate_array
     use utils, only: deallocator => util_deallocate_array
@@ -61,11 +72,6 @@ module spheres
 
     type, public, extends(particle_t) :: sphere_t
         private
-        ! position
-        real(kind = real64), allocatable :: r_x(:)
-        real(kind = real64), allocatable :: r_y(:)
-        real(kind = real64), allocatable :: r_z(:)
-
         ! force
         real(kind = real64), allocatable :: f_x(:)
         real(kind = real64), allocatable :: f_y(:)
@@ -102,14 +108,22 @@ module spheres
             class(sphere_t), intent(inout) :: self
             integer(kind = int64), intent(in) :: n
             integer(kind = int64) :: i
+            integer(kind = int32) :: mstat
+
 
             call allocator (n, self % id)
+            allocate (character(len=len("sphere")) :: self % shape % str, &
+                    & stat = mstat)
+            if (mstat /= 0) error stop "failed to allocate string"
+
 
             i = 0_int64
             do while (i /= n)
                 self % id = i
                 i = i + 1_int64
             end do
+
+            self % shape % str(:) = "sphere"
 
             return
         end subroutine
@@ -122,6 +136,10 @@ module spheres
 
             if ( allocated(sph % id) ) then
                 call deallocator(sph % id)
+            end if
+
+            if ( allocated(sph % shape % str) ) then
+                deallocate(sph % shape % str)
             end if
 
             return
