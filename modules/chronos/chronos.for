@@ -63,7 +63,7 @@ module chronos
 
 
         module function elapsed_time_method (self) result(etime)
-            class(chronom), intent(inout), target :: self
+            class(chronom), intent(inout) :: self
             real(kind = real64):: etime
         end function
     end interface
