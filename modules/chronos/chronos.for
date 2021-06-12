@@ -24,8 +24,9 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module chronos
-    use, intrinsic :: iso_fortran_env, only: int32, int64, real64
+    use, intrinsic :: iso_fortran_env, only: int64, real64
     implicit none
+    private
 
     type, public :: chronom
         private
@@ -39,98 +40,38 @@ module chronos
             procedure, public :: etime => elapsed_time_method
     end type
 
+
+    interface
+        module function constructor () result(chron)
+            type(chronom):: chron
+        end function
+
+
+        module subroutine clockspecs (chronometer)
+            type(chronom), intent(inout) :: chronometer
+        end subroutine
+
+
+        module subroutine start_method (self)
+            class(chronom), intent(inout), target :: self
+        end subroutine
+
+
+        module subroutine stop_method (self)
+            class(chronom), intent(inout), target :: self
+        end subroutine
+
+
+        module function elapsed_time_method (self) result(etime)
+            class(chronom), intent(inout) :: self
+            real(kind = real64):: etime
+        end function
+    end interface
+
+
     interface chronom
         module procedure constructor
     end interface
 
-    private
-    contains
 
-
-        function constructor() result(chron)
-            type(chronom):: chron
-            
-            call clockspecs(chron)
-            
-            return
-        end function
-
-
-        subroutine clockspecs(chronometer)
-            ! Synopsis:
-            ! Queries the system clock to set the period of the chronometer
-            ! and assigns default-values to its data members (or fields).
-
-            class(chronom):: chronometer
-            real(kind = real64):: clock_period
-            integer(kind = int64):: clock_rate
-
-
-            call system_clock(count_rate = clock_rate)
-            clock_period = 1.0_real64 / real(clock_rate, kind = real64)
-
-
-            chronometer % b      = 0_int64
-            chronometer % e      = 0_int64
-            chronometer % lapse  = 0.0_real64
-            chronometer % period = clock_period
-
-            return
-        end subroutine clockspecs
-
-
-        subroutine start_method(self)
-            ! Synopsis:
-            ! Starts the chronometer.
-
-            class(chronom), target :: self
-            integer(kind = int64), pointer :: p_beg
-
-            p_beg  => self % b
-            call system_clock(p_beg)
-
-            return
-        end subroutine
-
-
-        subroutine stop_method(self)
-            ! Synopsis:
-            ! Stops the chronometer.
-
-            class(chronom), target :: self
-            integer(kind = int64), pointer :: p_end
-
-            p_end => self % e
-            call system_clock(p_end)
-
-            return
-        end subroutine
-
-
-        function elapsed_time_method(self) result(etime)
-            ! Synopsis:
-            ! Returns the elapsed-time in milliseconds.
-
-            class(chronom), target :: self
-            
-            integer(kind = int64), pointer :: p_beg
-            integer(kind = int64), pointer :: p_end
-
-            real(kind = real64):: etime
-            real(kind = real64), pointer :: p_etime
-            real(kind = real64), pointer :: p_period
-
-
-            p_beg    => self % b
-            p_end    => self % e
-            p_etime  => self % lapse
-            p_period => self % period
-
-
-            p_etime = real( (p_end - p_beg), kind = real64 ) * p_period
-            p_etime = 1.0e+3_real64 * p_etime
-            etime   = p_etime
-
-            return
-        end function
-end module
+end module chronos

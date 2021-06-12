@@ -1,5 +1,5 @@
 #
-# source: test-linked-list-inc
+# source: LinkedList-test-inc
 # author: misael-diaz
 # date:   2021-06-05
 #
@@ -37,8 +37,11 @@ MODULES_INC         = -I$(UTILS_MOD_DIR) -I$(CHRONOS_MOD_DIR)\
 
 # defines relative path for needed modules
 UTILS_MOD_OBJ       = $(UTILS_MOD_DIR)/$(UTILS_MODULE_OBJ)
+# UTILS_SUB_OBJ     = $(UTILS_MOD_DIR)/$(UTILS_SUBMOD_OBJ)
 CHRONOS_MOD_OBJ     = $(CHRONOS_MOD_DIR)/$(CHRONOS_MODULE_OBJ)
+CHRONOS_SUB_OBJ     = $(CHRONOS_MOD_DIR)/$(CHRONOS_SUBMOD_OBJ)
 LINKED_LIST_MOD_OBJ = $(LINKED_LIST_MOD_DIR)/$(LINKED_LIST_MODULE_OBJ)
+# LINKED_LIST_SUB_OBJ = $(LINKED_LIST_MOD_DIR)/$(LINKED_LIST_SUBMOD_OBJ)
 
 
 # src
@@ -56,6 +59,7 @@ TEST_LINKING_EXE     = test-linking
 TEST_LINKED_LIST_EXE = test-linked-list
 
 
-# bundles
+# bundles (sub-modules, modules, and executables)
+SUBM  = $(UTILS_SUB_OBJ) $(CHRONOS_SUB_OBJ) $(LINKED_LIST_SUB_OBJ)
 MODS  = $(UTILS_MOD_OBJ) $(CHRONOS_MOD_OBJ) $(LINKED_LIST_MOD_OBJ)
 TESTS = $(TEST_LINKING_EXE) $(TEST_LINKED_LIST_EXE)
