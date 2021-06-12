@@ -33,4 +33,4 @@ $(VECTOR_MODULE_OBJ): $(VECTOR_MODULE_SRC)
 	        	   $(VECTOR_MODULE_OBJ)
 
 clean:
-	rm -f *.mod *.o
+	rm -f *.mod *.smod *.o

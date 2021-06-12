@@ -33,4 +33,4 @@ $(PARTICLES_MODULE_OBJ): $(PARTICLES_MODULE_SRC)
 	                                  $(PARTICLES_MODULE_OBJ)
 
 clean:
-	rm -f *.mod *.o
+	rm -f *.mod *.smod *.o

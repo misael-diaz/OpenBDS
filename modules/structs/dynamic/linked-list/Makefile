@@ -33,4 +33,4 @@ $(LINKED_LIST_MODULE_OBJ): $(LINKED_LIST_MODULE_SRC)
 	        	   $(LINKED_LIST_MODULE_OBJ)
 
 clean:
-	rm -f *.mod *.o
+	rm -f *.mod *.smod *.o
