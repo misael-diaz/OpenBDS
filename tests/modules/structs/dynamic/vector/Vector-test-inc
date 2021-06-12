@@ -35,10 +35,13 @@ VECTOR_MOD_DIR      = ../../../../../modules/structs/dynamic/vector
 MODULES_INC         = -I$(UTILS_MOD_DIR) -I$(CHRONOS_MOD_DIR)\
                       -I$(VECTOR_MOD_DIR)
 
-# defines relative path for needed modules
+# defines relative path for needed (sub)modules
 UTILS_MOD_OBJ       = $(UTILS_MOD_DIR)/$(UTILS_MODULE_OBJ)
+# UTILS_SUB_OBJ     = $(UTILS_MOD_DIR)/$(UTILS_SUBMOD_OBJ)
 CHRONOS_MOD_OBJ     = $(CHRONOS_MOD_DIR)/$(CHRONOS_MODULE_OBJ)
+CHRONOS_SUB_OBJ     = $(CHRONOS_MOD_DIR)/$(CHRONOS_SUBMOD_OBJ)
 VECTOR_MOD_OBJ      = $(VECTOR_MOD_DIR)/$(VECTOR_MODULE_OBJ)
+# VECTOR_SUB_OBJ    = $(VECTOR_MOD_DIR)/$(VECTOR_SUBMOD_OBJ)
 
 
 # src
@@ -53,6 +56,7 @@ TEST_VECTOR_OBJ = test_vector.o
 TEST_VECTOR_EXE = test-vector
 
 
-# bundles
+# bundles (submodules, modules, and executables)
+SUBM  = $(UTILS_SUB_OBJ) $(CHRONOS_SUB_OBJ) $(VECTOR_SUB_OBJ)
 MODS  = $(UTILS_MOD_OBJ) $(CHRONOS_MOD_OBJ) $(VECTOR_MOD_OBJ)
 TESTS = $(TEST_VECTOR_EXE)
