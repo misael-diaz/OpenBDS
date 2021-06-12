@@ -26,10 +26,13 @@
 
 include chronos-inc
 
-all: $(MODULES)
+all: $(CHRONOS_MODULE_OBJ) $(CHRONOS_SUBMOD_OBJ)
 
 $(CHRONOS_MODULE_OBJ): $(CHRONOS_MODULE_SRC)
 	$(FC) $(FC_OPT) -c $(CHRONOS_MODULE_SRC) -o $(CHRONOS_MODULE_OBJ)
 
+$(CHRONOS_SUBMOD_OBJ): $(CHRONOS_MODULE_OBJ) $(CHRONOS_SUBMOD_SRC)
+	$(FC) $(FC_OPT) -c $(CHRONOS_SUBMOD_SRC) -o $(CHRONOS_SUBMOD_OBJ)
+
 clean:
-	rm -f *.mod *.o
+	rm -f *.mod *.smod *.o

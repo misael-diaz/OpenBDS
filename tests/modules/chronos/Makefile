@@ -24,14 +24,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include chronos-inc
+include chronos-test-inc
 
 all: $(TESTS)
 
 
-$(TEST_CHRONOM_EXE): $(TEST_CHRONOM_OBJ)
-	$(FC) $(FC_OPT) $(MODULES_INC) $(CHRONOS_MOD_OBJ)\
-	       	$(TEST_CHRONOM_OBJ) -o $(TEST_CHRONOM_EXE)
+$(TEST_CHRONOM_EXE): $(CHRONOS_SUB_OBJ) $(TEST_CHRONOM_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(SMODS) $(TEST_CHRONOM_OBJ) -o\
+		                                $(TEST_CHRONOM_EXE)
 
 $(TEST_CHRONOM_OBJ): $(CHRONOS_MOD_OBJ) $(TEST_CHRONOM_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_CHRONOM_SRC) -o\

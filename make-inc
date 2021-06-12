@@ -32,11 +32,11 @@ FC = gfortran-10
 FC_OPT = -std=f2018 -ffree-form -fall-intrinsics -g -fbacktrace\
          -fcheck=all -ffpe-trap=invalid,zero,overflow -O0\
          -Wall -Wextra -Wimplicit-interface -Warray-temporaries\
-         -Wuse-without-only -Wrealloc-lhs-all -Wunderflow -Wtabs\
+         -Wrealloc-lhs-all -Wunderflow -Wtabs\
          -Wsurprising -Wreal-q-constant -Winteger-division\
          -Wconversion-extra -Wfrontend-loop-interchange\
          -Wcharacter-truncation -Wampersand -Waliasing -Wpedantic\
-         -Werror
+         -Werror #-Wuse-without-only
 
 # libraries
 LIB =

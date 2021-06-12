@@ -1,5 +1,5 @@
 #
-# source: chronos-inc
+# source: chronos-test-inc
 # author: misael-diaz
 # date:   2021-05-31
 #
@@ -30,8 +30,9 @@ include ../../../modules/chronos/chronos-inc
 MODULES_DIR = ../../../modules/chronos
 MODULES_INC = -I$(MODULES_DIR)
 
-# defines relative path for needed modules
+# defines relative path for needed (sub)modules
 CHRONOS_MOD_OBJ = $(MODULES_DIR)/$(CHRONOS_MODULE_OBJ)
+CHRONOS_SUB_OBJ = $(MODULES_DIR)/$(CHRONOS_SUBMOD_OBJ)
 
 
 # src
@@ -46,5 +47,6 @@ TEST_CHRONOM_OBJ = test_chronom.o
 TEST_CHRONOM_EXE = test-chronometer-class
 
 
-# bundle
+# bundles
+SMODS = $(CHRONOS_MOD_OBJ) $(CHRONOS_SUB_OBJ)
 TESTS = $(TEST_CHRONOM_EXE)
