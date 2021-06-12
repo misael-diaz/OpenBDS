@@ -26,11 +26,9 @@
 
 # src
 UTILS_MODULE_SRC = utilities.for
+UTILS_SUBMOD_SRC = utils_submod.for
 
 
 # objects
 UTILS_MODULE_OBJ = utilities.o
-
-
-# bundle
-MODULES = $(UTILS_MODULE_OBJ)
+UTILS_SUBMOD_OBJ = utils_submod.o

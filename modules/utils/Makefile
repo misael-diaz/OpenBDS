@@ -26,10 +26,13 @@
 
 include utils-inc
 
-all: $(MODULES)
+all: $(UTILS_MODULE_OBJ) $(UTILS_SUBMOD_OBJ)
 
 $(UTILS_MODULE_OBJ): $(UTILS_MODULE_SRC)
 	$(FC) $(FC_OPT) -c $(UTILS_MODULE_SRC) -o $(UTILS_MODULE_OBJ)
 
+$(UTILS_SUBMOD_OBJ): $(UTILS_MODULE_OBJ) $(UTILS_SUBMOD_SRC)
+	$(FC) $(FC_OPT) -c $(UTILS_SUBMOD_SRC) -o $(UTILS_SUBMOD_OBJ)
+
 clean:
-	rm -f *.mod *.o
+	rm -f *.mod *.smod *.o
