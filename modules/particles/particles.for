@@ -42,21 +42,21 @@ module particles
         real(kind = real64), allocatable :: r_z(:)
 
         integer(kind = int64), allocatable :: id(:)
-        contains
-            private
-            procedure(i_init), deferred :: initializer
+!       contains
+!           private
+!           procedure(i_init), deferred :: initializer
     end type
 
 
-    abstract interface
-        subroutine i_init (self, n)
-            use, intrinsic :: iso_fortran_env, only: int64
-            import particle_t
-            implicit none
-            class(particle_t), intent(inout) :: self
-            integer(kind = int64), intent(in) :: n
-        end subroutine
-    end interface
+!   abstract interface
+!       subroutine i_init (self, n)
+!           use, intrinsic :: iso_fortran_env, only: int64
+!           import particle_t
+!           implicit none
+!           class(particle_t), intent(inout) :: self
+!           integer(kind = int64), intent(in) :: n
+!       end subroutine
+!   end interface
 
 
 end module particles
@@ -91,7 +91,7 @@ module spheres
 
         contains
             private
-            procedure :: initializer
+!           procedure :: initializer
             procedure, public :: spawn => initializer
             final :: finalizer
     end type
