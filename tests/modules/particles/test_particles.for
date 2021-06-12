@@ -28,18 +28,18 @@ program test_particles
     use spheres, only: sphere_t
     implicit none
 
-    type(sphere_t), pointer :: spheres => null()
+    type(sphere_t), pointer :: sph => null()
     integer(kind = int32) :: mstat
     integer(kind = int64), parameter :: n = 256
 
 
-    allocate(spheres, stat = mstat)
+    allocate(sph, stat = mstat)
     if (mstat /= 0) error stop "allocation failure"
 
 
-    call spheres % spawn(n)
+    call sph % spawn(n)
 
 
-    deallocate(spheres)
+    deallocate(sph)
 
 end program
