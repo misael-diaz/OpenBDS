@@ -26,11 +26,10 @@
 
 # src
 CHRONOS_MODULE_SRC = chronos.for
+CHRONOS_SUBMOD_SRC = chronos_submod.for
 
 
 # objects
 CHRONOS_MODULE_OBJ = chronos.o
+CHRONOS_SUBMOD_OBJ = chronos_submod.o
 
-
-# bundle
-MODULES = $(CHRONOS_MODULE_OBJ)
