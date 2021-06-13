@@ -5,7 +5,7 @@
 !
 !
 !   Synopsis:
-!   Defines utility procedures.
+!   Defines the interfaces to utility procedures.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
@@ -48,121 +48,45 @@ module utils
     end interface
 
 
-    contains
-
-
-        subroutine util_allocate_array_by_bounds (bounds, values)
+    interface
+        module subroutine util_allocate_array_by_bounds (bounds, values)
             integer(kind = int64), intent(in) :: bounds(0:1)
-            integer(kind = int64) :: lb
-            integer(kind = int64) :: ub
             integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
-
-            lb = bounds(0)
-            ub = bounds(1)
-            allocate (values(lb:ub), stat = mstat)
-            if (mstat /= 0) then
-                error stop "util_allocate_array: insufficient memory"
-            end if
-
-            return
         end subroutine
 
 
-        subroutine util_allocate_array_int64_by_size (n, values)
+        module subroutine util_allocate_array_int64_by_size (n, values)
             integer(kind = int64), intent(in) :: n
             integer(kind = int64), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
-
-            allocate (values(n), stat = mstat)
-            if (mstat /= 0) then
-                error stop "util_allocate_array: insufficient memory"
-            end if
-
-            return
         end subroutine
 
 
-        subroutine util_allocate_array_int32_by_size (n, values)
+        module subroutine util_allocate_array_int32_by_size (n, values)
             integer(kind = int64), intent(in) :: n
             integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
-
-            allocate (values(n), stat = mstat)
-            if (mstat /= 0) then
-                error stop "util_allocate_array: insufficient memory"
-            end if
-
-            return
         end subroutine
 
 
-        subroutine util_reallocate_array_by_bounds (bounds, values)
+        module subroutine util_reallocate_array_by_bounds (bounds, values)
             integer(kind = int64), intent(in) :: bounds(0:1)
-            integer(kind = int64) :: lb
-            integer(kind = int64) :: ub
             integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
-
-            call util_deallocate_array (values)
-
-            lb = bounds(0)
-            ub = bounds(1)
-            allocate (values(lb:ub), stat = mstat)
-            if (mstat /= 0) then
-                error stop "util_reallocate_array: insufficient memory"
-            end if
-
-            return
         end subroutine
 
 
-        subroutine util_reallocate_array_by_size (n, values)
+        module subroutine util_reallocate_array_by_size (n, values)
             integer(kind = int64), intent(in) :: n
             integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
-
-            call util_deallocate_array (values)
-
-            allocate (values(n), stat = mstat)
-            if (mstat /= 0) then
-                error stop "util_reallocate_array: insufficient memory"
-            end if
-
-            return
         end subroutine
 
 
-        subroutine util_deallocate_array_int32 (values)
+        module subroutine util_deallocate_array_int32 (values)
             integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat = 0
-
-            if ( allocated(values) ) then
-                deallocate(values, stat = mstat)
-            end if
-
-            if (mstat /= 0) then
-                error stop "util_deallocate_array: unexpected error"
-            end if
-
-            return
         end subroutine
 
 
-        subroutine util_deallocate_array_int64 (values)
+        module subroutine util_deallocate_array_int64 (values)
             integer(kind = int64), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat = 0
-
-            if ( allocated(values) ) then
-                deallocate(values, stat = mstat)
-            end if
-
-            if (mstat /= 0) then
-                error stop "util_deallocate_array: unexpected error"
-            end if
-
-            return
         end subroutine
-
+    end interface
 
 end module
