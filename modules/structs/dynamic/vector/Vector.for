@@ -253,13 +253,6 @@ end module
 !
 
 
-! Experiments:
-! I tried to place an interface to a procedure in an interface
-! but could not make it work. I do not know if what I tried is
-! possible. I am inclined to believe it is but I need to study
-! this further.
-
-
 ! Comments on Procedures:
 ! subroutine create()
 ! Allocates an array of 9 elements on purpose to make the
