@@ -257,6 +257,22 @@ end module
 
 
 ! Comments on Procedures:
+!
 ! subroutine create()
 ! Allocates one more element on purpose to compute the size of the
 ! vector via: (end - begin) as in c++.
+!
+!
+! subroutine clear_method()
+! Placing the /avail/ iterator at the beginning is equivalent to
+! clearing the vector without deallocating memory. I have designed
+! the vector class thinking on how it will be used for keeping
+! track of neighbors. In that context it's convenient to
+! clear the vector without deallocating memory since it would
+! be expensive to have to grow the size of the vector over and
+! over again during the simulation. Why not use fixed-size arrays?
+! I have use them in the past worrying that I might have to allocate
+! more memory than actually needed to avoid exceding the array
+! bounds. Some systems might be more dynamic having particles with
+! far more neighbors than others. Vectors would come in handy for
+! such cases.
