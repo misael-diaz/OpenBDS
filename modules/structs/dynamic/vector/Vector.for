@@ -255,7 +255,5 @@ end module
 
 ! Comments on Procedures:
 ! subroutine create()
-! Allocates an array of 9 elements on purpose to make the
-! vector class similar to that defined in the c++ standard
-! template library. The size is obtained by subtracting
-! the limit and begin iterators.
+! Allocates one more element on purpose to compute the size of the
+! vector via: (end - begin) as in c++.
