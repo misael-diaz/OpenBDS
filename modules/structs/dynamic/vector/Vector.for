@@ -97,6 +97,7 @@ module vectors
 
 
         function addressing_method (self, idx) result(value)
+            ! Synopsis: Addresses the element pointed to by index.
             class(vector_t), intent(in) :: self
             integer(kind = int64), intent(in) :: idx
             integer(kind = int32) :: value
