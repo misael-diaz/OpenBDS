@@ -96,7 +96,7 @@ module vectors
         end function
 
 
-        function addressing_method(self, idx) result(value)
+        function addressing_method (self, idx) result(value)
             class(vector_t), intent(in) :: self
             integer(kind = int64), intent(in) :: idx
             integer(kind = int32) :: value
@@ -105,7 +105,7 @@ module vectors
         end function
 
 
-        function size_method(self) result(vector_size)
+        function size_method (self) result(vector_size)
             class(vector_t), intent(in) :: self
             integer(kind = int64) :: vector_size
 
@@ -118,7 +118,7 @@ module vectors
         end function
 
 
-        subroutine clear_method(self)
+        subroutine clear_method (self)
             class(vector_t), intent(inout) :: self
             self % avail % idx = 0_int64
             return
