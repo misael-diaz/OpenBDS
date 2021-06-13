@@ -107,6 +107,7 @@ module vectors
 
 
         function size_method (self) result(vector_size)
+            ! Synopsis: Returns the size of the vector.
             class(vector_t), intent(in) :: self
             integer(kind = int64) :: vector_size
 
@@ -120,6 +121,7 @@ module vectors
 
 
         subroutine clear_method (self)
+            ! Synopsis: Clears the vector elements.
             class(vector_t), intent(inout) :: self
             self % avail % idx = 0_int64
             return
