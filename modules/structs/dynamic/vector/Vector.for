@@ -259,8 +259,3 @@ end module
 ! vector class similar to that defined in the c++ standard
 ! template library. The size is obtained by subtracting
 ! the limit and begin iterators.
-
-
-! TODO:
-! [x] Move the array (de)allocator to a module.
-! [x] Initialize array values to zero.
