@@ -29,6 +29,7 @@ module vectors
     use utils, only: reallocator => util_reallocate_array
     use utils, only: deallocator => util_deallocate_array
     implicit none
+    private
 
 
     type :: iter_t
@@ -69,7 +70,6 @@ module vectors
     end interface
 
 
-    private
     contains
 
 
