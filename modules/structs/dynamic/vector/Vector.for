@@ -69,16 +69,6 @@ module vectors
     end interface
 
 
-!   interface allocator
-!       module procedure allocate_array
-!   end interface
-
-
-!   interface deallocator
-!       module procedure deallocate_array
-!   end interface
-
-
     private
     contains
 
