@@ -2,7 +2,7 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-11
+# date:   2021-06-02
 #
 # Synopsis:
 # Builds the OpenBDS modules
@@ -24,17 +24,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include particles-inc
 
-all: $(PARTICLES_MODULE_OBJ) $(PARTICLES_SUBMOD_OBJ)
+all: particle_module
 
-$(PARTICLES_MODULE_OBJ): $(PARTICLES_MODULE_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(PARTICLES_MODULE_SRC) -o\
-	                                  $(PARTICLES_MODULE_OBJ)
-
-$(PARTICLES_SUBMOD_OBJ): $(PARTICLES_MODULE_OBJ) $(PARTICLES_SUBMOD_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(PARTICLES_SUBMOD_SRC) -o\
-	                                  $(PARTICLES_SUBMOD_OBJ)
+particle_module:
+	@$(MAKE) -C module
 
 clean:
-	rm -f *.mod *.smod *.o
+	@$(MAKE) -C module clean
