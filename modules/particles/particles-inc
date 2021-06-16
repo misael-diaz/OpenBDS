@@ -32,11 +32,9 @@ MODULES_INC = -I$(MODULES_DIR)
 
 # src
 PARTICLES_MODULE_SRC = particles.for
+PARTICLES_SUBMOD_SRC = particles_submod.for
 
 
 # objects
 PARTICLES_MODULE_OBJ = particles.o
-
-
-# bundle
-MODULES = $(PARTICLES_MODULE_OBJ)
+# PARTICLES_SUBMOD_OBJ = particles_submod.o

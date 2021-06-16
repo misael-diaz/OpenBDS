@@ -26,11 +26,15 @@
 
 include particles-inc
 
-all: $(MODULES)
+all: $(PARTICLES_MODULE_OBJ) $(PARTICLES_SUBMOD_OBJ)
 
 $(PARTICLES_MODULE_OBJ): $(PARTICLES_MODULE_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(PARTICLES_MODULE_SRC) -o\
 	                                  $(PARTICLES_MODULE_OBJ)
+
+$(PARTICLES_SUBMOD_OBJ): $(PARTICLES_MODULE_OBJ) $(PARTICLES_SUBMOD_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(PARTICLES_SUBMOD_SRC) -o\
+	                                  $(PARTICLES_SUBMOD_OBJ)
 
 clean:
 	rm -f *.mod *.smod *.o
