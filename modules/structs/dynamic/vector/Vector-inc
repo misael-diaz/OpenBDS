@@ -32,11 +32,9 @@ MODULES_INC = -I$(MODULES_DIR)
 
 # src
 VECTOR_MODULE_SRC = Vector.for
+VECTOR_SUBMOD_SRC = Vector_submod.for
 
 
 # objects
 VECTOR_MODULE_OBJ = Vector.o
-
-
-# bundles
-MODULES = $(VECTOR_MODULE_OBJ)
+VECTOR_SUBMOD_OBJ = Vector_submod.o

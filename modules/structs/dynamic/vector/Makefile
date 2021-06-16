@@ -26,11 +26,15 @@
 
 include Vector-inc
 
-all: $(MODULES)
+all: $(VECTOR_MODULE_OBJ) $(VECTOR_SUBMOD_OBJ)
 
 $(VECTOR_MODULE_OBJ): $(VECTOR_MODULE_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MODULE_SRC) -o\
-	        	   $(VECTOR_MODULE_OBJ)
+	                                  $(VECTOR_MODULE_OBJ)
+
+$(VECTOR_SUBMOD_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_SUBMOD_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_SUBMOD_SRC) -o\
+	                                  $(VECTOR_SUBMOD_OBJ)
 
 clean:
 	rm -f *.mod *.smod *.o

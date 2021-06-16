@@ -32,11 +32,9 @@ MODULES_INC = -I$(MODULES_DIR)
 
 # src
 LINKED_LIST_MODULE_SRC = LinkedList.for
+LINKED_LIST_SUBMOD_SRC = LinkedList_submod.for
 
 
 # objects
 LINKED_LIST_MODULE_OBJ = linkedlist.o
-
-
-# bundles
-MODULES = $(LINKED_LIST_MODULE_OBJ)
+LINKED_LIST_SUBMOD_OBJ = linkedlist_submod.o
