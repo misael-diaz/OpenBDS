@@ -25,7 +25,7 @@
 #
 
 
-all: test_chronos test_structs test_random test_particles
+all: test_chronos test_structs test_random #test_particles
 
 test_chronos:
 	@$(MAKE) -C chronos
