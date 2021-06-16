@@ -70,199 +70,78 @@ module vectors
     end interface
 
 
-    contains
+    interface
 
 
-        function default_constructor () result(vector)
+        module function default_constructor () result(vector)
             ! Synopsis: Returns an empty vector
             type(vector_t):: vector
-
-            vector % begin % idx  = 0_int64
-            vector % avail % idx  = 0_int64
-            vector % limit % idx  = 0_int64
-            vector % state % init = .false.
-
-            return
         end function
 
 
-        function addressing_method (self, idx) result(value)
+        module function addressing_method (self, idx) result(value)
             ! Synopsis: Addresses the element pointed to by index.
             class(vector_t), intent(in) :: self
             integer(kind = int64), intent(in) :: idx
             integer(kind = int32) :: value
-            value = self % array % values(idx)
-            return
         end function
 
 
-        function size_method (self) result(vector_size)
+        module function size_method (self) result(vector_size)
             ! Synopsis: Returns the size of the vector.
             class(vector_t), intent(in) :: self
             integer(kind = int64) :: vector_size
-
-            associate (begin => self % begin % idx, &
-                     & end   => self % avail % idx)
-                vector_size = end - begin
-            end associate
-
-            return
         end function
 
 
-        subroutine clear_method (self)
+        module subroutine clear_method (self)
             ! Synopsis: Clears the vector elements.
             class(vector_t), intent(inout) :: self
-            self % avail % idx = 0_int64
-            return
         end subroutine
 
 
-        subroutine push_back_method (self, value)
+        module subroutine push_back_method (self, value)
             ! Synopsis: Pushes value unto back of vector.
             class(vector_t), intent(inout) :: self
             integer(kind = int32), intent(in) :: value
-
-            if (self % state % init) then
-                call insert_back (self, value)
-            else
-                call initializer (self, value)
-            end if
-
-            return
         end subroutine
 
 
-        subroutine insert_back (vector, value)
+        module subroutine insert_back (vector, value)
             ! Synopsis: Inserts value unto back, vector grows as needed.
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
-
-            if (vector % avail % idx == vector % limit % idx) then
-                call grow (vector)
-            end if
-
-            associate(avail => vector % avail % idx)
-                vector % array % values(avail) = value
-                avail = avail + 1_int64
-            end associate
-
-            return
         end subroutine
 
 
-        subroutine grow (vector)
+        module subroutine grow (vector)
             ! Synopsis: Doubles the vector size.
             type(vector_t), intent(inout) :: vector
-            integer(kind = int64):: lb
-            integer(kind = int64):: ub
-            integer(kind = int64):: bounds(0:1)
-            integer(kind = int32), allocatable :: values(:)
-
-
-            lb = vector % begin % idx
-            ub = vector % limit % idx
-            bounds(0) = lb
-            bounds(1) = ub
-            call allocator (bounds, values)
-            ! copies existing values into placeholder
-            values(lb:ub) = vector % array % values(lb:ub)
-
-
-            vector % limit % idx = 2_int64 * vector % limit % idx
-
-
-!           bounds(0) = vector % begin % idx
-            bounds(1) = vector % limit % idx
-            call reallocator (bounds, vector % array % values)
-            ! copies values in placeholder into (reallocated) vector
-            vector % array % values = 0
-            vector % array % values(lb:ub) = values(lb:ub)
-
-
-            call deallocator (values)
-
-            return
         end subroutine
 
 
-        subroutine initializer (vector, value)
+        module subroutine initializer (vector, value)
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
-            call create (vector, value)
-            return
         end subroutine
 
 
-        subroutine create (vector, value)
+        module subroutine create (vector, value)
             ! Synopsis: Creates the first element in vector.
             type(vector_t), intent(inout) :: vector
-            integer(kind = int64) :: idx
-            integer(kind = int64) :: bounds(0:1)
-            integer(kind = int64), parameter :: lb = 0_int64
-            integer(kind = int64), parameter :: ub = 8_int64
             integer(kind = int32), intent(in) :: value
-
-
-            bounds(0) = lb
-            bounds(1) = ub
-            call allocator (bounds, vector % array % values)
-
-
-            idx = vector % avail % idx
-            vector % array % values = 0
-            vector % array % values(idx) = value
-
-
-!           vector % begin % idx  = 0_int64
-            vector % avail % idx  = 1_int64
-            vector % limit % idx  = 8_int64
-            vector % state % init = .true.
-
-
-            return
         end subroutine
 
 
-        subroutine finalizer (vector)
+        module subroutine finalizer (vector)
             type(vector_t), intent(inout) :: vector
-
-            if ( allocated(vector % array % values) ) then
-                call deallocator (vector % array % values)
-            end if
-
-            return
         end subroutine
+
+
+    end interface
 end module
 
 
 ! References:
 ! SJ Chapman, FORTRAN for Scientists and Engineers, fourth edition
 ! A Koenig and B Moo, Accelerated C++ Practical Programming by Example
-
-
-! Comments:
-! For now iterators are implemented as indexes.
-!
-
-
-! Comments on Procedures:
-!
-! subroutine create()
-! Allocates one more element on purpose to compute the size of the
-! vector via: (end - begin) as in c++.
-!
-!
-! subroutine clear_method()
-! Placing the /avail/ iterator at the beginning is equivalent to
-! clearing the vector without deallocating memory. I have designed
-! the vector class thinking on how it will be used for keeping
-! track of neighbors. In that context it's convenient to
-! clear the vector without deallocating memory since it would
-! be expensive to have to grow the size of the vector over and
-! over again during the simulation. Why not use fixed-size arrays?
-! I have use them in the past worrying that I might have to allocate
-! more memory than actually needed to avoid exceding the array
-! bounds. Some systems might be more dynamic having particles with
-! far more neighbors than others. Vectors would come in handy for
-! such cases.
