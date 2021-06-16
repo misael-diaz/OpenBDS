@@ -26,7 +26,7 @@
 
 # modules directory
 # modules include
-MODULES_DIR = ../../modules/utils
+MODULES_DIR = ../../../modules/utils
 MODULES_INC = -I$(MODULES_DIR)
 
 
