@@ -23,7 +23,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 
-module particles
+module particle_class
     use, intrinsic :: iso_fortran_env, only: int64, real64
     implicit none
     private
@@ -34,13 +34,16 @@ module particles
     end type
 
 
+    type :: vector_t
+        real(kind = real64), allocatable :: x(:)
+        real(kind = real64), allocatable :: y(:)
+        real(kind = real64), allocatable :: z(:)
+    end type
+
+
     type, abstract, public :: particle_t
         type(string_t) :: shape
-        ! position
-        real(kind = real64), allocatable :: r_x(:)
-        real(kind = real64), allocatable :: r_y(:)
-        real(kind = real64), allocatable :: r_z(:)
-
+        type(vector_t), allocatable :: position
         integer(kind = int64), allocatable :: id(:)
 !       contains
 !           private
@@ -58,5 +61,15 @@ module particles
 !       end subroutine
 !   end interface
 
+    interface
 
-end module particles
+
+        module subroutine stub (self)
+            class(particle_t), intent(inout) :: self
+        end subroutine
+
+
+    end interface
+
+
+end module

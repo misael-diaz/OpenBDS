@@ -23,8 +23,27 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 
-submodule (particles) particle_implementations
+submodule (particle_class) particle_class_implementations
 !   use, intrinsic :: iso_fortran_env, only: int64, real64
 !   implicit none
-!   contains
+    contains
+
+
+        module subroutine stub (self)
+            class(particle_t), intent(inout) :: self
+            integer(kind = int32) :: mstat
+
+            allocate (character(len=len("unknown")) :: self % shape % str, &
+                    & stat = mstat)
+            if (mstat /= 0) error stop "failed to allocate string"
+
+            self % shape % str(:) = "unknown"
+            return
+        end subroutine
+
+
 end submodule
+
+! Comments:
+! Subroutine stub () has been defined for the sole purpose of producing
+! a submodule file.
