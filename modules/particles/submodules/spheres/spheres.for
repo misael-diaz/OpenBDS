@@ -4,7 +4,7 @@
 !   date:    2021-06-16
 !
 !   Synopsis:
-!   Defines the sphere class.
+!   Defines the sphere subclass.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
@@ -23,19 +23,16 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 
-submodule (particles) spheres
-!   use, intrinsic :: iso_fortran_env, only: int64, real64
-!   implicit none
-!   private
+module sphere_subclass
+    use, intrinsic :: iso_fortran_env, only: int32, int64, real64
+    use particle_class, only: particle_t
+    use utils, only: allocator   => util_allocate_array
+    use utils, only: deallocator => util_deallocate_array
+    implicit none
+    private
 
 
-!   use utils, only: allocator   => util_allocate_array
-!   use utils, only: deallocator => util_deallocate_array
-!   implicit none
-
-
-    type, public, extends(particle_t) :: sphere_t
-        private
+    type, extends(particle_t), public :: sphere_t
         ! force
         real(kind = real64), allocatable :: f_x(:)
         real(kind = real64), allocatable :: f_y(:)
@@ -81,16 +78,7 @@ submodule (particles) spheres
     end interface
 
 
-end submodule spheres
+end module
 
 ! TODO:
-! [x] invoke (de)allocator from util
-! [x] make particle_t abstract (no finalizer needed since objects
-!     are not instantiated from abstract classes)
-! [ ] move the finalizer to spheres and of course add code to
-!     deallocate the data members
-! [x] make the spawn procedure generic (entails defining an interface)
-! [ ] add pointers to procedures (for particles interfactions)
-! [ ] add a potential type (of sorts) that defines a string with the
-!     name of the potential to use for determining the particle
-!     interactions.
+! move components (force, position, and linear displacement) to superclass

@@ -4,7 +4,7 @@
 !   date:    2021-06-16
 !
 !   Synopsis:
-!   Implements the particle class.
+!   Implements the sphere subclass.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
@@ -23,7 +23,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 
-submodule (spheres) sphere_implementations
+submodule (sphere_subclass) sphere_subclass_implementations
 !   use, intrinsic :: iso_fortran_env, only: int64, real64
 !   implicit none
     contains
