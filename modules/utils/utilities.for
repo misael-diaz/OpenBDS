@@ -24,7 +24,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module utils
-    use, intrinsic :: iso_fortran_env, only: int32, int64
+    use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     implicit none
     public
 
@@ -49,9 +49,17 @@ module utils
 
 
     interface
+
+
         module subroutine util_allocate_array_by_bounds (bounds, values)
             integer(kind = int64), intent(in) :: bounds(0:1)
             integer(kind = int32), intent(inout), allocatable :: values(:)
+        end subroutine
+
+
+        module subroutine util_allocate_array_real64_by_size (n, values)
+            integer(kind = int64), intent(in) :: n
+            real(kind = real64), intent(inout), allocatable :: values(:)
         end subroutine
 
 
@@ -87,6 +95,13 @@ module utils
         module subroutine util_deallocate_array_int64 (values)
             integer(kind = int64), intent(inout), allocatable :: values(:)
         end subroutine
+
+
+        module subroutine util_deallocate_array_real64 (values)
+            real(kind = real64), intent(inout), allocatable :: values(:)
+        end subroutine
+
+
     end interface
 
 end module
