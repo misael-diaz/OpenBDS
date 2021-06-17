@@ -24,8 +24,6 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (utils) util_implementations
-    use, intrinsic :: iso_fortran_env, only: int32, int64
-    implicit none
     contains
 
 
@@ -39,6 +37,20 @@ submodule (utils) util_implementations
             lb = bounds(0)
             ub = bounds(1)
             allocate (values(lb:ub), stat = mstat)
+            if (mstat /= 0) then
+                error stop "util_allocate_array: insufficient memory"
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine util_allocate_array_real64_by_size (n, values)
+            integer(kind = int64), intent(in) :: n
+            real(kind = real64), intent(inout), allocatable :: values(:)
+            integer(kind = int32) :: mstat
+
+            allocate (values(n), stat = mstat)
             if (mstat /= 0) then
                 error stop "util_allocate_array: insufficient memory"
             end if
@@ -129,6 +141,22 @@ submodule (utils) util_implementations
 
         module subroutine util_deallocate_array_int64 (values)
             integer(kind = int64), intent(inout), allocatable :: values(:)
+            integer(kind = int32) :: mstat = 0
+
+            if ( allocated(values) ) then
+                deallocate(values, stat = mstat)
+            end if
+
+            if (mstat /= 0) then
+                error stop "util_deallocate_array: unexpected error"
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine util_deallocate_array_real64 (values)
+            real(kind = real64), intent(inout), allocatable :: values(:)
             integer(kind = int32) :: mstat = 0
 
             if ( allocated(values) ) then
