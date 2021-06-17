@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-16
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Builds the OpenBDS modules
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,23 +24,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include spheres-inc
 
-all: test_chronos test_structs test_random #test_particles
+all: $(SPHERES_MODULE_OBJ) $(SPHERES_SUBMOD_OBJ)
 
-test_chronos:
-	@$(MAKE) -C chronos
+$(SPHERES_MODULE_OBJ): $(PARTICLES_CLASS_MOD_OBJ) $(SPHERES_MODULE_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(SPHERES_MODULE_SRC) -o\
+	                                  $(SPHERES_MODULE_OBJ)
 
-test_structs:
-	@$(MAKE) -C structs
-
-test_random:
-	@$(MAKE) -C random
-
-test_particles:
-	@$(MAKE) -C particles
+$(SPHERES_SUBMOD_OBJ): $(SPHERES_MODULE_OBJ) $(SPHERES_SUBMOD_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(SPHERES_SUBMOD_SRC) -o\
+	                                  $(SPHERES_SUBMOD_OBJ)
 
 clean:
-	@$(MAKE) -C chronos   clean
-	@$(MAKE) -C structs   clean
-	@$(MAKE) -C random    clean
-	@$(MAKE) -C particles clean
+	rm -f *.mod *.smod *.o

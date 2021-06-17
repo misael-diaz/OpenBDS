@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: particles-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-11
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,23 +24,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# modules directory
+# modules include
+MODULES_DIR = ../../../modules/utils
+MODULES_INC = -I$(MODULES_DIR)
 
-all: test_chronos test_structs test_random #test_particles
 
-test_chronos:
-	@$(MAKE) -C chronos
+# src
+PARTICLES_MODULE_SRC = particles.for
+PARTICLES_SUBMOD_SRC = particles_submod.for
 
-test_structs:
-	@$(MAKE) -C structs
 
-test_random:
-	@$(MAKE) -C random
-
-test_particles:
-	@$(MAKE) -C particles
-
-clean:
-	@$(MAKE) -C chronos   clean
-	@$(MAKE) -C structs   clean
-	@$(MAKE) -C random    clean
-	@$(MAKE) -C particles clean
+# objects
+PARTICLES_MODULE_OBJ = particles.o
+# PARTICLES_SUBMOD_OBJ = particles_submod.o

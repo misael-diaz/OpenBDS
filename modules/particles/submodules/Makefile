@@ -5,7 +5,7 @@
 # date:   2021-06-02
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Builds the OpenBDS modules
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -25,22 +25,10 @@
 #
 
 
-all: test_chronos test_structs test_random #test_particles
+all: spheres_submodule
 
-test_chronos:
-	@$(MAKE) -C chronos
-
-test_structs:
-	@$(MAKE) -C structs
-
-test_random:
-	@$(MAKE) -C random
-
-test_particles:
-	@$(MAKE) -C particles
+spheres_submodule:
+	@$(MAKE) -C spheres
 
 clean:
-	@$(MAKE) -C chronos   clean
-	@$(MAKE) -C structs   clean
-	@$(MAKE) -C random    clean
-	@$(MAKE) -C particles clean
+	@$(MAKE) -C spheres clean

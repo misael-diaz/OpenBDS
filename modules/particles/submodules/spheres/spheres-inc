@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: spheres-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-16
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,23 +24,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# modules directory
+# modules include
+UTILS_MOD_DIR     = ../../../../modules/utils
+PARTICLES_MOD_DIR = ../../../../modules/particles/module
+MODULES_INC       = -I$(UTILS_MOD_DIR) -I$(PARTICLES_MOD_DIR)
 
-all: test_chronos test_structs test_random #test_particles
+# depends
+PARTICLES_CLASS_MOD_OBJ = $(PARTICLES_MOD_DIR)/$(PARTICLES_MODULE_OBJ)
 
-test_chronos:
-	@$(MAKE) -C chronos
+# src
+SPHERES_MODULE_SRC = spheres.for
+SPHERES_SUBMOD_SRC = spheres_submod.for
 
-test_structs:
-	@$(MAKE) -C structs
 
-test_random:
-	@$(MAKE) -C random
-
-test_particles:
-	@$(MAKE) -C particles
-
-clean:
-	@$(MAKE) -C chronos   clean
-	@$(MAKE) -C structs   clean
-	@$(MAKE) -C random    clean
-	@$(MAKE) -C particles clean
+# objects
+SPHERES_MODULE_OBJ = spheres.o
+SPHERES_SUBMOD_OBJ = spheres_submod.o
