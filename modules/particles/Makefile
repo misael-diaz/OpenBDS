@@ -25,10 +25,13 @@
 #
 
 
-all: particle_module
+all: particles_module particles_submodules
 
-particle_module:
+particles_module:
 	@$(MAKE) -C module
+particles_submodules: particles_module
+	@$(MAKE) -C submodules
 
 clean:
-	@$(MAKE) -C module clean
+	@$(MAKE) -C module     clean
+	@$(MAKE) -C submodules clean
