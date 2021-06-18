@@ -84,14 +84,13 @@ submodule (math_vector_class) math_vector_class_implementations
             integer(kind = int64), intent(in) :: i
             integer(kind = int64), intent(in) :: j
             real(kind = real64), intent(out) :: d
-            real(kind = real64) :: t
 
             associate ( x => v % x(i), y => v % y(i), z => v % z(i), &
                      &  p => v % x(j), q => v % y(j), r => v % z(j) )
 
 
-                t = (p - x)**2 + (q - y)**2 + (r - z)**2
-                d = dsqrt(t)
+                d = (p - x)**2 + (q - y)**2 + (r - z)**2
+                d = dsqrt(d)
 
 
             end associate
@@ -303,6 +302,11 @@ end submodule
 ! [x] implement GUARD against operating on uninitialized vectors
 ! [x] to implement GUARD against normalizing a singular vector
 ! [x] check vectorizer report and fix vectorization misses (if possible)
+! [ ] implement the cross product, you want to consider writing the result
+!     in another object of :[vector_t]: at a location delimited by some
+!     index. You may also want to consider not passing :[self]: so that
+!     the procedure operates on the objects of the type. You may want
+!     to check if you can write the code so that it can be vectorized.
 
 
 ! Vectorization:
