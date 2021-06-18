@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-17
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Builds the programs for testing the math vector class.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,27 +24,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include math-vector-test-inc
 
-all: test_chronos test_structs test_random test_math #test_particles
+all: $(TESTS)
 
-test_chronos:
-	@$(MAKE) -C chronos
 
-test_structs:
-	@$(MAKE) -C structs
+$(TEST_MATH_VECTOR_EXE): $(SUBM) $(TEST_MATH_VECTOR_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(MODS) $(SUBM)\
+	    $(TEST_MATH_VECTOR_OBJ) -o $(TEST_MATH_VECTOR_EXE)
 
-test_random:
-	@$(MAKE) -C random
+$(TEST_MATH_VECTOR_OBJ): $(MODS) $(TEST_MATH_VECTOR_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_MATH_VECTOR_SRC) -o\
+	       	                          $(TEST_MATH_VECTOR_OBJ)
 
-test_math:
-	@$(MAKE) -C math
-
-test_particles:
-	@$(MAKE) -C particles
 
 clean:
-	@$(MAKE) -C chronos   clean
-	@$(MAKE) -C structs   clean
-	@$(MAKE) -C random    clean
-	@$(MAKE) -C math      clean
-	@$(MAKE) -C particles clean
+	rm -f *.mod *.o $(TESTS)

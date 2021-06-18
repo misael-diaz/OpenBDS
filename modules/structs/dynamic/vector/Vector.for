@@ -60,6 +60,7 @@ module vectors
             generic, public :: operator (<) => addressing_method
             procedure, public :: size => size_method
             procedure, public :: clear => clear_method
+            procedure, public :: findloc => findloc_method
             procedure, public :: push_back => push_back_method
             final :: finalizer
     end type
@@ -77,6 +78,20 @@ module vectors
             ! Synopsis: Returns an empty vector
             type(vector_t):: vector
         end function
+
+
+        module function findloc_method (self, value) result(idx)
+            class(vector_t), intent(in) :: self
+            integer(kind = int64) :: idx
+            integer(kind = int32), intent(in) :: value
+        end function
+
+
+        module subroutine findloc_wrapper (vector, value, idx)
+            type(vector_t), intent(in) :: vector
+            integer(kind = int64), intent(out) :: idx
+            integer(kind = int32), intent(in) :: value
+        end subroutine
 
 
         module function addressing_method (self, idx) result(value)
@@ -145,3 +160,18 @@ end module
 ! References:
 ! SJ Chapman, FORTRAN for Scientists and Engineers, fourth edition
 ! A Koenig and B Moo, Accelerated C++ Practical Programming by Example
+
+
+! Comments:
+! Easiest way to get at the values in vector is by having direct
+! access. However, that's a dangerous road that I would only use
+! in the absence of suitable alternatives.
+
+
+! TODO:
+! [ ] make the components of :[vector_t]: allocatable
+! [x] Implement a wrapper for the findloc intrinsic. Full support is
+!     not intended. Just for the case in which array, value, and dim
+!     are supplied (the result is a scalar).
+!     This method will be used for testing the minimalistic neighbor-list
+!     implemented in test/modules/math/vector.

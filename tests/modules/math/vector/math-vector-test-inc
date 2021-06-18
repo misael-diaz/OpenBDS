@@ -1,0 +1,62 @@
+#
+# source: math-vector-test-inc
+# author: misael-diaz
+# date:   2021-06-17
+#
+# Synopsis:
+# Include for GNU make, defines source and object files to build tests.
+#
+#
+# Copyright (C) 2021 Misael Diaz-Maldonado
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+include ../../../../modules/utils/utils-inc
+include ../../../../modules/structs/dynamic/vector/Vector-inc
+include ../../../../modules/math/vector/math-vector-inc
+
+# modules directory
+# modules include
+UTILS_MOD_DIR       = ../../../../modules/utils
+VECTOR_MOD_DIR      = ../../../../modules/structs/dynamic/vector
+MATH_VECTOR_MOD_DIR = ../../../../modules/math/vector
+MODULES_INC         = -I$(UTILS_MOD_DIR) -I$(VECTOR_MOD_DIR)\
+                      -I$(MATH_VECTOR_MOD_DIR)
+
+# defines relative path for needed (sub)modules
+UTILS_MOD_OBJ       = $(UTILS_MOD_DIR)/$(UTILS_MODULE_OBJ)
+UTILS_SUB_OBJ       = $(UTILS_MOD_DIR)/$(UTILS_SUBMOD_OBJ)
+VECTOR_MOD_OBJ      = $(VECTOR_MOD_DIR)/$(VECTOR_MODULE_OBJ)
+VECTOR_SUB_OBJ      = $(VECTOR_MOD_DIR)/$(VECTOR_SUBMOD_OBJ)
+MATH_VECTOR_MOD_OBJ = $(MATH_VECTOR_MOD_DIR)/$(MATH_VECTOR_MODULE_OBJ)
+MATH_VECTOR_SUB_OBJ = $(MATH_VECTOR_MOD_DIR)/$(MATH_VECTOR_SUBMOD_OBJ)
+
+
+# src
+TEST_MATH_VECTOR_SRC = test_math_vector.for
+
+
+# objects
+TEST_MATH_VECTOR_OBJ = test_math_vector.o
+
+
+# excutables
+TEST_MATH_VECTOR_EXE = test-math-vector-class
+
+
+# bundles (submodules, modules, and executables)
+SUBM = $(UTILS_SUB_OBJ) $(VECTOR_SUB_OBJ) $(MATH_VECTOR_SUB_OBJ)
+MODS = $(UTILS_MOD_OBJ) $(VECTOR_MOD_OBJ) $(MATH_VECTOR_MOD_OBJ)
+TESTS = $(TEST_MATH_VECTOR_EXE)

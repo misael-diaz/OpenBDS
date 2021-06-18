@@ -25,26 +25,10 @@
 #
 
 
-all: test_chronos test_structs test_random test_math #test_particles
+all: test_math_vector
 
-test_chronos:
-	@$(MAKE) -C chronos
-
-test_structs:
-	@$(MAKE) -C structs
-
-test_random:
-	@$(MAKE) -C random
-
-test_math:
-	@$(MAKE) -C math
-
-test_particles:
-	@$(MAKE) -C particles
+test_math_vector:
+	@$(MAKE) -C vector
 
 clean:
-	@$(MAKE) -C chronos   clean
-	@$(MAKE) -C structs   clean
-	@$(MAKE) -C random    clean
-	@$(MAKE) -C math      clean
-	@$(MAKE) -C particles clean
+	@$(MAKE) -C vector clean
