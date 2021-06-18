@@ -36,8 +36,9 @@ program test_math_vector_class
 
 
     integer(kind = int64) :: i
+    integer(kind = int64), allocatable :: idx(:)
     integer(kind = int64), parameter :: n = 65536_int64
-    integer(kind = int32) :: mstat = 0
+    integer(kind = int32) :: mstat
 
 
 
@@ -63,6 +64,7 @@ program test_math_vector_class
 
 
 
+
     call vector % normalize ()
 
 
@@ -73,10 +75,8 @@ program test_math_vector_class
 
 
 
-
     allocate (d(n), stat = mstat)
     if (mstat /= 0) error stop "allocation failure"
-
 
 
     do i = 1, n
@@ -93,10 +93,45 @@ program test_math_vector_class
 
 
 
+    call vector % delta2(n)      ! vector squared distance
+
+
+    print *, ""
+    print *, ""
+    print *, "distance::min: ", dsqrt( minval(vector % v) )
+    print *, "distance::max: ", dsqrt( maxval(vector % v) )
+    print *, ""
+    print *, ""
+
+
+
+
+    allocate (idx(n), stat = mstat)
+    if (mstat /= 0) error stop "allocation failure"
+
+
+    do i = 1, n
+        idx(i) = i
+    end do
+
+
+    call vector % delta2(n, idx)      ! vector squared distance
+
+
+    print *, ""
+    print *, ""
+    print *, "distance::min: ", dsqrt( minval(vector % v) )
+    print *, "distance::max: ", dsqrt( maxval(vector % v) )
+    print *, ""
+    print *, ""
+
 
 
 
     deallocate (d, stat = mstat)
+    if (mstat /= 0) error stop "unexpected deallocation failure"
+
+    deallocate (idx, stat = mstat)
     if (mstat /= 0) error stop "unexpected deallocation failure"
 
     deallocate (vector, stat = mstat)
