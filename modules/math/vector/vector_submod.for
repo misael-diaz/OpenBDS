@@ -77,6 +77,7 @@ submodule (math_vector_class) math_vector_class_implementations
             call guard_singular (vector)
  
 
+            t = 0.0_real64
             associate(x => vector % x, y => vector % y, &
                     & z => vector % z, v => vector % v)
 
@@ -125,7 +126,7 @@ submodule (math_vector_class) math_vector_class_implementations
             real(kind = real64) :: t(vector % size % n)
 
 
-
+            t = 0.0_real64
             associate(x => vector % x, y => vector % y, &
                     & z => vector % z, v => vector % v)
                
