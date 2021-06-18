@@ -45,6 +45,38 @@ submodule (vectors) vectors_implementation
         end function
 
 
+        module function findloc_method (self, value) result(idx)
+            class(vector_t), intent(in) :: self
+            integer(kind = int64) :: idx
+            integer(kind = int32), intent(in) :: value
+
+            if (.not. self % state % init) then
+                idx = 0_int64
+            else
+                call findloc_wrapper (self, value, idx)
+            end if
+
+            return
+        end function
+
+
+        module subroutine findloc_wrapper (vector, value, idx)
+            type(vector_t), intent(in) :: vector
+            integer(kind = int64), intent(out) :: idx
+            integer(kind = int64) :: lb
+            integer(kind = int64) :: ub
+            integer(kind = int32), intent(in) :: value
+
+            lb = vector % begin % idx
+            ub = vector % avail % idx
+            ub = ub - 1_int64
+            idx = findloc (array = vector % array % values (lb:ub), &
+                         & value = value, dim = 1, kind = int64)
+
+            return
+        end subroutine
+
+
         module function addressing_method (self, idx) result(value)
             ! Synopsis: Addresses the element pointed to by index.
             class(vector_t), intent(in) :: self
@@ -210,6 +242,12 @@ end submodule
 ! subroutine create()
 ! Allocates one more element on purpose to compute the size of the
 ! vector via: (end - begin) as in c++.
+!
+!
+! function findloc_wrapper_method (self, value) result(idx)
+! lower and upper bounds (lb, ub) are chosen so that we do not include
+! the element pointed to by (end). It's a valid index but it should not
+! be referenced since it does not hold an actual value.
 !
 !
 ! subroutine clear_method()
