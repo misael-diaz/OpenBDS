@@ -41,6 +41,7 @@ submodule (math_vector_class) math_vector_class_implementations
             integer(kind = int64), intent(in) :: n
             
 
+            call allocator (vector % stat)
             call allocator (vector % size)
             call allocator (n, vector % x)
             call allocator (n, vector % y)
@@ -48,13 +49,18 @@ submodule (math_vector_class) math_vector_class_implementations
             call allocator (n, vector % v)
 
 
-            associate(x => vector % x, y => vector % y, z => vector % z, &
-                    & v => vector % v, size => vector % size % n)
-                x = 0.0_real64
-                y = 0.0_real64
-                z = 0.0_real64
-                v = 0.0_real64
+            associate (x => vector % x,    y => vector % y, &
+                     & z => vector % z,    v => vector % v, &
+                     & size => vector % size % n, &
+                     & init => vector % stat % init)
+
+                x    = 0.0_real64
+                y    = 0.0_real64
+                z    = 0.0_real64
+                v    = 0.0_real64
                 size = n
+                init = .true.
+
             end associate
 
             return
@@ -63,7 +69,11 @@ submodule (math_vector_class) math_vector_class_implementations
 
         module subroutine normalize_method (self)
             class(vector_t), intent(inout) :: self
-            call normalizer (self)
+
+            if ( allocated(self % stat) ) then
+                call normalizer (self)
+            end if
+
             return
         end subroutine
 
@@ -74,7 +84,7 @@ submodule (math_vector_class) math_vector_class_implementations
 
 
             call moduli (vector)
-            call guard_singular (vector)
+            call vector_guard_singular (vector)
  
 
             t = 0.0_real64
@@ -90,11 +100,12 @@ submodule (math_vector_class) math_vector_class_implementations
         end subroutine
 
 
-        module subroutine guard_singular (vector)
+        module subroutine vector_guard_singular (vector)
             type(vector_t), intent(in) :: vector
 
             if ( minval(vector % v) < vector_eps_mod ) then
-                error stop "math::vector.guard_singular (): abort singular"
+                error stop "math::vector.vector_guard_singular (): "//&
+                    & "abort singular"
             end if
 
             return
@@ -154,6 +165,22 @@ submodule (math_vector_class) math_vector_class_implementations
         end subroutine
 
 
+        module subroutine allocate_stat_t (s)
+            type(stat_t), intent(inout), allocatable :: s
+            integer(kind = int32) :: mstat = 0
+
+            if ( .not. allocated(s) ) then
+                allocate (s, stat = mstat)
+            end if
+
+            if (mstat /= 0) then
+                error stop "math::vector.allocate_stat: allocation failure"
+            end if
+
+            return
+        end subroutine
+
+
         module subroutine allocate_size_t (s)
             type(size_t), intent(inout), allocatable :: s
             integer(kind = int32) :: mstat = 0
@@ -164,6 +191,23 @@ submodule (math_vector_class) math_vector_class_implementations
 
             if (mstat /= 0) then
                 error stop "math::vector.allocate_size: allocation failure"
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine deallocate_stat_t (s)
+            type(stat_t), intent(inout), allocatable :: s
+            integer(kind = int32) :: mstat = 0
+
+            if ( allocated(s) ) then
+                deallocate (s, stat = mstat)
+            end if
+
+            if (mstat /= 0) then
+                error stop "math::vector.deallocate_stat: "// &
+                    & "deallocation failure"
             end if
 
             return
@@ -185,6 +229,7 @@ submodule (math_vector_class) math_vector_class_implementations
 
             return
         end subroutine
+
 
         module subroutine finalizer (vector)
             ! Synopsis: Frees memory allocated for vector.
@@ -212,6 +257,7 @@ submodule (math_vector_class) math_vector_class_implementations
             call deallocator (vector % z)
             call deallocator (vector % v)
             call deallocator (vector % size)
+            call deallocator (vector % stat)
 
             return
         end subroutine
@@ -221,6 +267,7 @@ end submodule
 
 
 ! TODO:
+! [x] implement GUARD against operating on uninitialized vectors
 ! [x] to implement GUARD against normalizing a singular vector
 ! [x] check vectorizer report and fix vectorization misses (if possible)
 
@@ -231,3 +278,17 @@ end submodule
 ! vectorize the code without directives. Intel Fortran Compiler was
 ! reluctant to vectorize loops with potential aliasing (when the
 ! variable to write was a component of vector in associate constructs).
+
+
+! Comments on Procedures:
+!
+!
+! subroutine normalize_method (self):
+!
+! Guards against attempts to invoke method on an uninitialized vector.
+! Even though the value of the state/status type :[stat_t]: is set
+! upon initialization it won't be available for uninitialized vectors
+! since memory needs to be allocated. This is why we only check if this
+! component is allocated. At this point any component could do to
+! achieve this however, having a state/status component might be useful
+! later. This is the reason for defining it.

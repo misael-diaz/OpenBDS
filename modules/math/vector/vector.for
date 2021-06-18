@@ -38,7 +38,13 @@ module math_vector_class
     end type
 
 
+    type :: stat_t
+        logical(kind = int64) :: init = .false.
+    end type
+
+
     type, public :: vector_t
+        type(stat_t), allocatable :: stat
         type(size_t), allocatable :: size 
         real(kind = real64), allocatable :: x(:)
         real(kind = real64), allocatable :: y(:)
@@ -57,12 +63,14 @@ module math_vector_class
 
 
     interface allocator
+        module procedure allocate_stat_t
         module procedure allocate_size_t
         module procedure util_allocate_array_real64_by_size
     end interface
 
 
     interface deallocator
+        module procedure deallocate_stat_t
         module procedure deallocate_size_t
         module procedure util_deallocate_array_real64
     end interface
@@ -93,7 +101,7 @@ module math_vector_class
         end subroutine
 
 
-        module subroutine guard_singular (vector)
+        module subroutine vector_guard_singular (vector)
             type(vector_t), intent(in) :: vector
         end subroutine
 
@@ -126,8 +134,18 @@ module math_vector_class
         end subroutine
 
 
+        module subroutine allocate_stat_t (s)
+            type(stat_t), intent(inout), allocatable :: s
+        end subroutine
+
+
         module subroutine allocate_size_t (s)
             type(size_t), intent(inout), allocatable :: s
+        end subroutine
+
+
+        module subroutine deallocate_stat_t (s)
+            type(stat_t), intent(inout), allocatable :: s
         end subroutine
 
 
