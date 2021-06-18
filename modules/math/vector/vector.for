@@ -56,7 +56,7 @@ module math_vector_class
             procedure :: delta_for_indexed_method
             procedure, public :: range => range_method
             procedure, public :: normalize => normalize_method
-            generic, public :: delta => delta_forall_method, &
+            generic, public :: delta2 => delta_forall_method, &
                                       & delta_for_indexed_method
             final :: finalizer
     end type
