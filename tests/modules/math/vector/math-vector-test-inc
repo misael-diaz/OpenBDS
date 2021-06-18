@@ -24,17 +24,22 @@
 #
 
 include ../../../../modules/utils/utils-inc
+include ../../../../modules/structs/dynamic/vector/Vector-inc
 include ../../../../modules/math/vector/math-vector-inc
 
 # modules directory
 # modules include
 UTILS_MOD_DIR       = ../../../../modules/utils
+VECTOR_MOD_DIR      = ../../../../modules/structs/dynamic/vector
 MATH_VECTOR_MOD_DIR = ../../../../modules/math/vector
-MODULES_INC         = -I$(UTILS_MOD_DIR) -I$(MATH_VECTOR_MOD_DIR)
+MODULES_INC         = -I$(UTILS_MOD_DIR) -I$(VECTOR_MOD_DIR)\
+                      -I$(MATH_VECTOR_MOD_DIR)
 
 # defines relative path for needed (sub)modules
 UTILS_MOD_OBJ       = $(UTILS_MOD_DIR)/$(UTILS_MODULE_OBJ)
 UTILS_SUB_OBJ       = $(UTILS_MOD_DIR)/$(UTILS_SUBMOD_OBJ)
+VECTOR_MOD_OBJ      = $(VECTOR_MOD_DIR)/$(VECTOR_MODULE_OBJ)
+VECTOR_SUB_OBJ      = $(VECTOR_MOD_DIR)/$(VECTOR_SUBMOD_OBJ)
 MATH_VECTOR_MOD_OBJ = $(MATH_VECTOR_MOD_DIR)/$(MATH_VECTOR_MODULE_OBJ)
 MATH_VECTOR_SUB_OBJ = $(MATH_VECTOR_MOD_DIR)/$(MATH_VECTOR_SUBMOD_OBJ)
 
@@ -52,6 +57,6 @@ TEST_MATH_VECTOR_EXE = test-math-vector-class
 
 
 # bundles (submodules, modules, and executables)
-SUBM = $(UTILS_SUB_OBJ) $(MATH_VECTOR_SUB_OBJ)
-MODS = $(UTILS_MOD_OBJ) $(MATH_VECTOR_MOD_OBJ)
+SUBM = $(UTILS_SUB_OBJ) $(VECTOR_SUB_OBJ) $(MATH_VECTOR_SUB_OBJ)
+MODS = $(UTILS_MOD_OBJ) $(VECTOR_MOD_OBJ) $(MATH_VECTOR_MOD_OBJ)
 TESTS = $(TEST_MATH_VECTOR_EXE)
