@@ -38,5 +38,6 @@ FC_OPT = -std=f2018 -ffree-form -fall-intrinsics -g -fbacktrace\
          -Wcharacter-truncation -Wampersand -Waliasing -Wpedantic\
          -Werror #-Wuse-without-only
 
+# FC_OPT = -std=f2018 -ffree-form -O2 -ftree-vectorize -fopt-info-vec
 # libraries
 LIB =
