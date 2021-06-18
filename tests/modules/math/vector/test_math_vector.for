@@ -28,21 +28,20 @@ module neighlists
     implicit none
     public
     contains
-        elemental subroutine in_range (d, m)
+        elemental subroutine in_range (d, m, n)
             ! Synopsis:
-            ! Sets mask .true. for "in range" particles, .false. otherwise.
-            ! NOTE: A lower limit is placed to exclude the particle itself.
+            ! Sets boolean n[eighbor] equal to .true. for neighbors,
+            ! .false. otherwise. The m[ask] excludes the particle itself.
 
-            real(kind = real64), intent(in) :: d        ! distance
-            logical(kind = int32), intent(inout) :: m   ! mask
+            integer(kind = int32), intent(in) :: d
+            logical(kind = int32), intent(in) :: m
+            logical(kind = int32), intent(inout) :: n
 
-
-            if (d < 0.25_real64 .and. d > 1.0e-6_real64) then
-                m = .true.
+            if (m .and. d == 0) then
+                n = .true.
             else
-                m = .false.
+                n = .false.
             end if
-
 
             return
         end subroutine
@@ -61,6 +60,7 @@ program test_math_vector_class
     type(math_vector_t), pointer :: vector => null()
 
 
+    real(kind = real64), parameter :: cutoff2 = 0.25_real64
     real(kind = real64), allocatable :: d(:)
 
 
@@ -69,6 +69,7 @@ program test_math_vector_class
     integer(kind = int64), parameter :: n = 65536_int64
     integer(kind = int32), parameter :: n_int32 = 65536_int32
     logical(kind = int32), allocatable :: mask(:)
+    logical(kind = int32), allocatable :: neig(:)
     integer(kind = int32) :: mstat
     integer(kind = int32) :: j
 
@@ -145,8 +146,10 @@ program test_math_vector_class
     allocate (idx(n), stat = mstat)
     if (mstat /= 0) error stop "allocation failure"
 
-
     allocate (mask(n), stat = mstat)
+    if (mstat /= 0) error stop "allocation failure"
+
+    allocate (neig(n), stat = mstat)
     if (mstat /= 0) error stop "allocation failure"
 
 
@@ -159,14 +162,16 @@ program test_math_vector_class
 
     call vector % delta2 (n, idx)       ! vector squared distance
 
-    mask = .false.
-    call in_range(vector % v, mask)
+    mask     = .true.
+    mask (n) = .false.  ! excludes the particle itself via mask
+    neig     = .false.
+    call in_range( floor(vector % v / cutoff2, kind = int32), mask, neig)
 
 
     j = 1
     do i = 1, n
         ! builds the neighbor-list for the nth particle
-        if ( mask(i) ) call neighbors % push_back (j)
+        if ( neig(i) ) call neighbors % push_back (j)
         j = j + 1
     end do
 
