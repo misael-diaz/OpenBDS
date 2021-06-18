@@ -67,6 +67,39 @@ submodule (math_vector_class) math_vector_class_implementations
         end subroutine
 
 
+        module function range_method (self, i, j) result(d)
+            class(vector_t), intent(in) :: self
+            integer(kind = int64), intent(in) :: i
+            integer(kind = int64), intent(in) :: j
+            real(kind = real64) :: d
+
+            call distance (self, i, j, d)
+
+            return
+        end function
+
+
+        module subroutine distance (v, i, j, d)
+            type(vector_t), intent(in) :: v
+            integer(kind = int64), intent(in) :: i
+            integer(kind = int64), intent(in) :: j
+            real(kind = real64), intent(out) :: d
+            real(kind = real64) :: t
+
+            associate ( x => v % x(i), y => v % y(i), z => v % z(i), &
+                     &  p => v % x(j), q => v % y(j), r => v % z(j) )
+
+
+                t = (p - x)**2 + (q - y)**2 + (r - z)**2
+                d = dsqrt(t)
+
+
+            end associate
+
+            return
+        end subroutine
+
+
         module subroutine normalize_method (self)
             class(vector_t), intent(inout) :: self
 

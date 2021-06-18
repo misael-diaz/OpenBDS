@@ -52,6 +52,7 @@ module math_vector_class
         real(kind = real64), allocatable :: v(:)        ! magnitude
         contains
             private
+            procedure, public :: range => range_method
             procedure, public :: normalize => normalize_method
             final :: finalizer
     end type
@@ -103,6 +104,22 @@ module math_vector_class
 
         module subroutine vector_guard_singular (vector)
             type(vector_t), intent(in) :: vector
+        end subroutine
+
+
+        module function range_method (self, i, j) result(d)
+            class(vector_t), intent(in) :: self
+            integer(kind = int64), intent(in) :: i
+            integer(kind = int64), intent(in) :: j
+            real(kind = real64) :: d
+        end function
+
+
+        module subroutine distance (v, i, j, d)
+            type(vector_t), intent(in) :: v
+            integer(kind = int64), intent(in) :: i
+            integer(kind = int64), intent(in) :: j
+            real(kind = real64), intent(out) :: d
         end subroutine
 
 
