@@ -164,3 +164,43 @@ module math_vector_class
 
 
 end module
+
+
+
+
+! Comments:
+!
+! Coord(inate) type
+!   type, public :: coord_t
+!       real(kind = real64) :: x = 0.0_real64
+!       real(kind = real64) :: y = 0.0_real64
+!       real(kind = real64) :: z = 0.0_real64
+!       real(kind = real64) :: v = 0.0_real64
+!   end type
+!
+! Have been considering introducing this type however I am still
+! reluctant to do so. If one were to use this type say to compute the
+! difference of two vectors, one would have to copy the corresponding
+! elements to initialize two :[coord_t]: objects. If one were dealing
+! with small data sets one might not worry (too much) but that's not
+! the case. The alternative (which is what's going to be implemented)
+! is to address the elements of the vector and store the distance in
+! a scalar, which might be reused as much as possible. In terms of
+! memory usage this one is preferable.
+!
+! Why not vectorize the code that computes the difference of two vectors?
+! Well, it could be done. However the difference of two vectors is most
+! useful when building the neighbor-lists. One can find ways to write
+! the code so that the compiler vectorizes the operation but bear in mind
+! that you can only push one value at a time to the neighbor-list. Note
+! that the neighbor-list is implemented as a dynamic vector which grows
+! as needed, and that property might hinder vectorization. I am not an
+! expert on vectorization but my intuition tells me that the compiler
+! might not vectorize without suitable compiler directives. Personally,
+! I prefer not to use compiler directives at all since these are bound to
+! be compiler dependent and besides users might prefer a compiler other
+! than the one I might choose. Ideally, writing code that performs
+! similarly independent of the compiler might be something worth aiming
+! for.
+!
+! Anyone interested in optimizing the code on this respect is welcomed.
