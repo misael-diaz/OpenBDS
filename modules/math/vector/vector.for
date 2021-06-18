@@ -52,8 +52,12 @@ module math_vector_class
         real(kind = real64), allocatable :: v(:)        ! magnitude
         contains
             private
+            procedure :: delta_forall_method
+            procedure :: delta_for_indexed_method
             procedure, public :: range => range_method
             procedure, public :: normalize => normalize_method
+            generic, public :: delta => delta_forall_method, &
+                                      & delta_for_indexed_method
             final :: finalizer
     end type
 
@@ -92,6 +96,11 @@ module math_vector_class
         end subroutine
 
 
+        module elemental subroutine initialize (value)
+            real(kind = real64), intent(out) :: value
+        end subroutine
+
+
         module subroutine normalize_method (self)
             class(vector_t), intent(inout) :: self
         end subroutine
@@ -105,6 +114,19 @@ module math_vector_class
         module subroutine vector_guard_singular (vector)
             type(vector_t), intent(in) :: vector
         end subroutine
+
+
+        module subroutine delta_forall_method (self, i)
+            class(vector_t), intent(inout) :: self
+            integer(kind = int64), intent(in) :: i
+        end subroutine
+
+        module subroutine delta_for_indexed_method (self, i, idx)
+            class(vector_t), intent(inout) :: self
+            integer(kind = int64), intent(in) :: i
+            integer(kind = int64), intent(in) :: idx(:)
+        end subroutine
+
 
 
         module function range_method (self, i, j) result(d)
