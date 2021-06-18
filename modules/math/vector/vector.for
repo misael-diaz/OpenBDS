@@ -24,24 +24,100 @@
 !
 
 module math_vector_class
-    use, intrinsic :: iso_fortran_env, only: real64
-    use utils, only: allocator   => util_allocate_array_real64_by_size
-    use utils, only: deallocator => util_deallocate_array_real64
+    use, intrinsic :: iso_fortran_env, only: int32, int64, real64
+    use utils, only: util_allocate_array_real64_by_size
+    use utils, only: util_deallocate_array_real64
     implicit none
+    real(kind = real64), parameter :: vector_eps_mod = 1.0e-12_real64
     private
+    save
+
+
+    type :: size_t
+        integer(kind = int64) :: n = 0_int64
+    end type
 
 
     type, public :: vector_t
+        type(size_t), allocatable :: size 
         real(kind = real64), allocatable :: x(:)
         real(kind = real64), allocatable :: y(:)
         real(kind = real64), allocatable :: z(:)
+        real(kind = real64), allocatable :: v(:)        ! magnitude
         contains
             private
+            procedure, public :: normalize => normalize_method
             final :: finalizer
     end type
 
 
+    interface vector_t
+        module procedure constructor
+    end interface
+
+
+    interface allocator
+        module procedure allocate_size_t
+        module procedure util_allocate_array_real64_by_size
+    end interface
+
+
+    interface deallocator
+        module procedure deallocate_size_t
+        module procedure util_deallocate_array_real64
+    end interface
+
+
     interface
+
+
+        module function constructor (n) result(vector)
+            type(vector_t) :: vector
+            integer(kind = int64), intent(in) :: n
+        end function
+
+
+        module subroutine initializer (vector, n)
+            type(vector_t), intent(inout) :: vector
+            integer(kind = int64), intent(in) :: n
+        end subroutine
+
+
+        module subroutine normalize_method (self)
+            class(vector_t), intent(inout) :: self
+        end subroutine
+
+
+        module subroutine normalizer (vector)
+            type(vector_t), intent(inout) :: vector
+        end subroutine
+
+
+        module subroutine guard_singular (vector)
+            type(vector_t), intent(in) :: vector
+        end subroutine
+
+
+        module elemental subroutine normalize (x, y, z, t, v)
+            real(kind = real64), intent(inout) :: x
+            real(kind = real64), intent(inout) :: y
+            real(kind = real64), intent(inout) :: z
+            real(kind = real64), intent(inout) :: t
+            real(kind = real64), intent(in)    :: v
+        end subroutine
+
+
+        module subroutine moduli (vector)
+            type(vector_t), intent(inout) :: vector
+        end subroutine
+
+
+        module elemental subroutine modulus (x, y, z, v)
+            real(kind = real64), intent(in)    :: x
+            real(kind = real64), intent(in)    :: y
+            real(kind = real64), intent(in)    :: z
+            real(kind = real64), intent(inout) :: v
+        end subroutine
 
 
         module subroutine finalizer (vector)
@@ -49,6 +125,15 @@ module math_vector_class
             type(vector_t), intent(inout) :: vector
         end subroutine
 
+
+        module subroutine allocate_size_t (s)
+            type(size_t), intent(inout), allocatable :: s
+        end subroutine
+
+
+        module subroutine deallocate_size_t (s)
+            type(size_t), intent(inout), allocatable :: s
+        end subroutine
 
 
         module subroutine destructor (vector)
