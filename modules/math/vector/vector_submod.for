@@ -54,14 +54,53 @@ submodule (math_vector_class) math_vector_class_implementations
                      & size => vector % size % n, &
                      & init => vector % stat % init)
 
-                x    = 0.0_real64
-                y    = 0.0_real64
-                z    = 0.0_real64
-                v    = 0.0_real64
                 size = n
                 init = .true.
+                call initialize (x)
+                call initialize (y)
+                call initialize (z)
+                call initialize (v)
 
             end associate
+
+            return
+        end subroutine
+
+
+        module elemental subroutine initialize (value)
+            real(kind = real64), intent(out) :: value
+            value = 0.0_real64
+            return
+        end subroutine
+
+
+        module subroutine delta_forall_method (self, i)
+            ! Synopsis:
+            ! Obtains the distance of the ith vector v[i] relative to v[:].
+            class(vector_t), intent(inout) :: self
+            integer(kind = int64), intent(in) :: i
+
+            self % v(:) = ( self % x(i) - self % x(:) )**2 + &
+                        & ( self % y(i) - self % y(:) )**2 + &
+                        & ( self % z(i) - self % z(:) )**2
+
+            return
+        end subroutine
+
+
+        module subroutine delta_for_indexed_method (self, i, idx)
+            ! Synopsis:
+            ! Obtains the distance of the ith vector v[i] relative to v[*].
+            class(vector_t), intent(inout) :: self
+            integer(kind = int64), intent(in) :: i
+            integer(kind = int64), intent(in) :: idx(:)
+
+
+            self % v(1 : size(idx, kind=int64)) = &
+                & ( self % x(i) - self % x(idx(:)) )**2 + &
+                & ( self % y(i) - self % y(idx(:)) )**2 + &
+                & ( self % z(i) - self % z(idx(:)) )**2
+
 
             return
         end subroutine
@@ -119,7 +158,7 @@ submodule (math_vector_class) math_vector_class_implementations
             call vector_guard_singular (vector)
  
 
-            t = 0.0_real64
+            call initialize (t)
             associate(x => vector % x, y => vector % y, &
                     & z => vector % z, v => vector % v)
 
@@ -169,7 +208,7 @@ submodule (math_vector_class) math_vector_class_implementations
             real(kind = real64) :: t(vector % size % n)
 
 
-            t = 0.0_real64
+            call initialize (t)
             associate(x => vector % x, y => vector % y, &
                     & z => vector % z, v => vector % v)
                
@@ -329,3 +368,14 @@ end submodule
 ! component is allocated. At this point any component could do to
 ! achieve this however, having a state/status component might be useful
 ! later. This is the reason for defining it.
+!
+!
+! subroutine delta_for_indexed_method (self, i, idx):
+! Intel Fortran Compiler vectorizes loop though I did not check if it
+! only vectorizes a versioned loop assuming unit stride (see SIMD
+! directive section):
+!
+! (software.intel.com/content/www/us/en/develop/articles/
+!  explicit-vector-programming-in-fortran.html)
+!
+! The GNU Fortran Compiler 10 did not vectorize the loop.
