@@ -23,12 +23,41 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+module neighlists
+    use, intrinsic :: iso_fortran_env, only: int32, real64
+    implicit none
+    public
+    contains
+        elemental subroutine in_range (d, m)
+            ! Synopsis:
+            ! Sets mask .true. for "in range" particles, .false. otherwise.
+            ! NOTE: A lower limit is placed to exclude the particle itself.
+
+            real(kind = real64), intent(in) :: d        ! distance
+            logical(kind = int32), intent(inout) :: m   ! mask
+
+
+            if (d < 0.25_real64 .and. d > 1.0e-6_real64) then
+                m = .true.
+            else
+                m = .false.
+            end if
+
+
+            return
+        end subroutine
+end module
+
+
 program test_math_vector_class
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
+    use vectors, only: vector_t
+    use neighlists, only: in_range
     use math_vector_class, only: math_vector_t => vector_t
     implicit none
 
 
+    type(vector_t), pointer :: neighbors => null()
     type(math_vector_t), pointer :: vector => null()
 
 
@@ -38,16 +67,23 @@ program test_math_vector_class
     integer(kind = int64) :: i
     integer(kind = int64), allocatable :: idx(:)
     integer(kind = int64), parameter :: n = 65536_int64
+    integer(kind = int32), parameter :: n_int32 = 65536_int32
+    logical(kind = int32), allocatable :: mask(:)
     integer(kind = int32) :: mstat
+    integer(kind = int32) :: j
 
 
 
+    allocate(neighbors, stat = mstat)
+    if (mstat /= 0) error stop "allocation failure"
 
     allocate(vector, stat = mstat)
     if (mstat /= 0) error stop "allocation failure"
 
 
-    vector = math_vector_t (n)  ! instantiation
+    ! instantiations
+    neighbors = vector_t ()
+    vector    = math_vector_t (n)
 
 
     do i = 1, n
@@ -93,7 +129,7 @@ program test_math_vector_class
 
 
 
-    call vector % delta2(n)      ! vector squared distance
+    call vector % delta2 (n)    ! vector squared distance
 
 
     print *, ""
@@ -110,18 +146,49 @@ program test_math_vector_class
     if (mstat /= 0) error stop "allocation failure"
 
 
+    allocate (mask(n), stat = mstat)
+    if (mstat /= 0) error stop "allocation failure"
+
+
     do i = 1, n
         idx(i) = i
     end do
 
 
-    call vector % delta2(n, idx)      ! vector squared distance
+
+
+    call vector % delta2 (n, idx)       ! vector squared distance
+
+    mask = .false.
+    call in_range(vector % v, mask)
+
+
+    j = 1
+    do i = 1, n
+        ! builds the neighbor-list for the nth particle
+        if ( mask(i) ) call neighbors % push_back (j)
+        j = j + 1
+    end do
 
 
     print *, ""
     print *, ""
     print *, "distance::min: ", dsqrt( minval(vector % v) )
     print *, "distance::max: ", dsqrt( maxval(vector % v) )
+    print *, "vector::neighbors: ", neighbors % size ()
+    print *, "findloc: ", neighbors % findloc (n_int32)
+
+
+    ! checks if the particle has included itself in the neighbor-list
+    if (neighbors % findloc (n_int32) /= 0) then
+        print *, "fail"
+    else
+        print *, "pass"
+    end if
+
+
+    print *, ""
+    print *, ""
     print *, ""
     print *, ""
 
@@ -134,9 +201,14 @@ program test_math_vector_class
     deallocate (idx, stat = mstat)
     if (mstat /= 0) error stop "unexpected deallocation failure"
 
+    deallocate (mask, stat = mstat)
+    if (mstat /= 0) error stop "unexpected deallocation failure"
+
     deallocate (vector, stat = mstat)
     if (mstat /= 0) error stop "unexpected deallocation failure"
 
+    deallocate (neighbors, stat = mstat)
+    if (mstat /= 0) error stop "unexpected deallocation failure"
 
     print *, ""
     print *, ""
