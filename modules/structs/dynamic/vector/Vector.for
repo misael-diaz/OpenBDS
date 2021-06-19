@@ -38,7 +38,8 @@ module vectors
 
 
     type :: data_t
-        integer(kind = int32), allocatable :: values(:)
+        integer(kind = int32), allocatable :: values_int32_t(:)
+        integer(kind = int64), allocatable :: values_int64_t(:)
     end type
 
 
