@@ -23,12 +23,7 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-submodule (vectors) vectors_implementation
-    use, intrinsic :: iso_fortran_env, only: int32, int64
-!   use utils, only: allocator   => util_allocate_array
-!   use utils, only: reallocator => util_reallocate_array
-!   use utils, only: deallocator => util_deallocate_array
-    implicit none
+submodule (vectors) vectors_int32_t_implementation
     contains
 
 
@@ -70,8 +65,8 @@ submodule (vectors) vectors_implementation
             lb = vector % begin % idx
             ub = vector % avail % idx
             ub = ub - 1_int64
-            idx = findloc (array = vector % array % values (lb:ub), &
-                         & value = value, dim = 1, kind = int64)
+            idx = findloc(array = vector % array % values_int32_t(lb:ub), &
+                        & value = value, dim = 1, kind = int64)
 
             return
         end subroutine
@@ -82,7 +77,7 @@ submodule (vectors) vectors_implementation
             class(vector_t), intent(in) :: self
             integer(kind = int64), intent(in) :: idx
             integer(kind = int32) :: value
-            value = self % array % values(idx)
+            value = self % array % values_int32_t(idx)
             return
         end function
 
@@ -134,7 +129,7 @@ submodule (vectors) vectors_implementation
             end if
 
             associate(avail => vector % avail % idx)
-                vector % array % values(avail) = value
+                vector % array % values_int32_t(avail) = value
                 avail = avail + 1_int64
             end associate
 
@@ -157,7 +152,7 @@ submodule (vectors) vectors_implementation
             bounds(1) = ub
             call allocator (bounds, values)
             ! copies existing values into placeholder
-            values(lb:ub) = vector % array % values(lb:ub)
+            values(lb:ub) = vector % array % values_int32_t(lb:ub)
 
 
             vector % limit % idx = 2_int64 * vector % limit % idx
@@ -165,10 +160,10 @@ submodule (vectors) vectors_implementation
 
 !           bounds(0) = vector % begin % idx
             bounds(1) = vector % limit % idx
-            call reallocator (bounds, vector % array % values)
+            call reallocator (bounds, vector % array % values_int32_t)
             ! copies values in placeholder into (reallocated) vector
-            vector % array % values = 0
-            vector % array % values(lb:ub) = values(lb:ub)
+            vector % array % values_int32_t = 0
+            vector % array % values_int32_t(lb:ub) = values(lb:ub)
 
 
             call deallocator (values)
@@ -197,12 +192,12 @@ submodule (vectors) vectors_implementation
 
             bounds(0) = lb
             bounds(1) = ub
-            call allocator (bounds, vector % array % values)
+            call allocator (bounds, vector % array % values_int32_t)
 
 
             idx = vector % avail % idx
-            vector % array % values = 0
-            vector % array % values(idx) = value
+            vector % array % values_int32_t = 0
+            vector % array % values_int32_t(idx) = value
 
 
 !           vector % begin % idx  = 0_int64
@@ -218,8 +213,8 @@ submodule (vectors) vectors_implementation
         module subroutine finalizer (vector)
             type(vector_t), intent(inout) :: vector
 
-            if ( allocated(vector % array % values) ) then
-                call deallocator (vector % array % values)
+            if ( allocated(vector % array % values_int32_t) ) then
+                call deallocator (vector % array % values_int32_t)
             end if
 
             return
