@@ -5,7 +5,7 @@
 !
 !
 !   Synopsis:
-!   Implements the vector class.
+!   Implements a (minimalistic) vector class.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
@@ -31,13 +31,43 @@ submodule (vectors) vectors_int32_t_implementation
             ! Synopsis: Returns an empty vector
             type(vector_t):: vector
 
+!           print *, "instantiating vector ... "
+            call instantiate (vector)
+
+            return
+        end function
+
+
+        module subroutine allocate_vector_t (v)
+            ! Synopsis: Allocates memory for the vector components.
+            type(vector_t), intent(inout) :: v
+
+!           print *, "allocating vector components ... "
+
+            call allocator (v % begin)
+            call allocator (v % avail)
+            call allocator (v % limit)
+            call allocator (v % array)
+            call allocator (v % state)
+
+            return
+        end subroutine
+
+
+        module subroutine instantiate (vector)
+            type(vector_t), intent(inout) :: vector
+
+            call allocator (vector)
+
+!           print *, "instantiating vector components ... "
+
             vector % begin % idx  = 0_int64
             vector % avail % idx  = 0_int64
             vector % limit % idx  = 0_int64
             vector % state % init = .false.
 
             return
-        end function
+        end subroutine
 
 
         module function findloc_method (self, value) result(idx)
@@ -45,11 +75,8 @@ submodule (vectors) vectors_int32_t_implementation
             integer(kind = int64) :: idx
             integer(kind = int32), intent(in) :: value
 
-            if (.not. self % state % init) then
-                idx = 0_int64
-            else
-                call findloc_wrapper (self, value, idx)
-            end if
+            call is_empty (self)
+            call findloc_wrapper (self, value, idx)
 
             return
         end function
@@ -77,7 +104,12 @@ submodule (vectors) vectors_int32_t_implementation
             class(vector_t), intent(in) :: self
             integer(kind = int64), intent(in) :: idx
             integer(kind = int32) :: value
-            value = self % array % values_int32_t(idx)
+
+            call is_empty (self)
+            call check_bounds (self, idx)
+
+            value = self % array % values_int32_t (idx)
+
             return
         end function
 
@@ -87,10 +119,16 @@ submodule (vectors) vectors_int32_t_implementation
             class(vector_t), intent(in) :: self
             integer(kind = int64) :: vector_size
 
-            associate (begin => self % begin % idx, &
-                     & end   => self % avail % idx)
-                vector_size = end - begin
-            end associate
+            if ( .not. allocated(self % state) ) then
+                vector_size = 0_int64
+            else
+
+                associate (begin => self % begin % idx, &
+                         & end   => self % avail % idx)
+                    vector_size = end - begin
+                end associate
+
+            end if
 
             return
         end function
@@ -99,6 +137,9 @@ submodule (vectors) vectors_int32_t_implementation
         module subroutine clear_method (self)
             ! Synopsis: Clears the vector elements.
             class(vector_t), intent(inout) :: self
+
+            call is_instantiated (self)
+
             self % avail % idx = 0_int64
             return
         end subroutine
@@ -109,7 +150,11 @@ submodule (vectors) vectors_int32_t_implementation
             class(vector_t), intent(inout) :: self
             integer(kind = int32), intent(in) :: value
 
-            if (self % state % init) then
+
+            call is_instantiated (self)
+
+
+            if ( self % state % init ) then
                 call insert_back (self, value)
             else
                 call initializer (self, value)
@@ -210,21 +255,193 @@ submodule (vectors) vectors_int32_t_implementation
         end subroutine
 
 
-        module subroutine finalizer (vector)
-            type(vector_t), intent(inout) :: vector
+        module subroutine allocate_iter_t (i)
+            type(iter_t), intent(inout), allocatable :: i
+            integer(kind = int32) :: mstat
 
-            if ( allocated(vector % array % values_int32_t) ) then
-                call deallocator (vector % array % values_int32_t)
+            mstat = 0
+            if ( .not. allocated(i) ) then
+                allocate (i, stat = mstat)
+!               print *, "vector.iter has been allocated"
+            end if
+
+            if (mstat /= 0) then
+                error stop "vector.allocate_iter_t: allocation failure"
             end if
 
             return
         end subroutine
+
+
+        module subroutine allocate_data_t (d)
+            type(data_t), intent(inout), allocatable :: d
+            integer(kind = int32) :: mstat
+
+            mstat = 0
+            if ( .not. allocated(d) ) then
+                allocate (d, stat = mstat)
+!               print *, "vector.data has been allocated"
+            end if
+
+            if (mstat /= 0) then
+                error stop "vector.allocate_data_t: allocation failure"
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine allocate_stat_t (s)
+            type(stat_t), intent(inout), allocatable :: s
+            integer(kind = int32) :: mstat
+
+            mstat = 0
+            if ( .not. allocated(s) ) then
+                allocate (s, stat = mstat)
+!               print *, "vector.stat has been allocated"
+            end if
+
+            if (mstat /= 0) then
+                error stop "vector.allocate_stat_t: allocation failure"
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine deallocate_iter_t (i)
+            type(iter_t), intent(inout), allocatable :: i
+            integer(kind = int32) :: mstat
+
+            mstat = 0
+            if ( allocated(i) ) then
+                deallocate (i, stat = mstat)
+            end if
+
+            if (mstat /= 0) then
+                error stop "dynamic::vector.deallocate_iter: "// &
+                    & "deallocation failure"
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine deallocate_data_t (d)
+            type(data_t), intent(inout), allocatable :: d
+            integer(kind = int32) :: mstat
+
+            mstat = 0
+            if ( allocated(d) ) then
+                deallocate (d, stat = mstat)
+            end if
+
+            if (mstat /= 0) then
+                error stop "dynamic::vector.deallocate_data: "// &
+                    & "deallocation failure"
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine deallocate_stat_t (s)
+            type(stat_t), intent(inout), allocatable :: s
+            integer(kind = int32) :: mstat
+
+            mstat = 0
+            if ( allocated(s) ) then
+                deallocate (s, stat = mstat)
+            end if
+
+            if (mstat /= 0) then
+                error stop "dynamic::vector.deallocate_stat: "// &
+                    & "deallocation failure"
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine is_empty (vector)
+            type(vector_t), intent(in) :: vector
+
+            if ( .not. allocated(vector % state) ) then
+                error stop "dynamic::vector.is_empty: empty vector"
+            else if ( .not. vector % state % init ) then
+                error stop "dynamic::vector.is_empty: empty vector"
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine is_instantiated (vector)
+            type(vector_t), intent(inout) :: vector
+
+            if ( .not. allocated(vector % state) ) then
+                call instantiate (vector)
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine check_bounds (vector, idx)
+            type(vector_t), intent(in) :: vector
+            integer(kind = int64), intent(in) :: idx
+
+            if ( idx < vector % begin % idx ) then
+                error stop "dynamic::vector.[i]: i < lbound"
+            else if ( idx >= vector % avail % idx ) then
+                error stop "dynamic::vector.[i]: i > ubound"
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine finalizer (vector)
+            type(vector_t), intent(inout) :: vector
+
+!           print *, "destroying dynamic vector components ... "
+
+            call deallocator (vector % begin)
+            call deallocator (vector % avail)
+            call deallocator (vector % limit)
+            call deallocator (vector % array)
+            call deallocator (vector % state)
+
+            return
+        end subroutine
+
+
 end submodule
 
 
 ! References:
 ! SJ Chapman, FORTRAN for Scientists and Engineers, fourth edition
 ! A Koenig and B Moo, Accelerated C++ Practical Programming by Example
+
+
+! The vector class presented by Koening and Moo inspired me to write my
+! own in fortran. I borrowed some of their ideas to implement it.
+
+
+! TODO:
+! [x] GUARD against indexing beyond the bounds of the vector
+! [x] CHECK procedures that attempt to use the vector (allocatable)
+!     components. Instantiating the vector might suffice to fix some.
+! [x] CHECK procedures that rely on the status value to make decisions.
+!     Note that the status component is now an allocatable, so that it
+!     is unsafe to check for its value since it could be unallocated.
+!     A possible solution is to check for the allocation status first,
+!     then check for the value.
+! [ ] GUARD against using the vector to store integers of different types.
+!     If the user inserts a 32-bit integer it won't be able to insert
+!     a 64-bit integer unless the vector contents are cleared. A possible
+!     implementation is to check the allocation status of its counterpart
+!     upon calls to the push-back method.
 
 
 ! Comments:
