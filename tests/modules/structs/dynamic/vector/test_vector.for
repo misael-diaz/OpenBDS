@@ -43,6 +43,13 @@ program test_vector_class
     allocate(vector, stat = alloc_stat)
     if (alloc_stat /= 0) error stop "allocation failure"
 
+
+!!  Tests:
+!!  print *, vector % findloc (0)    ! complains that vector is empty
+!!  print *, vector % size ()        ! returns zero, vector is empty
+!!  call vector % clear ()           ! instantiates vector
+!!  print *, vector < 0_int64!>      ! complains that vector is empty
+
     ! instantiations
     vector = vector_t()
     stopwatch = chronom()
@@ -124,19 +131,19 @@ program test_vector_class
         i = i + 1_int64
     end do
 
-
+!!  Tests: out-of-bounds checks
+!!  print *, vector < -1_int64 !>
+!!  print *, vector < int(huge(0), kind = int64) !>
     print *, ""
     print *, ""
     print *, ""
     print *, ""
 
 
-    write (*, '(1X,A)', advance='no') 'freeing memory buffers ... '
+    print *, "freeing memory buffers ... "
 
     deallocate(vector)
     
-    print *, "done"
-
 
     print *, ""
     print *, ""
