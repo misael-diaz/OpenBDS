@@ -32,28 +32,39 @@ module utils
     interface util_allocate_array
         module procedure util_allocate_array_int32_by_size
         module procedure util_allocate_array_int64_by_size
-        module procedure util_allocate_array_by_bounds
+        module procedure util_allocate_array_int32_by_bounds
+        module procedure util_allocate_array_int64_by_bounds
     end interface
 
 
     interface util_reallocate_array
-        module procedure util_reallocate_array_by_size
-        module procedure util_reallocate_array_by_bounds
+        module procedure util_reallocate_array_int32_by_size
+        module procedure util_reallocate_array_int64_by_size
+        module procedure util_reallocate_array_int32_by_bounds
+        module procedure util_reallocate_array_int64_by_bounds
     end interface
 
 
     interface util_deallocate_array
         module procedure util_deallocate_array_int32
         module procedure util_deallocate_array_int64
+        module procedure util_deallocate_array_real64
     end interface
 
 
     interface
 
 
-        module subroutine util_allocate_array_by_bounds (bounds, values)
+        module subroutine util_allocate_array_int32_by_bounds (bounds, values)
             integer(kind = int64), intent(in) :: bounds(0:1)
             integer(kind = int32), intent(inout), allocatable :: values(:)
+        end subroutine
+
+
+        module subroutine util_allocate_array_int64_by_bounds &
+                        & (bounds, values)
+            integer(kind = int64), intent(in) :: bounds(0:1)
+            integer(kind = int64), intent(inout), allocatable :: values(:)
         end subroutine
 
 
@@ -75,15 +86,29 @@ module utils
         end subroutine
 
 
-        module subroutine util_reallocate_array_by_bounds (bounds, values)
+        module subroutine util_reallocate_array_int32_by_bounds &
+                        & (bounds, values)
             integer(kind = int64), intent(in) :: bounds(0:1)
             integer(kind = int32), intent(inout), allocatable :: values(:)
         end subroutine
 
 
-        module subroutine util_reallocate_array_by_size (n, values)
+        module subroutine util_reallocate_array_int64_by_bounds &
+                        & (bounds, values)
+            integer(kind = int64), intent(in) :: bounds(0:1)
+            integer(kind = int64), intent(inout), allocatable :: values(:)
+        end subroutine
+
+
+        module subroutine util_reallocate_array_int32_by_size (n, values)
             integer(kind = int64), intent(in) :: n
             integer(kind = int32), intent(inout), allocatable :: values(:)
+        end subroutine
+
+
+        module subroutine util_reallocate_array_int64_by_size (n, values)
+            integer(kind = int64), intent(in) :: n
+            integer(kind = int64), intent(inout), allocatable :: values(:)
         end subroutine
 
 
