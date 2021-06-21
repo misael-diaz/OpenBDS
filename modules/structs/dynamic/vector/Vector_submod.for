@@ -155,6 +155,7 @@ submodule (vectors) vectors_int32_t_implementation
 
 
             if ( self % state % init ) then
+                call check_kind  (self, value)
                 call insert_back (self, value)
             else
                 call initializer (self, value)
@@ -249,10 +250,11 @@ submodule (vectors) vectors_int32_t_implementation
             vector % avail % idx  = 1_int64
             vector % limit % idx  = 8_int64
             vector % state % init = .true.
+            vector % state % kind = int32
 
 
             return
-        end subroutine
+        end subroutine create
 
 
         module subroutine allocate_iter_t (i)
@@ -399,6 +401,80 @@ submodule (vectors) vectors_int32_t_implementation
 
             return
         end subroutine
+
+
+        module subroutine check_kind_int32 (vector, value)
+            type(vector_t), intent(in) :: vector
+            integer(kind = int32), intent(in) :: value
+            character(len = 64) :: value_str
+            character(len = 64) :: values_kind_str
+            character(len = 64) :: vector_kind_str
+
+
+            value_str       = to_string (value)
+            values_kind_str = to_string (int32)
+            vector_kind_str = to_string (vector % state % kind)
+
+
+            if ( vector % state % kind /= int32 ) then
+                error stop "dynamic::vector.check_kind: " // &
+                    & "vector is a Container of integers of Kind " // &
+                    & trim(vector_kind_str) // " but given value [" // &
+                    & trim(value_str) // "] is of Kind " // &
+                    & trim(values_kind_str)
+            end if
+
+
+            return
+        end subroutine check_kind_int32
+
+
+        module subroutine check_kind_int64 (vector, value)
+            type(vector_t), intent(in) :: vector
+            integer(kind = int64), intent(in) :: value
+            character(len = 64) :: value_str
+            character(len = 64) :: values_kind_str
+            character(len = 64) :: vector_kind_str
+
+
+            value_str       = to_string (value)
+            values_kind_str = to_string (int64)
+            vector_kind_str = to_string (vector % state % kind)
+
+
+            if ( vector % state % kind /= int64 ) then
+                error stop "dynamic::vector.check_kind: " // &
+                    & "vector is a Container of integers of Kind " // &
+                    & trim(vector_kind_str) // " but given value [" // &
+                    & trim(value_str) // "] is of Kind " // &
+                    & trim(values_kind_str)
+            end if
+
+
+            return
+        end subroutine check_kind_int64
+
+
+        module function to_string_int32 (i) result(str)
+            integer(kind = int32), intent(in) :: i
+            character(len = 64) :: str
+
+            write (str, '(I16)') i
+            str = adjustl (str)
+
+            return
+        end function
+
+
+        module function to_string_int64 (i) result(str)
+            integer(kind = int64), intent(in) :: i
+            character(len = 64) :: str
+
+            write (str, '(I32)') i
+            str = adjustl (str)
+
+            return
+        end function
 
 
         module subroutine finalizer (vector)
