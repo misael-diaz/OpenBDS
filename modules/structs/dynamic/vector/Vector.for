@@ -74,7 +74,8 @@ module vectors
 
 
     type :: stat_t
-        logical(kind = int64) :: init = .false.
+        logical(kind = int32) :: init = .false.
+        integer(kind = int32) :: kind = int32
     end type
 
 
@@ -118,6 +119,18 @@ module vectors
         module procedure deallocate_stat_t
         module procedure util_deallocate_array_int32
         module procedure util_deallocate_array_int64
+    end interface
+
+
+    interface check_kind
+        module procedure check_kind_int32
+        module procedure check_kind_int64
+    end interface
+
+
+    interface to_string
+        module procedure to_string_int32
+        module procedure to_string_int64
     end interface
 
 
@@ -247,10 +260,35 @@ module vectors
             type(vector_t), intent(inout) :: vector
         end subroutine
 
+
         module subroutine check_bounds (vector, idx)
             type(vector_t), intent(in) :: vector
             integer(kind = int64), intent(in) :: idx
         end subroutine
+
+
+        module subroutine check_kind_int32 (vector, value)
+            type(vector_t), intent(in) :: vector
+            integer(kind = int32), intent(in) :: value
+        end subroutine
+
+
+        module subroutine check_kind_int64 (vector, value)
+            type(vector_t), intent(in) :: vector
+            integer(kind = int64), intent(in) :: value
+        end subroutine
+
+
+        module function to_string_int32 (i) result(str)
+            integer(kind = int32), intent(in) :: i
+            character(len = 64) :: str
+        end function
+
+
+        module function to_string_int64 (i) result(str)
+            integer(kind = int64), intent(in) :: i
+            character(len = 64) :: str
+        end function
 
 
         module subroutine finalizer (vector)
