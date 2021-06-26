@@ -32,8 +32,7 @@ module idata
 
 
     type, public :: data_t
-        integer(kind = int64), allocatable :: values_int64_t(:)
-        integer(kind = int32), allocatable :: values_int32_t(:)
+        class(*), allocatable :: values(:)
         contains
             private
             final :: finalizer
@@ -42,16 +41,23 @@ module idata
 
     contains
 
+
         subroutine finalizer (data)
             type(data_t), intent(inout) :: data
+            integer(kind = int32) :: mstat
 
 !           print *, "destroying dynamic vector data ... "
 
-            call deallocator (data % values_int64_t)
-            call deallocator (data % values_int32_t)
+            mstat = 0
+            if ( allocated(data % values) ) then
+                deallocate (data % values, stat = mstat)
+            end if
+
+            if (mstat /= 0) error stop "dynamic::vector.data: dealloc err"
 
             return
         end subroutine
+
 
 end module idata
 
@@ -60,7 +66,7 @@ module vectors
     use, intrinsic :: iso_fortran_env, only: int32, int64
     use utils, only: util_allocate_array_int32_by_bounds
     use utils, only: util_allocate_array_int64_by_bounds
-    use utils, only: reallocator => util_reallocate_array
+    use utils, only: util_reallocate_array_int32_by_bounds
     use utils, only: util_deallocate_array_int32
     use utils, only: util_deallocate_array_int64
     use idata, only: data_t
@@ -74,26 +80,25 @@ module vectors
 
 
     type :: stat_t
-        logical(kind = int32) :: init = .false.
-        integer(kind = int32) :: kind = int32
+        logical(kind = int64) :: init = .false.
     end type
 
 
     type, public :: vector_t
         private
+        type(data_t), allocatable :: array
         type(iter_t), allocatable :: begin
         type(iter_t), allocatable :: avail
         type(iter_t), allocatable :: limit
-        type(data_t), allocatable :: array
         type(stat_t), allocatable :: state
         contains
             private
-            procedure :: addressing_method
-            generic, public :: operator (<) => addressing_method
+            procedure, public :: get  => addressing_method
+            procedure, public :: iter => iter_method
             procedure, public :: size => size_method
+            procedure, public :: find => findloc_method
             procedure, public :: clear => clear_method
-            procedure, public :: findloc => findloc_method
-            procedure, public :: push_back => push_back_method
+            procedure, public :: push_back => push_back_polymorphic_method
             final :: finalizer
     end type
 
@@ -108,8 +113,15 @@ module vectors
         module procedure allocate_data_t
         module procedure allocate_stat_t
         module procedure allocate_vector_t
+        module procedure allocate_polymorphic_int32_t
         module procedure util_allocate_array_int32_by_bounds
         module procedure util_allocate_array_int64_by_bounds
+    end interface
+
+
+    interface reallocator
+        module procedure allocate_polymorphic_int32_t
+        module procedure util_reallocate_array_int32_by_bounds
     end interface
 
 
@@ -117,21 +129,21 @@ module vectors
         module procedure deallocate_iter_t
         module procedure deallocate_data_t
         module procedure deallocate_stat_t
+        module procedure deallocate_polymorphic_t
         module procedure util_deallocate_array_int32
         module procedure util_deallocate_array_int64
     end interface
 
 
-    interface check_kind
-        module procedure check_kind_int32
-        module procedure check_kind_int64
+    interface back_inserter
+        module procedure push_back_int32_t
     end interface
 
 
-    interface to_string
-        module procedure to_string_int32
-        module procedure to_string_int64
-    end interface
+!   interface to_string
+!       module procedure to_string_int32
+!       module procedure to_string_int64
+!   end interface
 
 
     interface
@@ -155,6 +167,13 @@ module vectors
         end function
 
 
+        module subroutine iter_method (self, it)
+            class(vector_t), intent(in), target :: self
+            integer(kind = int32), intent(inout), &
+                & pointer, contiguous :: it(:)
+        end subroutine
+
+
         module subroutine findloc_wrapper (vector, value, idx)
             type(vector_t), intent(in) :: vector
             integer(kind = int64), intent(out) :: idx
@@ -162,12 +181,12 @@ module vectors
         end subroutine
 
 
-        module function addressing_method (self, idx) result(value)
+        module subroutine addressing_method (self, idx, value)
             ! Synopsis: Addresses the element pointed to by index.
             class(vector_t), intent(in) :: self
             integer(kind = int64), intent(in) :: idx
-            integer(kind = int32) :: value
-        end function
+            integer(kind = int32), intent(inout) :: value
+        end subroutine
 
 
         module function size_method (self) result(vector_size)
@@ -180,6 +199,18 @@ module vectors
         module subroutine clear_method (self)
             ! Synopsis: Clears the vector elements.
             class(vector_t), intent(inout) :: self
+        end subroutine
+
+
+        module subroutine push_back_polymorphic_method (self, value)
+            class(vector_t), intent(inout) :: self
+            class(*), intent(in) :: value
+        end subroutine
+
+
+        module subroutine push_back_int32_t (vector, value)
+            type(vector_t), intent(inout) :: vector
+            integer(kind = int32), intent(in) :: value
         end subroutine
 
 
@@ -197,9 +228,16 @@ module vectors
         end subroutine
 
 
-        module subroutine grow (vector)
+        module subroutine grow (vector, value)
             ! Synopsis: Doubles the vector size.
-            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(inout), target :: vector
+            integer(kind = int32), intent(in) :: value
+        end subroutine
+
+
+        module elemental subroutine copy (dst, src)
+            integer(kind = int32), intent(inout) :: dst
+            integer(kind = int32), intent(in) :: src
         end subroutine
 
 
@@ -241,6 +279,13 @@ module vectors
         end subroutine
 
 
+        module subroutine allocate_polymorphic_int32_t (b, array, value)
+            integer(kind = int64), intent(in) :: b(0:1)
+            class(*), intent(inout), allocatable :: array(:)
+            integer(kind = int32), intent(in) :: value
+        end subroutine
+
+
         module subroutine deallocate_data_t (d)
             type(data_t), intent(inout), allocatable :: d
         end subroutine
@@ -248,6 +293,12 @@ module vectors
 
         module subroutine deallocate_stat_t (s)
             type(stat_t), intent(inout), allocatable :: s
+        end subroutine
+
+
+        module subroutine deallocate_polymorphic_t (array, value)
+            class(*), intent(inout), allocatable :: array(:)
+            integer(kind = int32), intent(in) :: value
         end subroutine
 
 
@@ -267,28 +318,16 @@ module vectors
         end subroutine
 
 
-        module subroutine check_kind_int32 (vector, value)
-            type(vector_t), intent(in) :: vector
-            integer(kind = int32), intent(in) :: value
-        end subroutine
+!       module function to_string_int32 (i) result(str)
+!           integer(kind = int32), intent(in) :: i
+!           character(len = 64) :: str
+!       end function
 
 
-        module subroutine check_kind_int64 (vector, value)
-            type(vector_t), intent(in) :: vector
-            integer(kind = int64), intent(in) :: value
-        end subroutine
-
-
-        module function to_string_int32 (i) result(str)
-            integer(kind = int32), intent(in) :: i
-            character(len = 64) :: str
-        end function
-
-
-        module function to_string_int64 (i) result(str)
-            integer(kind = int64), intent(in) :: i
-            character(len = 64) :: str
-        end function
+!       module function to_string_int64 (i) result(str)
+!           integer(kind = int64), intent(in) :: i
+!           character(len = 64) :: str
+!       end function
 
 
         module subroutine finalizer (vector)
