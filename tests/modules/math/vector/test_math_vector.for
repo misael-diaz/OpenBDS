@@ -181,11 +181,11 @@ program test_math_vector_class
     print *, "distance::min: ", dsqrt( minval(vector % v) )
     print *, "distance::max: ", dsqrt( maxval(vector % v) )
     print *, "vector::neighbors: ", neighbors % size ()
-    print *, "findloc: ", neighbors % findloc (n_int32)
+    print *, "find: ", neighbors % find (n_int32)
 
 
     ! checks if the particle has included itself in the neighbor-list
-    if (neighbors % findloc (n_int32) /= 0) then
+    if (neighbors % find (n_int32) /= 0) then
         print *, "fail"
     else
         print *, "pass"
