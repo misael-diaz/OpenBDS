@@ -24,7 +24,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 program test_vector_class
-    use, intrinsic :: iso_fortran_env, only: int32, int64
+    use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use chronos, only: chronom
     use vectors, only: vector_t
     implicit none
@@ -32,7 +32,10 @@ program test_vector_class
     type(vector_t), pointer :: vector => null()
     type(chronom) :: stopwatch
     
+    integer(kind = int32), pointer, contiguous :: it(:) => null()
     integer(kind = int64) :: i = 0_int64
+    integer(kind = int64) :: lb
+    integer(kind = int64) :: ub
     integer(kind = int64), parameter :: n = 65536_int64
 !   integer(kind = int64), parameter :: n = 2147483648_int64
 
@@ -45,7 +48,7 @@ program test_vector_class
 
 
 !!  Tests:
-!!  print *, vector % findloc (0)    ! complains that vector is empty
+!!  print *, vector % find (0)       ! complains that vector is empty
 !!  print *, vector % size ()        ! returns zero, vector is empty
 !!  call vector % clear ()           ! instantiates vector
 !!  print *, vector < 0_int64!>      ! complains that vector is empty
@@ -127,7 +130,9 @@ program test_vector_class
     i = 0_int64
     ! tests element addressing
     do while ( i /= vector % size() )
-        print *, vector < i!>    ! returns the value at the ith element
+        ! returns the value at the ith element
+        call vector % get (i, value)
+        print *, value
         i = i + 1_int64
     end do
 
@@ -138,6 +143,26 @@ program test_vector_class
     print *, ""
     print *, ""
     print *, ""
+
+    call vector % iter (it)
+    if ( associated(it) ) then
+
+        lb = lbound(it, dim = 1, kind = int64)
+        ub = ubound(it, dim = 1, kind = int64)
+        do i = lb, ub
+            print *, it(i)
+        end do
+
+    end if
+
+
+    call vector % clear ()
+    call vector % iter (it)
+    if ( .not. associated(it) ) then
+        print *, "pass"
+    else
+        print *, "fail"
+    end if
 
 
     print *, "freeing memory buffers ... "

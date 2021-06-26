@@ -82,36 +82,93 @@ submodule (vectors) vectors_int32_t_implementation
         end function
 
 
+        module subroutine iter_method (self, it)
+            ! Synopsis: Returns iterator to values in range [begin, avail).
+            class(vector_t), intent(in), target :: self
+            integer(kind = int64) :: lb
+            integer(kind = int64) :: ub
+            integer(kind = int32), intent(inout), &
+                & pointer, contiguous :: it(:)
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.iter: support for iterators "   // &
+                & "of the requested type has not been implemented"
+
+            if ( self % size () == 0_int64 ) then
+                it => null()
+            else
+
+                lb = self % begin % idx
+                ub = self % avail % idx
+                ub = ub - 1_int64
+
+                associate (values => self % array % values)
+
+                    select type (values)
+                        type is ( integer(kind = int32) )
+                            it => values (lb:ub)
+                        class default
+                            error stop errmsg
+                    end select
+
+                end associate
+
+            end if
+
+            return
+        end subroutine
+
+
         module subroutine findloc_wrapper (vector, value, idx)
             type(vector_t), intent(in) :: vector
             integer(kind = int64), intent(out) :: idx
             integer(kind = int64) :: lb
             integer(kind = int64) :: ub
             integer(kind = int32), intent(in) :: value
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.find: 32-bit int container"
+
 
             lb = vector % begin % idx
             ub = vector % avail % idx
             ub = ub - 1_int64
-            idx = findloc(array = vector % array % values_int32_t(lb:ub), &
-                        & value = value, dim = 1, kind = int64)
 
+            associate (values => vector % array % values)
+
+                select type (values)
+                    type is ( integer(kind = int32) )
+                        idx = findloc(array = values(lb:ub), &
+                                    & value = value, dim = 1, kind = int64)
+                    class default
+                        error stop errmsg
+                end select
+
+            end associate
             return
         end subroutine
 
 
-        module function addressing_method (self, idx) result(value)
+        module subroutine addressing_method (self, idx, value)
             ! Synopsis: Addresses the element pointed to by index.
             class(vector_t), intent(in) :: self
             integer(kind = int64), intent(in) :: idx
-            integer(kind = int32) :: value
+            integer(kind = int32), intent(inout) :: value
 
             call is_empty (self)
             call check_bounds (self, idx)
 
-            value = self % array % values_int32_t (idx)
+            associate (values => self % array % values)
+
+                select type (values)
+                    type is ( integer(kind = int32) )
+                        value = values (idx)
+                    class default
+                        error stop "dynamic::vector.[i]: unexpected error"
+                end select
+
+            end associate
 
             return
-        end function
+        end subroutine
 
 
         module function size_method (self) result(vector_size)
@@ -145,20 +202,40 @@ submodule (vectors) vectors_int32_t_implementation
         end subroutine
 
 
-        module subroutine push_back_method (self, value)
+        module subroutine push_back_polymorphic_method (self, value)
             ! Synopsis: Pushes value unto back of vector.
             class(vector_t), intent(inout) :: self
+            class(*), intent(in) :: value
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.push_back: support for pushing " // &
+                & "objects of given type has not been implemented"
+
+
+            select type (value)
+                type is ( integer(kind = int32) )
+                    call back_inserter (self, value)
+                class default
+                    error stop errmsg
+            end select
+
+
+            return
+        end subroutine
+
+
+        module subroutine push_back_int32_t (vector, value)
+            ! Synopsis: Pushes 32-bit integer unto back of vector.
+            type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
 
 
-            call is_instantiated (self)
+            call is_instantiated (vector)
 
 
-            if ( self % state % init ) then
-                call check_kind  (self, value)
-                call insert_back (self, value)
+            if ( vector % state % init ) then
+                call insert_back (vector, value)
             else
-                call initializer (self, value)
+                call initializer (vector, value)
             end if
 
             return
@@ -169,36 +246,64 @@ submodule (vectors) vectors_int32_t_implementation
             ! Synopsis: Inserts value unto back, vector grows as needed.
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.push_back: 32-bit int container"
+
 
             if (vector % avail % idx == vector % limit % idx) then
-                call grow (vector)
+                call grow (vector, value)
             end if
 
-            associate(avail => vector % avail % idx)
-                vector % array % values_int32_t(avail) = value
-                avail = avail + 1_int64
+
+            associate(avail  => vector % avail % idx,&
+                      values => vector % array % values)
+
+                select type (values)
+                    type is ( integer(kind = int32) )
+                        values (avail) = value
+                        avail = avail + 1_int64
+                    class default
+                        error stop errmsg ! caters inserting mixed-types
+                end select
+
             end associate
+
 
             return
         end subroutine
 
 
-        module subroutine grow (vector)
+        module subroutine grow (vector, value)
             ! Synopsis: Doubles the vector size.
-            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(inout), target :: vector
             integer(kind = int64):: lb
             integer(kind = int64):: ub
             integer(kind = int64):: bounds(0:1)
-            integer(kind = int32), allocatable :: values(:)
+            integer(kind = int32), intent(in) :: value
+            integer(kind = int32), allocatable :: array(:)
+            integer(kind = int32), pointer, contiguous :: ptr(:)
+
 
 
             lb = vector % begin % idx
             ub = vector % limit % idx
             bounds(0) = lb
             bounds(1) = ub
-            call allocator (bounds, values)
+            call allocator (bounds, array)
+
+
             ! copies existing values into placeholder
-            values(lb:ub) = vector % array % values_int32_t(lb:ub)
+            associate (values => vector % array % values)
+
+                select type (values)
+                    type is ( integer(kind = int32) )
+                        ptr => values(:)
+                        call copy (array, ptr)
+                    class default
+                        error stop "dynamic::vector.grow: unexpected error"
+                end select
+
+            end associate
 
 
             vector % limit % idx = 2_int64 * vector % limit % idx
@@ -206,14 +311,33 @@ submodule (vectors) vectors_int32_t_implementation
 
 !           bounds(0) = vector % begin % idx
             bounds(1) = vector % limit % idx
-            call reallocator (bounds, vector % array % values_int32_t)
+            call reallocator (bounds, vector % array % values, value)
+
             ! copies values in placeholder into (reallocated) vector
-            vector % array % values_int32_t = 0
-            vector % array % values_int32_t(lb:ub) = values(lb:ub)
+            associate (values => vector % array % values)
+
+               select type (values)
+                    type is ( integer(kind = int32) )
+                       values = 0
+                       call copy (values(lb:ub), array)
+                    class default
+                        error stop "dynamic::vector.grow: unexpected error"
+                end select
+
+            end associate
 
 
-            call deallocator (values)
+            call deallocator (array)
 
+
+            return
+        end subroutine
+
+
+        module elemental subroutine copy (dst, src)
+            integer(kind = int32), intent(inout) :: dst
+            integer(kind = int32), intent(in) :: src
+            dst = src
             return
         end subroutine
 
@@ -229,28 +353,39 @@ submodule (vectors) vectors_int32_t_implementation
         module subroutine create (vector, value)
             ! Synopsis: Creates the first element in vector.
             type(vector_t), intent(inout) :: vector
-            integer(kind = int64) :: idx
             integer(kind = int64) :: bounds(0:1)
             integer(kind = int64), parameter :: lb = 0_int64
             integer(kind = int64), parameter :: ub = 8_int64
             integer(kind = int32), intent(in) :: value
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.create: unexpected error"
 
 
             bounds(0) = lb
             bounds(1) = ub
-            call allocator (bounds, vector % array % values_int32_t)
+            call allocator (bounds, vector % array % values, value)
 
 
-            idx = vector % avail % idx
-            vector % array % values_int32_t = 0
-            vector % array % values_int32_t(idx) = value
+            associate (begin  => vector % begin % idx,  &
+                     & avail  => vector % avail % idx,  &
+                     & limit  => vector % limit % idx,  &
+                     & state  => vector % state % init, &
+                     & values => vector % array % values)
 
+                select type (values)
+                    type is ( integer(kind = int32) )
+                        values         = 0
+                        values (avail) = value
+                    class default
+                        error stop errmsg
+                end select
 
-!           vector % begin % idx  = 0_int64
-            vector % avail % idx  = 1_int64
-            vector % limit % idx  = 8_int64
-            vector % state % init = .true.
-            vector % state % kind = int32
+                begin = 0_int64
+                avail = avail + 1_int64
+                limit = ub
+                state = .true.
+
+            end associate
 
 
             return
@@ -268,7 +403,7 @@ submodule (vectors) vectors_int32_t_implementation
             end if
 
             if (mstat /= 0) then
-                error stop "vector.allocate_iter_t: allocation failure"
+                error stop "vector.allocate_iter_t: allocation error"
             end if
 
             return
@@ -286,7 +421,7 @@ submodule (vectors) vectors_int32_t_implementation
             end if
 
             if (mstat /= 0) then
-                error stop "vector.allocate_data_t: allocation failure"
+                error stop "vector.allocate_data_t: allocation error"
             end if
 
             return
@@ -304,8 +439,41 @@ submodule (vectors) vectors_int32_t_implementation
             end if
 
             if (mstat /= 0) then
-                error stop "vector.allocate_stat_t: allocation failure"
+                error stop "vector.allocate_stat_t: allocation error"
             end if
+
+            return
+        end subroutine
+
+
+        module subroutine allocate_polymorphic_int32_t (b, array, value)
+            integer(kind = int64), intent(in) :: b(0:1)       ! b[ounds]
+            class(*), intent(inout), allocatable :: array(:)
+            integer(kind = int64):: lb
+            integer(kind = int64):: ub
+            integer(kind = int32), intent(in) :: value
+            integer(kind = int32):: mstat
+
+
+            if ( allocated(array) ) then
+
+                deallocate (array, stat = mstat)
+
+                if (mstat /= 0) then
+                    error stop "dynamic::vector.allocate: unexpected error"
+                end if
+
+            end if
+
+
+            lb = b(0)
+            ub = b(1)
+            allocate (array(lb:ub), mold = value, stat = mstat)
+
+            if (mstat /= 0) then
+                error stop "dynamic::vector.allocate: allocation error"
+            end if
+
 
             return
         end subroutine
@@ -314,6 +482,8 @@ submodule (vectors) vectors_int32_t_implementation
         module subroutine deallocate_iter_t (i)
             type(iter_t), intent(inout), allocatable :: i
             integer(kind = int32) :: mstat
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.deallocate_iter: deallocation error"
 
             mstat = 0
             if ( allocated(i) ) then
@@ -321,8 +491,7 @@ submodule (vectors) vectors_int32_t_implementation
             end if
 
             if (mstat /= 0) then
-                error stop "dynamic::vector.deallocate_iter: "// &
-                    & "deallocation failure"
+                error stop errmsg
             end if
 
             return
@@ -332,6 +501,8 @@ submodule (vectors) vectors_int32_t_implementation
         module subroutine deallocate_data_t (d)
             type(data_t), intent(inout), allocatable :: d
             integer(kind = int32) :: mstat
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.deallocate_data: deallocation error"
 
             mstat = 0
             if ( allocated(d) ) then
@@ -339,8 +510,7 @@ submodule (vectors) vectors_int32_t_implementation
             end if
 
             if (mstat /= 0) then
-                error stop "dynamic::vector.deallocate_data: "// &
-                    & "deallocation failure"
+                error stop errmsg
             end if
 
             return
@@ -350,6 +520,8 @@ submodule (vectors) vectors_int32_t_implementation
         module subroutine deallocate_stat_t (s)
             type(stat_t), intent(inout), allocatable :: s
             integer(kind = int32) :: mstat
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.deallocate_stat: deallocation error"
 
             mstat = 0
             if ( allocated(s) ) then
@@ -357,8 +529,30 @@ submodule (vectors) vectors_int32_t_implementation
             end if
 
             if (mstat /= 0) then
-                error stop "dynamic::vector.deallocate_stat: "// &
-                    & "deallocation failure"
+                error stop errmsg
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine deallocate_polymorphic_t (array, value)
+            ! the compiler cannot differentiate without the dummy value
+            class(*), intent(inout), allocatable :: array(:)
+            integer(kind = int32), intent(in) :: value
+            integer(kind = int32) :: mstat
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.deallocate_polymorphic: " // &
+                & "deallocation error"
+
+            mstat = 0
+            if ( allocated(array) ) then
+                deallocate (array, stat = mstat)
+            end if
+
+            if (mstat /= 0) then
+                print *, value  ! use input so that compiler won't complain
+                error stop errmsg
             end if
 
             return
@@ -403,78 +597,26 @@ submodule (vectors) vectors_int32_t_implementation
         end subroutine
 
 
-        module subroutine check_kind_int32 (vector, value)
-            type(vector_t), intent(in) :: vector
-            integer(kind = int32), intent(in) :: value
-            character(len = 64) :: value_str
-            character(len = 64) :: values_kind_str
-            character(len = 64) :: vector_kind_str
+!       module function to_string_int32 (i) result(str)
+!           integer(kind = int32), intent(in) :: i
+!           character(len = 64) :: str
+!
+!           write (str, '(I16)') i
+!           str = adjustl (str)
+!
+!           return
+!       end function
 
 
-            value_str       = to_string (value)
-            values_kind_str = to_string (int32)
-            vector_kind_str = to_string (vector % state % kind)
-
-
-            if ( vector % state % kind /= int32 ) then
-                error stop "dynamic::vector.check_kind: " // &
-                    & "vector is a Container of integers of Kind " // &
-                    & trim(vector_kind_str) // " but given value [" // &
-                    & trim(value_str) // "] is of Kind " // &
-                    & trim(values_kind_str)
-            end if
-
-
-            return
-        end subroutine check_kind_int32
-
-
-        module subroutine check_kind_int64 (vector, value)
-            type(vector_t), intent(in) :: vector
-            integer(kind = int64), intent(in) :: value
-            character(len = 64) :: value_str
-            character(len = 64) :: values_kind_str
-            character(len = 64) :: vector_kind_str
-
-
-            value_str       = to_string (value)
-            values_kind_str = to_string (int64)
-            vector_kind_str = to_string (vector % state % kind)
-
-
-            if ( vector % state % kind /= int64 ) then
-                error stop "dynamic::vector.check_kind: " // &
-                    & "vector is a Container of integers of Kind " // &
-                    & trim(vector_kind_str) // " but given value [" // &
-                    & trim(value_str) // "] is of Kind " // &
-                    & trim(values_kind_str)
-            end if
-
-
-            return
-        end subroutine check_kind_int64
-
-
-        module function to_string_int32 (i) result(str)
-            integer(kind = int32), intent(in) :: i
-            character(len = 64) :: str
-
-            write (str, '(I16)') i
-            str = adjustl (str)
-
-            return
-        end function
-
-
-        module function to_string_int64 (i) result(str)
-            integer(kind = int64), intent(in) :: i
-            character(len = 64) :: str
-
-            write (str, '(I32)') i
-            str = adjustl (str)
-
-            return
-        end function
+!       module function to_string_int64 (i) result(str)
+!           integer(kind = int64), intent(in) :: i
+!           character(len = 64) :: str
+!
+!           write (str, '(I32)') i
+!           str = adjustl (str)
+!
+!           return
+!       end function
 
 
         module subroutine finalizer (vector)
@@ -504,6 +646,15 @@ end submodule
 ! own in fortran. I borrowed some of their ideas to implement it.
 
 
+! Comments:
+! A vector is a container that holds values of the same type. The
+! "default class" in select type constructs sometimes is used as a
+! mechanism that saves the user from catastrophy:
+! An array in Fortran can only hold values of the same type and so the
+! vector class which uses the Fortran array as the underlying data
+! structure to store values.
+
+
 ! TODO:
 ! [x] GUARD against indexing beyond the bounds of the vector
 ! [x] CHECK procedures that attempt to use the vector (allocatable)
@@ -513,11 +664,24 @@ end submodule
 !     is unsafe to check for its value since it could be unallocated.
 !     A possible solution is to check for the allocation status first,
 !     then check for the value.
+! [ ] PARTITION further into submodules. Idea: keep methods in a submodule
+!     and implementations in another. You will need another for utility
+!     procedures (for memory management).
+! [x] IMPLEMENT method that returns an iterator to values in the asymmetric
+!     range [begin, avail). Implement the iterator as a pointer.
+! [ ] IMPLEMENT a polymorphic push-back method (value is of type class(*)).
+!     Use a select type construct to determine what version
+!     (of "proxy" procedure) to call at runtime.
+!     Note: Most methods delegates work to a "proxy" of sorts. The method
+!     test_polymorphic_method() may be used as a template for other ones.
 ! [ ] GUARD against using the vector to store integers of different types.
 !     If the user inserts a 32-bit integer it won't be able to insert
 !     a 64-bit integer unless the vector contents are cleared. A possible
 !     implementation is to check the allocation status of its counterpart
 !     upon calls to the push-back method.
+! [x] EXPERIMENT with dynamically allocated strings. Not fully supported
+!     by GNU Fortran Compiler. Cannot use them without disabling some
+!     compiler options I would like to retain.
 
 
 ! Comments:
