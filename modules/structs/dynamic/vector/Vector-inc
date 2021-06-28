@@ -34,7 +34,7 @@ MODULES_INC = -I$(MODULES_DIR)
 VECTOR_MODULE_SRC = Vector.for
 VECTOR_UTILIT_SRC = submodules/Vector_utils.for
 VECTOR_OBLIVI_SRC = submodules/Vector_type_oblivious_methods.for
-VECTOR_METHOD_SRC = submodules/Vector_methods.for
+VECTOR_MINT32_SRC = submodules/Vector_int32_t_methods.for
 VECTOR_IINT32_SRC = submodules/Vector_int32_t_implementations.for
 
 
@@ -42,7 +42,7 @@ VECTOR_IINT32_SRC = submodules/Vector_int32_t_implementations.for
 VECTOR_MODULE_OBJ = Vector.o
 VECTOR_UTILIT_OBJ = submodules/Vector_utils.o
 VECTOR_OBLIVI_OBJ = submodules/Vector_type_oblivious_methods.o
-VECTOR_METHOD_OBJ = submodules/Vector_methods.o
+VECTOR_MINT32_OBJ = submodules/Vector_int32_t_methods.o
 VECTOR_IINT32_OBJ = submodules/Vector_int32_t_implementations.o
 VECTOR_SUBMOD_OBJ = $(VECTOR_UTILIT_OBJ) $(VECTOR_OBLIVI_OBJ)\
-                    $(VECTOR_METHOD_OBJ) $(VECTOR_IINT32_OBJ)
+                    $(VECTOR_MINT32_OBJ) $(VECTOR_IINT32_OBJ)
