@@ -32,9 +32,17 @@ MODULES_INC = -I$(MODULES_DIR)
 
 # src
 VECTOR_MODULE_SRC = Vector.for
-VECTOR_SUBMOD_SRC = Vector_submod.for
+VECTOR_UTILIT_SRC = submodules/Vector_utils.for
+VECTOR_OBLIVI_SRC = submodules/Vector_type_oblivious_methods.for
+VECTOR_METHOD_SRC = submodules/Vector_methods.for
+VECTOR_IMPLEM_SRC = submodules/Vector_implementations.for
 
 
 # objects
 VECTOR_MODULE_OBJ = Vector.o
-VECTOR_SUBMOD_OBJ = Vector_submod.o
+VECTOR_UTILIT_OBJ = submodules/Vector_utils.o
+VECTOR_OBLIVI_OBJ = submodules/Vector_type_oblivious_methods.o
+VECTOR_METHOD_OBJ = submodules/Vector_methods.o
+VECTOR_IMPLEM_OBJ = submodules/Vector_implementations.o
+VECTOR_SUBMOD_OBJ = $(VECTOR_UTILIT_OBJ) $(VECTOR_OBLIVI_OBJ)\
+                    $(VECTOR_METHOD_OBJ) $(VECTOR_IMPLEM_OBJ)

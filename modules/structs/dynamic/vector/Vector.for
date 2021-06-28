@@ -26,7 +26,6 @@
 module idata
     ! Defines the type i[nternal]data of the vector class
     use, intrinsic :: iso_fortran_env, only: int32, int64
-    use utils, only: deallocator => util_deallocate_array
     implicit none
     private
 
@@ -93,12 +92,16 @@ module vectors
         type(stat_t), allocatable :: state
         contains
             private
-            procedure, public :: get  => addressing_method
-            procedure, public :: iter => iter_method
+            procedure :: vector_int32_t_indexing_method
+            procedure :: vector_int32_t_find_method
+            procedure :: vector_int32_t_iterator_method
+            procedure :: vector_int32_t_push_back_method
+            generic, public :: get  => vector_int32_t_indexing_method
+            generic, public :: iter => vector_int32_t_iterator_method
+            generic, public :: find => vector_int32_t_find_method
+            generic, public :: push_back => vector_int32_t_push_back_method
             procedure, public :: size => size_method
-            procedure, public :: find => findloc_method
             procedure, public :: clear => clear_method
-            procedure, public :: push_back => push_back_polymorphic_method
             final :: finalizer
     end type
 
@@ -113,14 +116,14 @@ module vectors
         module procedure allocate_data_t
         module procedure allocate_stat_t
         module procedure allocate_vector_t
-        module procedure allocate_polymorphic_int32_t
+        module procedure vector_int32_t_allocate_dynamic
         module procedure util_allocate_array_int32_by_bounds
         module procedure util_allocate_array_int64_by_bounds
     end interface
 
 
     interface reallocator
-        module procedure allocate_polymorphic_int32_t
+        module procedure vector_int32_t_allocate_dynamic
         module procedure util_reallocate_array_int32_by_bounds
     end interface
 
@@ -129,14 +132,49 @@ module vectors
         module procedure deallocate_iter_t
         module procedure deallocate_data_t
         module procedure deallocate_stat_t
-        module procedure deallocate_polymorphic_t
+        module procedure vector_int32_t_deallocate_dynamic
         module procedure util_deallocate_array_int32
         module procedure util_deallocate_array_int64
     end interface
 
 
+    interface initializer
+        module procedure vector_int32_t_initializer
+    end interface
+
+
+    interface create
+        module procedure vector_int32_t_create
+    end interface
+
+
     interface back_inserter
-        module procedure push_back_int32_t
+        module procedure vector_int32_t_push_back
+    end interface
+
+
+    interface insert_back
+        module procedure vector_int32_t_insert_back
+    end interface
+
+
+    interface indexer
+        module procedure vector_int32_t_indexer
+    end interface
+
+
+    interface slice
+        module procedure vector_int32_t_slice
+    end interface
+
+
+    interface grow
+        module procedure vector_int32_t_grow
+    end interface
+
+
+    interface copy
+        module procedure array_int32_t_copy
     end interface
 
 
@@ -160,33 +198,47 @@ module vectors
         end subroutine
 
 
-        module function findloc_method (self, value) result(idx)
+        module function vector_int32_t_find_method (self, value) result(i)
             class(vector_t), intent(in) :: self
-            integer(kind = int64) :: idx
+            integer(kind = int64) :: i
             integer(kind = int32), intent(in) :: value
         end function
 
 
-        module subroutine iter_method (self, it)
-            class(vector_t), intent(in), target :: self
+        module subroutine vector_int32_t_iterator_method (self, it)
+            class(vector_t), intent(in) :: self
             integer(kind = int32), intent(inout), &
                 & pointer, contiguous :: it(:)
         end subroutine
 
 
-        module subroutine findloc_wrapper (vector, value, idx)
+        module subroutine vector_int32_t_slice (vector, it)
+            type(vector_t), intent(in), target :: vector
+            integer(kind = int32), intent(inout), &
+                & pointer, contiguous :: it(:)
+        end subroutine
+
+
+        module subroutine vector_int32_t_findloc_wrapper (vector, value, i)
             type(vector_t), intent(in) :: vector
-            integer(kind = int64), intent(out) :: idx
+            integer(kind = int64), intent(out) :: i
             integer(kind = int32), intent(in) :: value
         end subroutine
 
 
-        module subroutine addressing_method (self, idx, value)
+        module subroutine vector_int32_t_indexing_method (self, idx, value)
             ! Synopsis: Addresses the element pointed to by index.
             class(vector_t), intent(in) :: self
             integer(kind = int64), intent(in) :: idx
             integer(kind = int32), intent(inout) :: value
         end subroutine
+
+
+        module function vector_int32_t_indexer (vector, idx) result(value)
+            type(vector_t), intent(in) :: vector
+            integer(kind = int64), intent(in) :: idx
+            integer(kind = int32) :: value
+        end function
 
 
         module function size_method (self) result(vector_size)
@@ -202,52 +254,45 @@ module vectors
         end subroutine
 
 
-        module subroutine push_back_polymorphic_method (self, value)
+        module subroutine vector_int32_t_push_back_method (self, value)
             class(vector_t), intent(inout) :: self
-            class(*), intent(in) :: value
+            integer(kind = int32), intent(in) :: value
         end subroutine
 
 
-        module subroutine push_back_int32_t (vector, value)
+        module subroutine vector_int32_t_push_back (vector, value)
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
         end subroutine
 
 
-        module subroutine push_back_method (self, value)
-            ! Synopsis: Pushes value unto back of vector.
-            class(vector_t), intent(inout) :: self
-            integer(kind = int32), intent(in) :: value
-        end subroutine
-
-
-        module subroutine insert_back (vector, value)
+        module subroutine vector_int32_t_insert_back (vector, value)
             ! Synopsis: Inserts value unto back, vector grows as needed.
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
         end subroutine
 
 
-        module subroutine grow (vector, value)
+        module subroutine vector_int32_t_grow (vector, value)
             ! Synopsis: Doubles the vector size.
             type(vector_t), intent(inout), target :: vector
             integer(kind = int32), intent(in) :: value
         end subroutine
 
 
-        module elemental subroutine copy (dst, src)
+        module elemental subroutine array_int32_t_copy (dst, src)
             integer(kind = int32), intent(inout) :: dst
             integer(kind = int32), intent(in) :: src
         end subroutine
 
 
-        module subroutine initializer (vector, value)
+        module subroutine vector_int32_t_initializer (vector, value)
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
         end subroutine
 
 
-        module subroutine create (vector, value)
+        module subroutine vector_int32_t_create (vector, value)
             ! Synopsis: Creates the first element in vector.
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
@@ -279,7 +324,7 @@ module vectors
         end subroutine
 
 
-        module subroutine allocate_polymorphic_int32_t (b, array, value)
+        module subroutine vector_int32_t_allocate_dynamic (b, array, value)
             integer(kind = int64), intent(in) :: b(0:1)
             class(*), intent(inout), allocatable :: array(:)
             integer(kind = int32), intent(in) :: value
@@ -296,7 +341,7 @@ module vectors
         end subroutine
 
 
-        module subroutine deallocate_polymorphic_t (array, value)
+        module subroutine vector_int32_t_deallocate_dynamic (array, value)
             class(*), intent(inout), allocatable :: array(:)
             integer(kind = int32), intent(in) :: value
         end subroutine
