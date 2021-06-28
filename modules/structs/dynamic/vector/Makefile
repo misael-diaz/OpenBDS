@@ -44,9 +44,9 @@ $(VECTOR_METHOD_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_METHOD_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_METHOD_SRC) -o\
 	                                  $(VECTOR_METHOD_OBJ)
 
-$(VECTOR_IMPLEM_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IMPLEM_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IMPLEM_SRC) -o\
-	                                  $(VECTOR_IMPLEM_OBJ)
+$(VECTOR_IINT32_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IINT32_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IINT32_SRC) -o\
+	                                  $(VECTOR_IINT32_OBJ)
 
 clean:
 	rm -f *.mod *.smod *.o submodules/*.o
