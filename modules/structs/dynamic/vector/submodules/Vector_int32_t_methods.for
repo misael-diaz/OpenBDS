@@ -5,7 +5,7 @@
 !
 !
 !   Synopsis:
-!   Defines methods of the vector class.
+!   Defines methods for vectors of 32-bit integers.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
