@@ -30,9 +30,11 @@ program test_vector_class
     implicit none
 
     type(vector_t), pointer :: vector => null()
+    type(vector_t), pointer :: vint64 => null()
     type(chronom) :: stopwatch
     
     integer(kind = int32), pointer, contiguous :: it(:) => null()
+    integer(kind = int64), pointer, contiguous :: it_int64_t(:) => null()
     integer(kind = int64) :: i = 0_int64
     integer(kind = int64) :: lb
     integer(kind = int64) :: ub
@@ -45,6 +47,8 @@ program test_vector_class
 
     allocate(vector, stat = alloc_stat)
     if (alloc_stat /= 0) error stop "allocation failure"
+    allocate(vint64, stat = alloc_stat)
+    if (alloc_stat /= 0) error stop "allocation failure"
 
 
 !!  Tests:
@@ -55,6 +59,7 @@ program test_vector_class
 
     ! instantiations
     vector = vector_t()
+    vint64 = vector_t()
     stopwatch = chronom()
 
 
@@ -66,10 +71,12 @@ program test_vector_class
 
     value = 0
     i = 0_int64
+!   call vector % push_back(0_int64)           ! type check passed
     call stopwatch % tic()
     do while (i /= n)
         if (value == huge(0)) value = 0
         call vector % push_back(value)         ! pushes unto back of vector
+        call vint64 % push_back(i)
         value = value + 1
         i = i + 1_int64
     end do
@@ -111,6 +118,7 @@ program test_vector_class
         i = i + 1_int64
     end do
     call stopwatch % toc()
+!   call vector % push_back(0_int64) type check passed
 
 
     print *, "done"
@@ -144,6 +152,7 @@ program test_vector_class
     print *, ""
     print *, ""
 
+!   call vector % iter (it_int64_t)     ! type check passed
     call vector % iter (it)
     if ( associated(it) ) then
 
@@ -165,9 +174,30 @@ program test_vector_class
     end if
 
 
+!   call vint64 % iter (it)             ! type check passed
+    call vint64 % iter (it_int64_t)
+    if ( associated(it_int64_t) ) then
+
+        lb = lbound(it_int64_t, dim = 1, kind = int64)
+        ub = ubound(it_int64_t, dim = 1, kind = int64)
+        do i = lb, ub
+            print *, it_int64_t(i)
+        end do
+
+    end if
+
+
+
+    print *, ""
+    print *, ""
+    print *, ""
+    print *, ""
+
+
     print *, "freeing memory buffers ... "
 
     deallocate(vector)
+    deallocate(vint64)
     
 
     print *, ""
