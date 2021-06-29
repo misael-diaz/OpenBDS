@@ -38,6 +38,22 @@ submodule (vectors) vector_type_oblivious_methods
         end function
 
 
+        module subroutine instantiate (vector)
+            type(vector_t), intent(inout) :: vector
+
+            call allocator (vector)
+
+!           print *, "instantiating vector components ... "
+
+            vector % begin % idx  = 0_int64
+            vector % avail % idx  = 0_int64
+            vector % limit % idx  = 0_int64
+            vector % state % init = .false.
+
+            return
+        end subroutine
+
+
         module function size_method (self) result(vector_size)
             ! Synopsis: Returns the size of the vector.
             class(vector_t), intent(in) :: self
