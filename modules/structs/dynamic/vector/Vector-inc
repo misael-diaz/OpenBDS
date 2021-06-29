@@ -36,6 +36,8 @@ VECTOR_UTILIT_SRC = submodules/Vector_utils.for
 VECTOR_OBLIVI_SRC = submodules/Vector_type_oblivious_methods.for
 VECTOR_MINT32_SRC = submodules/Vector_int32_t_methods.for
 VECTOR_IINT32_SRC = submodules/Vector_int32_t_implementations.for
+VECTOR_MINT64_SRC = submodules/Vector_int64_t_methods.for
+VECTOR_IINT64_SRC = submodules/Vector_int64_t_implementations.for
 
 
 # objects
@@ -44,5 +46,8 @@ VECTOR_UTILIT_OBJ = submodules/Vector_utils.o
 VECTOR_OBLIVI_OBJ = submodules/Vector_type_oblivious_methods.o
 VECTOR_MINT32_OBJ = submodules/Vector_int32_t_methods.o
 VECTOR_IINT32_OBJ = submodules/Vector_int32_t_implementations.o
+VECTOR_MINT64_OBJ = submodules/Vector_int64_t_methods.o
+VECTOR_IINT64_OBJ = submodules/Vector_int64_t_implementations.o
 VECTOR_SUBMOD_OBJ = $(VECTOR_UTILIT_OBJ) $(VECTOR_OBLIVI_OBJ)\
-                    $(VECTOR_MINT32_OBJ) $(VECTOR_IINT32_OBJ)
+                    $(VECTOR_MINT32_OBJ) $(VECTOR_IINT32_OBJ)\
+                    $(VECTOR_MINT64_OBJ) $(VECTOR_IINT64_OBJ)
