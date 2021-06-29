@@ -51,6 +51,14 @@ submodule (vectors) vector_utils
         end subroutine
 
 
+        module elemental subroutine array_int64_t_copy (dst, src)
+            integer(kind = int64), intent(inout) :: dst
+            integer(kind = int64), intent(in) :: src
+            dst = src
+            return
+        end subroutine
+        
+
         module subroutine allocate_iter_t (i)
             type(iter_t), intent(inout), allocatable :: i
             integer(kind = int32) :: mstat
@@ -111,6 +119,39 @@ submodule (vectors) vector_utils
             integer(kind = int64):: lb
             integer(kind = int64):: ub
             integer(kind = int32), intent(in) :: value
+            integer(kind = int32):: mstat
+
+
+            if ( allocated(array) ) then
+
+                deallocate (array, stat = mstat)
+
+                if (mstat /= 0) then
+                    error stop "dynamic::vector.allocate: unexpected error"
+                end if
+
+            end if
+
+
+            lb = b(0)
+            ub = b(1)
+            allocate (array(lb:ub), mold = value, stat = mstat)
+
+            if (mstat /= 0) then
+                error stop "dynamic::vector.allocate: allocation error"
+            end if
+
+
+            return
+        end subroutine
+
+
+        module subroutine vector_int64_t_allocate_dynamic (b, array, value)
+            integer(kind = int64), intent(in) :: b(0:1)       ! b[ounds]
+            class(*), intent(inout), allocatable :: array(:)
+            integer(kind = int64):: lb
+            integer(kind = int64):: ub
+            integer(kind = int64), intent(in) :: value
             integer(kind = int32):: mstat
 
 
@@ -218,6 +259,30 @@ submodule (vectors) vector_utils
         end subroutine
 
 
+        module subroutine vector_int64_t_deallocate_dynamic (array, value)
+            ! the compiler cannot differentiate without the dummy value
+            class(*), intent(inout), allocatable :: array(:)
+            integer(kind = int64), intent(in) :: value
+            integer(kind = int32) :: mstat
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.deallocate_polymorphic: " // &
+                & "deallocation error"
+
+            mstat = 0
+            if ( allocated(array) ) then
+                deallocate (array, stat = mstat)
+            end if
+
+            if (mstat /= 0) then
+                print *, value  ! use input so that compiler won't complain
+                error stop errmsg
+            end if
+
+            return
+        end subroutine
+        
+
+
         module subroutine is_empty (vector)
             type(vector_t), intent(in) :: vector
 
@@ -276,6 +341,27 @@ submodule (vectors) vector_utils
 !
 !           return
 !       end function
+
+
+        module subroutine destructor_stat_t (s)
+            type(stat_t), intent(inout) :: s
+            integer(kind = int32):: mstat
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.state: deallocation error"
+
+!           print *, "destroying vector state data ... "
+
+            mstat = 0
+            if ( allocated(s % errmsg) ) then
+                deallocate (s % errmsg, stat = mstat)
+            end if
+
+            if (mstat /= 0) then
+                error stop errmsg
+            end if
+
+            return
+        end subroutine
 
 
         module subroutine finalizer (vector)
