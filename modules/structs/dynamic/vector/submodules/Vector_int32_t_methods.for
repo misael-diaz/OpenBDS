@@ -23,7 +23,7 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-submodule (vectors) vector_methods
+submodule (vectors) vector_int32_t_methods
     contains
 
 
@@ -33,7 +33,7 @@ submodule (vectors) vector_methods
             integer(kind = int32), intent(in) :: value
 
             call is_empty (self)
-            call vector_int32_t_findloc_wrapper (self, value, i)
+            call find (self, value, i)
 
             return
         end function
@@ -59,12 +59,12 @@ submodule (vectors) vector_methods
             ! Synopsis: Addresses the element pointed to by index.
             class(vector_t), intent(in) :: self
             integer(kind = int64), intent(in) :: idx
-            integer(kind = int32), intent(inout) :: value
+            integer(kind = int32), intent(out) :: value
 
             call is_empty (self)
             call check_bounds (self, idx)
 
-            value = indexer (self, idx)
+            call indexer (self, idx, value)
 
             return
         end subroutine
