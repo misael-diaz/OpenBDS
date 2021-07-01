@@ -58,6 +58,7 @@ program test_math_vector_class
 
     type(vector_t), pointer :: neighbors => null()
     type(vector_t), pointer :: neighvect => null()
+    type(vector_t), pointer, contiguous :: it(:) => null()
     type(tensor_t), pointer :: tensor => null()
 
 
@@ -68,14 +69,15 @@ program test_math_vector_class
     integer(kind = int64) :: i
     integer(kind = int64) :: j
     integer(kind = int64), allocatable :: idx(:)
-    integer(kind = int64), parameter :: n = 65536_int64
+    integer(kind = int64), parameter :: n = 16384_int64
+!   integer(kind = int64), parameter :: n = 65536_int64
     logical(kind = int32), allocatable :: mask(:)
     logical(kind = int32), allocatable :: neig(:)
     integer(kind = int32) :: mstat
 
 
 
-    allocate(neighbors, stat = mstat)
+    allocate(neighbors, neighvect, stat = mstat)
     if (mstat /= 0) error stop "allocation failure"
 
     allocate(tensor, stat = mstat)
@@ -159,32 +161,40 @@ program test_math_vector_class
 
 
 
+    do j = 1, n
+        call tensor % delta2 (j, idx)       ! vector squared distance
 
-    call tensor % delta2 (n, idx)       ! vector squared distance
+        mask     = .true.
+        mask (j) = .false.  ! excludes the particle itself via mask
+        neig     = .false.
+        call in_range( floor(tensor % v / cutoff2, kind = int32), &
+                    &  mask, neig )
 
-    mask     = .true.
-    mask (n) = .false.  ! excludes the particle itself via mask
-    neig     = .false.
-    call in_range( floor(tensor % v / cutoff2, kind = int32), mask, neig)
+
+        do i = 1, n
+            ! builds the neighbor-list for the jth particle
+            if ( neig(i) ) call neighbors % push_back (i)
+        end do
 
 
-    j = 1
-    do i = 1, n
-        ! builds the neighbor-list for the nth particle
-        if ( neig(i) ) call neighbors % push_back (j)
-        j = j + 1
+        call neighvect % push_back (neighbors)
+        call neighbors % clear ()
+
     end do
+
+
+    call neighvect % iter (it)
 
 
     print *, ""
     print *, ""
     print *, "distance::min: ", dsqrt( minval(tensor % v) )
     print *, "distance::max: ", dsqrt( maxval(tensor % v) )
-    print *, "tensor::neighbors: ", neighbors % size ()
+    print *, "tensor::neighbors: ", it(n) % size ()
 
 
     ! checks if the particle has included itself in the neighbor-list
-    if (neighbors % find (n) /= -1) then
+    if (it(n) % find (n) /= -1) then
         print *, "fail"
     else
         print *, "pass"
@@ -211,7 +221,7 @@ program test_math_vector_class
     deallocate (tensor, stat = mstat)
     if (mstat /= 0) error stop "unexpected deallocation failure"
 
-    deallocate (neighbors, stat = mstat)
+    deallocate (neighbors, neighvect, stat = mstat)
     if (mstat /= 0) error stop "unexpected deallocation failure"
 
     print *, ""
