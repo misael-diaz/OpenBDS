@@ -24,6 +24,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (vectors) vector_utils
+    implicit none
     contains
 
 
@@ -57,7 +58,7 @@ submodule (vectors) vector_utils
             dst = src
             return
         end subroutine
-        
+
 
         module subroutine allocate_iter_t (i)
             type(iter_t), intent(inout), allocatable :: i
