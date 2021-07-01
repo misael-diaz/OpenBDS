@@ -104,7 +104,6 @@ module vector_class_tests
             integer(kind = int64), pointer, contiguous :: it(:) => null()
             integer(kind = int64), parameter :: n = max_vector_size
             integer(kind = int64):: r, t(2), address(2)
-            integer(kind = int32):: i
             integer(kind = int32):: mstat
 
             allocate (vector(2), stat = mstat)
@@ -165,7 +164,6 @@ module vector_class_tests
         subroutine test_vector_up_array_vector_t ()
             ! Synopsis: Tests u[nlimited] p[olymorphic] array of vectors.
             type(vector_t), allocatable :: vector(:)
-            integer(kind = int32):: i
             integer(kind = int32):: mstat
 
             allocate (vector(2), stat = mstat)
