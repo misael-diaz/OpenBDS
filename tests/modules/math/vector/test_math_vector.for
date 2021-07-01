@@ -52,12 +52,12 @@ program test_math_vector_class
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use VectorClass, only: vector_t
     use neighlists, only: in_range
-    use math_vector_class, only: math_vector_t => vector_t
+    use math_vector_class, only: tensor_t => vector_t
     implicit none
 
 
     type(vector_t), pointer :: neighbors => null()
-    type(math_vector_t), pointer :: vector => null()
+    type(tensor_t), pointer :: tensor => null()
 
 
     real(kind = real64), parameter :: cutoff2 = 0.25_real64
@@ -78,35 +78,35 @@ program test_math_vector_class
     allocate(neighbors, stat = mstat)
     if (mstat /= 0) error stop "allocation failure"
 
-    allocate(vector, stat = mstat)
+    allocate(tensor, stat = mstat)
     if (mstat /= 0) error stop "allocation failure"
 
 
     ! instantiations
     neighbors = vector_t ()
-    vector    = math_vector_t (n)
+    tensor    = tensor_t (n)
 
 
     do i = 1, n
-        call random_number  ( vector % x(i) )
+        call random_number  ( tensor % x(i) )
     end do
 
     do i = 1, n
-        call random_number  ( vector % y(i) )
+        call random_number  ( tensor % y(i) )
     end do
 
     do i = 1, n
-        call random_number  ( vector % z(i) )
+        call random_number  ( tensor % z(i) )
     end do
 
 
 
 
-    call vector % normalize ()
+    call tensor % normalize ()
 
 
     do i = 1, n
-        print '(1X,3F8.4)', vector % x(i), vector % y(i), vector % z(i)
+        print '(1X,3F8.4)', tensor % x(i), tensor % y(i), tensor % z(i)
     end do
 
 
@@ -117,7 +117,7 @@ program test_math_vector_class
 
 
     do i = 1, n
-        d(i) = vector % range (n, i)     ! computes vector distance
+        d(i) = tensor % range (n, i)     ! computes vector distance
     end do
 
 
@@ -130,13 +130,13 @@ program test_math_vector_class
 
 
 
-    call vector % delta2 (n)    ! vector squared distance
+    call tensor % delta2 (n)    ! vector squared distance
 
 
     print *, ""
     print *, ""
-    print *, "distance::min: ", dsqrt( minval(vector % v) )
-    print *, "distance::max: ", dsqrt( maxval(vector % v) )
+    print *, "distance::min: ", dsqrt( minval(tensor % v) )
+    print *, "distance::max: ", dsqrt( maxval(tensor % v) )
     print *, ""
     print *, ""
 
@@ -160,12 +160,12 @@ program test_math_vector_class
 
 
 
-    call vector % delta2 (n, idx)       ! vector squared distance
+    call tensor % delta2 (n, idx)       ! vector squared distance
 
     mask     = .true.
     mask (n) = .false.  ! excludes the particle itself via mask
     neig     = .false.
-    call in_range( floor(vector % v / cutoff2, kind = int32), mask, neig)
+    call in_range( floor(tensor % v / cutoff2, kind = int32), mask, neig)
 
 
     j = 1
@@ -178,9 +178,9 @@ program test_math_vector_class
 
     print *, ""
     print *, ""
-    print *, "distance::min: ", dsqrt( minval(vector % v) )
-    print *, "distance::max: ", dsqrt( maxval(vector % v) )
-    print *, "vector::neighbors: ", neighbors % size ()
+    print *, "distance::min: ", dsqrt( minval(tensor % v) )
+    print *, "distance::max: ", dsqrt( maxval(tensor % v) )
+    print *, "tensor::neighbors: ", neighbors % size ()
 
 
     ! checks if the particle has included itself in the neighbor-list
@@ -208,7 +208,7 @@ program test_math_vector_class
     deallocate (mask, stat = mstat)
     if (mstat /= 0) error stop "unexpected deallocation failure"
 
-    deallocate (vector, stat = mstat)
+    deallocate (tensor, stat = mstat)
     if (mstat /= 0) error stop "unexpected deallocation failure"
 
     deallocate (neighbors, stat = mstat)
@@ -222,13 +222,6 @@ program test_math_vector_class
 
 end program
 
-! Comments:
-! The GNU Fortran Compiler issues a *warning* about reallocating the vector
-! upon instantiation when it is declared with the allocatable attribute.
-! To avoid this (possible) reallocation it's declared with the pointer 
-! attribute.
-!
-!
 ! Vectorization:
 ! The Intel Fortran Compiler vectorizes the random_number() intrinsic. Other
 ! than that the GNU Fortran Compiler vectorizes everything else its Intel
