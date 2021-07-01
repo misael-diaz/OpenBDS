@@ -24,6 +24,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (vectors) vectors_int32_t_implementation
+    implicit none
     contains
 
 
@@ -43,8 +44,9 @@ submodule (vectors) vectors_int32_t_implementation
 
                 select type (values)
                     type is ( integer(kind = int32) )
-                        i= findloc(array = values(lb:ub), &
-                                 & value = value, dim = 1, kind = int64)
+                        i = findloc(array = values(lb:ub), &
+                                  & value = value, dim = 1, kind = int64)
+                        i = i - 1_int64
                     class default
                         error stop vector % state % errmsg
                 end select
@@ -337,6 +339,19 @@ end submodule
 ! lower and upper bounds (lb, ub) are chosen so that we do not include
 ! the element pointed to by (end). It's a valid index but it should not
 ! be referenced since it does not hold an actual value.
+!
+! Index returned by findloc intrinsic has been adjusted by one to
+! account for the array bounds. I am unsure if this a BUG in the
+! implementation of findloc or a misinterpretation on my part.
+! Both the Intel and GNU Fortran Compilers yield the same result.
+! I cannot conclude anything from that but at least account for it
+! when using the compilers I have available.
+!
+! Documentation of findloc from GNU Fortran Compiler:
+! Determines the *location* of the element in the array with the value
+! given in the VALUE argument ... They used *location* instead of index
+! so maybe the user is responsible for obtaining the index from the
+! location as it has been done here.
 !
 !
 ! subroutine clear_method()

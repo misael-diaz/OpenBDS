@@ -24,6 +24,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (vectors) vectors_int64_t_implementation
+    implicit none
     contains
 
 
@@ -43,8 +44,9 @@ submodule (vectors) vectors_int64_t_implementation
 
                 select type (values)
                     type is ( integer(kind = int64) )
-                        i= findloc(array = values(lb:ub), &
-                                 & value = value, dim = 1, kind = int64)
+                        i = findloc(array = values(lb:ub), &
+                                  & value = value, dim = 1, kind = int64)
+                        i = i - 1_int64
                     class default
                         error stop vector % state % errmsg
                 end select
