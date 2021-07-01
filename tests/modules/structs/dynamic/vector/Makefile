@@ -38,4 +38,4 @@ $(TEST_VECTOR_OBJ): $(MODS) $(TEST_VECTOR_SRC)
 
 
 clean:
-	rm -f *.mod *.o $(TESTS)
+	rm -f *.mod *.smod *.o $(TESTS)
