@@ -25,7 +25,7 @@
 
 module vector_class_tests
     use, intrinsic :: iso_fortran_env, only: int32, int64
-    use vectors, only: vector_t
+    use VectorClass, only: vector_t
     use chronos, only: chronom
     implicit none
     integer(kind = int64), parameter :: max_vector_size = 1048576_int64

@@ -23,7 +23,7 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-submodule (vectors) vector_type_oblivious_methods
+submodule (VectorClass) vector_type_oblivious_methods
     implicit none
     contains
 
