@@ -24,6 +24,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (vectors) vector_int64_t_methods
+    implicit none
     contains
 
 
