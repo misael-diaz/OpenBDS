@@ -40,13 +40,21 @@ $(VECTOR_OBLIVI_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_OBLIVI_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_OBLIVI_SRC) -o\
 	                                  $(VECTOR_OBLIVI_OBJ)
 
-$(VECTOR_METHOD_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_METHOD_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_METHOD_SRC) -o\
-	                                  $(VECTOR_METHOD_OBJ)
+$(VECTOR_MINT32_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_MINT32_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MINT32_SRC) -o\
+	                                  $(VECTOR_MINT32_OBJ)
 
-$(VECTOR_IMPLEM_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IMPLEM_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IMPLEM_SRC) -o\
-	                                  $(VECTOR_IMPLEM_OBJ)
+$(VECTOR_IINT32_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IINT32_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IINT32_SRC) -o\
+	                                  $(VECTOR_IINT32_OBJ)
+
+$(VECTOR_MINT64_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_MINT64_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MINT64_SRC) -o\
+	                                  $(VECTOR_MINT64_OBJ)
+
+$(VECTOR_IINT64_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IINT64_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IINT64_SRC) -o\
+	                                  $(VECTOR_IINT64_OBJ)
 
 clean:
 	rm -f *.mod *.smod *.o submodules/*.o

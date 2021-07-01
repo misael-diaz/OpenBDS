@@ -1,5 +1,5 @@
 !
-!   source: Vector_implementations.for
+!   source: Vector_int32_t_implementations.for
 !   author: misael-diaz
 !   date:   2021-06-27
 !
@@ -24,23 +24,8 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (vectors) vectors_int32_t_implementation
+    implicit none
     contains
-
-
-        module subroutine instantiate (vector)
-            type(vector_t), intent(inout) :: vector
-
-            call allocator (vector)
-
-!           print *, "instantiating vector components ... "
-
-            vector % begin % idx  = 0_int64
-            vector % avail % idx  = 0_int64
-            vector % limit % idx  = 0_int64
-            vector % state % init = .false.
-
-            return
-        end subroutine
 
 
         module subroutine vector_int32_t_findloc_wrapper (vector, value, i)
@@ -49,8 +34,6 @@ submodule (vectors) vectors_int32_t_implementation
             integer(kind = int64) :: lb
             integer(kind = int64) :: ub
             integer(kind = int32), intent(in) :: value
-            character(len=*), parameter :: errmsg = &
-                & "dynamic::vector.find: 32-bit int container"
 
 
             lb = vector % begin % idx
@@ -61,10 +44,11 @@ submodule (vectors) vectors_int32_t_implementation
 
                 select type (values)
                     type is ( integer(kind = int32) )
-                        i= findloc(array = values(lb:ub), &
-                                 & value = value, dim = 1, kind = int64)
+                        i = findloc(array = values(lb:ub), &
+                                  & value = value, dim = 1, kind = int64)
+                        i = i - 1_int64
                     class default
-                        error stop errmsg
+                        error stop vector % state % errmsg
                 end select
 
             end associate
@@ -72,12 +56,10 @@ submodule (vectors) vectors_int32_t_implementation
         end subroutine
 
 
-        module function vector_int32_t_indexer (vector, idx) result(value)
+        module subroutine vector_int32_t_indexer (vector, idx, value)
             type(vector_t), intent(in) :: vector
             integer(kind = int64), intent(in) :: idx
-            integer(kind = int32) :: value
-            character(len=*), parameter :: errmsg = &
-                & "dynamic::vector.get: 32-bit int container"
+            integer(kind = int32), intent(out) :: value
 
             associate (values => vector % array % values)
 
@@ -85,14 +67,14 @@ submodule (vectors) vectors_int32_t_implementation
                     type is ( integer(kind = int32) )
                         value = values (idx)
                     class default
-                        error stop errmsg
+                        error stop vector % state % errmsg
                 end select
 
             end associate
 
 
             return
-        end function
+        end subroutine
 
 
         module subroutine vector_int32_t_push_back (vector, value)
@@ -118,8 +100,6 @@ submodule (vectors) vectors_int32_t_implementation
             ! Synopsis: Inserts value unto back, vector grows as needed.
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
-            character(len=*), parameter :: errmsg = &
-                & "dynamic::vector.push_back: 32-bit int container"
 
 
             if (vector % avail % idx == vector % limit % idx) then
@@ -135,7 +115,8 @@ submodule (vectors) vectors_int32_t_implementation
                         values (avail) = value
                         avail = avail + 1_int64
                     class default
-                        error stop errmsg ! caters inserting mixed-types
+                        ! caters inserting mixed-types
+                        error stop vector % state % errmsg
                 end select
 
             end associate
@@ -152,8 +133,6 @@ submodule (vectors) vectors_int32_t_implementation
                 & pointer, contiguous :: it(:)
             integer(kind = int64) :: lb
             integer(kind = int64) :: ub
-            character(len=*), parameter :: errmsg = &
-                & "dynamic::vector.iter: 32-bit int container"
 
 
             lb = vector % begin % idx
@@ -167,7 +146,7 @@ submodule (vectors) vectors_int32_t_implementation
                     type is ( integer(kind = int32) )
                         it => values (lb:ub)
                     class default
-                        error stop errmsg
+                        error stop vector % state % errmsg
                 end select
 
             end associate
@@ -230,13 +209,6 @@ submodule (vectors) vectors_int32_t_implementation
 
             end associate
 
-            ! TODO: check with valgrind if the array is automatically
-            !       deallocated upon return to caller. Would the
-            !       deallocation be handled by the OS rather than the
-            !       program in this case? Would not deallocating
-            !       explicitly result in a speed up.
-!           call deallocator (array)
-
 
             return
         end subroutine vector_int32_t_grow
@@ -257,9 +229,18 @@ submodule (vectors) vectors_int32_t_implementation
             integer(kind = int64), parameter :: lb = 0_int64
             integer(kind = int64), parameter :: ub = 8_int64
             integer(kind = int32), intent(in) :: value
+            integer(kind = int32) :: mstat
             character(len=*), parameter :: errmsg = &
-                & "dynamic::vector.create: unexpected error"
+                & "dynamic::vector.error: container of 32-bit integers"
 
+
+!           TODO: consider moving to utils of the vector class
+            allocate(character(len=len(errmsg)):: vector % state % errmsg,&
+                   & stat = mstat)
+            if (mstat /= 0) then
+                error stop "dynamic::vector.create: allocation error"
+            end if
+            vector % state % errmsg(:) = errmsg
 
             bounds(0) = lb
             bounds(1) = ub
@@ -277,7 +258,7 @@ submodule (vectors) vectors_int32_t_implementation
                         values         = 0
                         values (avail) = value
                     class default
-                        error stop errmsg
+                        error stop "dynamic::vector.create: unexpected err"
                 end select
 
                 begin = 0_int64
@@ -358,6 +339,19 @@ end submodule
 ! lower and upper bounds (lb, ub) are chosen so that we do not include
 ! the element pointed to by (end). It's a valid index but it should not
 ! be referenced since it does not hold an actual value.
+!
+! Index returned by findloc intrinsic has been adjusted by one to
+! account for the array bounds. I am unsure if this a BUG in the
+! implementation of findloc or a misinterpretation on my part.
+! Both the Intel and GNU Fortran Compilers yield the same result.
+! I cannot conclude anything from that but at least account for it
+! when using the compilers I have available.
+!
+! Documentation of findloc from GNU Fortran Compiler:
+! Determines the *location* of the element in the array with the value
+! given in the VALUE argument ... They used *location* instead of index
+! so maybe the user is responsible for obtaining the index from the
+! location as it has been done here.
 !
 !
 ! subroutine clear_method()

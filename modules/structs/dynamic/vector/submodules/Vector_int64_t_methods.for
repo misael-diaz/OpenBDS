@@ -1,11 +1,11 @@
 !
-!   source: Vector_methods.for
+!   source: Vector_int64_t_methods.for
 !   author: misael-diaz
 !   date:   2021-06-27
 !
 !
 !   Synopsis:
-!   Defines methods of the vector class.
+!   Defines methods for vectors of 64-bit integers.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
@@ -23,26 +23,27 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-submodule (vectors) vector_methods
+submodule (vectors) vector_int64_t_methods
+    implicit none
     contains
 
 
-        module function vector_int32_t_find_method (self, value) result(i)
+        module function vector_int64_t_find_method (self, value) result(i)
             class(vector_t), intent(in) :: self
             integer(kind = int64) :: i
-            integer(kind = int32), intent(in) :: value
+            integer(kind = int64), intent(in) :: value
 
             call is_empty (self)
-            call vector_int32_t_findloc_wrapper (self, value, i)
+            call find (self, value, i)
 
             return
         end function
 
 
-        module subroutine vector_int32_t_iterator_method (self, it)
+        module subroutine vector_int64_t_iterator_method (self, it)
             ! Synopsis: Returns iterator to values in range [begin, avail).
             class(vector_t), intent(in) :: self
-            integer(kind = int32), intent(inout), &
+            integer(kind = int64), intent(inout), &
                 & pointer, contiguous :: it(:)
 
             if ( self % size () == 0_int64 ) then
@@ -55,25 +56,25 @@ submodule (vectors) vector_methods
         end subroutine
 
 
-        module subroutine vector_int32_t_indexing_method (self, idx, value)
+        module subroutine vector_int64_t_indexing_method (self, idx, value)
             ! Synopsis: Addresses the element pointed to by index.
             class(vector_t), intent(in) :: self
             integer(kind = int64), intent(in) :: idx
-            integer(kind = int32), intent(inout) :: value
+            integer(kind = int64), intent(out) :: value
 
             call is_empty (self)
             call check_bounds (self, idx)
 
-            value = indexer (self, idx)
+            call indexer (self, idx, value)
 
             return
         end subroutine
 
 
-        module subroutine vector_int32_t_push_back_method (self, value)
+        module subroutine vector_int64_t_push_back_method (self, value)
             ! Synopsis: Pushes value unto back of vector.
             class(vector_t), intent(inout) :: self
-            integer(kind = int32), intent(in) :: value
+            integer(kind = int64), intent(in) :: value
             call back_inserter (self, value)
             return
         end subroutine
