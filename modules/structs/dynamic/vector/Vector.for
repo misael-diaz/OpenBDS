@@ -75,7 +75,7 @@ module idata
 end module idata
 
 
-module vectors
+module VectorClass
     use, intrinsic :: iso_fortran_env, only: int32, int64
     use utils, only: util_allocate_array_int32_by_bounds
     use utils, only: util_allocate_array_int64_by_bounds

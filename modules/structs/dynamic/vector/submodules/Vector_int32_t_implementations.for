@@ -23,7 +23,7 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-submodule (vectors) vectors_int32_t_implementation
+submodule (VectorClass) vector_int32_t_implementation
     implicit none
     contains
 
