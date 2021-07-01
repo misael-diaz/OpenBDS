@@ -56,5 +56,13 @@ $(VECTOR_IINT64_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IINT64_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IINT64_SRC) -o\
 	                                  $(VECTOR_IINT64_OBJ)
 
+$(VECTOR_MVECTT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_MVECTT_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MVECTT_SRC) -o\
+	                                  $(VECTOR_MVECTT_OBJ)
+
+$(VECTOR_IVECTT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IVECTT_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IVECTT_SRC) -o\
+	                                  $(VECTOR_IVECTT_OBJ)
+
 clean:
 	rm -f *.mod *.smod *.o submodules/*.o
