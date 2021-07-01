@@ -23,7 +23,7 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-submodule (vectors) vector_type_oblivious_methods
+submodule (VectorClass) vector_type_oblivious_methods
     implicit none
     contains
 
@@ -118,6 +118,8 @@ submodule (vectors) vector_type_oblivious_methods
         module subroutine vector_vector_t_copy (to, from)
             type(vector_t), intent(out) :: to
             type(vector_t), intent(in) :: from
+            type(vector_t), allocatable :: aryvec(:)
+            type(vector_t) :: vec
             integer(kind = int32), allocatable :: aryi32(:)
             integer(kind = int64), allocatable :: aryi64(:)
             integer(kind = int64) :: ary_bounds(0:1)
@@ -179,6 +181,16 @@ submodule (vectors) vector_type_oblivious_methods
                         to % state % errmsg(:) = "vector<int64_t>"
 
 
+                    type is (vector_t)
+
+
+                        call allocator (ary_bounds, aryvec)
+                        call allocator (vec_bounds, to % array % values, vec)
+
+                        aryvec(:) = values(lb:ub)
+                        to % state % errmsg(:) = "vector<vector_t>"
+
+
                     class default
 
                         error stop errmsg
@@ -197,6 +209,8 @@ submodule (vectors) vector_type_oblivious_methods
                         values(lb:ub) = aryi32(:)
                     type is ( integer(kind = int64) )
                         values(lb:ub) = aryi64(:)
+                    type is (vector_t)
+                        values(lb:ub) = aryvec(:)
                     class default
                         error stop "dynamic::vector.copy: unexpected error"
 

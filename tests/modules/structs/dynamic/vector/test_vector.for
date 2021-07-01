@@ -25,7 +25,7 @@
 
 module vector_class_tests
     use, intrinsic :: iso_fortran_env, only: int32, int64
-    use vectors, only: vector_t
+    use VectorClass, only: vector_t
     use chronos, only: chronom
     implicit none
     integer(kind = int64), parameter :: max_vector_size = 1048576_int64
@@ -44,13 +44,17 @@ module vector_class_tests
 
         subroutine test_vector_push_back ()
             ! Synopsis: Tests pushing values unto back of vector.
-            type(vector_t), pointer :: vector => null()
+            type(vector_t), allocatable :: vector !<int64_t> !
+            type(vector_t), allocatable :: vector2!<vector_t>!
+            type(vector_t), allocatable :: veccopy!<vector_t>!
+            type(vector_t), allocatable :: vector3!<vector_t>!
+            type(vector_t), allocatable :: vc3copy!<vector_t>!
             type(chronom) :: stopwatch
             integer(kind = int64):: i
             integer(kind = int64), parameter :: n = 65536_int64
             integer(kind = int32):: mstat
 
-            allocate (vector, stat = mstat)
+            allocate (vector, vector2, vector3, veccopy, vc3copy, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.push_back: allocation error"
             end if
@@ -76,7 +80,7 @@ module vector_class_tests
             print *, "done"
             print *, new_line('n')//new_line('n')
             print *, "size: ", vector % size()
-            write (*, '(1X,A)', advance='no') "push-back test:"
+            write (*, '(1X,A)', advance='no') "push-back test 1:"
             if ( n == vector % size() ) then
                 print *, "pass"
             else
@@ -85,11 +89,47 @@ module vector_class_tests
 
 
             print *, "elapsed-time (millis): ", stopwatch % etime ()
+
+
+            vector2 = vector_t ()
+
+
+            i = 0_int64
+            do while (i /= 64_int64)
+                call vector2 % push_back (vector)
+                i = i + 1_int64
+            end do
+
+
+            veccopy = vector2   ! copies vector of vectors vector<vector_t>
+
+
+            write (*, '(1X,A)', advance='no') "push-back test 2:"
+            if ( veccopy % size() == vector2 % size() ) then
+                print *, "pass"
+            else
+                print *, "FAIL"
+            end if
+
+
+            ! creates a vector of (vector of vectors)
+            vector3 = vector_t ()
+            call vector3 % push_back (veccopy)
+            vc3copy = vector3
+
+
+            write (*, '(1X,A)', advance='no') "push-back test 3:"
+            if ( vc3copy % size() == vector3 % size() ) then
+                print *, "pass"
+            else
+                print *, "FAIL"
+            end if
+
+
             print *, new_line('n')//new_line('n')
 
 
-
-            deallocate (vector, stat = mstat)
+            deallocate (vector, vector2, vector3, veccopy, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.push_back: deallocation error"
             end if
@@ -104,7 +144,6 @@ module vector_class_tests
             integer(kind = int64), pointer, contiguous :: it(:) => null()
             integer(kind = int64), parameter :: n = max_vector_size
             integer(kind = int64):: r, t(2), address(2)
-            integer(kind = int32):: i
             integer(kind = int32):: mstat
 
             allocate (vector(2), stat = mstat)
@@ -165,7 +204,6 @@ module vector_class_tests
         subroutine test_vector_up_array_vector_t ()
             ! Synopsis: Tests u[nlimited] p[olymorphic] array of vectors.
             type(vector_t), allocatable :: vector(:)
-            integer(kind = int32):: i
             integer(kind = int32):: mstat
 
             allocate (vector(2), stat = mstat)
@@ -364,11 +402,13 @@ module vector_class_tests
         subroutine test_vector_iterator ()
             ! Synopsis: Tests the iterator of the vector class.
             type(vector_t), allocatable :: vector
+            type(vector_t), allocatable :: vector2
+            type(vector_t), pointer, contiguous :: itvec(:) => null()
             integer(kind = int64), pointer, contiguous :: it(:) => null()
             integer(kind = int64):: n, t
             integer(kind = int32):: mstat
 
-            allocate (vector, stat = mstat)
+            allocate (vector, vector2, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.iterator: allocation error"
             end if
@@ -383,7 +423,7 @@ module vector_class_tests
             print *, new_line('n')//new_line('n')
 
 
-            write (*, '(1X,A)', advance='no') "test::vector.iter(): "
+            write (*, '(1X,A)', advance='no') "[0] test::vector.iter(): "
 
             if ( t == sum(it) ) then
                 print *, "pass"
@@ -391,10 +431,23 @@ module vector_class_tests
                 print *, "FAIL"
             end if
 
+
+            vector2 = vector_t ()
+            call vector2 % push_back (vector)
+            call vector2 % iter (itvec)
+
+
+            write (*, '(1X,A)', advance='no') "[1] test::vector.iter(): "
+            if ( itvec(1) % size() /= vector % size() ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
             print *, new_line('n')//new_line('n')
 
-
-            deallocate (vector, stat = mstat)
+            deallocate (vector, vector2, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.iterator: deallocation error"
             end if

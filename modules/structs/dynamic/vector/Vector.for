@@ -55,7 +55,7 @@ module idata
 !       end subroutine
 
 
-        subroutine finalizer (data)
+        recursive subroutine finalizer (data)
             type(data_t), intent(inout) :: data
             integer(kind = int32) :: mstat
 
@@ -75,7 +75,7 @@ module idata
 end module idata
 
 
-module vectors
+module VectorClass
     use, intrinsic :: iso_fortran_env, only: int32, int64
     use utils, only: util_allocate_array_int32_by_bounds
     use utils, only: util_allocate_array_int64_by_bounds
@@ -112,22 +112,28 @@ module vectors
             procedure :: vector_vector_t_copy_method
             procedure :: vector_int32_t_indexing_method
             procedure :: vector_int64_t_indexing_method
+            procedure :: vector_vector_t_indexing_method
             procedure :: vector_int32_t_find_method
             procedure :: vector_int64_t_find_method
             procedure :: vector_int32_t_iterator_method
             procedure :: vector_int64_t_iterator_method
+            procedure :: vector_vector_t_iterator_method
             procedure :: vector_int32_t_push_back_method
             procedure :: vector_int64_t_push_back_method
+            procedure :: vector_vector_t_push_back_method
             generic, public :: assignment(=) => vector_vector_t_copy_method
             generic, public :: get  => vector_int32_t_indexing_method, &
-                                     & vector_int64_t_indexing_method
+                                     & vector_int64_t_indexing_method, &
+                                     & vector_vector_t_indexing_method
             generic, public :: iter => vector_int32_t_iterator_method, &
-                                     & vector_int64_t_iterator_method
+                                     & vector_int64_t_iterator_method, &
+                                     & vector_vector_t_iterator_method
             generic, public :: find => vector_int32_t_find_method, &
                                      & vector_int64_t_find_method
             generic, public :: push_back => &
                                      & vector_int32_t_push_back_method, &
-                                     & vector_int64_t_push_back_method
+                                     & vector_int64_t_push_back_method, &
+                                     & vector_vector_t_push_back_method
             procedure, public :: size => size_method
             procedure, public :: clear => clear_method
             final :: finalizer
@@ -144,16 +150,20 @@ module vectors
         module procedure allocate_data_t
         module procedure allocate_stat_t
         module procedure allocate_vector_t
+        module procedure vector_allocate_array_vector_t
         module procedure vector_int32_t_allocate_dynamic
         module procedure vector_int64_t_allocate_dynamic
+        module procedure vector_vector_t_allocate_dynamic
         module procedure util_allocate_array_int32_by_bounds
         module procedure util_allocate_array_int64_by_bounds
     end interface
 
 
     interface reallocator
+        module procedure vector_allocate_array_vector_t
         module procedure vector_int32_t_allocate_dynamic
         module procedure vector_int64_t_allocate_dynamic
+        module procedure vector_vector_t_allocate_dynamic
         module procedure util_reallocate_array_int32_by_bounds
     end interface
 
@@ -164,6 +174,7 @@ module vectors
         module procedure deallocate_stat_t
         module procedure vector_int32_t_deallocate_dynamic
         module procedure vector_int64_t_deallocate_dynamic
+        module procedure vector_vector_t_deallocate_dynamic
         module procedure util_deallocate_array_int32
         module procedure util_deallocate_array_int64
     end interface
@@ -172,30 +183,35 @@ module vectors
     interface initializer
         module procedure vector_int32_t_initializer
         module procedure vector_int64_t_initializer
+        module procedure vector_vector_t_initializer
     end interface
 
 
     interface create
         module procedure vector_int32_t_create
         module procedure vector_int64_t_create
+        module procedure vector_vector_t_create
     end interface
 
 
     interface back_inserter
         module procedure vector_int32_t_push_back
         module procedure vector_int64_t_push_back
+        module procedure vector_vector_t_push_back
     end interface
 
 
     interface insert_back
         module procedure vector_int32_t_insert_back
         module procedure vector_int64_t_insert_back
+        module procedure vector_vector_t_insert_back
     end interface
 
 
     interface indexer
         module procedure vector_int32_t_indexer
         module procedure vector_int64_t_indexer
+        module procedure vector_vector_t_indexer
     end interface
 
 
@@ -208,12 +224,14 @@ module vectors
     interface slice
         module procedure vector_int32_t_slice
         module procedure vector_int64_t_slice
+        module procedure vector_vector_t_slice
     end interface
 
 
     interface grow
         module procedure vector_int32_t_grow
         module procedure vector_int64_t_grow
+        module procedure vector_vector_t_grow
     end interface
 
 
@@ -271,6 +289,12 @@ module vectors
         end subroutine
 
 
+        module subroutine vector_vector_t_iterator_method (self, it)
+            class(vector_t), intent(in) :: self
+            type(vector_t), intent(inout), pointer, contiguous :: it(:)
+        end subroutine
+
+
         module subroutine vector_int32_t_slice (vector, it)
             type(vector_t), intent(in), target :: vector
             integer(kind = int32), intent(inout), &
@@ -282,6 +306,12 @@ module vectors
             type(vector_t), intent(in), target :: vector
             integer(kind = int64), intent(inout), &
                 & pointer, contiguous :: it(:)
+        end subroutine
+
+
+        module subroutine vector_vector_t_slice (vector, it)
+            type(vector_t), intent(in), target :: vector
+            type(vector_t), intent(inout), pointer, contiguous :: it(:)
         end subroutine
 
 
@@ -315,6 +345,13 @@ module vectors
         end subroutine
 
 
+        module subroutine vector_vector_t_indexing_method (self, idx, value)
+            class(vector_t), intent(in) :: self
+            type(vector_t), intent(inout) :: value
+            integer(kind = int64), intent(in) :: idx
+        end subroutine
+
+
         module subroutine vector_int32_t_indexer (vector, idx, value)
             type(vector_t), intent(in) :: vector
             integer(kind = int64), intent(in) :: idx
@@ -326,6 +363,13 @@ module vectors
             type(vector_t), intent(in) :: vector
             integer(kind = int64), intent(in) :: idx
             integer(kind = int64), intent(out) :: value
+        end subroutine
+
+
+        module subroutine vector_vector_t_indexer (vector, idx, value)
+            type(vector_t), intent(in) :: vector
+            type(vector_t), intent(inout) :: value
+            integer(kind = int64), intent(in) :: idx
         end subroutine
 
 
@@ -354,6 +398,12 @@ module vectors
         end subroutine
 
 
+        module subroutine vector_vector_t_push_back_method (self, value)
+            class(vector_t), intent(inout) :: self
+            type(vector_t), intent(in) :: value
+        end subroutine
+
+
         module subroutine vector_int32_t_push_back (vector, value)
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
@@ -363,6 +413,12 @@ module vectors
         module subroutine vector_int64_t_push_back (vector, value)
             type(vector_t), intent(inout) :: vector
             integer(kind = int64), intent(in) :: value
+        end subroutine
+
+
+        module subroutine vector_vector_t_push_back (vector, value)
+            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(in) :: value
         end subroutine
 
 
@@ -380,6 +436,12 @@ module vectors
         end subroutine
 
 
+        module subroutine vector_vector_t_insert_back (vector, value)
+            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(in) :: value
+        end subroutine
+
+
         module subroutine vector_int32_t_grow (vector, value)
             ! Synopsis: Doubles the vector size.
             type(vector_t), intent(inout), target :: vector
@@ -391,6 +453,12 @@ module vectors
             ! Synopsis: Doubles the vector size.
             type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: value
+        end subroutine
+
+
+        module subroutine vector_vector_t_grow (vector, value)
+            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(in) :: value
         end subroutine
 
 
@@ -430,6 +498,12 @@ module vectors
         end subroutine
 
 
+        module subroutine vector_vector_t_initializer (vector, value)
+            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(in) :: value
+        end subroutine
+
+
         module subroutine vector_int32_t_create (vector, value)
             ! Synopsis: Creates the first element in vector.
             type(vector_t), intent(inout) :: vector
@@ -441,6 +515,12 @@ module vectors
             ! Synopsis: Creates the first element in vector.
             type(vector_t), intent(inout) :: vector
             integer(kind = int64), intent(in) :: value
+        end subroutine
+
+
+        module subroutine vector_vector_t_create (vector, value)
+            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(in) :: value
         end subroutine
 
 
@@ -483,6 +563,19 @@ module vectors
         end subroutine
 
 
+        module subroutine vector_vector_t_allocate_dynamic (b, array, value)
+            type(vector_t), intent(in) :: value
+            class(*), intent(inout), allocatable :: array(:)
+            integer(kind = int64), intent(in) :: b(0:1)
+        end subroutine
+
+
+        module subroutine vector_allocate_array_vector_t (b, array)
+            type(vector_t), intent(inout), allocatable :: array(:)
+            integer(kind = int64), intent(in) :: b(0:1)
+        end subroutine
+
+
         module subroutine deallocate_data_t (d)
             type(data_t), intent(inout), allocatable :: d
         end subroutine
@@ -502,6 +595,12 @@ module vectors
         module subroutine vector_int64_t_deallocate_dynamic (array, value)
             class(*), intent(inout), allocatable :: array(:)
             integer(kind = int64), intent(in) :: value
+        end subroutine
+
+
+        module subroutine vector_vector_t_deallocate_dynamic (array, value)
+            type(vector_t), intent(in) :: value
+            class(*), intent(inout), allocatable :: array(:)
         end subroutine
 
 
@@ -538,7 +637,7 @@ module vectors
         end subroutine
 
 
-        module subroutine finalizer (vector)
+        module recursive subroutine finalizer (vector)
             type(vector_t), intent(inout) :: vector
         end subroutine
 

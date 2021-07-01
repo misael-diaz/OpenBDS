@@ -1,5 +1,5 @@
 !
-!   source: Vector_int64_t_implementations.for
+!   source: Vector_vector_t_implementations.for
 !   author: misael-diaz
 !   date:   2021-06-27
 !
@@ -23,48 +23,20 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-submodule (VectorClass) vector_int64_t_implementation
+submodule (VectorClass) vector_vector_t_implementation
     implicit none
     contains
 
 
-        module subroutine vector_int64_t_findloc_wrapper (vector, value, i)
+        module subroutine vector_vector_t_indexer (vector, idx, value)
             type(vector_t), intent(in) :: vector
-            integer(kind = int64), intent(out) :: i
-            integer(kind = int64) :: lb
-            integer(kind = int64) :: ub
-            integer(kind = int64), intent(in) :: value
-
-
-            lb = vector % begin % idx
-            ub = vector % avail % idx
-            ub = ub - 1_int64
-
-            associate (values => vector % array % values)
-
-                select type (values)
-                    type is ( integer(kind = int64) )
-                        i = findloc(array = values(lb:ub), &
-                                  & value = value, dim = 1, kind = int64)
-                        i = i - 1_int64
-                    class default
-                        error stop vector % state % errmsg
-                end select
-
-            end associate
-            return
-        end subroutine
-
-
-        module subroutine vector_int64_t_indexer (vector, idx, value)
-            type(vector_t), intent(in) :: vector
+            type(vector_t), intent(inout) :: value
             integer(kind = int64), intent(in) :: idx
-            integer(kind = int64), intent(out) :: value
 
             associate (values => vector % array % values)
 
                 select type (values)
-                    type is ( integer(kind = int64) )
+                    type is (vector_t)
                         value = values (idx)
                     class default
                         error stop vector % state % errmsg
@@ -77,10 +49,10 @@ submodule (VectorClass) vector_int64_t_implementation
         end subroutine
 
 
-        module subroutine vector_int64_t_push_back (vector, value)
-            ! Synopsis: Pushes 64-bit integer unto back of vector.
+        module subroutine vector_vector_t_push_back (vector, value)
+            ! Synopsis: Pushes 32-bit integer unto back of vector.
             type(vector_t), intent(inout) :: vector
-            integer(kind = int64), intent(in) :: value
+            type(vector_t), intent(in) :: value
 
 
             call is_instantiated (vector)
@@ -96,10 +68,10 @@ submodule (VectorClass) vector_int64_t_implementation
         end subroutine
 
 
-        module subroutine vector_int64_t_insert_back (vector, value)
+        module subroutine vector_vector_t_insert_back (vector, value)
             ! Synopsis: Inserts value unto back, vector grows as needed.
             type(vector_t), intent(inout) :: vector
-            integer(kind = int64), intent(in) :: value
+            type(vector_t), intent(in) :: value
 
 
             if (vector % avail % idx == vector % limit % idx) then
@@ -111,7 +83,7 @@ submodule (VectorClass) vector_int64_t_implementation
                       values => vector % array % values)
 
                 select type (values)
-                    type is ( integer(kind = int64) )
+                    type is (vector_t)
                         values (avail) = value
                         avail = avail + 1_int64
                     class default
@@ -126,11 +98,10 @@ submodule (VectorClass) vector_int64_t_implementation
         end subroutine
 
 
-        module subroutine vector_int64_t_slice (vector, it)
+        module subroutine vector_vector_t_slice (vector, it)
             ! Synopsis: Binds iterator to slice of (pushed values).
             type(vector_t), intent(in), target :: vector
-            integer(kind = int64), intent(inout), &
-                & pointer, contiguous :: it(:)
+            type(vector_t), intent(inout), pointer, contiguous :: it(:)
             integer(kind = int64) :: lb
             integer(kind = int64) :: ub
 
@@ -143,7 +114,7 @@ submodule (VectorClass) vector_int64_t_implementation
             associate (values => vector % array % values)
 
                 select type (values)
-                    type is ( integer(kind = int64) )
+                    type is (vector_t)
                         it => values (lb:ub)
                     class default
                         error stop vector % state % errmsg
@@ -156,15 +127,15 @@ submodule (VectorClass) vector_int64_t_implementation
         end subroutine
 
 
-        module subroutine vector_int64_t_grow (vector, value)
+        module subroutine vector_vector_t_grow (vector, value)
             ! Synopsis: Doubles the vector size.
-            type(vector_t), intent(inout), target :: vector
+            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(in) :: value
+            type(vector_t), allocatable :: array(:)
             integer(kind = int64):: lb
             integer(kind = int64):: ub
             integer(kind = int64):: bounds(0:1)
-            integer(kind = int64), intent(in) :: value
-            integer(kind = int64), allocatable :: array(:)
-            integer(kind = int64), pointer, contiguous :: ptr(:)
+
 
 
             lb = vector % begin % idx
@@ -178,11 +149,10 @@ submodule (VectorClass) vector_int64_t_implementation
             associate (values => vector % array % values)
 
                 select type (values)
-                    type is ( integer(kind = int64) )
-                        ptr => values(:)
-                        call copy (array, ptr)
+                    type is (vector_t)
+                        array = values
                     class default
-                        error stop vector % state % errmsg
+                        error stop "dynamic::vector.grow: unexpected error"
                 end select
 
             end associate
@@ -199,47 +169,37 @@ submodule (VectorClass) vector_int64_t_implementation
             associate (values => vector % array % values)
 
                select type (values)
-                    type is ( integer(kind = int64) )
-                       values = 0
-                       call copy (values(lb:ub), array)
+                    type is (vector_t)
+                       values(lb:ub) = array(:)
                     class default
                         error stop "dynamic::vector.grow: unexpected error"
                 end select
 
             end associate
 
-            ! TODO: check with valgrind if the array is automatically
-            !       deallocated upon return to caller. Would the
-            !       deallocation be handled by the OS rather than the
-            !       program in this case? Would not deallocating
-            !       explicitly result in a speed up.
-            ! TEST: outcome, array is automatically deallocated on return.
-            !       Did not check the runtime.
-!           call deallocator (array)
-
 
             return
-        end subroutine vector_int64_t_grow
+        end subroutine vector_vector_t_grow
 
 
-        module subroutine vector_int64_t_initializer (vector, value)
+        module subroutine vector_vector_t_initializer (vector, value)
             type(vector_t), intent(inout) :: vector
-            integer(kind = int64), intent(in) :: value
+            type(vector_t), intent(in) :: value
             call create (vector, value)
             return
         end subroutine
 
 
-        module subroutine vector_int64_t_create (vector, value)
+        module subroutine vector_vector_t_create (vector, value)
             ! Synopsis: Creates the first element in vector.
             type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(in) :: value
             integer(kind = int64) :: bounds(0:1)
             integer(kind = int64), parameter :: lb = 0_int64
             integer(kind = int64), parameter :: ub = 8_int64
-            integer(kind = int64), intent(in) :: value
             integer(kind = int32) :: mstat
             character(len=*), parameter :: errmsg = &
-                & "dynamic::vector.error: container of 64-bit integers"
+                & "dynamic::vector.error: container of vectors"
 
 
 !           TODO: consider moving to utils of the vector class
@@ -262,8 +222,7 @@ submodule (VectorClass) vector_int64_t_implementation
                      & values => vector % array % values)
 
                 select type (values)
-                    type is ( integer(kind = int64) )
-                        values         = 0
+                    type is (vector_t)
                         values (avail) = value
                     class default
                         error stop "dynamic::vector.create: unexpected err"
@@ -278,7 +237,7 @@ submodule (VectorClass) vector_int64_t_implementation
 
 
             return
-        end subroutine vector_int64_t_create
+        end subroutine vector_vector_t_create
 
 
 end submodule

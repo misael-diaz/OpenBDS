@@ -50,7 +50,7 @@ end module
 
 program test_math_vector_class
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
-    use vectors, only: vector_t
+    use VectorClass, only: vector_t
     use neighlists, only: in_range
     use math_vector_class, only: math_vector_t => vector_t
     implicit none
