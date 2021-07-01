@@ -34,11 +34,25 @@ module idata
         class(*), allocatable :: values(:)
         contains
             private
+!           procedure :: assign
+!           generic, public :: assignment(=) => assign
             final :: finalizer
     end type
 
 
     contains
+
+
+!       subroutine assign (to, from)
+!           class(data_t), intent(out) :: to
+!           class(data_t), intent(in) :: from
+!
+!           if ( allocated(from % values) ) then
+!               error stop "dynamic::vector.assignment(=): unimplemented"
+!           end if
+!
+!           return
+!       end subroutine
 
 
         subroutine finalizer (data)
@@ -95,6 +109,7 @@ module vectors
         type(stat_t), allocatable :: state
         contains
             private
+            procedure :: vector_vector_t_copy_method
             procedure :: vector_int32_t_indexing_method
             procedure :: vector_int64_t_indexing_method
             procedure :: vector_int32_t_find_method
@@ -103,6 +118,7 @@ module vectors
             procedure :: vector_int64_t_iterator_method
             procedure :: vector_int32_t_push_back_method
             procedure :: vector_int64_t_push_back_method
+            generic, public :: assignment(=) => vector_vector_t_copy_method
             generic, public :: get  => vector_int32_t_indexing_method, &
                                      & vector_int64_t_indexing_method
             generic, public :: iter => vector_int32_t_iterator_method, &
@@ -390,6 +406,18 @@ module vectors
         end subroutine
 
 
+        module subroutine vector_vector_t_copy_method (self, vector)
+            class(vector_t), intent(inout) :: self
+            class(vector_t), intent(in) :: vector
+        end subroutine
+
+
+        module subroutine vector_vector_t_copy (to, from)
+            type(vector_t), intent(out) :: to
+            type(vector_t), intent(in) :: from
+        end subroutine
+
+
         module subroutine vector_int32_t_initializer (vector, value)
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: value
@@ -538,6 +566,7 @@ end module
 
 
 ! TODO:
+! [x] IMPLEMENT type-bound assignment for the data component of vector.
 ! [x] make the components of :[vector_t]: allocatable
 ! [x] Implement a wrapper for the findloc intrinsic. Full support is
 !     not intended. Just for the case in which array, value, and dim
