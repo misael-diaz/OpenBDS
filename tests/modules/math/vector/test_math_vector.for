@@ -57,6 +57,7 @@ program test_math_vector_class
 
 
     type(vector_t), pointer :: neighbors => null()
+    type(vector_t), pointer :: neighvect => null()
     type(tensor_t), pointer :: tensor => null()
 
 
@@ -65,13 +66,12 @@ program test_math_vector_class
 
 
     integer(kind = int64) :: i
+    integer(kind = int64) :: j
     integer(kind = int64), allocatable :: idx(:)
     integer(kind = int64), parameter :: n = 65536_int64
-    integer(kind = int32), parameter :: n_int32 = 65536_int32
     logical(kind = int32), allocatable :: mask(:)
     logical(kind = int32), allocatable :: neig(:)
     integer(kind = int32) :: mstat
-    integer(kind = int32) :: j
 
 
 
@@ -184,7 +184,7 @@ program test_math_vector_class
 
 
     ! checks if the particle has included itself in the neighbor-list
-    if (neighbors % find (n_int32) /= -1) then
+    if (neighbors % find (n) /= -1) then
         print *, "fail"
     else
         print *, "pass"
