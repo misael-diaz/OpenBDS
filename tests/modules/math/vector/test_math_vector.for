@@ -162,6 +162,7 @@ program test_math_vector_class
 
 
     do j = 1, n
+
         call tensor % delta2 (j, idx)       ! vector squared distance
 
         mask     = .true.
@@ -186,18 +187,30 @@ program test_math_vector_class
     call neighvect % iter (it)
 
 
+    ! display some info to user
     print *, ""
     print *, ""
     print *, "distance::min: ", dsqrt( minval(tensor % v) )
     print *, "distance::max: ", dsqrt( maxval(tensor % v) )
     print *, "tensor::neighbors: ", it(n) % size ()
+    print *, ""
+    print *, ""
 
 
-    ! checks if the particle has included itself in the neighbor-list
-    if (it(n) % find (n) /= -1) then
-        print *, "fail"
-    else
+    ! checks if any particle has included itself in the neighbor-list
+    i = 0_int64
+    do j = 1, n
+        if (it(j) % find (j) /= -1) then
+            i = i + 1_int64
+        end if
+    end do
+
+
+    write (*, '(1X,A)', advance='no') "test::neighbor-lists: "
+    if (i == 0_int64) then
         print *, "pass"
+    else
+        print *, "FAIL"
     end if
 
 
