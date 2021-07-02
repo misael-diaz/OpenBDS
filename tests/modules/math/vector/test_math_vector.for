@@ -23,10 +23,11 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module neighlists
+module test_neighlists
     use, intrinsic :: iso_fortran_env, only: int32, real64
     implicit none
-    public
+    private
+    public :: in_range
     contains
         elemental subroutine in_range (d, m, n)
             ! Synopsis:
@@ -51,13 +52,13 @@ end module
 program test_math_vector_class
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use VectorClass, only: vector_t
-    use neighlists, only: in_range
+    use test_neighlists, only: in_range
     use math_vector_class, only: tensor_t => vector_t
     implicit none
 
 
     type(vector_t), pointer :: neighbors => null()
-    type(vector_t), pointer :: neighvect => null()
+    type(vector_t), pointer :: vec_neigh => null()
     type(vector_t), pointer, contiguous :: it(:) => null()
     type(tensor_t), pointer :: tensor => null()
 
@@ -69,15 +70,16 @@ program test_math_vector_class
     integer(kind = int64) :: i
     integer(kind = int64) :: j
     integer(kind = int64), allocatable :: idx(:)
-    integer(kind = int64), parameter :: n = 16384_int64
+    integer(kind = int64), parameter :: n = 1024_int64
+!   integer(kind = int64), parameter :: n = 16384_int64
 !   integer(kind = int64), parameter :: n = 65536_int64
     logical(kind = int32), allocatable :: mask(:)
-    logical(kind = int32), allocatable :: neig(:)
+    logical(kind = int32), allocatable :: is_neighbor(:)
     integer(kind = int32) :: mstat
 
 
 
-    allocate(neighbors, neighvect, stat = mstat)
+    allocate(neighbors, vec_neigh, stat = mstat)
     if (mstat /= 0) error stop "allocation failure"
 
     allocate(tensor, stat = mstat)
@@ -145,13 +147,7 @@ program test_math_vector_class
 
 
 
-    allocate (idx(n), stat = mstat)
-    if (mstat /= 0) error stop "allocation failure"
-
-    allocate (mask(n), stat = mstat)
-    if (mstat /= 0) error stop "allocation failure"
-
-    allocate (neig(n), stat = mstat)
+    allocate (idx(n), mask(n), is_neighbor(n), stat = mstat)
     if (mstat /= 0) error stop "allocation failure"
 
 
@@ -160,31 +156,30 @@ program test_math_vector_class
     end do
 
 
-
     do j = 1, n
 
         call tensor % delta2 (j, idx)       ! vector squared distance
 
-        mask     = .true.
-        mask (j) = .false.  ! excludes the particle itself via mask
-        neig     = .false.
+        mask        = .true.
+        mask (j)    = .false.  ! excludes itself
+        is_neighbor = .false.
         call in_range( floor(tensor % v / cutoff2, kind = int32), &
-                    &  mask, neig )
+                    &  mask, is_neighbor )
 
 
         do i = 1, n
             ! builds the neighbor-list for the jth particle
-            if ( neig(i) ) call neighbors % push_back (i)
+            if ( is_neighbor(i) ) call neighbors % push_back (i)
         end do
 
 
-        call neighvect % push_back (neighbors)
+        call vec_neigh % push_back (neighbors)
         call neighbors % clear ()
 
     end do
 
 
-    call neighvect % iter (it)
+    call vec_neigh % iter (it)
 
 
     ! display some info to user
@@ -222,19 +217,13 @@ program test_math_vector_class
 
 
 
-    deallocate (d, stat = mstat)
-    if (mstat /= 0) error stop "unexpected deallocation failure"
-
-    deallocate (idx, stat = mstat)
-    if (mstat /= 0) error stop "unexpected deallocation failure"
-
-    deallocate (mask, stat = mstat)
+    deallocate (d, idx, mask, is_neighbor, stat = mstat)
     if (mstat /= 0) error stop "unexpected deallocation failure"
 
     deallocate (tensor, stat = mstat)
     if (mstat /= 0) error stop "unexpected deallocation failure"
 
-    deallocate (neighbors, neighvect, stat = mstat)
+    deallocate (neighbors, vec_neigh, stat = mstat)
     if (mstat /= 0) error stop "unexpected deallocation failure"
 
     print *, ""
