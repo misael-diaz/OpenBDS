@@ -1,10 +1,10 @@
 !
-!   source:  vector.f90
+!   source:  tensor.f90
 !   author:  misael-diaz
 !   date:    2021-06-17
 !
 !   Synopsis:
-!   Defines the math vector class.
+!   Defines the tensor class.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
@@ -23,12 +23,12 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 
-module math_vector_class
+module TensorClass
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use utils, only: util_allocate_array_real64_by_size
     use utils, only: util_deallocate_array_real64
     implicit none
-    real(kind = real64), parameter :: vector_eps_mod = 1.0e-12_real64
+    real(kind = real64), parameter :: tensor_eps_mod = 1.0e-12_real64
     private
     save
 
@@ -43,7 +43,7 @@ module math_vector_class
     end type
 
 
-    type, public :: vector_t
+    type, public :: tensor_t
         type(stat_t), allocatable :: stat
         type(size_t), allocatable :: size 
         real(kind = real64), allocatable :: x(:)
@@ -57,12 +57,12 @@ module math_vector_class
             procedure, public :: range => range_method
             procedure, public :: normalize => normalize_method
             generic, public :: delta2 => delta_forall_method, &
-                                      & delta_for_indexed_method
+                                       & delta_for_indexed_method
             final :: finalizer
     end type
 
 
-    interface vector_t
+    interface tensor_t
         module procedure constructor
     end interface
 
@@ -84,14 +84,14 @@ module math_vector_class
     interface
 
 
-        module function constructor (n) result(vector)
-            type(vector_t) :: vector
+        module function constructor (n) result(tensor)
+            type(tensor_t) :: tensor
             integer(kind = int64), intent(in) :: n
         end function
 
 
-        module subroutine initializer (vector, n)
-            type(vector_t), intent(inout) :: vector
+        module subroutine initializer (tensor, n)
+            type(tensor_t), intent(inout) :: tensor
             integer(kind = int64), intent(in) :: n
         end subroutine
 
@@ -102,27 +102,27 @@ module math_vector_class
 
 
         module subroutine normalize_method (self)
-            class(vector_t), intent(inout) :: self
+            class(tensor_t), intent(inout) :: self
         end subroutine
 
 
-        module subroutine normalizer (vector)
-            type(vector_t), intent(inout) :: vector
+        module subroutine normalizer (tensor)
+            type(tensor_t), intent(inout) :: tensor
         end subroutine
 
 
-        module subroutine vector_guard_singular (vector)
-            type(vector_t), intent(in) :: vector
+        module subroutine tensor_guard_singular (tensor)
+            type(tensor_t), intent(in) :: tensor
         end subroutine
 
 
         module subroutine delta_forall_method (self, i)
-            class(vector_t), intent(inout) :: self
+            class(tensor_t), intent(inout) :: self
             integer(kind = int64), intent(in) :: i
         end subroutine
 
         module subroutine delta_for_indexed_method (self, i, idx)
-            class(vector_t), intent(inout) :: self
+            class(tensor_t), intent(inout) :: self
             integer(kind = int64), intent(in) :: i
             integer(kind = int64), intent(in) :: idx(:)
         end subroutine
@@ -130,7 +130,7 @@ module math_vector_class
 
 
         module function range_method (self, i, j) result(d)
-            class(vector_t), intent(in) :: self
+            class(tensor_t), intent(in) :: self
             integer(kind = int64), intent(in) :: i
             integer(kind = int64), intent(in) :: j
             real(kind = real64) :: d
@@ -138,7 +138,7 @@ module math_vector_class
 
 
         module subroutine distance (v, i, j, d)
-            type(vector_t), intent(in) :: v
+            type(tensor_t), intent(in) :: v
             integer(kind = int64), intent(in) :: i
             integer(kind = int64), intent(in) :: j
             real(kind = real64), intent(out) :: d
@@ -154,8 +154,8 @@ module math_vector_class
         end subroutine
 
 
-        module subroutine moduli (vector)
-            type(vector_t), intent(inout) :: vector
+        module subroutine moduli (tensor)
+            type(tensor_t), intent(inout) :: tensor
         end subroutine
 
 
@@ -167,9 +167,9 @@ module math_vector_class
         end subroutine
 
 
-        module subroutine finalizer (vector)
-            ! Synopsis: Frees the memory allocated for the vector.
-            type(vector_t), intent(inout) :: vector
+        module subroutine finalizer (tensor)
+            ! Synopsis: Frees the memory allocated for the tensor.
+            type(tensor_t), intent(inout) :: tensor
         end subroutine
 
 
@@ -193,9 +193,9 @@ module math_vector_class
         end subroutine
 
 
-        module subroutine destructor (vector)
-            ! Synopsis: Destroys the components of the vector.
-            type(vector_t), intent(inout) :: vector
+        module subroutine destructor (tensor)
+            ! Synopsis: Destroys the components of the tensor.
+            type(tensor_t), intent(inout) :: tensor
         end subroutine
 
 
@@ -219,20 +219,20 @@ end module
 !
 ! Have been considering introducing this type however I am still
 ! reluctant to do so. If one were to use this type say to compute the
-! difference of two vectors, one would have to copy the corresponding
+! difference of two tensors, one would have to copy the corresponding
 ! elements to initialize two :[coord_t]: objects. If one were dealing
 ! with small data sets one might not worry (too much) but that's not
 ! the case. The alternative (which is what's going to be implemented)
-! is to address the elements of the vector and store the distance in
+! is to address the elements of the tensor and store the distance in
 ! a scalar, which might be reused as much as possible. In terms of
 ! memory usage this one is preferable.
 !
-! Why not vectorize the code that computes the difference of two vectors?
-! Well, it could be done. However the difference of two vectors is most
+! Why not vectorize the code that computes the difference of two tensors?
+! Well, it could be done. However the difference of two tensors is most
 ! useful when building the neighbor-lists. One can find ways to write
 ! the code so that the compiler vectorizes the operation but bear in mind
 ! that you can only push one value at a time to the neighbor-list. Note
-! that the neighbor-list is implemented as a dynamic vector which grows
+! that the neighbor-list is implemented as a dynamic tensor which grows
 ! as needed, and that property might hinder vectorization. I am not an
 ! expert on vectorization but my intuition tells me that the compiler
 ! might not vectorize without suitable compiler directives. Personally,
