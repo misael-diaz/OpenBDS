@@ -24,18 +24,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include math-vector-test-inc
+include Tensor-test-inc
 
 all: $(TESTS)
 
 
-$(TEST_MATH_VECTOR_EXE): $(SUBM) $(TEST_MATH_VECTOR_OBJ)
+$(TEST_TENSOR_EXE): $(SUBM) $(TEST_TENSOR_OBJ)
 	$(FC) $(FC_OPT) $(MODULES_INC) $(MODS) $(SUBM)\
-	    $(TEST_MATH_VECTOR_OBJ) -o $(TEST_MATH_VECTOR_EXE)
+	    $(TEST_TENSOR_OBJ) -o $(TEST_TENSOR_EXE)
 
-$(TEST_MATH_VECTOR_OBJ): $(MODS) $(TEST_MATH_VECTOR_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_MATH_VECTOR_SRC) -o\
-	       	                          $(TEST_MATH_VECTOR_OBJ)
+$(TEST_TENSOR_OBJ): $(MODS) $(TEST_TENSOR_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_TENSOR_SRC) -o\
+	       	                          $(TEST_TENSOR_OBJ)
 
 
 clean:

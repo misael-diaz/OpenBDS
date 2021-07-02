@@ -59,7 +59,6 @@ module test_neighlists
             type(vector_t), pointer, contiguous :: it(:) => null()
 
             integer(kind = int64):: i, j
-            integer(kind = int32):: mstat
 
 
             call allocator (vec_neighborls)
