@@ -150,7 +150,7 @@ submodule (VectorClass) vector_vector_t_implementation
 
                 select type (values)
                     type is (vector_t)
-                        array = values
+                        array(:) = values(:)
                     class default
                         error stop "dynamic::vector.grow: unexpected error"
                 end select
