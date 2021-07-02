@@ -1,5 +1,5 @@
 !
-!   source: test_math_vector.for
+!   source: test_tensor.for
 !   author: misael-diaz
 !   date:   2021-06-17
 !
@@ -278,6 +278,16 @@ program test_math_vector_class
     call test ()
 
 end program
+
+
+! TODO:
+! [ ] use chronos to find out how much time it takes to build the
+!     neighbor-lists from scratch
+! [ ] use chronos to find out how much time it takes to rebuild
+!     the neighbor-lists (implies that the vectors are cleared
+!     but not deallocated, which is exactly what vector.clear()
+!     does).
+
 
 ! Vectorization:
 ! The Intel Fortran Compiler vectorizes the random_number() intrinsic. Other
