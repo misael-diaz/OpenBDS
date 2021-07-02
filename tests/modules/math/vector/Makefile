@@ -39,4 +39,4 @@ $(TEST_MATH_VECTOR_OBJ): $(MODS) $(TEST_MATH_VECTOR_SRC)
 
 
 clean:
-	rm -f *.mod *.o $(TESTS)
+	rm -f *.mod *.smod *.o $(TESTS)
