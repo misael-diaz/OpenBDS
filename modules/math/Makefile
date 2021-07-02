@@ -25,10 +25,10 @@
 #
 
 
-all: math_vector_mod
+all: tensor_mod
 
-math_vector_mod:
-	@$(MAKE) -C vector
+tensor_mod:
+	@$(MAKE) -C tensor
 
 clean:
-	@$(MAKE) -C vector clean
+	@$(MAKE) -C tensor clean

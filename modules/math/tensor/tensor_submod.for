@@ -1,10 +1,10 @@
 !
-!   source:  vector_submod.f90
+!   source:  tensor_submod.f90
 !   author:  misael-diaz
 !   date:    2021-06-17
 !
 !   Synopsis:
-!   Implements the procedures of the math vector class.
+!   Implements the procedures of the tensor class.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
@@ -23,36 +23,36 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 
-submodule (math_vector_class) math_vector_class_implementations
+submodule (TensorClass) tensor_class_implementations
     contains
 
 
-        module function constructor (n) result(vector)
-            type(vector_t) :: vector
+        module function constructor (n) result(tensor)
+            type(tensor_t) :: tensor
             integer(kind = int64), intent(in) :: n
-            call initializer (vector, n)
+            call initializer (tensor, n)
             return
         end function
 
 
-        module subroutine initializer (vector, n)
-            ! Synopsis: Assigns default values to vector components.
-            type(vector_t), intent(inout) :: vector
+        module subroutine initializer (tensor, n)
+            ! Synopsis: Assigns default values to tensor components.
+            type(tensor_t), intent(inout) :: tensor
             integer(kind = int64), intent(in) :: n
             
 
-            call allocator (vector % stat)
-            call allocator (vector % size)
-            call allocator (n, vector % x)
-            call allocator (n, vector % y)
-            call allocator (n, vector % z)
-            call allocator (n, vector % v)
+            call allocator (tensor % stat)
+            call allocator (tensor % size)
+            call allocator (n, tensor % x)
+            call allocator (n, tensor % y)
+            call allocator (n, tensor % z)
+            call allocator (n, tensor % v)
 
 
-            associate (x => vector % x,    y => vector % y, &
-                     & z => vector % z,    v => vector % v, &
-                     & size => vector % size % n, &
-                     & init => vector % stat % init)
+            associate (x => tensor % x,    y => tensor % y, &
+                     & z => tensor % z,    v => tensor % v, &
+                     & size => tensor % size % n, &
+                     & init => tensor % stat % init)
 
                 size = n
                 init = .true.
@@ -76,8 +76,8 @@ submodule (math_vector_class) math_vector_class_implementations
 
         module subroutine delta_forall_method (self, i)
             ! Synopsis:
-            ! Obtains the distance of the ith vector v[i] relative to v[:].
-            class(vector_t), intent(inout) :: self
+            ! Obtains the distance of the ith tensor v[i] relative to v[:].
+            class(tensor_t), intent(inout) :: self
             integer(kind = int64), intent(in) :: i
 
             self % v(:) = ( self % x(i) - self % x(:) )**2 + &
@@ -90,8 +90,8 @@ submodule (math_vector_class) math_vector_class_implementations
 
         module subroutine delta_for_indexed_method (self, i, idx)
             ! Synopsis:
-            ! Obtains the distance of the ith vector v[i] relative to v[*].
-            class(vector_t), intent(inout) :: self
+            ! Obtains the distance of the ith tensor v[i] relative to v[*].
+            class(tensor_t), intent(inout) :: self
             integer(kind = int64), intent(in) :: i
             integer(kind = int64), intent(in) :: idx(:)
 
@@ -107,7 +107,7 @@ submodule (math_vector_class) math_vector_class_implementations
 
 
         module function range_method (self, i, j) result(d)
-            class(vector_t), intent(in) :: self
+            class(tensor_t), intent(in) :: self
             integer(kind = int64), intent(in) :: i
             integer(kind = int64), intent(in) :: j
             real(kind = real64) :: d
@@ -119,7 +119,7 @@ submodule (math_vector_class) math_vector_class_implementations
 
 
         module subroutine distance (v, i, j, d)
-            type(vector_t), intent(in) :: v
+            type(tensor_t), intent(in) :: v
             integer(kind = int64), intent(in) :: i
             integer(kind = int64), intent(in) :: j
             real(kind = real64), intent(out) :: d
@@ -139,7 +139,7 @@ submodule (math_vector_class) math_vector_class_implementations
 
 
         module subroutine normalize_method (self)
-            class(vector_t), intent(inout) :: self
+            class(tensor_t), intent(inout) :: self
 
             if ( allocated(self % stat) ) then
                 call normalizer (self)
@@ -149,18 +149,18 @@ submodule (math_vector_class) math_vector_class_implementations
         end subroutine
 
 
-        module subroutine normalizer (vector)
-            type(vector_t), intent(inout) :: vector
-            real(kind = real64) :: t(vector % size % n)
+        module subroutine normalizer (tensor)
+            type(tensor_t), intent(inout) :: tensor
+            real(kind = real64) :: t(tensor % size % n)
 
 
-            call moduli (vector)
-            call vector_guard_singular (vector)
+            call moduli (tensor)
+            call tensor_guard_singular (tensor)
  
 
             call initialize (t)
-            associate(x => vector % x, y => vector % y, &
-                    & z => vector % z, v => vector % v)
+            associate(x => tensor % x, y => tensor % y, &
+                    & z => tensor % z, v => tensor % v)
 
                call normalize (x, y, z, t, v)
 
@@ -171,11 +171,11 @@ submodule (math_vector_class) math_vector_class_implementations
         end subroutine
 
 
-        module subroutine vector_guard_singular (vector)
-            type(vector_t), intent(in) :: vector
+        module subroutine tensor_guard_singular (tensor)
+            type(tensor_t), intent(in) :: tensor
 
-            if ( minval(vector % v) < vector_eps_mod ) then
-                error stop "math::vector.vector_guard_singular (): "//&
+            if ( minval(tensor % v) < tensor_eps_mod ) then
+                error stop "math::tensor.tensor_guard_singular (): "//&
                     & "abort singular"
             end if
 
@@ -203,14 +203,14 @@ submodule (math_vector_class) math_vector_class_implementations
         end subroutine
 
 
-        module subroutine moduli (vector)
-            type(vector_t), intent(inout) :: vector
-            real(kind = real64) :: t(vector % size % n)
+        module subroutine moduli (tensor)
+            type(tensor_t), intent(inout) :: tensor
+            real(kind = real64) :: t(tensor % size % n)
 
 
             call initialize (t)
-            associate(x => vector % x, y => vector % y, &
-                    & z => vector % z, v => vector % v)
+            associate(x => tensor % x, y => tensor % y, &
+                    & z => tensor % z, v => tensor % v)
                
                call modulus (x, y, z, t)
                v = dsqrt(t)
@@ -245,7 +245,7 @@ submodule (math_vector_class) math_vector_class_implementations
             end if
 
             if (mstat /= 0) then
-                error stop "math::vector.allocate_stat: allocation failure"
+                error stop "math::tensor.allocate_stat: allocation failure"
             end if
 
             return
@@ -261,7 +261,7 @@ submodule (math_vector_class) math_vector_class_implementations
             end if
 
             if (mstat /= 0) then
-                error stop "math::vector.allocate_size: allocation failure"
+                error stop "math::tensor.allocate_size: allocation failure"
             end if
 
             return
@@ -277,7 +277,7 @@ submodule (math_vector_class) math_vector_class_implementations
             end if
 
             if (mstat /= 0) then
-                error stop "math::vector.deallocate_stat: "// &
+                error stop "math::tensor.deallocate_stat: "// &
                     & "deallocation failure"
             end if
 
@@ -294,7 +294,7 @@ submodule (math_vector_class) math_vector_class_implementations
             end if
 
             if (mstat /= 0) then
-                error stop "math::vector.deallocate_size: "// &
+                error stop "math::tensor.deallocate_size: "// &
                     & "deallocation failure"
             end if
 
@@ -302,33 +302,33 @@ submodule (math_vector_class) math_vector_class_implementations
         end subroutine
 
 
-        module subroutine finalizer (vector)
-            ! Synopsis: Frees memory allocated for vector.
-            type(vector_t), intent(inout) :: vector
+        module subroutine finalizer (tensor)
+            ! Synopsis: Frees memory allocated for tensor.
+            type(tensor_t), intent(inout) :: tensor
 
-            write (*, '(A)', advance='no') "destroying vector ... "
+!           write (*, '(A)', advance='no') "destroying tensor ... "
 
 
-            call destructor (vector)
+            call destructor (tensor)
         
         
-            print *, "done"
+!           print *, "done"
 
             return
         end subroutine
 
 
 
-        module subroutine destructor (vector)
-            ! Synopsis: Destroys the components of the vector.
-            type(vector_t), intent(inout) :: vector
+        module subroutine destructor (tensor)
+            ! Synopsis: Destroys the components of the tensor.
+            type(tensor_t), intent(inout) :: tensor
 
-            call deallocator (vector % x)
-            call deallocator (vector % y)
-            call deallocator (vector % z)
-            call deallocator (vector % v)
-            call deallocator (vector % size)
-            call deallocator (vector % stat)
+            call deallocator (tensor % x)
+            call deallocator (tensor % y)
+            call deallocator (tensor % z)
+            call deallocator (tensor % v)
+            call deallocator (tensor % size)
+            call deallocator (tensor % stat)
 
             return
         end subroutine

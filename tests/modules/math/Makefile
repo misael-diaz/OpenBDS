@@ -25,10 +25,10 @@
 #
 
 
-all: test_math_vector
+all: test_tensor
 
-test_math_vector:
-	@$(MAKE) -C vector
+test_tensor:
+	@$(MAKE) -C tensor
 
 clean:
-	@$(MAKE) -C vector clean
+	@$(MAKE) -C tensor clean

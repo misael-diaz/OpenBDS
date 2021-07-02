@@ -24,18 +24,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include math-vector-inc
+include Tensor-inc
 
-all: $(MATH_VECTOR_MODULE_OBJ) $(MATH_VECTOR_SUBMOD_OBJ)
+all: $(TENSOR_MODULE_OBJ) $(TENSOR_SUBMOD_OBJ)
 
-$(MATH_VECTOR_MODULE_OBJ): $(MATH_VECTOR_MODULE_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(MATH_VECTOR_MODULE_SRC) -o\
-	                                  $(MATH_VECTOR_MODULE_OBJ)
+$(TENSOR_MODULE_OBJ): $(TENSOR_MODULE_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TENSOR_MODULE_SRC) -o\
+	                                  $(TENSOR_MODULE_OBJ)
 
-$(MATH_VECTOR_SUBMOD_OBJ): $(MATH_VECTOR_MODULE_OBJ)\
-       	                   $(MATH_VECTOR_SUBMOD_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(MATH_VECTOR_SUBMOD_SRC) -o\
-	                                  $(MATH_VECTOR_SUBMOD_OBJ)
+$(TENSOR_SUBMOD_OBJ): $(TENSOR_MODULE_OBJ)\
+       	                   $(TENSOR_SUBMOD_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TENSOR_SUBMOD_SRC) -o\
+	                                  $(TENSOR_SUBMOD_OBJ)
 
 clean:
 	rm -f *.mod *.smod *.o

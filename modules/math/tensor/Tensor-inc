@@ -1,5 +1,5 @@
 #
-# source: math-vector-inc
+# source: Tensor-inc
 # author: misael-diaz
 # date:   2021-06-17
 #
@@ -31,10 +31,10 @@ MODULES_INC = -I$(MODULES_DIR)
 
 
 # src
-MATH_VECTOR_MODULE_SRC = vector.for
-MATH_VECTOR_SUBMOD_SRC = vector_submod.for
+TENSOR_MODULE_SRC = tensor.for
+TENSOR_SUBMOD_SRC = tensor_submod.for
 
 
 # objects
-MATH_VECTOR_MODULE_OBJ = math_vector.o
-MATH_VECTOR_SUBMOD_OBJ = math_vector_submod.o
+TENSOR_MODULE_OBJ = tensor.o
+TENSOR_SUBMOD_OBJ = tensor_submod.o

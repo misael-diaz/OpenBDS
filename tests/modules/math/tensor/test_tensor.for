@@ -26,7 +26,7 @@
 module test_neighlists
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use VectorClass, only: vector_t
-    use math_vector_class, only: tensor_t => vector_t
+    use TensorClass, only: tensor_t
     implicit none
     integer(kind = int64), parameter :: n = 1024_int64
 !   integer(kind = int64), parameter :: n = 16384_int64
@@ -59,7 +59,6 @@ module test_neighlists
             type(vector_t), pointer, contiguous :: it(:) => null()
 
             integer(kind = int64):: i, j
-            integer(kind = int32):: mstat
 
 
             call allocator (vec_neighborls)
