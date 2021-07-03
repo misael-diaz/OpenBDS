@@ -56,23 +56,27 @@ module test_neighlists
             ! Synopsis: 
             ! Checks if any particle's included itself in the neighbor-list
             type(vector_t), allocatable :: vec_neighborls
-            type(vector_t), pointer, contiguous :: it(:) => null()
+            class(*), pointer, contiguous :: it(:) => null()
 
             integer(kind = int64):: i, j
 
 
             call allocator (vec_neighborls)
             vec_neighborls = neighlists_create ()
-            call vec_neighborls % iter (it)
+            it => vec_neighborls % deref % it
 
-
-            i = 0_int64
-            do j = 1_int64, n
-                ! searchs itself in its neighbor-list
-                if (it(j) % find (j) /= -1) then
-                    i = i + 1_int64
-                end if
-            end do
+            select type (it)
+                type is (vector_t)
+                    i = 0_int64
+                    do j = 1_int64, n
+                        ! searchs itself in its neighbor-list
+                        if (it(j) % find (j) /= -1) then
+                        i = i + 1_int64
+                        end if
+                    end do
+                class default
+                    error stop "unexpected error"
+            end select
 
 
             write (*, '(1X,A)', advance='no') "test::neighbor-lists: "
