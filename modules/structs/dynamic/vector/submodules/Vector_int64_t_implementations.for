@@ -129,37 +129,6 @@ submodule (VectorClass) vector_int64_t_implementation
         end subroutine
 
 
-        ! TODO: Remove Method
-        module subroutine vector_int64_t_slice (vector, it)
-            ! Synopsis: Binds iterator to slice of (pushed values).
-            type(vector_t), intent(in), target :: vector
-            integer(kind = int64), intent(inout), &
-                & pointer, contiguous :: it(:)
-            integer(kind = int64) :: lb
-            integer(kind = int64) :: ub
-
-
-            lb = vector % begin % idx
-            ub = vector % avail % idx
-            ub = ub - 1_int64
-
-
-            associate (values => vector % array % values)
-
-                select type (values)
-                    type is ( integer(kind = int64) )
-                        it => values (lb:ub)
-                    class default
-                        error stop vector % state % errmsg
-                end select
-
-            end associate
-
-
-            return
-        end subroutine
-
-
         module subroutine vector_int64_t_grow (vector, value)
             ! Synopsis: Doubles the vector size.
             type(vector_t), intent(inout), target :: vector
