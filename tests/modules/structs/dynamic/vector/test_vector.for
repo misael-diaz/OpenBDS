@@ -142,9 +142,9 @@ module vector_class_tests
         subroutine test_vector_array_vector_t ()
             ! Synopsis: Tests array of vectors.
             type(vector_t), allocatable :: vector(:)
-            integer(kind = int64), pointer, contiguous :: it(:) => null()
+            class(*), pointer, contiguous :: it(:) => null()
             integer(kind = int64), parameter :: n = max_vector_size
-            integer(kind = int64):: r, t(2), address(2)
+            integer(kind = int64):: i, r, t(2), address(2)
             integer(kind = int32):: mstat
 
             allocate (vector(2), stat = mstat)
@@ -153,7 +153,11 @@ module vector_class_tests
             end if
 
 
-            vector = create () ! instantiates array of vectors
+!! BUG      vector = create () WRONG: iterators point to the same object !!
+            do i = 1_int64, 2_int64
+                ! instantiates array of vectors the right way
+                vector(i) = create ()
+            end do
 
 
             ! size test (vectors must have the same number of elements)
@@ -167,11 +171,23 @@ module vector_class_tests
 
             write (*, '(1X,A)', advance='no') "array of vectors test 2:"
 
-            call vector(1) % iter(it)
-            t(1) = sum(it)
+            it => vector(1) % deref % it
+            select type (it)
+                type is ( integer(kind = int64) )
+                    t(1) = sum(it)
+                class default
+                    error stop "v.iter: unexpected error"
+            end select
             address(1) = loc(it)
-            call vector(2) % iter(it)
-            t(2) = sum(it)
+
+
+            it => vector(2) % deref % it
+            select type (it)
+                type is ( integer(kind = int64) )
+                    t(2) = sum(it)
+                class default
+                    error stop "v.iter: unexpected error"
+            end select            
             address(2) = loc(it)
 
 
@@ -204,24 +220,29 @@ module vector_class_tests
 
         subroutine test_vector_up_array_vector_t ()
             ! Synopsis: Tests u[nlimited] p[olymorphic] array of vectors.
-            type(vector_t), allocatable :: vector(:)
+            type(vector_t), allocatable :: v(:)
             integer(kind = int32):: mstat
 
-            allocate (vector(2), stat = mstat)
+            allocate (v(2), stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.array: allocation error"
             end if
 
 
-            vector = vector_t ()
-            call vector(1) % push_back(0_int32)
-            call vector(2) % push_back(0_int64)
+            v = vector_t ()
+            call v(1) % push_back(0_int32)
+            call v(2) % push_back(0_int64)
 
+            if ( loc(v(1) % deref % it) == loc(v(2) % deref % it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
 
             print *, "unlimited polymorphic test: pass" ! compiles/executes
 
 
-            deallocate (vector, stat = mstat)
+            deallocate (v, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.copy: deallocation error"
             end if
@@ -281,7 +302,7 @@ module vector_class_tests
 
         subroutine test_vector_clear ()
             type(vector_t), allocatable :: vector
-            integer(kind = int64), pointer, contiguous :: it(:) => null()
+            class(*), pointer, contiguous :: it(:) => null()
             integer(kind = int32):: mstat
 
             allocate (vector, stat = mstat)
@@ -292,8 +313,7 @@ module vector_class_tests
 
             vector = create ()
             call vector % clear ()
-            call vector % iter  (it)
-
+            it => vector % deref % it
 
             write (*, '(1X,A)', advance='no') "[0] test::vector.clear(): "
             if ( vector % size() /= 0 ) then
@@ -404,8 +424,7 @@ module vector_class_tests
             ! Synopsis: Tests the iterator of the vector class.
             type(vector_t), allocatable :: vector
             type(vector_t), allocatable :: vector2
-            type(vector_t), pointer, contiguous :: itvec(:) => null()
-            integer(kind = int64), pointer, contiguous :: it(:) => null()
+            class(*), pointer, contiguous :: it(:) => null()
             integer(kind = int64):: n, t
             integer(kind = int32):: mstat
 
@@ -416,7 +435,7 @@ module vector_class_tests
 
 
             vector = create ()
-            call vector % iter (it)
+            it => vector % deref % it
             n = vector % size ()
             t = (n - 1_int64) * n / 2_int64
 
@@ -426,24 +445,39 @@ module vector_class_tests
 
             write (*, '(1X,A)', advance='no') "[0] test::vector.iter(): "
 
-            if ( t == sum(it) ) then
-                print *, "pass"
-            else
-                print *, "FAIL"
-            end if
+            select type (it)
+                type is ( integer(kind = int64) )
+
+                    if ( t == sum(it) ) then
+                        print *, "pass"
+                    else
+                        print *, "FAIL"
+                    end if
+
+                class default
+                    error stop "v.iter: unexepcted error"
+            end select
 
 
             vector2 = vector_t ()
             call vector2 % push_back (vector)
-            call vector2 % iter (itvec)
+            it => vector2 % deref % it
 
 
             write (*, '(1X,A)', advance='no') "[1] test::vector.iter(): "
-            if ( itvec(1) % size() /= vector % size() ) then
-                print *, "FAIL"
-            else
-                print *, "pass"
-            end if
+
+            select type (it)
+                type is (vector_t)
+
+                    if ( it(1) % size() /= vector % size() ) then
+                        print *, "FAIL"
+                    else
+                        print *, "pass"
+                    end if
+
+                class default
+                    error stop "v.iter: unexpected error"
+            end select
 
 
             print *, new_line('n')//new_line('n')
@@ -595,7 +629,7 @@ module vector_class_tests
             ! Synopsis: Tests molding class(*) into vector.
             type(vector_t), allocatable :: vector
             class(*), allocatable :: array(:)
-            integer(kind = int64), pointer, contiguous :: it(:) => null()
+            class(*), pointer, contiguous :: it(:) => null()
             integer(kind = int64), parameter :: n = max_vector_size
             integer(kind = int64):: r, t(2)
             integer(kind = int32):: mstat
@@ -622,10 +656,23 @@ module vector_class_tests
 
 
                     array = vector
-                    call array(1) % iter (it)
-                    t(1) = sum(it)
-                    call array(2) % iter (it)
-                    t(2) = sum(it)
+                    it => array(1) % deref % it
+                    select type (it)
+                        type is ( integer(kind = int64) )
+                            t(1) = sum(it)
+                        class default
+                            error stop "cast test: unexpected error"
+                    end select
+
+
+                    it => array(2) % deref % it
+                    select type (it)
+                        type is ( integer(kind = int64) )
+                            t(2) = sum(it)
+                        class default
+                            error stop "cast test: unexpected error"
+                    end select
+
 
                     r = (n - 1_int64) * n / 2_int64
                     ! running total test
