@@ -98,7 +98,7 @@ submodule (VectorClass) vector_int64_t_implementation
 
         module subroutine vector_int64_t_insert_back (vector, value)
             ! Synopsis: Inserts value unto back, vector grows as needed.
-            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: value
 
 
@@ -107,17 +107,20 @@ submodule (VectorClass) vector_int64_t_implementation
             end if
 
 
-            associate(avail  => vector % avail % idx,&
-                      values => vector % array % values)
+            associate (begin  => vector % begin % idx,  &
+                     & avail  => vector % avail % idx,  &
+                     & values => vector % array % values)
 
                 select type (values)
                     type is ( integer(kind = int64) )
                         values (avail) = value
-                        avail = avail + 1_int64
                     class default
                         ! caters inserting mixed-types
                         error stop vector % state % errmsg
                 end select
+
+                vector % deref % it => vector % array % values(begin:avail)
+                avail = avail + 1_int64
 
             end associate
 
@@ -126,6 +129,7 @@ submodule (VectorClass) vector_int64_t_implementation
         end subroutine
 
 
+        ! TODO: Remove Method
         module subroutine vector_int64_t_slice (vector, it)
             ! Synopsis: Binds iterator to slice of (pushed values).
             type(vector_t), intent(in), target :: vector
@@ -165,8 +169,10 @@ submodule (VectorClass) vector_int64_t_implementation
             integer(kind = int64), intent(in) :: value
             integer(kind = int64), allocatable :: array(:)
             integer(kind = int64), pointer, contiguous :: ptr(:)
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.grow: unexpected error"
 
-
+            ! bounds for copying the entire data array
             lb = vector % begin % idx
             ub = vector % limit % idx
             bounds(0) = lb
@@ -203,7 +209,7 @@ submodule (VectorClass) vector_int64_t_implementation
                        values = 0
                        call copy (values(lb:ub), array)
                     class default
-                        error stop "dynamic::vector.grow: unexpected error"
+                        error stop errmsg
                 end select
 
             end associate
@@ -232,7 +238,7 @@ submodule (VectorClass) vector_int64_t_implementation
 
         module subroutine vector_int64_t_create (vector, value)
             ! Synopsis: Creates the first element in vector.
-            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(inout), target :: vector
             integer(kind = int64) :: bounds(0:1)
             integer(kind = int64), parameter :: lb = 0_int64
             integer(kind = int64), parameter :: ub = 8_int64
@@ -250,6 +256,7 @@ submodule (VectorClass) vector_int64_t_implementation
             end if
             vector % state % errmsg(:) = errmsg
 
+
             bounds(0) = lb
             bounds(1) = ub
             call allocator (bounds, vector % array % values, value)
@@ -261,17 +268,22 @@ submodule (VectorClass) vector_int64_t_implementation
                      & state  => vector % state % init, &
                      & values => vector % array % values)
 
+
+                begin = lb
+                avail = lb
+                limit = ub
+
+
                 select type (values)
                     type is ( integer(kind = int64) )
-                        values         = 0
+                        values         = 0_int64
                         values (avail) = value
                     class default
                         error stop "dynamic::vector.create: unexpected err"
                 end select
 
-                begin = 0_int64
+                vector % deref % it => vector % array % values(begin:avail)
                 avail = avail + 1_int64
-                limit = ub
                 state = .true.
 
             end associate
