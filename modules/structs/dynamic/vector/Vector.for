@@ -117,9 +117,6 @@ module VectorClass
             procedure :: vector_vector_t_indexing_method
             procedure :: vector_int32_t_find_method
             procedure :: vector_int64_t_find_method
-            procedure :: vector_int32_t_iterator_method
-            procedure :: vector_int64_t_iterator_method
-            procedure :: vector_vector_t_iterator_method
             procedure :: vector_int32_t_push_back_method
             procedure :: vector_int64_t_push_back_method
             procedure :: vector_vector_t_push_back_method
@@ -127,9 +124,6 @@ module VectorClass
             generic, public :: get  => vector_int32_t_indexing_method, &
                                      & vector_int64_t_indexing_method, &
                                      & vector_vector_t_indexing_method
-            generic, public :: iter => vector_int32_t_iterator_method, &
-                                     & vector_int64_t_iterator_method, &
-                                     & vector_vector_t_iterator_method
             generic, public :: find => vector_int32_t_find_method, &
                                      & vector_int64_t_find_method
             generic, public :: push_back => &
@@ -223,13 +217,6 @@ module VectorClass
     end interface
 
 
-    interface slice
-        module procedure vector_int32_t_slice
-        module procedure vector_int64_t_slice
-        module procedure vector_vector_t_slice
-    end interface
-
-
     interface grow
         module procedure vector_int32_t_grow
         module procedure vector_int64_t_grow
@@ -275,46 +262,6 @@ module VectorClass
             integer(kind = int64) :: i
             integer(kind = int64), intent(in) :: value
         end function
-
-
-        module subroutine vector_int32_t_iterator_method (self, it)
-            class(vector_t), intent(in) :: self
-            integer(kind = int32), intent(inout), &
-                & pointer, contiguous :: it(:)
-        end subroutine
-
-
-        module subroutine vector_int64_t_iterator_method (self, it)
-            class(vector_t), intent(in) :: self
-            integer(kind = int64), intent(inout), &
-                & pointer, contiguous :: it(:)
-        end subroutine
-
-
-        module subroutine vector_vector_t_iterator_method (self, it)
-            class(vector_t), intent(in) :: self
-            type(vector_t), intent(inout), pointer, contiguous :: it(:)
-        end subroutine
-
-
-        module subroutine vector_int32_t_slice (vector, it)
-            type(vector_t), intent(in), target :: vector
-            integer(kind = int32), intent(inout), &
-                & pointer, contiguous :: it(:)
-        end subroutine
-
-
-        module subroutine vector_int64_t_slice (vector, it)
-            type(vector_t), intent(in), target :: vector
-            integer(kind = int64), intent(inout), &
-                & pointer, contiguous :: it(:)
-        end subroutine
-
-
-        module subroutine vector_vector_t_slice (vector, it)
-            type(vector_t), intent(in), target :: vector
-            type(vector_t), intent(inout), pointer, contiguous :: it(:)
-        end subroutine
 
 
         module subroutine vector_int32_t_findloc_wrapper (vector, value, i)

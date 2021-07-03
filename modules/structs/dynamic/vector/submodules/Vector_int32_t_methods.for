@@ -40,22 +40,6 @@ submodule (VectorClass) vector_int32_t_methods
         end function
 
 
-        module subroutine vector_int32_t_iterator_method (self, it)
-            ! Synopsis: Returns iterator to values in range [begin, avail).
-            class(vector_t), intent(in) :: self
-            integer(kind = int32), intent(inout), &
-                & pointer, contiguous :: it(:)
-
-            if ( self % size () == 0_int64 ) then
-                it => null()
-            else
-                call slice (self, it)
-            end if
-
-            return
-        end subroutine
-
-
         module subroutine vector_int32_t_indexing_method (self, idx, value)
             ! Synopsis: Addresses the element pointed to by index.
             class(vector_t), intent(in) :: self
