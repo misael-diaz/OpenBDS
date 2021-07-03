@@ -36,6 +36,7 @@ module vector_class_tests
     public :: test_vector_find
     public :: test_vector_clear
     public :: test_vector_iterator
+    public :: test_vector_public_iterator
     public :: test_vector_array_vector_t
     public :: test_vector_up_array_vector_t
     public :: test_vector_mold_vector_t
@@ -456,6 +457,118 @@ module vector_class_tests
         end subroutine
 
 
+        subroutine test_vector_public_iterator ()
+            type(vector_t), allocatable, target :: vector
+            type(vector_t), allocatable :: vecopy
+            class(*), pointer, contiguous :: iter(:)
+            integer(kind = int32), allocatable :: values(:)
+            integer(kind = int32):: i, v(1), value
+            integer(kind = int32):: mstat
+
+            allocate (vector, vecopy, values(256), stat = mstat)
+            if (mstat /= 0) then
+                error stop "test::vector.iterator: allocation error"
+            end if
+
+
+            vector = vector_t ()
+
+            do i = 1, 256
+                value = i
+                values(i) = value
+                call vector % push_back (value)
+            end do
+
+
+            ! select-type construct needed to dereference iterator
+            associate (it => vector % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        values(:) = it - values
+                end select
+            end associate
+
+
+            write (*, '(1X,A)', advance='no') "[0] test::v.iter: "
+            if ( sum(values) /= 0 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            iter => vector % deref % it
+            ! inquiry functions do *not* need the select-type construct
+            write (*, '(1X,A)', advance='no') "[1] test::v.iter: "
+            if ( size(iter, kind = int64) /= vector % size() ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            call vector % clear ()
+            write (*, '(1X,A)', advance='no') "[2] test::v.iter: "
+            if ( associated(vector % deref % it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            v = 256
+            call vector % push_back( v(1) )
+
+
+            associate (it => vector % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        v = it - v
+                end select
+            end associate
+
+
+            write (*, '(1X,A)', advance='no') "[3] test::v.iter: "
+            if ( v(1) /= 0 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            iter => vector % deref % it
+            write (*, '(1X,A)', advance='no') "[4] test::v.iter: "
+            if ( size(iter, kind = int64) /= vector % size() ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            vecopy = vector
+
+
+            iter => vecopy % deref % it
+            write (*, '(1X,A)', advance='no') "[5] test::v.iter: "
+            if ( size(iter, kind = int64) /= vecopy % size() ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            write (*, '(1X,A)', advance='no') "[6] test::v.iter: "
+            if (loc(vecopy % deref % it) == loc(vector % deref % it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            return
+        end subroutine
+
+
         function create () result(vector)
             ! Synopsis: Returns vector<int64_t>.
             type(vector_t), allocatable :: vector
@@ -545,6 +658,7 @@ program test_vector_class
     use vector_class_tests, only: copy => test_vector_copy
     use vector_class_tests, only: find => test_vector_find
     use vector_class_tests, only: iter => test_vector_iterator
+    use vector_class_tests, only: it   => test_vector_public_iterator
     use vector_class_tests, only: cast => test_vector_mold_vector_t
     use vector_class_tests, only: clear => test_vector_clear
     use vector_class_tests, only: array_vector_t => &
@@ -563,7 +677,7 @@ program test_vector_class
     call clear ()
     call array_vector_t ()
     call up_array_vector_t ()
-
+    call it ()
 
 end program
 

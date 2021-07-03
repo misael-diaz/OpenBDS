@@ -49,6 +49,8 @@ submodule (VectorClass) vector_type_oblivious_methods
             vector % begin % idx  = 0_int64
             vector % avail % idx  = 0_int64
             vector % limit % idx  = 0_int64
+            vector % deref % idx  = 0_int64
+            vector % deref % it   => null()
             vector % state % init = .false.
 
             return
@@ -82,6 +84,7 @@ submodule (VectorClass) vector_type_oblivious_methods
             call is_instantiated (self)
 
             self % avail % idx = 0_int64
+            self % deref % it  => null()
             return
         end subroutine
 
@@ -116,7 +119,7 @@ submodule (VectorClass) vector_type_oblivious_methods
 
 
         module subroutine vector_vector_t_copy (to, from)
-            type(vector_t), intent(out) :: to
+            type(vector_t), intent(out), target :: to
             type(vector_t), intent(in) :: from
             type(vector_t), allocatable :: aryvec(:)
             type(vector_t) :: vec
@@ -124,6 +127,8 @@ submodule (VectorClass) vector_type_oblivious_methods
             integer(kind = int64), allocatable :: aryi64(:)
             integer(kind = int64) :: ary_bounds(0:1)
             integer(kind = int64) :: vec_bounds(0:1)
+            integer(kind = int64) :: first
+            integer(kind = int64) :: last
             integer(kind = int64) :: lb
             integer(kind = int64) :: ub
             integer(kind = int64) :: i64
@@ -145,6 +150,7 @@ submodule (VectorClass) vector_type_oblivious_methods
             to % begin % idx = from % begin % idx
             to % avail % idx = from % avail % idx
             to % limit % idx = from % limit % idx
+            to % deref % idx = from % deref % idx
 
 
             lb            = from % begin % idx
@@ -218,6 +224,9 @@ submodule (VectorClass) vector_type_oblivious_methods
 
             end associate
 
+            first = to % begin % idx
+            last  = to % avail % idx - 1_int64
+            to % deref % it   => to % array % values(first:last)
             to % state % init = .true.
 
             return

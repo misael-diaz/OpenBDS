@@ -88,6 +88,7 @@ module VectorClass
 
 
     type :: iter_t
+        class(*), pointer, contiguous :: it(:) => null()
         integer(kind = int64) :: idx = 0_int64
     end type
 
@@ -102,10 +103,11 @@ module VectorClass
 
     type, public :: vector_t
         private
-        type(data_t), allocatable :: array
+        type(iter_t), allocatable, public :: deref
         type(iter_t), allocatable :: begin
         type(iter_t), allocatable :: avail
         type(iter_t), allocatable :: limit
+        type(data_t), allocatable :: array
         type(stat_t), allocatable :: state
         contains
             private
@@ -424,20 +426,20 @@ module VectorClass
 
         module subroutine vector_int32_t_insert_back (vector, value)
             ! Synopsis: Inserts value unto back, vector grows as needed.
-            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(inout), target :: vector
             integer(kind = int32), intent(in) :: value
         end subroutine
 
 
         module subroutine vector_int64_t_insert_back (vector, value)
             ! Synopsis: Inserts value unto back, vector grows as needed.
-            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: value
         end subroutine
 
 
         module subroutine vector_vector_t_insert_back (vector, value)
-            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(inout), target :: vector
             type(vector_t), intent(in) :: value
         end subroutine
 
@@ -481,7 +483,7 @@ module VectorClass
 
 
         module subroutine vector_vector_t_copy (to, from)
-            type(vector_t), intent(out) :: to
+            type(vector_t), intent(out), target :: to
             type(vector_t), intent(in) :: from
         end subroutine
 
@@ -506,20 +508,20 @@ module VectorClass
 
         module subroutine vector_int32_t_create (vector, value)
             ! Synopsis: Creates the first element in vector.
-            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(inout), target :: vector
             integer(kind = int32), intent(in) :: value
         end subroutine
 
 
         module subroutine vector_int64_t_create (vector, value)
             ! Synopsis: Creates the first element in vector.
-            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: value
         end subroutine
 
 
         module subroutine vector_vector_t_create (vector, value)
-            type(vector_t), intent(inout) :: vector
+            type(vector_t), intent(inout), target :: vector
             type(vector_t), intent(in) :: value
         end subroutine
 

@@ -39,6 +39,7 @@ submodule (VectorClass) vector_utils
             call allocator (v % limit)
             call allocator (v % array)
             call allocator (v % state)
+            call allocator (v % deref)
 
             return
         end subroutine
@@ -456,6 +457,7 @@ submodule (VectorClass) vector_utils
             call deallocator (vector % limit)
             call deallocator (vector % array)
             call deallocator (vector % state)
+            call deallocator (vector % deref)
 
             return
         end subroutine
