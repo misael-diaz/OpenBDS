@@ -137,14 +137,13 @@ submodule (VectorClass) vector_int32_t_implementation
             integer(kind = int64):: bounds(0:1)
             integer(kind = int32), intent(in) :: value
             integer(kind = int32), allocatable :: array(:)
-            integer(kind = int32), pointer, contiguous :: ptr(:)
             character(len=*), parameter :: errmsg = &
                 & "dynamic::vector.grow: unexpected error"
 
 
-            ! bounds for copying the entire data array
+            ! bounds for copying the data
             lb = vector % begin % idx
-            ub = vector % limit % idx
+            ub = vector % avail % idx - 1_int64
             bounds(0) = lb
             bounds(1) = ub
             call allocator (bounds, array)
@@ -155,8 +154,7 @@ submodule (VectorClass) vector_int32_t_implementation
 
                 select type (values)
                     type is ( integer(kind = int32) )
-                        ptr => values(:)
-                        call copy (array, ptr)
+                        array(:) = values(lb:ub)
                     class default
                         error stop vector % state % errmsg
                 end select
@@ -167,7 +165,7 @@ submodule (VectorClass) vector_int32_t_implementation
             vector % limit % idx = 2_int64 * vector % limit % idx
 
 
-!           bounds(0) = vector % begin % idx
+            bounds(0) = vector % begin % idx
             bounds(1) = vector % limit % idx
             call reallocator (bounds, vector % array % values, value)
 
@@ -176,8 +174,8 @@ submodule (VectorClass) vector_int32_t_implementation
 
                select type (values)
                     type is ( integer(kind = int32) )
-                       values = 0
-                       call copy (values(lb:ub), array)
+                        values = 0
+                        values(lb:ub) = array
                     class default
                         error stop errmsg
                 end select

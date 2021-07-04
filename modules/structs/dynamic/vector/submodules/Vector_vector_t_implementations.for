@@ -114,7 +114,7 @@ submodule (VectorClass) vector_vector_t_implementation
 
             ! bounds for copying the entire data array
             lb = vector % begin % idx
-            ub = vector % limit % idx
+            ub = vector % avail % idx - 1_int64
             bounds(0) = lb
             bounds(1) = ub
             call allocator (bounds, array)
@@ -125,7 +125,7 @@ submodule (VectorClass) vector_vector_t_implementation
 
                 select type (values)
                     type is (vector_t)
-                        array(:) = values(:)
+                        array(:) = values(lb:ub)
                     class default
                         error stop vector % state % errmsg
                 end select
@@ -136,7 +136,7 @@ submodule (VectorClass) vector_vector_t_implementation
             vector % limit % idx = 2_int64 * vector % limit % idx
 
 
-!           bounds(0) = vector % begin % idx
+            bounds(0) = vector % begin % idx
             bounds(1) = vector % limit % idx
             call reallocator (bounds, vector % array % values, value)
 
@@ -145,7 +145,7 @@ submodule (VectorClass) vector_vector_t_implementation
 
                select type (values)
                     type is (vector_t)
-                       values(lb:ub) = array(:)
+                       values(lb:ub) = array
                     class default
                         error stop errmsg
                 end select
