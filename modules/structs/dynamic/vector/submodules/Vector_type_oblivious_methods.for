@@ -5,7 +5,7 @@
 !
 !
 !   Synopsis:
-!   Defines type oblivious methods of the vector class.
+!   Defines type-oblivious methods of the vector class.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
@@ -32,7 +32,6 @@ submodule (VectorClass) vector_type_oblivious_methods
             ! Synopsis: Returns an empty vector
             type(vector_t):: vector
 
-!           print *, "instantiating vector ... "
             call instantiate (vector)
 
             return
@@ -44,7 +43,6 @@ submodule (VectorClass) vector_type_oblivious_methods
 
             call allocator (vector)
 
-!           print *, "instantiating vector components ... "
 
             vector % begin % idx  = 0_int64
             vector % avail % idx  = 0_int64
@@ -93,7 +91,6 @@ submodule (VectorClass) vector_type_oblivious_methods
             class(vector_t), intent(inout) :: self
             class(vector_t), intent(in) :: vector
 
-!           print *, "vector assignment ... "
 
             if ( loc(self) /= loc(vector) ) then
 
@@ -135,9 +132,6 @@ submodule (VectorClass) vector_type_oblivious_methods
             integer(kind = int32) :: i32
             character(len=*), parameter :: errmsg = &
                 & "dynamic::vector.copy: unimplemented vector<T>"
-
-
-!           print *, 'copying vector ... '
 
 
             i32 = 0_int32
@@ -244,23 +238,8 @@ end submodule
 ! A Koenig and B Moo, Accelerated C++ Practical Programming by Example
 
 
-! subroutine clear_method()
-! Placing the /avail/ iterator at the beginning is equivalent to
-! clearing the vector without deallocating memory. I have designed
-! the vector class thinking on how it will be used for keeping
-! track of neighbors. In that context it's convenient to
-! clear the vector without deallocating memory since it would
-! be expensive to have to grow the size of the vector over and
-! over again during the simulation. Why not use fixed-size arrays?
-! I have use them in the past worrying that I might have to allocate
-! more memory than actually needed to avoid exceding the array
-! bounds. Some systems might be more dynamic having particles with
-! far more neighbors than others. Vectors would come in handy for
-! such cases.
-
-
 ! subroutine copy_method()
-! caters self-assignment by checking the memory addresses and this is also
+! Caters self-assignment by checking the memory addresses and this is also
 ! why the intent(inout) is used for self. If the user attempts a
 ! self-assignment the data contained shouldn't be destroyed which it would
 ! if the intent(out) was used. (Recall that allocatable dummy arguments
@@ -275,8 +254,5 @@ end submodule
 ! [0] lb, ub are aliases for ary_bounds(0) and ary_bounds(1), where ary
 !     stands for array
 ! [1] An exact copy implies that the vector components match the type,
-!     values, and allocation size for all its components. This is why
-!     we allocate different amounts for the array temporary and the
-!     internal data of vector. We are careful to copy the stored
-!     values (the remainder are either zeros or undefined for derived
-!     types [not implemented]).
+!     values, and allocation size. Only the actual values [begin, avail)
+!     are ultimately copied into the vector.
