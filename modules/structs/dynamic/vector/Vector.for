@@ -59,8 +59,6 @@ module idata
             type(data_t), intent(inout) :: data
             integer(kind = int32) :: mstat
 
-!           print *, "destroying dynamic vector data ... "
-
             mstat = 0
             if ( allocated(data % values) ) then
                 deallocate (data % values, stat = mstat)
@@ -399,7 +397,6 @@ module VectorClass
 
 
         module subroutine vector_int64_t_grow (vector, value)
-            ! Synopsis: Doubles the vector size.
             type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: value
         end subroutine
@@ -461,7 +458,6 @@ module VectorClass
 
 
         module subroutine vector_int64_t_create (vector, value)
-            ! Synopsis: Creates the first element in vector.
             type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: value
         end subroutine
@@ -600,17 +596,6 @@ end module
 ! References:
 ! SJ Chapman, FORTRAN for Scientists and Engineers, fourth edition
 ! A Koenig and B Moo, Accelerated C++ Practical Programming by Example
-
-
-! Comments:
-! Easiest way to get at the values in vector is by having direct
-! access. However, that's a dangerous road that I would only use
-! in the absence of suitable alternatives. Iterator to the stored
-! data solve this.
-! Resolution:
-! In c++ a user may change the values in the
-! vector via an iterator so we are just providing an analogous
-! functionality.
 
 
 ! TODO:
