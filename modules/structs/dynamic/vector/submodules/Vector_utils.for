@@ -32,8 +32,6 @@ submodule (VectorClass) vector_utils
             ! Synopsis: Allocates memory for the vector components.
             type(vector_t), intent(inout) :: v
 
-!           print *, "allocating vector components ... "
-
             call allocator (v % begin)
             call allocator (v % avail)
             call allocator (v % limit)
@@ -68,7 +66,6 @@ submodule (VectorClass) vector_utils
             mstat = 0
             if ( .not. allocated(i) ) then
                 allocate (i, stat = mstat)
-!               print *, "vector.iter has been allocated"
             end if
 
             if (mstat /= 0) then
@@ -86,7 +83,6 @@ submodule (VectorClass) vector_utils
             mstat = 0
             if ( .not. allocated(d) ) then
                 allocate (d, stat = mstat)
-!               print *, "vector.data has been allocated"
             end if
 
             if (mstat /= 0) then
@@ -104,7 +100,6 @@ submodule (VectorClass) vector_utils
             mstat = 0
             if ( .not. allocated(s) ) then
                 allocate (s, stat = mstat)
-!               print *, "vector.stat has been allocated"
             end if
 
             if (mstat /= 0) then
@@ -149,7 +144,7 @@ submodule (VectorClass) vector_utils
 
 
         module subroutine vector_int64_t_allocate_dynamic (b, array, value)
-            integer(kind = int64), intent(in) :: b(0:1)       ! b[ounds]
+            integer(kind = int64), intent(in) :: b(0:1)
             class(*), intent(inout), allocatable :: array(:)
             integer(kind = int64):: lb
             integer(kind = int64):: ub
@@ -183,7 +178,7 @@ submodule (VectorClass) vector_utils
 
         module subroutine vector_vector_t_allocate_dynamic (b, ary, value)
             type(vector_t), intent(in) :: value
-            integer(kind = int64), intent(in) :: b(0:1)       ! b[ounds]
+            integer(kind = int64), intent(in) :: b(0:1)
             class(*), intent(inout), allocatable :: ary(:)
             integer(kind = int64):: lb
             integer(kind = int64):: ub
@@ -322,7 +317,6 @@ submodule (VectorClass) vector_utils
 
 
         module subroutine vector_int64_t_deallocate_dynamic (array, value)
-            ! the compiler cannot differentiate without the dummy value
             class(*), intent(inout), allocatable :: array(:)
             integer(kind = int64), intent(in) :: value
             integer(kind = int32) :: mstat
@@ -345,7 +339,6 @@ submodule (VectorClass) vector_utils
         
 
         module subroutine vector_vector_t_deallocate_dynamic (array, value)
-            ! the compiler cannot differentiate without the dummy value
             type(vector_t), intent(in) :: value
             class(*), intent(inout), allocatable :: array(:)
             integer(kind = int32) :: mstat
@@ -359,6 +352,7 @@ submodule (VectorClass) vector_utils
             end if
 
             if (mstat /= 0) then
+                print *, value % size ()
                 error stop errmsg
             end if
 
@@ -432,8 +426,6 @@ submodule (VectorClass) vector_utils
             character(len=*), parameter :: errmsg = &
                 & "dynamic::vector.state: deallocation error"
 
-!           print *, "destroying vector state data ... "
-
             mstat = 0
             if ( allocated(s % errmsg) ) then
                 deallocate (s % errmsg, stat = mstat)
@@ -449,8 +441,6 @@ submodule (VectorClass) vector_utils
 
         module recursive subroutine finalizer (vector)
             type(vector_t), intent(inout) :: vector
-
-!           print *, "destroying dynamic vector components ... "
 
             call deallocator (vector % begin)
             call deallocator (vector % avail)
