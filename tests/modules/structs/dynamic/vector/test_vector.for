@@ -152,12 +152,11 @@ module vector_class_tests
                 error stop "test::vector.array: allocation error"
             end if
 
-
-!! BUG      vector = create () WRONG: iterators point to the same object !!
-            do i = 1_int64, 2_int64
+!! BUG      vector[(:)] = create () ! Iterators point to the same object !
+!           do i = 1_int64, 2_int64
                 ! instantiates array of vectors the right way
-                vector(i) = create ()
-            end do
+!               vector(i) = create ()
+!           end do
 
 
             ! size test (vectors must have the same number of elements)
