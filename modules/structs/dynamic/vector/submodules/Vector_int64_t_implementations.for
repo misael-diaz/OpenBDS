@@ -181,15 +181,6 @@ submodule (VectorClass) vector_int64_t_implementation
 
             end associate
 
-            ! TODO: check with valgrind if the array is automatically
-            !       deallocated upon return to caller. Would the
-            !       deallocation be handled by the OS rather than the
-            !       program in this case? Would not deallocating
-            !       explicitly result in a speed up.
-            ! TEST: outcome, array is automatically deallocated on return.
-            !       Did not check the runtime.
-!           call deallocator (array)
-
 
             return
         end subroutine vector_int64_t_grow
