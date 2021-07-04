@@ -39,6 +39,6 @@ FC_OPT = -std=f2018 -ffree-form -fall-intrinsics -g -fbacktrace\
          -Wextra -Wuse-without-only #-Werror
 
 # FC_OPT = -std=f2018 -ffree-form -fall-intrinsics -O2 -ftree-vectorize\
-#          -fopt-info-vec
+#          -fopt-info-vec-missed # -fopt-info-vec
 # libraries
 LIB =
