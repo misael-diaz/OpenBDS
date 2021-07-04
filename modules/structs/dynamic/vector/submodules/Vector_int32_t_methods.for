@@ -29,6 +29,7 @@ submodule (VectorClass) vector_int32_t_methods
 
 
         module function vector_int32_t_find_method (self, value) result(i)
+            ! Synopsis: Returns index of element having the sought value.
             class(vector_t), intent(in) :: self
             integer(kind = int64) :: i
             integer(kind = int32), intent(in) :: value
@@ -94,21 +95,19 @@ end submodule
 !     is unsafe to check for its value since it could be unallocated.
 !     A possible solution is to check for the allocation status first,
 !     then check for the value.
-! [ ] PARTITION further into submodules. Idea: keep methods in a submodule
+! [x] PARTITION further into submodules. Idea: keep methods in a submodule
 !     and implementations in another. You will need another for utility
 !     procedures (for memory management).
 ! [x] IMPLEMENT method that returns an iterator to values in the asymmetric
 !     range [begin, avail). Implement the iterator as a pointer.
-! [ ] IMPLEMENT a polymorphic push-back method (value is of type class(*)).
+! [x] IMPLEMENT a polymorphic push-back method (value is of type class(*)).
 !     Use a select type construct to determine what version
 !     (of "proxy" procedure) to call at runtime.
 !     Note: Most methods delegates work to a "proxy" of sorts. The method
 !     test_polymorphic_method() may be used as a template for other ones.
-! [ ] GUARD against using the vector to store integers of different types.
+! [x] GUARD against using the vector to store integers of different types.
 !     If the user inserts a 32-bit integer it won't be able to insert
-!     a 64-bit integer unless the vector contents are cleared. A possible
-!     implementation is to check the allocation status of its counterpart
-!     upon calls to the push-back method.
+!     a 64-bit integer unless the vector contents are cleared.
 ! [x] EXPERIMENT with dynamically allocated strings. Not fully supported
 !     by GNU Fortran Compiler. Cannot use them without disabling some
 !     compiler options I would like to retain.
@@ -128,12 +127,12 @@ end submodule
 !
 ! function findloc_wrapper_method (self, value) result(idx)
 ! lower and upper bounds (lb, ub) are chosen so that we do not include
-! the element pointed to by (end). It's a valid index but it should not
+! the element pointed to by (avail). It's a valid index but it should not
 ! be referenced since it does not hold an actual value.
 !
 !
 ! subroutine clear_method()
-! Placing the /avail/ iterator at the beginning is equivalent to
+! Placing the avail iterator at the beginning is equivalent to
 ! clearing the vector without deallocating memory. I have designed
 ! the vector class thinking on how it will be used for keeping
 ! track of neighbors. In that context it's convenient to
