@@ -28,16 +28,16 @@ submodule (VectorClass) vector_vector_t_methods
     contains
 
 
-        module subroutine vector_vector_t_indexing_method (self, idx, value)
+        module subroutine vector_vector_t_indexing_method (self, i, value)
             ! Synopsis: Addresses the element pointed to by index.
             class(vector_t), intent(in) :: self
             type(vector_t), intent(inout) :: value
-            integer(kind = int64), intent(in) :: idx
+            integer(kind = int64), intent(in) :: i
 
             call is_empty (self)
-            call check_bounds (self, idx)
+            call check_bounds (self, i)
 
-            call indexer (self, idx, value)
+            call indexer (self, i, value)
 
             return
         end subroutine
