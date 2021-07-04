@@ -181,18 +181,18 @@ submodule (VectorClass) vector_utils
         end subroutine
 
 
-        module subroutine vector_vector_t_allocate_dynamic (b, array, value)
+        module subroutine vector_vector_t_allocate_dynamic (b, ary, value)
             type(vector_t), intent(in) :: value
             integer(kind = int64), intent(in) :: b(0:1)       ! b[ounds]
-            class(*), intent(inout), allocatable :: array(:)
+            class(*), intent(inout), allocatable :: ary(:)
             integer(kind = int64):: lb
             integer(kind = int64):: ub
             integer(kind = int32):: mstat
 
 
-            if ( allocated(array) ) then
+            if ( allocated(ary) ) then
 
-                deallocate (array, stat = mstat)
+                deallocate (ary, stat = mstat)
 
                 if (mstat /= 0) then
                     error stop "dynamic::vector.allocate: unexpected error"
@@ -203,7 +203,7 @@ submodule (VectorClass) vector_utils
 
             lb = b(0)
             ub = b(1)
-            allocate (array(lb:ub), mold = value, stat = mstat)
+            allocate (ary(lb:ub), mold = value, stat = mstat)
 
             if (mstat /= 0) then
                 error stop "dynamic::vector.allocate: allocation error"

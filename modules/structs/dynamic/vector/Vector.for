@@ -294,10 +294,10 @@ module VectorClass
         end subroutine
 
 
-        module subroutine vector_vector_t_indexing_method (self, idx, value)
+        module subroutine vector_vector_t_indexing_method (self, i, value)
             class(vector_t), intent(in) :: self
             type(vector_t), intent(inout) :: value
-            integer(kind = int64), intent(in) :: idx
+            integer(kind = int64), intent(in) :: i
         end subroutine
 
 
@@ -512,9 +512,9 @@ module VectorClass
         end subroutine
 
 
-        module subroutine vector_vector_t_allocate_dynamic (b, array, value)
+        module subroutine vector_vector_t_allocate_dynamic (b, ary, value)
             type(vector_t), intent(in) :: value
-            class(*), intent(inout), allocatable :: array(:)
+            class(*), intent(inout), allocatable :: ary(:)
             integer(kind = int64), intent(in) :: b(0:1)
         end subroutine
 
