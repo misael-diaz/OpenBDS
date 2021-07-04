@@ -153,10 +153,10 @@ module vector_class_tests
             end if
 
 !! BUG      vector[(:)] = create () ! Iterators point to the same object !
-!           do i = 1_int64, 2_int64
+            do i = 1_int64, 2_int64
                 ! instantiates array of vectors the right way
-!               vector(i) = create ()
-!           end do
+                vector(i) = create ()
+            end do
 
 
             ! size test (vectors must have the same number of elements)
