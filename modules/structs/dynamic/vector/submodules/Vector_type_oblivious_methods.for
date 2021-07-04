@@ -171,7 +171,8 @@ submodule (VectorClass) vector_type_oblivious_methods
                     type is ( integer(kind = int32) )
 
                         call allocator (ary_bounds, aryi32)
-                        call allocator (vec_bounds, to % array % values, i32)
+                        call allocator (vec_bounds, to % array % values, &
+                                      & i32)
 
                         aryi32(:) = values(lb:ub)
                         to % state % errmsg(:) = "vector<int32_t>"
@@ -181,7 +182,8 @@ submodule (VectorClass) vector_type_oblivious_methods
 
 
                         call allocator (ary_bounds, aryi64)
-                        call allocator (vec_bounds, to % array % values, i64)
+                        call allocator (vec_bounds, to % array % values, &
+                                      & i64)
 
                         aryi64(:) = values(lb:ub)
                         to % state % errmsg(:) = "vector<int64_t>"
@@ -191,7 +193,8 @@ submodule (VectorClass) vector_type_oblivious_methods
 
 
                         call allocator (ary_bounds, aryvec)
-                        call allocator (vec_bounds, to % array % values, vec)
+                        call allocator (vec_bounds, to % array % values, &
+                                      & vec)
 
                         aryvec(:) = values(lb:ub)
                         to % state % errmsg(:) = "vector<vector_t>"
