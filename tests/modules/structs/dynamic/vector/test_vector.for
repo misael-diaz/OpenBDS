@@ -348,12 +348,13 @@ module vector_class_tests
             class(*), pointer, contiguous :: it(:) => null()
             integer(kind = int32), parameter :: n = 8
             integer(kind = int64), allocatable :: vs(:)
+            logical(kind = int32), allocatable :: mask(:)
             integer(kind = int64):: idx, bounds(0:1)
-            integer(kind = int32):: i, value, delta
+            integer(kind = int32):: i, j, value, delta
             integer(kind = int32):: mstat
 
 
-            allocate (vector, vecopy, vs(0:3), stat = mstat)
+            allocate (vector, vecopy, vs(0:3), mask(0:n-1), stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.get: allocation error"
             end if
@@ -387,7 +388,7 @@ module vector_class_tests
 
             ! [0] erase the first value
             value = 0
-            idx = 0_int64
+            idx = int(value, kind = int64)
             call vector % erase (i = idx)       ! erase by index
             idx = vector % find (value)
 
@@ -424,7 +425,7 @@ module vector_class_tests
             ! [1] erase the last value (of original vector)
             vector = vecopy
             value = 7
-            idx = 7_int64
+            idx = int(value, kind = int64)
             call vector % erase (i = idx)
             idx = vector % find (value)
 
@@ -456,6 +457,48 @@ module vector_class_tests
                 print *, "pass"
             end if
 
+
+            ! erase intermediate value
+            vector = vecopy
+            value = 4
+            idx = int(value, kind = int64)
+            mask = .true.
+            mask(idx) = .false.
+            call vector % erase (i = idx)
+            idx = vector % find (value)
+
+
+
+            it => vector % deref % it
+            select type (it)
+                type is ( integer(kind = int32) )
+                    j = 1
+                    delta = 0
+                    do i = 0, (n - 1)
+                        if ( mask(i) ) then
+                            delta = delta + (it(j) - i)
+                            j = j + 1
+                        end if
+                    end do
+                class default
+                    error stop "test::vector.erase(): unexpected error"
+            end select
+
+
+            write (*, '(1X,A)', advance='no') "[2] test::vector.erase(): "
+            if ( idx /= -1_int64 ) then
+                print *, "FAIL"
+            else if ( n == vector % size () ) then
+                print *, "FAIL"
+            else if ( delta /= 0 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( size (it) /= (n - 1) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
 
 
             call vector % erase (b=bounds)      ! erase by index
