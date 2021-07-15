@@ -118,12 +118,15 @@ module VectorClass
             procedure :: vector_int32_t_push_back_method
             procedure :: vector_int64_t_push_back_method
             procedure :: vector_vector_t_push_back_method
+!           procedure :: vector_int32_t_erase_method
             generic, public :: assignment(=) => vector_vector_t_copy_method
             generic, public :: get  => vector_int32_t_indexing_method, &
                                      & vector_int64_t_indexing_method, &
                                      & vector_vector_t_indexing_method
             generic, public :: find => vector_int32_t_find_method, &
                                      & vector_int64_t_find_method
+!           generic, public :: erase => vector_int32_t_erase_method
+            procedure, public :: erase => vector_int32_t_erase_method
             generic, public :: push_back => &
                                      & vector_int32_t_push_back_method, &
                                      & vector_int64_t_push_back_method, &
@@ -466,6 +469,50 @@ module VectorClass
         module subroutine vector_vector_t_create (vector, value)
             type(vector_t), intent(inout), target :: vector
             type(vector_t), intent(in) :: value
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_method (vec, i, b, s, v, m, f)
+            ! Synopsis:
+            ! Erases values either by index, range, subscript, or value(s).
+            class(vector_t), intent(inout) :: vec
+            integer(kind = int64), intent(in), optional :: i       ! index
+            integer(kind = int64), intent(in), optional :: b(2)    ! bounds
+            integer(kind = int64), intent(in), optional :: s(:)    ! isubs
+            integer(kind = int32), intent(in), optional :: v       ! value
+            logical(kind = int32), intent(in), optional :: f       ! flip
+            character(len=9),      intent(in), optional :: m       ! mode
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_all (vector)
+            type(vector_t), intent(inout) :: vector
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_by_index (vector, idx)
+            type(vector_t), intent(inout) :: vector
+            integer(kind = int64), intent(in) :: idx
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_intermediate (vector, idx)
+            type(vector_t), intent(inout), target :: vector
+            integer(kind = int64), intent(in) :: idx
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_final_value (vector)
+            type(vector_t), intent(inout), target :: vector
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_argsCheck (i, b, s, v, m)
+            integer(kind = int64), intent(in), optional :: i
+            integer(kind = int64), intent(in), optional :: b(2)
+            integer(kind = int64), intent(in), optional :: s(:)
+            integer(kind = int32), intent(in), optional :: v
+            character(len=9),      intent(in), optional :: m
         end subroutine
 
 
