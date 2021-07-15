@@ -251,6 +251,172 @@ submodule (VectorClass) vector_int32_t_implementation
         end subroutine vector_int32_t_create
 
 
+        module subroutine vector_int32_t_erase_all (vector)
+            type(vector_t), intent(inout) :: vector
+            integer(kind = int32):: value
+
+            call deallocator (vector % array % values, value)
+
+            vector % begin % idx  = 0_int64
+            vector % avail % idx  = 0_int64
+            vector % limit % idx  = 0_int64
+            vector % deref % idx  = 0_int64
+            vector % deref % it   => null()
+            vector % state % init = .false.
+
+            return
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_by_index (vector, idx)
+            type(vector_t), intent(inout) :: vector
+            integer(kind = int64), intent(in) :: idx
+
+
+            associate (avail => vector % avail % idx)
+                if (idx == avail - 1_int64) then
+                    call vector_int32_t_erase_final_value (vector)
+                else
+                    call vector_int32_t_erase_intermediate (vector, idx)
+                end if
+            end associate
+
+
+            return
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_final_value (vector)
+            ! Synopsis: Erases the last stored value in vector.
+            type(vector_t), intent(inout), target :: vector
+            integer(kind = int64) :: final
+
+            associate (begin => vector % begin % idx, &
+                     & avail => vector % avail % idx)
+                avail = avail - 1_int64
+                final = avail - 1_int64
+                vector % deref % it => vector % array % values(begin:final)
+            end associate
+
+            return
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_intermediate (vector, idx)
+            ! Synopsis: Erases the value pointed to by index.
+            type(vector_t), intent(inout), target :: vector
+            integer(kind = int64), intent(in) :: idx
+            integer(kind = int64):: final
+            integer(kind = int64):: lb_ary, lb_vec, lb
+            integer(kind = int64):: ub_ary, ub_vec, ub
+            integer(kind = int64):: ary_bounds(0:1)
+            integer(kind = int32), allocatable :: array(:)
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.erase(idx): unexpected error"
+
+
+            associate (begin => vector % begin % idx,   &
+                     & avail => vector % avail % idx,   &
+                     & values => vector % array % values)
+
+                ! overwrites vector values in range [idx, avail - 1)
+                lb     = idx
+                ub     = avail - 2_int64
+                ! copies vector values in range [idx + 1, avail)
+                lb_vec = lb + 1_int64
+                ub_vec = ub + 1_int64
+
+                ! placeholder's range for vector values in [idx + 1, avail)
+                lb_ary = 0_int64
+                ub_ary = avail - (idx + 1_int64) - 1_int64
+                ary_bounds(0) = lb_ary
+                ary_bounds(1) = ub_ary
+                call allocator (ary_bounds, array)
+
+
+                select type (values)
+                    type is ( integer(kind = int32 ) )
+                        array(:) = values(lb_vec:ub_vec)
+                        values(lb:ub) = array(:)
+                    class default
+                        error stop errmsg
+                end select
+
+
+                avail = avail - 1_int64
+                final = avail - 1_int64
+                vector % deref % it => vector % array % values(begin:final)
+
+            end associate
+
+
+            return
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_argsCheck (i, b, s, v, m)
+            ! Synopsis:
+            ! Checks input arg[ument]s of erase method.
+            integer(kind = int64), intent(in), optional :: i
+            integer(kind = int64), intent(in), optional :: b(2)
+            integer(kind = int64), intent(in), optional :: s(:)
+            integer(kind = int32), intent(in), optional :: v
+            character(len=9), intent(in),      optional :: m
+            character(len=*), parameter :: wrnmsg = &
+                & "dynamic::vector.erase(): ignoring mode, it's only " // &
+                & "meaningful for ranges"
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.erase(): erases either by index, "  // &
+                & "subscript, range, or value, exclusively"
+            character(len=*), parameter :: errmsg_mode = &
+                & "dynamic::vector.erase(): missing range for " // &
+                & "applying the supplied mode"
+
+
+            if ( present(i) ) then
+                if ( present(b) ) then
+                    print *, errmsg
+                else if ( present(s) ) then
+                    print *, errmsg
+                else if ( present(v) ) then
+                    print *, errmsg
+                end if
+            end if
+
+
+            if ( present(b) ) then
+                if ( present(s) ) then
+                    print *, errmsg
+                else if ( present(v) ) then
+                    print *, errmsg
+                end if
+            end if
+
+
+            if ( present(s) ) then
+                if ( present(v) ) then
+                    print *, errmsg
+                end if
+            end if
+
+
+            if ( present(m) ) then
+
+                if ( .not. present(b) ) then
+                    print *, errmsg_mode
+                end if
+
+                if ( present(i) .or. present(s) .or. present(v) ) then
+                    print *, wrnmsg
+                end if
+
+            end if
+
+
+            return
+        end subroutine
+
+
 end submodule
 
 

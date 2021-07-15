@@ -65,6 +65,43 @@ submodule (VectorClass) vector_int32_t_methods
         end subroutine
 
 
+        module subroutine vector_int32_t_erase_method(vec, i, b, s, v, m, f)
+            ! Synopsis:
+            ! Erases values either by index, range, subscript, or value(s).
+            ! mode: [in|ex]clusive
+            ! flip: inverts logic, erases all but those specified.
+            class(vector_t), intent(inout) :: vec
+            integer(kind = int64), intent(in), optional :: i       ! index
+            integer(kind = int64), intent(in), optional :: b(2)    ! bounds
+            integer(kind = int64), intent(in), optional :: s(:)    ! isubs
+            integer(kind = int32), intent(in), optional :: v       ! value
+            logical(kind = int32), intent(in), optional :: f       ! flip
+            character(len=9), intent(in),      optional :: m       ! mode
+
+
+            call vector_int32_t_erase_argsCheck (i, b, s, v, m)
+
+
+            if ( present(i) ) then
+                print *, "erasing by index ... "
+                call check_bounds (vec, i)
+                call vector_int32_t_erase_by_index (vec, i)
+            else if ( present(b) ) then
+                print *, "erasing by range ... "
+            else if ( present(s) ) then
+                print *, "erasing by subscript ... "
+            else if ( present(v) ) then
+                print *, "erasing by value ... "
+            else
+                print *, "erasing all ... "
+                call vector_int32_t_erase_all (vec)
+            end if
+
+
+            return
+        end subroutine
+
+
 end submodule
 
 
@@ -144,3 +181,9 @@ end submodule
 ! bounds. Some systems might be more dynamic having particles with
 ! far more neighbors than others. Vectors would come in handy for
 ! such cases.
+!
+!
+! subroutine vector_int32_t_erase_method(vec, i, b, s, v, m, f)
+! NOTE:
+! Not sure if I should really add support for deleting multiple distinct
+! values.
