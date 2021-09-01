@@ -576,8 +576,8 @@ module vector_class_tests
 
             ! erases by range
             vector = vecopy
-            bounds(0) = 1_int64
-            bounds(1) = int(n - 2, kind = int64)
+            bounds(0) = 2_int64
+            bounds(1) = int(n - 3, kind = int64)
             call vector % erase (b=bounds)
             it => vector % deref % it
 
@@ -588,8 +588,13 @@ module vector_class_tests
                     diff = 0
                     value = 0
                     diff = diff + ( it(1) - value )
-                    value = n - 1
+                    value = 1
                     diff = diff + ( it(2) - value )
+
+                    value = n - 2
+                    diff = diff + ( it(3) - value )
+                    value = n - 1
+                    diff = diff + ( it(4) - value )
 
                 class default
                     error stop "unexpected error"
@@ -597,7 +602,7 @@ module vector_class_tests
 
 
             write (*, '(1X,A)', advance='no') "[6] test::vector.erase(): "
-            if (vector % size() /= 2_int64) then
+            if ( vector % size() /= n - (bounds(1) - bounds(0) + 1) ) then
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
                 print *, "FAIL"
