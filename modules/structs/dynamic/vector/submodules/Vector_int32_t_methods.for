@@ -76,6 +76,7 @@ submodule (VectorClass) vector_int32_t_methods
             integer(kind = int64), intent(in), optional :: s(:)    ! isubs
             integer(kind = int32), intent(in), optional :: v       ! value
             logical(kind = int32), intent(in), optional :: f       ! flip
+            integer(kind = int64) :: lb, ub
             character(len=9), intent(in),      optional :: m       ! mode
 
 
@@ -87,7 +88,18 @@ submodule (VectorClass) vector_int32_t_methods
                 call check_bounds (vec, i)
                 call vector_int32_t_erase_by_index (vec, i)
             else if ( present(b) ) then
+                lb = lbound(b, dim = 1, kind = int64)
+                ub = ubound(b, dim = 1, kind = int64)
+                lb = b(lb)
+                ub = b(ub)
+                call check_bounds (vec, lb)
+                call check_bounds (vec, ub)
                 print *, "erasing by range ... "
+                if (lb <= ub) then
+                    call vector_int32_t_erase_by_range (vec, b)
+!               else
+!                   print *, "empty range ... " ! passed
+                end if
             else if ( present(s) ) then
                 print *, "erasing by subscript ... "
             else if ( present(v) ) then

@@ -344,6 +344,12 @@ module vector_class_tests
             ! NOTE:
             ! Vector stores an index array so that searching
             ! by value or index yields the same result.
+            ! TODO:
+            ! It is assumed that the user knows that the range
+            ! of the vector is [0, vector % size). For users
+            ! who do not wish to work this way it might be
+            ! in their interest to delete by iterator. Consider
+            ! implementing this feature.
             type(vector_t), allocatable :: vector, vecopy
             class(*), pointer, contiguous :: it(:) => null()
             integer(kind = int32), parameter :: n = 8
@@ -501,17 +507,63 @@ module vector_class_tests
             end if
 
 
-            call vector % erase (b=bounds)      ! erase by index
+            ! erases by range (all values)
+            vector = vecopy
+!           bounds check
+!           bounds(0) = -255_int64              ! passed
+!           bounds(1) =  255_int64              ! passed
+!           bounds(1) = int(n, kind = int64)    ! passed
+
+!           empty range test: lb > ub
+!           bounds(1) = 0_int64
+!           bounds(0) = int(n - 1, kind = int64)
+!           call vector % erase (b=bounds)      ! passed
+            bounds(0) = 0_int64
+            bounds(1) = int(n - 1, kind = int64)
+            call vector % erase (b=bounds)
+
+
+            write (*, '(1X,A)', advance='no') "[3] test::vector.erase(): "
+            if (vector % size() /= 0_int64) then
+                print *, "FAIL"
+            else if ( associated(vector % deref % it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            ! erases values in lb:ub, where ub is last but lb is not first
+            vector = vecopy
+            bounds(0) = 1_int64
+            bounds(1) = int(n - 1, kind = int64)
+            call vector % erase (b=bounds)
+
+            value = 0
+            idx = vector % find (value)
+            it => vector % deref % it
+
+            write (*, '(1X,A)', advance='no') "[4] test::vector.erase(): "
+            if (vector % size() /= 1_int64) then
+                print *, "FAIL"
+            else if ( idx /= int(value, kind = int64) ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+
             call vector % erase (s=vs)          ! erase by s[ubscript]
-
-
-
-
             call vector % erase ()              ! erases all values
 
 
             write (*, '(1X,A)', advance='no') "[] test::vector.erase(): "
             if (vector % size() /= 0_int64) then
+                print *, "FAIL"
+            else if ( associated(vector % deref % it) ) then
                 print *, "FAIL"
             else
                 print *, "pass"

@@ -354,6 +354,107 @@ submodule (VectorClass) vector_int32_t_implementation
         end subroutine
 
 
+        module subroutine vector_int32_t_erase_by_range (vector, bounds)
+            type(vector_t), intent(inout) :: vector
+            integer(kind = int64), intent(in) :: bounds(2)
+            integer(kind = int64) :: lb, ub
+            integer(kind = int64) :: final
+
+            lb = lbound(bounds, dim = 1, kind = int64)
+            ub = ubound(bounds, dim = 1, kind = int64)
+
+            lb = bounds(lb)
+            ub = bounds(ub)
+
+            final = vector % avail % idx - 1_int64
+            if (lb == 0_int64 .and. ub == final) then
+                call vector_int32_t_erase_all (vector)
+            else
+                call vector_int32_t_trim (vector, bounds)
+            end if
+
+            return
+        end subroutine
+
+
+        module subroutine vector_int32_t_trim (vector, vec_bounds)
+            type(vector_t), intent(inout), target :: vector
+            integer(kind = int64), intent(in) :: vec_bounds(2)
+            integer(kind = int64):: begin, final
+            integer(kind = int64):: ary_bounds(0:1)
+            integer(kind = int64):: lb, lb_vec, lb_ary
+            integer(kind = int64):: ub, ub_vec, ub_ary
+            integer(kind = int64):: i, idx, numel
+            integer(kind = int32), allocatable :: array(:)
+            integer(kind = int32), allocatable :: mask(:)
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.trimming: unexpected error"
+
+            lb = lbound(vec_bounds, dim = 1, kind = int64)
+            ub = ubound(vec_bounds, dim = 1, kind = int64)
+
+            ! defines the (inclusive) trimming range lb:ub
+            lb = vec_bounds(lb)
+            ub = vec_bounds(ub)
+
+
+            ! masks (numel) elements to copy from vector into array
+            lb_ary = 0_int64
+            ub_ary = vector % avail % idx - 1_int64
+            ary_bounds(0) = lb_ary
+            ary_bounds(1) = ub_ary
+            call allocator (ary_bounds, mask)
+
+            ! masks values for erasing
+            mask(:) = 0
+            mask(lb:ub) = 1
+            numel = (ub - lb) + 1_int64
+
+            lb_ary = 0_int64
+            ub_ary = numel - 1_int64
+            ary_bounds(0) = lb_ary
+            ary_bounds(1) = ub_ary
+            call allocator (ary_bounds, array)
+
+            associate (begin  => vector % begin % idx,  &
+                     & avail  => vector % avail % idx,  &
+                     & values => vector % array % values)
+
+
+                select type (values)
+                    type is ( integer(kind = int32) )
+
+                        idx = 0_int64
+                        ! copies values unselected (for removal) into array
+                        do i = begin, avail - 1_int64
+                            if ( mask(i) == 0 ) then
+                                array(idx) = values(i)
+                                idx = idx + 1_int64
+                            end if
+                        end do
+
+                        idx = 0_int64
+                        ! effectively erases values by overwriting
+                        do i = begin, avail - 1_int64
+                            if ( mask(i) == 1 ) then
+                                values(i) = array(idx)
+                                idx = idx + 1_int64
+                            end if
+                        end do
+
+                    class default
+                        error stop errmsg
+                end select
+
+                avail = avail - numel
+                final = avail - 1_int64
+                vector % deref % it => vector % array % values(begin:final)
+            end associate
+
+            return
+        end subroutine
+
+
         module subroutine vector_int32_t_erase_argsCheck (i, b, s, v, m)
             ! Synopsis:
             ! Checks input arg[ument]s of erase method.
