@@ -384,7 +384,7 @@ submodule (VectorClass) vector_int32_t_implementation
             integer(kind = int64):: ary_bounds(0:1)
             integer(kind = int64):: lb, lb_vec, lb_ary
             integer(kind = int64):: ub, ub_vec, ub_ary
-            integer(kind = int64):: i, idx, numel
+            integer(kind = int64):: i, j, idx, numel
             integer(kind = int32), allocatable :: array(:)
             integer(kind = int32), allocatable :: mask(:)
             character(len=*), parameter :: errmsg = &
@@ -411,7 +411,7 @@ submodule (VectorClass) vector_int32_t_implementation
             numel = (ub - lb) + 1_int64
 
             lb_ary = 0_int64
-            ub_ary = numel - 1_int64
+            ub_ary = vector % avail % idx - numel - 1_int64
             ary_bounds(0) = lb_ary
             ary_bounds(1) = ub_ary
             call allocator (ary_bounds, array)
@@ -433,13 +433,21 @@ submodule (VectorClass) vector_int32_t_implementation
                             end if
                         end do
 
+                        j = 0_int64
                         idx = 0_int64
                         ! effectively erases values by overwriting
                         do i = begin, avail - 1_int64
                             if ( mask(i) == 1 ) then
-                                values(i) = array(idx)
+                                values(j) = array(idx)
+                                j = j + 1_int64
                                 idx = idx + 1_int64
                             end if
+
+                            ! breaks if there are no more values to copy
+                            if ( idx == avail - numel ) then
+                                exit
+                            end if
+
                         end do
 
                     class default
