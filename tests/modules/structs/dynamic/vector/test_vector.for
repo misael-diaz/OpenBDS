@@ -356,7 +356,7 @@ module vector_class_tests
             integer(kind = int64), allocatable :: vs(:)
             logical(kind = int32), allocatable :: mask(:)
             integer(kind = int64):: idx, bounds(0:1)
-            integer(kind = int32):: i, j, value, delta
+            integer(kind = int32):: i, j, value, delta, diff
             integer(kind = int32):: mstat
 
 
@@ -564,11 +564,45 @@ module vector_class_tests
 
             write (*, '(1X,A)', advance='no') "[5] test::vector.erase(): "
             if (vector % size() /= n) then
-                print *, "SIZE FAIL"
+                print *, "FAIL"
             else if ( .not. associated(vector % deref % it) ) then
-                print *, "ITER FAIL"
+                print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
-                print *, "ITER SIZE FAIL"
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            ! erases by range
+            vector = vecopy
+            bounds(0) = 1_int64
+            bounds(1) = int(n - 2, kind = int64)
+            call vector % erase (b=bounds)
+            it => vector % deref % it
+
+
+            select type (it)
+                type is ( integer(kind = int32) )
+                    
+                    diff = 0
+                    value = 0
+                    diff = diff + ( it(1) - value )
+                    value = n - 1
+                    diff = diff + ( it(2) - value )
+
+                class default
+                    error stop "unexpected error"
+            end select
+
+
+            write (*, '(1X,A)', advance='no') "[6] test::vector.erase(): "
+            if (vector % size() /= 2_int64) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( diff /= 0 ) then
+                print *, "FAIL"
             else
                 print *, "pass"
             end if
