@@ -507,17 +507,15 @@ module vector_class_tests
             end if
 
 
-            ! erases by range (all values)
-            vector = vecopy
 !           bounds check
 !           bounds(0) = -255_int64              ! passed
 !           bounds(1) =  255_int64              ! passed
 !           bounds(1) = int(n, kind = int64)    ! passed
 
-!           empty range test: lb > ub
-!           bounds(1) = 0_int64
-!           bounds(0) = int(n - 1, kind = int64)
-!           call vector % erase (b=bounds)      ! passed
+
+
+            ! erases by range (all values)
+            vector = vecopy
             bounds(0) = 0_int64
             bounds(1) = int(n - 1, kind = int64)
             call vector % erase (b=bounds)
@@ -550,6 +548,27 @@ module vector_class_tests
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
                 print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+
+            ! erases by range (empty)
+            vector = vecopy
+            bounds(0) = int(n - 1, kind = int64)
+            bounds(1) = 0_int64
+            call vector % erase (b=bounds)
+            it => vector % deref % it
+
+
+            write (*, '(1X,A)', advance='no') "[5] test::vector.erase(): "
+            if (vector % size() /= n) then
+                print *, "SIZE FAIL"
+            else if ( .not. associated(vector % deref % it) ) then
+                print *, "ITER FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "ITER SIZE FAIL"
             else
                 print *, "pass"
             end if
