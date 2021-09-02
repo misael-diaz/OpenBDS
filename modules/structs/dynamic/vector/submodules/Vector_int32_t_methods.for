@@ -76,7 +76,7 @@ submodule (VectorClass) vector_int32_t_methods
             integer(kind = int64), intent(in), optional :: s(:)    ! isubs
             integer(kind = int32), intent(in), optional :: v       ! value
             logical(kind = int32), intent(in), optional :: f       ! flip
-            integer(kind = int64) :: lb, ub
+            integer(kind = int64) :: lb, ub, numel
             character(len=9), intent(in),      optional :: m       ! mode
 
 
@@ -101,7 +101,23 @@ submodule (VectorClass) vector_int32_t_methods
 !                   print *, "empty range ... " ! passed
                 end if
             else if ( present(s) ) then
+
                 print *, "erasing by subscript ... "
+
+                ! queries the bounds and size of the vector-subscript
+                lb = minval(s)
+                ub = maxval(s)
+                numel = size(s, kind = int64)
+
+                call check_bounds (vec, lb)
+                call check_bounds (vec, ub)
+
+                if ( numel == vec % size() ) then
+                    call vector_int32_t_erase_all (vec)
+                else
+                    call vector_int32_t_erase_by_subscript (vec, s)
+                end if
+
             else if ( present(v) ) then
                 print *, "erasing by value ... "
             else
