@@ -360,7 +360,7 @@ module vector_class_tests
             integer(kind = int32):: mstat
 
 
-            allocate (vector, vecopy, vs(0:3), mask(0:n-1), stat = mstat)
+            allocate (vector, vecopy, vs(0:7), mask(0:n-1), stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.get: allocation error"
             end if
@@ -384,7 +384,7 @@ module vector_class_tests
             ! checks arguments:
             idx = 0_int64
 
-            do idx = 0_int64, 3_int64
+            do idx = 0_int64, 7_int64
                 vs(idx) = idx
             end do
 
@@ -582,6 +582,7 @@ module vector_class_tests
             it => vector % deref % it
 
 
+            ! checks for the remaining values
             select type (it)
                 type is ( integer(kind = int32) )
                     
@@ -614,7 +615,24 @@ module vector_class_tests
 
 
 
+            vector = vecopy
+            do idx = 0_int64, 7_int64
+                vs(idx) = idx
+            end do
             call vector % erase (s=vs)          ! erase by s[ubscript]
+            it => vector % deref % it
+
+
+            write (*, '(1X,A)', advance='no') "[7] test::vector.erase(): "
+            if ( vector % size() /= 0_int64 ) then
+                print *, "FAIL"
+            else if ( associated(it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
             call vector % erase ()              ! erases all values
 
 

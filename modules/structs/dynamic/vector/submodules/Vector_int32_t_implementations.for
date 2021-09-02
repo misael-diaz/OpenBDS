@@ -454,10 +454,88 @@ submodule (VectorClass) vector_int32_t_implementation
                         error stop errmsg
                 end select
 
+
+                avail = avail - numel
+                final = avail - 1_int64
+                vector % deref % it => vector % array % values(begin:final)
+
+            end associate
+
+            return
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_by_subscript (vector, vs)
+            ! erases vector elements marked by the vector-subscript `vs'
+            type(vector_t), intent(inout), target :: vector
+            integer(kind = int64), intent(in) :: vs(:)
+            integer(kind = int64):: begin, final
+            integer(kind = int64):: ary_bounds(0:1)
+            integer(kind = int64):: lb, ub
+            integer(kind = int64):: i, idx, numel
+            integer(kind = int32), allocatable :: array(:)
+            integer(kind = int32), allocatable :: mask(:)
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.erase_by_subscript: unexpected error"
+
+            ! queries for the bounds and size of the vector-subscript
+            lb = lbound(vs, dim = 1, kind = int64)
+            ub = ubound(vs, dim = 1, kind = int64)
+            numel = size(vs)
+
+            ary_bounds(0) = 0_int64
+            ary_bounds(1) = vector % avail % idx - numel - 1_int64
+            call allocator (ary_bounds, array)
+
+            ary_bounds(0) = 0_int64
+            ary_bounds(1) = vector % avail % idx - 1_int64
+            call allocator (ary_bounds, mask)
+
+            mask = 0
+            ! marks vector elements for erasing
+            do idx = lb, ub
+                mask( vs(idx) ) = 1
+            end do
+
+
+            associate (begin  => vector % begin % idx,  &
+                     & avail  => vector % avail % idx,  &
+                     & values => vector % array % values)
+
+                select type (values)
+                    type is ( integer(kind = int32) )
+
+
+                        i = 0_int64
+                        ! copies ``unselected'' elements into placeholder
+                        do idx = begin, (avail - 1_int64)
+                            if ( mask(idx) == 0 ) then
+                                array(i) = values(idx)
+                                i = i + 1_int64
+                            end if
+                        end do
+
+
+                        i = 0_int64
+                        ! erases selected elements by overwriting
+                        do idx = begin, (avail - 1_int64)
+                            if ( mask(idx) == 1 ) then
+                                values(i) = array(i)
+                                i = i + 1_int64
+                            end if
+                        end do
+
+
+                    class default
+                        error stop errmsg
+                end select
+
                 avail = avail - numel
                 final = avail - 1_int64
                 vector % deref % it => vector % array % values(begin:final)
             end associate
+
+
 
             return
         end subroutine

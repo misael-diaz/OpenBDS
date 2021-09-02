@@ -502,6 +502,12 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_int32_t_erase_by_subscript (vector, vs)
+            type(vector_t), intent(inout), target :: vector
+            integer(kind = int64), intent(in) :: vs(:)
+        end subroutine
+
+
         module subroutine vector_int32_t_trim (vector, vec_bounds)
             type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: vec_bounds(2)
