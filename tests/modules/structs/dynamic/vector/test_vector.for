@@ -636,7 +636,7 @@ module vector_class_tests
 
 
             deallocate (vs)
-            allocate( vs(0:6_int64), stat = mstat )
+            allocate( vs(0:6), stat = mstat )
             if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
 
 
