@@ -516,14 +516,8 @@ submodule (VectorClass) vector_int32_t_implementation
                         end do
 
 
-                        i = 0_int64
                         ! erases selected elements by overwriting
-                        do idx = begin, (avail - 1_int64)
-                            if ( mask(idx) == 1 ) then
-                                values(i) = array(i)
-                                i = i + 1_int64
-                            end if
-                        end do
+                        values( 0 : (avail - numel - 1_int64) ) = array(:)
 
 
                     class default
