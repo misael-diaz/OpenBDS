@@ -355,8 +355,9 @@ module vector_class_tests
             integer(kind = int32), parameter :: n = 8
             integer(kind = int64), allocatable :: vs(:)
             logical(kind = int32), allocatable :: mask(:)
+            integer(kind = int32), allocatable :: values(:)
             integer(kind = int64):: idx, bounds(0:1)
-            integer(kind = int32):: i, j, value, delta, diff
+            integer(kind = int32):: i, j, value, delta, diff, isum
             integer(kind = int32):: mstat
 
 
@@ -562,6 +563,7 @@ module vector_class_tests
             it => vector % deref % it
 
 
+
             write (*, '(1X,A)', advance='no') "[5] test::vector.erase(): "
             if (vector % size() /= n) then
                 print *, "FAIL"
@@ -627,6 +629,115 @@ module vector_class_tests
             if ( vector % size() /= 0_int64 ) then
                 print *, "FAIL"
             else if ( associated(it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (vs)
+            allocate( vs(0:6_int64), stat = mstat )
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            vector = vecopy
+            do idx = 0_int64, 6_int64
+                vs(idx) = idx
+            end do
+            call vector % erase (s=vs)
+            it => vector % deref % it
+
+
+            write (*, '(1X,A)', advance='no') "[8] test::vector.erase(): "
+            if ( vector % size() /= 1_int64 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (vs)
+            allocate( vs(1:6), stat = mstat )
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            vector = vecopy
+            do idx = 1_int64, 6_int64
+                vs(idx) = idx
+            end do
+            call vector % erase (s=vs)
+            it => vector % deref % it
+
+
+            write (*, '(1X,A)', advance='no') "[9] test::vector.erase(): "
+            if ( vector % size() /= 2_int64 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (vs)
+            allocate( vs(2:5), stat = mstat )
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            vector = vecopy
+            do idx = 2_int64, 5_int64
+                vs(idx) = idx
+            end do
+            call vector % erase (s=vs)
+            it => vector % deref % it
+
+
+            isum = 0
+            ! searching for the four erased values should make isum = -4
+            do value = 2, 5
+                isum = isum + vector % find (value)
+            end do
+
+
+            write (*, '(1X,A)', advance='no') "[10] test::vector.erase(): "
+            if ( vector % size() /= 4_int64 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( isum /= -4 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (vs)
+            allocate( vs(4), values(4), stat = mstat )
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            vector = vecopy
+            values = [0, 2, 3, 7]
+            vs = values
+            call vector % erase (s=vs)
+            it => vector % deref % it
+
+
+            isum = 0
+            do i = 1, 4
+                value = values(i)
+                isum = isum + vector % find(value)
+            end do
+
+
+            write (*, '(1X,A)', advance='no') "[11] test::vector.erase(): "
+            if ( vector % size() /= 4_int64 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( isum /= -4 ) then
                 print *, "FAIL"
             else
                 print *, "pass"
