@@ -356,8 +356,8 @@ module vector_class_tests
             integer(kind = int64), allocatable :: vs(:)
             logical(kind = int32), allocatable :: mask(:)
             integer(kind = int32), allocatable :: values(:)
-            integer(kind = int64):: idx, bounds(0:1)
-            integer(kind = int32):: i, j, value, delta, diff, isum
+            integer(kind = int64):: idx, isum, bounds(0:1)
+            integer(kind = int32):: i, j, value, delta, diff
             integer(kind = int32):: mstat
 
 
@@ -694,7 +694,7 @@ module vector_class_tests
             it => vector % deref % it
 
 
-            isum = 0
+            isum = 0_int64
             ! searching for the four erased values should make isum = -4
             do value = 2, 5
                 isum = isum + vector % find (value)
@@ -706,7 +706,7 @@ module vector_class_tests
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
                 print *, "FAIL"
-            else if ( isum /= -4 ) then
+            else if ( isum /= -4_int64 ) then
                 print *, "FAIL"
             else
                 print *, "pass"
@@ -719,13 +719,13 @@ module vector_class_tests
 
 
             vector = vecopy
-            values = [0, 2, 3, 7]
-            vs = values
+            values(:) = [0, 2, 3, 7]
+            vs(:) = int(values, kind = int64)
             call vector % erase (s=vs)
             it => vector % deref % it
 
 
-            isum = 0
+            isum = 0_int64
             do i = 1, 4
                 value = values(i)
                 isum = isum + vector % find(value)
@@ -737,7 +737,7 @@ module vector_class_tests
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
                 print *, "FAIL"
-            else if ( isum /= -4 ) then
+            else if ( isum /= -4_int64 ) then
                 print *, "FAIL"
             else
                 print *, "pass"
