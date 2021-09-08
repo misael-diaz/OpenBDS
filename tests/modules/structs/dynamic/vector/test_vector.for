@@ -744,6 +744,96 @@ module vector_class_tests
             end if
 
 
+
+            vector = vecopy
+            values(:) = [0, 2, 3, 7]
+            call vector % erase (v=values)      ! erases selected values
+            it => vector % deref % it
+
+
+            isum = 0_int64
+            do i = 1, 4
+                value = values(i)
+                isum = isum + vector % find(value)
+            end do
+
+
+            write (*, '(1X,A)', advance='no') "[12] test::vector.erase(): "
+            if ( vector % size() /= 4_int64 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( isum /= -4_int64 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            ! requests to erase (already) deleted values (does nothing)
+            call vector % erase (v=values)
+
+            write (*, '(1X,A)', advance='no') "[13] test::vector.erase(): "
+            if ( vector % size() /= 4_int64 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (values)
+            allocate (values(0:7), stat=mstat)
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            ! erases all elements by their values
+            vector = vecopy
+            values(:) = [(i, i = 0, 7)]
+            call vector % erase (v=values)
+            it => vector % deref % it
+
+
+            write (*, '(1X,A)', advance='no') "[14] test::vector.erase(): "
+            if (vector % size() /= 0_int64) then
+                print *, "FAIL"
+            else if ( associated(vector % deref % it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (values)
+            allocate (values(0:5), stat=mstat)
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            vector = vecopy
+            values(:) = [0, (i, i = 2, 5), 7]
+            call vector % erase (v=values)
+            it => vector % deref % it
+
+
+            isum = 0_int64
+            do i = 0, 5
+                value = values(i)
+                isum = isum + vector % find(value)
+            end do
+
+
+            write (*, '(1X,A)', advance='no') "[15] test::vector.erase(): "
+            if (vector % size() /= 2_int64) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( isum /= -6_int64 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            vector = vecopy
             call vector % erase ()              ! erases all values
 
 
