@@ -479,7 +479,7 @@ module VectorClass
             integer(kind = int64), intent(in), optional :: i       ! index
             integer(kind = int64), intent(in), optional :: b(2)    ! bounds
             integer(kind = int64), intent(in), optional :: s(:)    ! isubs
-            integer(kind = int32), intent(in), optional :: v       ! value
+            integer(kind = int32), intent(in), optional :: v(:)    ! values
             logical(kind = int32), intent(in), optional :: f       ! flip
             character(len=9),      intent(in), optional :: m       ! mode
         end subroutine
@@ -508,6 +508,12 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_int32_t_erase_values (vector, elements)
+            type(vector_t), intent(inout) :: vector
+            integer(kind = int32), intent(in) :: elements(:)
+        end subroutine
+
+
         module subroutine vector_int32_t_trim (vector, vec_bounds)
             type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: vec_bounds(2)
@@ -529,7 +535,7 @@ module VectorClass
             integer(kind = int64), intent(in), optional :: i
             integer(kind = int64), intent(in), optional :: b(2)
             integer(kind = int64), intent(in), optional :: s(:)
-            integer(kind = int32), intent(in), optional :: v
+            integer(kind = int32), intent(in), optional :: v(:)
             character(len=9),      intent(in), optional :: m
         end subroutine
 

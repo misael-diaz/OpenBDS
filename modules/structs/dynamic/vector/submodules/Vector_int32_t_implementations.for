@@ -530,6 +530,89 @@ submodule (VectorClass) vector_int32_t_implementation
             end associate
 
 
+            return
+        end subroutine
+
+
+        module subroutine vector_int32_t_erase_values (vector, elements)
+            ! erases vector elements equal to ``elements''
+            type(vector_t), intent(inout) :: vector
+            integer(kind = int64), allocatable :: vs(:)
+            integer(kind = int32), intent(in) :: elements(:)
+            integer(kind = int32), allocatable :: mask(:)
+            integer(kind = int64):: ary_bounds(0:1), bounds(0:1)
+            integer(kind = int64):: i, lb, ub, idx, numel
+            character(len=*), parameter :: errmsg = &
+                & "dynamic::vector.erase_values: unexpected error"
+
+
+            ! queries for the bounds and size of the array of elements
+            numel = size(elements, kind = int64)
+            lb = lbound(elements, dim = 1, kind = int64)
+            ub = ubound(elements, dim = 1, kind = int64)
+
+            ary_bounds(0) = 0_int64
+            ary_bounds(1) = vector % avail % idx - 1_int64
+            call allocator (ary_bounds, mask)
+
+
+            associate (begin  => vector % begin % idx,  &
+                     & avail  => vector % avail % idx,  &
+                     & values => vector % array % values)
+
+                select type (values)
+                    type is ( integer(kind = int32) )
+
+                        mask = 0
+                        do idx = begin, (avail - 1_int64)
+
+                            ! masks values equal to any of the elements
+                            do i = lb, ub
+                                if ( values(idx) == elements(i) ) then
+                                    mask(idx) = mask(idx) + 1
+                                else
+                                    mask(idx) = mask(idx) + 0
+                                end if
+                            end do
+
+                            mask(idx) = min(mask(idx), 1) !! mask is 0|1
+                        end do
+
+                    class default
+                        error stop errmsg
+                end select
+
+            end associate
+
+
+            ! finds the number of elements marked for removal and delegates
+            numel = int (sum(mask), kind = int64)
+
+            if ( numel > 0_int64 ) then
+
+                if ( numel == vector % avail % idx ) then
+                    call vector_int32_t_erase_all (vector)
+                else
+
+                    bounds(0) = 0_int64
+                    bounds(1) = numel - 1_int64
+                    call allocator (bounds, vs)
+
+                    i = 0_int64
+                    ! generates vector-subscript for erase method
+                    do idx = ary_bounds(0), ary_bounds(1)
+                        if ( mask(idx) == 1 ) then
+                            vs(i) = idx
+                            i = i + 1_int64
+                        end if
+                    end do
+
+                    call vector_int32_t_erase_by_subscript (vector, vs)
+
+                end if
+
+            end if
+
 
             return
         end subroutine
@@ -541,7 +624,7 @@ submodule (VectorClass) vector_int32_t_implementation
             integer(kind = int64), intent(in), optional :: i
             integer(kind = int64), intent(in), optional :: b(2)
             integer(kind = int64), intent(in), optional :: s(:)
-            integer(kind = int32), intent(in), optional :: v
+            integer(kind = int32), intent(in), optional :: v(:)
             character(len=9), intent(in),      optional :: m
             character(len=*), parameter :: wrnmsg = &
                 & "dynamic::vector.erase(): ignoring mode, it's only " // &
