@@ -353,7 +353,7 @@ module vector_class_tests
             type(vector_t), allocatable :: vector, vecopy
             class(*), pointer, contiguous :: it(:) => null()
             integer(kind = int32), parameter :: n = 8
-            integer(kind = int64), allocatable :: vs(:)
+            integer(kind = int64), allocatable :: vs(:), imask(:)
             logical(kind = int32), allocatable :: mask(:)
             integer(kind = int32), allocatable :: values(:)
             integer(kind = int64):: idx, isum, bounds(0:1)
@@ -833,6 +833,77 @@ module vector_class_tests
             end if
 
 
+            ! tests possible usage of erasing by vector-subscript
+            vector = vecopy
+            it => vector % deref % it
+
+            deallocate (vs, values)
+            allocate (values(1:4), imask( size(it) ), stat=mstat)
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            imask = 0
+            values(:) = [(2 * i - 1, i = 1, 4)] !! [1, 3, 5, 7]
+            ! masks vector elements matching any of the selected ``values''
+            select type (it)
+
+                type is ( integer(kind = int32) )
+
+                    do idx = 1_int64, size(it, kind = int64)
+                        do j = 1, size(values)
+                            if ( it(idx) == values(j) ) then
+                                imask(idx) = 1
+                                exit
+                            end if
+                        end do
+                    end do
+
+                class default
+                    error stop "test::vector_erase(): unexpected error"
+            end select
+
+            ! assumes that there's at least one matching value (not empty)
+            allocate ( vs( sum(imask) ), stat = mstat )
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            i = 1
+            ! generates a vector-subscript for the iterator
+            do idx = 1_int64, size(imask, kind = int64)
+                if ( imask(idx) == 1 ) then
+                    vs(i) = idx
+                    i = i + 1
+                end if
+            end do
+
+            ! transforms the vector-subscript so that it can be used
+            call vdx (vs)
+            call vector % erase (s=vs)
+            it => vector % deref % it
+
+
+            isum = 0_int64
+            ! checks that the selected values have been erased from vector
+            do i = 1, 4
+                value = values(i)
+                isum = isum + vector % find(value)
+            end do
+
+
+            write (*, '(1X,A)', advance='no') "[10] test::vector.erase(): "
+            if (vector % size() /= 4_int64) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( isum /= -4_int64 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+
+
             vector = vecopy
             call vector % erase ()              ! erases all values
 
@@ -856,6 +927,15 @@ module vector_class_tests
 
 
             return
+            contains
+                elemental subroutine vdx (idx)
+                    ! transforms iterator index to that of a vector
+                    integer(kind = int64), intent(inout) :: idx
+
+                    idx = idx - 1_int64 !! NOTE: lbound(vec, iter) = (0, 1)
+
+                    return
+                end subroutine
         end subroutine
 
 
