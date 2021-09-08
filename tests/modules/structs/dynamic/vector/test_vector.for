@@ -413,7 +413,7 @@ module vector_class_tests
 
 
             ! note: value shouldn't exist after the erase
-            write (*, '(1X,A)', advance='no') "[0] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[00] test::vector.erase(): "
             if ( idx == int(value, kind = int64) .or. idx /= -1_int64 ) then
                 print *, "FAIL"
             else if ( n == vector % size () ) then
@@ -449,7 +449,7 @@ module vector_class_tests
             end select
 
 
-            write (*, '(1X,A)', advance='no') "[1] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[01] test::vector.erase(): "
             if ( idx /= -1_int64 ) then
                 print *, "FAIL"
             else if ( n == vector % size () ) then
@@ -492,7 +492,7 @@ module vector_class_tests
             end select
 
 
-            write (*, '(1X,A)', advance='no') "[2] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[02] test::vector.erase(): "
             if ( idx /= -1_int64 ) then
                 print *, "FAIL"
             else if ( n == vector % size () ) then
@@ -522,7 +522,7 @@ module vector_class_tests
             call vector % erase (b=bounds)
 
 
-            write (*, '(1X,A)', advance='no') "[3] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[03] test::vector.erase(): "
             if (vector % size() /= 0_int64) then
                 print *, "FAIL"
             else if ( associated(vector % deref % it) ) then
@@ -542,7 +542,7 @@ module vector_class_tests
             idx = vector % find (value)
             it => vector % deref % it
 
-            write (*, '(1X,A)', advance='no') "[4] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[04] test::vector.erase(): "
             if (vector % size() /= 1_int64) then
                 print *, "FAIL"
             else if ( idx /= int(value, kind = int64) ) then
@@ -564,7 +564,7 @@ module vector_class_tests
 
 
 
-            write (*, '(1X,A)', advance='no') "[5] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[05] test::vector.erase(): "
             if (vector % size() /= n) then
                 print *, "FAIL"
             else if ( .not. associated(vector % deref % it) ) then
@@ -604,7 +604,7 @@ module vector_class_tests
             end select
 
 
-            write (*, '(1X,A)', advance='no') "[6] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[06] test::vector.erase(): "
             if ( vector % size() /= n - (bounds(1) - bounds(0) + 1) ) then
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
@@ -625,7 +625,7 @@ module vector_class_tests
             it => vector % deref % it
 
 
-            write (*, '(1X,A)', advance='no') "[7] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[07] test::vector.erase(): "
             if ( vector % size() /= 0_int64 ) then
                 print *, "FAIL"
             else if ( associated(it) ) then
@@ -648,7 +648,7 @@ module vector_class_tests
             it => vector % deref % it
 
 
-            write (*, '(1X,A)', advance='no') "[8] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[08] test::vector.erase(): "
             if ( vector % size() /= 1_int64 ) then
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
@@ -671,7 +671,7 @@ module vector_class_tests
             it => vector % deref % it
 
 
-            write (*, '(1X,A)', advance='no') "[9] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[09] test::vector.erase(): "
             if ( vector % size() /= 2_int64 ) then
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
@@ -701,7 +701,7 @@ module vector_class_tests
             end do
 
 
-            write (*, '(1X,A)', advance='no') "[10] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[0A] test::vector.erase(): "
             if ( vector % size() /= 4_int64 ) then
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
@@ -732,7 +732,7 @@ module vector_class_tests
             end do
 
 
-            write (*, '(1X,A)', advance='no') "[11] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[0B] test::vector.erase(): "
             if ( vector % size() /= 4_int64 ) then
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
@@ -758,7 +758,7 @@ module vector_class_tests
             end do
 
 
-            write (*, '(1X,A)', advance='no') "[12] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[0C] test::vector.erase(): "
             if ( vector % size() /= 4_int64 ) then
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
@@ -773,7 +773,7 @@ module vector_class_tests
             ! requests to erase (already) deleted values (does nothing)
             call vector % erase (v=values)
 
-            write (*, '(1X,A)', advance='no') "[13] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[0D] test::vector.erase(): "
             if ( vector % size() /= 4_int64 ) then
                 print *, "FAIL"
             else
@@ -793,7 +793,7 @@ module vector_class_tests
             it => vector % deref % it
 
 
-            write (*, '(1X,A)', advance='no') "[14] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[0E] test::vector.erase(): "
             if (vector % size() /= 0_int64) then
                 print *, "FAIL"
             else if ( associated(vector % deref % it) ) then
@@ -821,7 +821,7 @@ module vector_class_tests
             end do
 
 
-            write (*, '(1X,A)', advance='no') "[15] test::vector.erase(): "
+            write (*, '(1X,A)', advance='no') "[0F] test::vector.erase(): "
             if (vector % size() /= 2_int64) then
                 print *, "FAIL"
             else if ( size (it, kind = int64) /= vector % size () ) then
