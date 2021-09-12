@@ -85,8 +85,7 @@ submodule (VectorClass) vector_int32_t_methods
 
             if ( present(i) ) then
                 print *, "erasing by index ... "
-                call check_bounds (vec, i)
-                call vector_int32_t_erase_by_index (vec, i)
+                call vector_int32_t_erase_byIndexShadow (vec, i, f)
             else if ( present(b) ) then
                 lb = lbound(b, dim = 1, kind = int64)
                 ub = ubound(b, dim = 1, kind = int64)

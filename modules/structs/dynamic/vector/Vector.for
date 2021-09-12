@@ -490,6 +490,13 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_int32_t_erase_byIndexShadow (vec, idx, f)
+            type(vector_t), intent(inout) :: vec
+            integer(kind = int64), intent(in) :: idx
+            logical(kind = int32), intent(in), optional :: f
+        end subroutine
+
+
         module subroutine vector_int32_t_erase_by_index (vector, idx)
             type(vector_t), intent(inout) :: vector
             integer(kind = int64), intent(in) :: idx
