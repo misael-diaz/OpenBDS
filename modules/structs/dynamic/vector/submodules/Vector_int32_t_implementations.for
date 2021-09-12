@@ -541,7 +541,7 @@ submodule (VectorClass) vector_int32_t_implementation
             ! queries for the bounds and size of the vector-subscript
             lb = lbound(vs, dim = 1, kind = int64)
             ub = ubound(vs, dim = 1, kind = int64)
-            numel = size(vs)
+            numel = size(vs, kind = int64)
 
             ary_bounds(0) = 0_int64
             ary_bounds(1) = vector % avail % idx - numel - 1_int64
