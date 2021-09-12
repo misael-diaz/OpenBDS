@@ -529,6 +529,13 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_int32_t_erase_byValueShadow (vec, elem, f)
+            type(vector_t), intent(inout) :: vec
+            integer(kind = int32), intent(in) :: elem(:)
+            logical(kind = int32), intent(in), optional :: f
+        end subroutine
+
+
         module subroutine vector_int32_t_erase_values (vector, elements)
             type(vector_t), intent(inout) :: vector
             integer(kind = int32), intent(in) :: elements(:)

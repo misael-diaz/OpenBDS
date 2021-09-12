@@ -93,7 +93,7 @@ submodule (VectorClass) vector_int32_t_methods
                 call vector_int32_t_erase_byVecSubShadow (vec, s, f)
             else if ( present(v) ) then
                 print *, "erasing by values ... "
-                call vector_int32_t_erase_values (vec, v)
+                call vector_int32_t_erase_byValueShadow (vec, v, f)
             else
                 print *, "erasing all ... "
                 call vector_int32_t_erase_all (vec)
