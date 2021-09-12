@@ -76,7 +76,6 @@ submodule (VectorClass) vector_int32_t_methods
             integer(kind = int64), intent(in), optional :: s(:)    ! isubs
             integer(kind = int32), intent(in), optional :: v(:)    ! values
             logical(kind = int32), intent(in), optional :: f       ! flip
-            integer(kind = int64) :: lb, ub, numel
             character(len=9), intent(in),      optional :: m       ! mode
 
 
