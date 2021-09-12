@@ -415,10 +415,10 @@ submodule (VectorClass) vector_int32_t_implementation
         module subroutine vector_int32_t_trim (vector, vec_bounds)
             type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: vec_bounds(2)
-            integer(kind = int64):: begin, final
+            integer(kind = int64):: final
             integer(kind = int64):: ary_bounds(0:1)
-            integer(kind = int64):: lb, lb_vec, lb_ary
-            integer(kind = int64):: ub, ub_vec, ub_ary
+            integer(kind = int64):: lb, lb_ary
+            integer(kind = int64):: ub, ub_ary
             integer(kind = int64):: i, j, idx, numel
             integer(kind = int32), allocatable :: array(:)
             integer(kind = int32), allocatable :: mask(:)
@@ -529,7 +529,7 @@ submodule (VectorClass) vector_int32_t_implementation
             ! erases vector elements marked by the vector-subscript `vs'
             type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: vs(:)
-            integer(kind = int64):: begin, final
+            integer(kind = int64):: final
             integer(kind = int64):: ary_bounds(0:1)
             integer(kind = int64):: lb, ub
             integer(kind = int64):: i, idx, numel
