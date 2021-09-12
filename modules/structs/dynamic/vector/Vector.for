@@ -502,6 +502,13 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_int32_t_erase_subs_shadow (vec, vs, f)
+            type(vector_t), intent(inout) :: vec
+            integer(kind = int64), intent(in) :: vs(:)
+            logical(kind = int32), intent(in), optional :: f
+        end subroutine
+
+
         module subroutine vector_int32_t_erase_by_subscript (vector, vs)
             type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: vs(:)
