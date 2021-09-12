@@ -503,6 +503,13 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_int32_t_erase_byRangeShadow (vec, b, f)
+            type(vector_t), intent(inout) :: vec
+            integer(kind = int64), intent(in) :: b(2)
+            logical(kind = int32), intent(in), optional :: f
+        end subroutine
+
+
         module subroutine vector_int32_t_erase_by_range (vector, bounds)
             type(vector_t), intent(inout) :: vector
             integer(kind = int64), intent(in) :: bounds(2)

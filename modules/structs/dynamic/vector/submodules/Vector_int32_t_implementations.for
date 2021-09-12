@@ -367,6 +367,28 @@ submodule (VectorClass) vector_int32_t_implementation
         end subroutine
 
 
+        module subroutine vector_int32_t_erase_byRangeShadow (vec, b, f)
+            type(vector_t), intent(inout) :: vec
+            integer(kind = int64), intent(in) :: b(2)
+            integer(kind = int64):: lb, ub
+            logical(kind = int32), intent(in), optional :: f
+
+            lb = lbound(b, dim = 1, kind = int64)
+            ub = ubound(b, dim = 1, kind = int64)
+            lb = b(lb)
+            ub = b(ub)
+            call check_bounds (vec, lb)
+            call check_bounds (vec, ub)
+            if (lb <= ub) then
+                call vector_int32_t_erase_by_range (vec, b)
+!           else
+!               print *, "empty range ... " ! passed test
+            end if
+
+            return
+        end subroutine
+
+
         module subroutine vector_int32_t_erase_by_range (vector, bounds)
             type(vector_t), intent(inout) :: vector
             integer(kind = int64), intent(in) :: bounds(2)
