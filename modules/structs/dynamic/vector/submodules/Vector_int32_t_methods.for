@@ -87,18 +87,8 @@ submodule (VectorClass) vector_int32_t_methods
                 print *, "erasing by index ... "
                 call vector_int32_t_erase_byIndexShadow (vec, i, f)
             else if ( present(b) ) then
-                lb = lbound(b, dim = 1, kind = int64)
-                ub = ubound(b, dim = 1, kind = int64)
-                lb = b(lb)
-                ub = b(ub)
-                call check_bounds (vec, lb)
-                call check_bounds (vec, ub)
                 print *, "erasing by range ... "
-                if (lb <= ub) then
-                    call vector_int32_t_erase_by_range (vec, b)
-!               else
-!                   print *, "empty range ... " ! passed
-                end if
+                call vector_int32_t_erase_byRangeShadow (vec, b, f)
             else if ( present(s) ) then
                 print *, "erasing by subscript ... "
                 call vector_int32_t_erase_subs_shadow (vec, s, f)
