@@ -465,6 +465,31 @@ submodule (VectorClass) vector_int32_t_implementation
         end subroutine
 
 
+        module subroutine vector_int32_t_erase_subs_shadow (vec, vs, f)
+            ! delegates the task to (specialized) subroutines
+            type(vector_t), intent(inout) :: vec
+            integer(kind = int64), intent(in) :: vs(:)
+            integer(kind = int64):: lb, ub, numel
+            logical(kind = int32), intent(in), optional :: f
+
+            ! queries the bounds and size of the vector-subscript
+            lb = minval(vs)
+            ub = maxval(vs)
+            numel = size(vs, kind = int64)
+
+            call check_bounds (vec, lb)
+            call check_bounds (vec, ub)
+
+            if ( numel == vec % size() ) then
+                call vector_int32_t_erase_all (vec)
+            else
+                call vector_int32_t_erase_by_subscript (vec, vs)
+            end if
+
+            return
+        end subroutine
+
+
         module subroutine vector_int32_t_erase_by_subscript (vector, vs)
             ! erases vector elements marked by the vector-subscript `vs'
             type(vector_t), intent(inout), target :: vector
