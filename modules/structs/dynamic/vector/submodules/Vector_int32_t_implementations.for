@@ -251,6 +251,37 @@ submodule (VectorClass) vector_int32_t_implementation
         end subroutine vector_int32_t_create
 
 
+        module subroutine vector_int32_t_erase (vec, i, b, s, v, m, f)
+            ! implements the erase method
+            type(vector_t), intent(inout) :: vec
+            integer(kind = int64), intent(in), optional :: i       ! index
+            integer(kind = int64), intent(in), optional :: b(2)    ! bounds
+            integer(kind = int64), intent(in), optional :: s(:)    ! isubs
+            integer(kind = int32), intent(in), optional :: v(:)    ! values
+            logical(kind = int32), intent(in), optional :: f       ! flip
+            character(len=9), intent(in),      optional :: m       ! mode
+
+            if ( present(i) ) then
+                print *, "erasing by index ... "
+                call vector_int32_t_erase_byIndexShadow (vec, i, f)
+            else if ( present(b) ) then
+                print *, "erasing by range ... "
+                call vector_int32_t_erase_byRangeShadow (vec, b, f)
+            else if ( present(s) ) then
+                print *, "erasing by subscript ... "
+                call vector_int32_t_erase_byVecSubShadow (vec, s, f)
+            else if ( present(v) ) then
+                print *, "erasing by values ... "
+                call vector_int32_t_erase_byValueShadow (vec, v, f)
+            else
+                print *, "erasing all ... "
+                call vector_int32_t_erase_all (vec)
+            end if
+
+            return
+        end subroutine
+
+
         module subroutine vector_int32_t_erase_all (vector)
             type(vector_t), intent(inout) :: vector
             integer(kind = int32):: value

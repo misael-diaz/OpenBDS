@@ -485,6 +485,17 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_int32_t_erase (vec, i, b, s, v, m, f)
+            type(vector_t), intent(inout) :: vec
+            integer(kind = int64), intent(in), optional :: i       ! index
+            integer(kind = int64), intent(in), optional :: b(2)    ! bounds
+            integer(kind = int64), intent(in), optional :: s(:)    ! isubs
+            integer(kind = int32), intent(in), optional :: v(:)    ! values
+            logical(kind = int32), intent(in), optional :: f       ! flip
+            character(len=9),      intent(in), optional :: m       ! mode
+        end subroutine
+
+
         module subroutine vector_int32_t_erase_all (vector)
             type(vector_t), intent(inout) :: vector
         end subroutine
