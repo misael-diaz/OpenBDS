@@ -369,6 +369,7 @@ module vector_class_tests
 
             i = 0
             vector = vector_t ()
+            call vector % erase ()      ! tests erasing an empty vector
             do while (i /= n)
                 call vector % push_back (i)
                 i = i + 1

@@ -78,27 +78,11 @@ submodule (VectorClass) vector_int32_t_methods
             logical(kind = int32), intent(in), optional :: f       ! flip
             character(len=9), intent(in),      optional :: m       ! mode
 
-
             call vector_int32_t_erase_argsCheck (i, b, s, v, m)
 
-
-            if ( present(i) ) then
-                print *, "erasing by index ... "
-                call vector_int32_t_erase_byIndexShadow (vec, i, f)
-            else if ( present(b) ) then
-                print *, "erasing by range ... "
-                call vector_int32_t_erase_byRangeShadow (vec, b, f)
-            else if ( present(s) ) then
-                print *, "erasing by subscript ... "
-                call vector_int32_t_erase_byVecSubShadow (vec, s, f)
-            else if ( present(v) ) then
-                print *, "erasing by values ... "
-                call vector_int32_t_erase_byValueShadow (vec, v, f)
-            else
-                print *, "erasing all ... "
-                call vector_int32_t_erase_all (vec)
-            end if
-
+            not_empty: if ( vec % size () /= 0_int64 ) then
+                call vector_int32_t_erase (vec, i, b, s, v, m, f)
+            end if not_empty
 
             return
         end subroutine
