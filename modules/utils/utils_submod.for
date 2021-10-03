@@ -69,6 +69,27 @@ submodule (utils) util_implementations
         end subroutine
 
 
+        module subroutine util_allocate_array_real64_by_bounds &
+                        & (bounds, values)
+            integer(kind = int64), intent(in) :: bounds(0:1)
+            real(kind = real64), intent(inout), allocatable :: values(:)
+            integer(kind = int64) :: lb
+            integer(kind = int64) :: ub
+            integer(kind = int32) :: mstat
+
+            call util_deallocate_array (values)
+
+            lb = bounds(0)
+            ub = bounds(1)
+            allocate (values(lb:ub), stat = mstat)
+            if (mstat /= 0) then
+                error stop "util_allocate_array: insufficient memory"
+            end if
+
+            return
+        end subroutine
+
+
         module subroutine util_allocate_array_real64_by_size (n, values)
             integer(kind = int64), intent(in) :: n
             real(kind = real64), intent(inout), allocatable :: values(:)

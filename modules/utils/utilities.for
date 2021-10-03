@@ -32,8 +32,10 @@ module utils
     interface util_allocate_array
         module procedure util_allocate_array_int32_by_size
         module procedure util_allocate_array_int64_by_size
+        module procedure util_allocate_array_real64_by_size
         module procedure util_allocate_array_int32_by_bounds
         module procedure util_allocate_array_int64_by_bounds
+        module procedure util_allocate_array_real64_by_bounds
     end interface
 
 
@@ -42,6 +44,7 @@ module utils
         module procedure util_reallocate_array_int64_by_size
         module procedure util_reallocate_array_int32_by_bounds
         module procedure util_reallocate_array_int64_by_bounds
+        module procedure util_reallocate_array_real64_by_bounds
     end interface
 
 
@@ -65,6 +68,13 @@ module utils
                         & (bounds, values)
             integer(kind = int64), intent(in) :: bounds(0:1)
             integer(kind = int64), intent(inout), allocatable :: values(:)
+        end subroutine
+
+
+        module subroutine util_allocate_array_real64_by_bounds &
+                        & (bounds, values)
+            integer(kind = int64), intent(in) :: bounds(0:1)
+            real(kind = real64), intent(inout), allocatable :: values(:)
         end subroutine
 
 
@@ -97,6 +107,13 @@ module utils
                         & (bounds, values)
             integer(kind = int64), intent(in) :: bounds(0:1)
             integer(kind = int64), intent(inout), allocatable :: values(:)
+        end subroutine
+
+
+        module subroutine util_reallocate_array_real64_by_bounds &
+                        & (bounds, values)
+            integer(kind = int64), intent(in) :: bounds(0:1)
+            real(kind = real64), intent(inout), allocatable :: values(:)
         end subroutine
 
 
