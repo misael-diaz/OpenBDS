@@ -38,6 +38,8 @@ VECTOR_MINT32_SRC = submodules/Vector_int32_t_methods.for
 VECTOR_IINT32_SRC = submodules/Vector_int32_t_implementations.for
 VECTOR_MINT64_SRC = submodules/Vector_int64_t_methods.for
 VECTOR_IINT64_SRC = submodules/Vector_int64_t_implementations.for
+VECTOR_METR64_SRC = submodules/Vector_real64_t_methods.for
+VECTOR_IMPR64_SRC = submodules/Vector_real64_t_implementations.for
 VECTOR_MVECTT_SRC = submodules/Vector_vector_t_methods.for
 VECTOR_IVECTT_SRC = submodules/Vector_vector_t_implementations.for
 
@@ -50,9 +52,12 @@ VECTOR_MINT32_OBJ = submodules/Vector_int32_t_methods.o
 VECTOR_IINT32_OBJ = submodules/Vector_int32_t_implementations.o
 VECTOR_MINT64_OBJ = submodules/Vector_int64_t_methods.o
 VECTOR_IINT64_OBJ = submodules/Vector_int64_t_implementations.o
+VECTOR_METR64_OBJ = submodules/Vector_real64_t_methods.o
+VECTOR_IMPR64_OBJ = submodules/Vector_real64_t_implementations.o
 VECTOR_MVECTT_OBJ = submodules/Vector_vector_t_methods.o
 VECTOR_IVECTT_OBJ = submodules/Vector_vector_t_implementations.o
 VECTOR_SUBMOD_OBJ = $(VECTOR_UTILIT_OBJ) $(VECTOR_OBLIVI_OBJ)\
                     $(VECTOR_MINT32_OBJ) $(VECTOR_IINT32_OBJ)\
                     $(VECTOR_MINT64_OBJ) $(VECTOR_IINT64_OBJ)\
+                    $(VECTOR_METR64_OBJ) $(VECTOR_IMPR64_OBJ)\
                     $(VECTOR_MVECTT_OBJ) $(VECTOR_IVECTT_OBJ)
