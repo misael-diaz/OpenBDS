@@ -56,6 +56,14 @@ $(VECTOR_IINT64_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IINT64_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IINT64_SRC) -o\
 	                                  $(VECTOR_IINT64_OBJ)
 
+$(VECTOR_METR64_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_METR64_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_METR64_SRC) -o\
+	                                  $(VECTOR_METR64_OBJ)
+
+$(VECTOR_IMPR64_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IMPR64_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IMPR64_SRC) -o\
+	                                  $(VECTOR_IMPR64_OBJ)
+
 $(VECTOR_MVECTT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_MVECTT_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MVECTT_SRC) -o\
 	                                  $(VECTOR_MVECTT_OBJ)

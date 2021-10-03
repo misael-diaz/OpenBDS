@@ -74,9 +74,10 @@ end module idata
 
 
 module VectorClass
-    use, intrinsic :: iso_fortran_env, only: int32, int64
+    use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use utils, only: util_allocate_array_int32_by_bounds
     use utils, only: util_allocate_array_int64_by_bounds
+    use utils, only: util_allocate_array_real64_by_bounds
     use utils, only: util_reallocate_array_int32_by_bounds
     use utils, only: util_deallocate_array_int32
     use utils, only: util_deallocate_array_int64
@@ -112,16 +113,19 @@ module VectorClass
             procedure :: vector_vector_t_copy_method
             procedure :: vector_int32_t_indexing_method
             procedure :: vector_int64_t_indexing_method
+            procedure :: vector_real64_t_indexing_method
             procedure :: vector_vector_t_indexing_method
             procedure :: vector_int32_t_find_method
             procedure :: vector_int64_t_find_method
             procedure :: vector_int32_t_push_back_method
             procedure :: vector_int64_t_push_back_method
+            procedure :: vector_real64_t_push_back_method
             procedure :: vector_vector_t_push_back_method
 !           procedure :: vector_int32_t_erase_method
             generic, public :: assignment(=) => vector_vector_t_copy_method
             generic, public :: get  => vector_int32_t_indexing_method, &
                                      & vector_int64_t_indexing_method, &
+                                     & vector_real64_t_indexing_method,&
                                      & vector_vector_t_indexing_method
             generic, public :: find => vector_int32_t_find_method, &
                                      & vector_int64_t_find_method
@@ -130,6 +134,7 @@ module VectorClass
             generic, public :: push_back => &
                                      & vector_int32_t_push_back_method, &
                                      & vector_int64_t_push_back_method, &
+                                     & vector_real64_t_push_back_method,&
                                      & vector_vector_t_push_back_method
             procedure, public :: size => size_method
             procedure, public :: clear => clear_method
@@ -150,9 +155,11 @@ module VectorClass
         module procedure vector_allocate_array_vector_t
         module procedure vector_int32_t_allocate_dynamic
         module procedure vector_int64_t_allocate_dynamic
+        module procedure vector_real64_t_allocate_dynamic
         module procedure vector_vector_t_allocate_dynamic
         module procedure util_allocate_array_int32_by_bounds
         module procedure util_allocate_array_int64_by_bounds
+        module procedure util_allocate_array_real64_by_bounds
     end interface
 
 
@@ -160,6 +167,7 @@ module VectorClass
         module procedure vector_allocate_array_vector_t
         module procedure vector_int32_t_allocate_dynamic
         module procedure vector_int64_t_allocate_dynamic
+        module procedure vector_real64_t_allocate_dynamic
         module procedure vector_vector_t_allocate_dynamic
         module procedure util_reallocate_array_int32_by_bounds
     end interface
@@ -180,6 +188,7 @@ module VectorClass
     interface initializer
         module procedure vector_int32_t_initializer
         module procedure vector_int64_t_initializer
+        module procedure vector_real64_t_initializer
         module procedure vector_vector_t_initializer
     end interface
 
@@ -187,6 +196,7 @@ module VectorClass
     interface create
         module procedure vector_int32_t_create
         module procedure vector_int64_t_create
+        module procedure vector_real64_t_create
         module procedure vector_vector_t_create
     end interface
 
@@ -194,6 +204,7 @@ module VectorClass
     interface back_inserter
         module procedure vector_int32_t_push_back
         module procedure vector_int64_t_push_back
+        module procedure vector_real64_t_push_back
         module procedure vector_vector_t_push_back
     end interface
 
@@ -201,6 +212,7 @@ module VectorClass
     interface insert_back
         module procedure vector_int32_t_insert_back
         module procedure vector_int64_t_insert_back
+        module procedure vector_real64_t_insert_back
         module procedure vector_vector_t_insert_back
     end interface
 
@@ -208,6 +220,7 @@ module VectorClass
     interface indexer
         module procedure vector_int32_t_indexer
         module procedure vector_int64_t_indexer
+        module procedure vector_real64_t_indexer
         module procedure vector_vector_t_indexer
     end interface
 
@@ -221,6 +234,7 @@ module VectorClass
     interface grow
         module procedure vector_int32_t_grow
         module procedure vector_int64_t_grow
+        module procedure vector_real64_t_grow
         module procedure vector_vector_t_grow
     end interface
 
@@ -295,6 +309,14 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_real64_t_indexing_method (self, i, value)
+            ! Synopsis: Addresses the element pointed to by index.
+            class(vector_t), intent(in) :: self
+            real(kind = real64), intent(out) :: value
+            integer(kind = int64), intent(in) :: i
+        end subroutine
+
+
         module subroutine vector_vector_t_indexing_method (self, i, value)
             class(vector_t), intent(in) :: self
             type(vector_t), intent(inout) :: value
@@ -313,6 +335,13 @@ module VectorClass
             type(vector_t), intent(in) :: vector
             integer(kind = int64), intent(in) :: idx
             integer(kind = int64), intent(out) :: value
+        end subroutine
+
+
+        module subroutine vector_real64_t_indexer (vector, idx, value)
+            type(vector_t), intent(in) :: vector
+            real(kind = real64), intent(out) :: value
+            integer(kind = int64), intent(in) :: idx
         end subroutine
 
 
@@ -348,6 +377,12 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_real64_t_push_back_method (self, value)
+            class(vector_t), intent(inout) :: self
+            real(kind = real64), intent(in) :: value
+        end subroutine
+
+
         module subroutine vector_vector_t_push_back_method (self, value)
             class(vector_t), intent(inout) :: self
             type(vector_t), intent(in) :: value
@@ -363,6 +398,12 @@ module VectorClass
         module subroutine vector_int64_t_push_back (vector, value)
             type(vector_t), intent(inout) :: vector
             integer(kind = int64), intent(in) :: value
+        end subroutine
+
+
+        module subroutine vector_real64_t_push_back (vector, value)
+            type(vector_t), intent(inout) :: vector
+            real(kind = real64), intent(in) :: value
         end subroutine
 
 
@@ -386,6 +427,13 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_real64_t_insert_back (vector, value)
+            ! Synopsis: Inserts value unto back, vector grows as needed.
+            type(vector_t), intent(inout), target :: vector
+            real(kind = real64), intent(in) :: value
+        end subroutine
+
+
         module subroutine vector_vector_t_insert_back (vector, value)
             type(vector_t), intent(inout), target :: vector
             type(vector_t), intent(in) :: value
@@ -402,6 +450,12 @@ module VectorClass
         module subroutine vector_int64_t_grow (vector, value)
             type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: value
+        end subroutine
+
+
+        module subroutine vector_real64_t_grow (vector, value)
+            type(vector_t), intent(inout), target :: vector
+            real(kind = real64), intent(in) :: value
         end subroutine
 
 
@@ -447,6 +501,12 @@ module VectorClass
         end subroutine
 
 
+        module subroutine vector_real64_t_initializer (vector, value)
+            type(vector_t), intent(inout) :: vector
+            real(kind = real64), intent(in) :: value
+        end subroutine
+
+
         module subroutine vector_vector_t_initializer (vector, value)
             type(vector_t), intent(inout) :: vector
             type(vector_t), intent(in) :: value
@@ -463,6 +523,12 @@ module VectorClass
         module subroutine vector_int64_t_create (vector, value)
             type(vector_t), intent(inout), target :: vector
             integer(kind = int64), intent(in) :: value
+        end subroutine
+
+
+        module subroutine vector_real64_t_create (vector, value)
+            type(vector_t), intent(inout), target :: vector
+            real(kind = real64), intent(in) :: value
         end subroutine
 
 
@@ -615,6 +681,13 @@ module VectorClass
             integer(kind = int64), intent(in) :: b(0:1)
             class(*), intent(inout), allocatable :: array(:)
             integer(kind = int64), intent(in) :: value
+        end subroutine
+
+
+        module subroutine vector_real64_t_allocate_dynamic (b, ary, value)
+            integer(kind = int64), intent(in) :: b(0:1)
+            class(*), intent(inout), allocatable :: ary(:)
+            real(kind = real64), intent(in) :: value
         end subroutine
 
 
