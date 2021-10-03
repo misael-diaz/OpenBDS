@@ -24,7 +24,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module vector_class_tests
-    use, intrinsic :: iso_fortran_env, only: int32, int64
+    use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use VectorClass, only: vector_t
     use chronos, only: chronom
     implicit none
@@ -47,6 +47,7 @@ module vector_class_tests
         subroutine test_vector_push_back ()
             ! Synopsis: Tests pushing values unto back of vector.
             type(vector_t), allocatable :: vector !<int64_t> !
+            type(vector_t), allocatable :: vecR64 !<real64_t>!
             type(vector_t), allocatable :: vector2!<vector_t>!
             type(vector_t), allocatable :: veccopy!<vector_t>!
             type(vector_t), allocatable :: vector3!<vector_t>!
@@ -56,7 +57,8 @@ module vector_class_tests
             integer(kind = int64), parameter :: n = 65536_int64
             integer(kind = int32):: mstat
 
-            allocate (vector, vector2, vector3, veccopy, vc3copy, stat = mstat)
+            allocate (vector, vector2, vector3, veccopy, vc3copy,&
+                    & vecR64, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.push_back: allocation error"
             end if
@@ -84,6 +86,31 @@ module vector_class_tests
             print *, "size: ", vector % size()
             write (*, '(1X,A)', advance='no') "push-back test 1:"
             if ( n == vector % size() ) then
+                print *, "pass"
+            else
+                print *, "FAIL"
+            end if
+
+
+            print *, "elapsed-time (millis): ", stopwatch % etime ()
+
+
+            vecR64 = vector_t ()
+
+            i = 0_int64
+            call stopwatch % tic ()
+            do while (i /= n)
+                call vecR64 % push_back ( real(i, kind = real64) )
+                i = i + 1_int64
+            end do
+            call stopwatch % toc ()
+
+
+            print *, "done"
+            print *, new_line('n')//new_line('n')
+            print *, "size: ", vecR64 % size()
+            write (*, '(1X,A)', advance='no') "push-back test real64:"
+            if ( n == vecR64 % size() ) then
                 print *, "pass"
             else
                 print *, "FAIL"
@@ -131,7 +158,8 @@ module vector_class_tests
             print *, new_line('n')//new_line('n')
 
 
-            deallocate (vector, vector2, vector3, veccopy, stat = mstat)
+            deallocate (vector, vector2, vector3, veccopy,&
+                      & vecR64, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.push_back: deallocation error"
             end if
@@ -1093,24 +1121,27 @@ module vector_class_tests
 
         subroutine test_vector_public_iterator ()
             type(vector_t), allocatable, target :: vector
+            type(vector_t), allocatable, target :: vecR64
             type(vector_t), allocatable :: vecopy
             class(*), pointer, contiguous :: iter(:)
             integer(kind = int32), allocatable :: values(:)
             integer(kind = int32):: i, v(1), value
             integer(kind = int32):: mstat
 
-            allocate (vector, vecopy, values(256), stat = mstat)
+            allocate (vector, vecopy, vecR64, values(256), stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.iterator: allocation error"
             end if
 
 
             vector = vector_t ()
+            vecr64 = vector_t ()
 
             do i = 1, 256
                 value = i
                 values(i) = value
                 call vector % push_back (value)
+                call vecR64 % push_back ( real(value, kind=real64) )
             end do
 
 
@@ -1197,6 +1228,17 @@ module vector_class_tests
             else
                 print *, "pass"
             end if
+
+
+            ! uses iterator to process values contained in vector<real64_t>
+            associate (it => vecR64 % deref % it)
+                select type (it)
+                    type is ( real(kind = real64) )
+                        print *, 'total: ', sum  (it)
+                        print *, 'min:   ', minval (it)
+                        print *, 'max:   ', maxval (it)
+                end select
+            end associate
 
 
             return
