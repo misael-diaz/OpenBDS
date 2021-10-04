@@ -73,4 +73,5 @@ $(VECTOR_IVECTT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IVECTT_SRC)
 	                                  $(VECTOR_IVECTT_OBJ)
 
 clean:
-	rm -f *.mod *.smod *.o submodules/*.o
+	rm -f *.mod *.smod *.o submodules/*.mod \
+	 submodules/*.smod     submodules/*.o
