@@ -24,44 +24,44 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (VectorClass) vector_int64_t_methods
-    implicit none
-    contains
+implicit none
+contains
 
 
-        module function vector_int64_t_find_method (self, value) result(i)
-            class(vector_t), intent(in) :: self
-            integer(kind = int64) :: i
-            integer(kind = int64), intent(in) :: value
+  module function vector_int64_t_find_method (self, value) result(i)
+      class(vector_t), intent(in) :: self
+      integer(kind = int64) :: i
+      integer(kind = int64), intent(in) :: value
 
-            call is_empty (self)
-            call find (self, value, i)
+      call is_empty (self)
+      call find (self, value, i)
 
-            return
-        end function
-
-
-        module subroutine vector_int64_t_indexing_method (self, idx, value)
-            ! Synopsis: Addresses the element pointed to by index.
-            class(vector_t), intent(in) :: self
-            integer(kind = int64), intent(in) :: idx
-            integer(kind = int64), intent(out) :: value
-
-            call is_empty (self)
-            call check_bounds (self, idx)
-
-            call indexer (self, idx, value)
-
-            return
-        end subroutine
+      return
+  end function
 
 
-        module subroutine vector_int64_t_push_back_method (self, value)
-            ! Synopsis: Pushes value unto back of vector.
-            class(vector_t), intent(inout) :: self
-            integer(kind = int64), intent(in) :: value
-            call back_inserter (self, value)
-            return
-        end subroutine
+  module subroutine vector_int64_t_indexing_method (self, idx, value)
+      ! Synopsis: Addresses the element pointed to by index.
+      class(vector_t), intent(in) :: self
+      integer(kind = int64), intent(in) :: idx
+      integer(kind = int64), intent(out) :: value
+
+      call is_empty (self)
+      call check_bounds (self, idx)
+
+      call indexer (self, idx, value)
+
+      return
+  end subroutine
+
+
+  module subroutine vector_int64_t_push_back_method (self, value)
+      ! Synopsis: Pushes value unto back of vector.
+      class(vector_t), intent(inout) :: self
+      integer(kind = int64), intent(in) :: value
+      call back_inserter (self, value)
+      return
+  end subroutine
 
 
 end submodule
