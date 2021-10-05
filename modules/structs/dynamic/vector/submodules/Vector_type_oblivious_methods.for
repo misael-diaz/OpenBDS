@@ -24,210 +24,210 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (VectorClass) vector_type_oblivious_methods
-    implicit none
-    contains
+implicit none
+contains
 
 
-        module function default_constructor () result(vector)
-            ! Synopsis: Returns an empty vector
-            type(vector_t):: vector
+  module function default_constructor () result(vector)
+      ! Synopsis: Returns an empty vector
+      type(vector_t):: vector
 
-            call instantiate (vector)
+      call instantiate (vector)
 
-            return
-        end function
+      return
+  end function
 
 
-        module subroutine instantiate (vector)
-            type(vector_t), intent(inout) :: vector
+  module subroutine instantiate (vector)
+      type(vector_t), intent(inout) :: vector
 
-            call allocator (vector)
+      call allocator (vector)
 
 
-            vector % begin % idx  = 0_int64
-            vector % avail % idx  = 0_int64
-            vector % limit % idx  = 0_int64
-            vector % deref % idx  = 0_int64
-            vector % deref % it   => null()
-            vector % state % init = .false.
+      vector % begin % idx  = 0_int64
+      vector % avail % idx  = 0_int64
+      vector % limit % idx  = 0_int64
+      vector % deref % idx  = 0_int64
+      vector % deref % it   => null()
+      vector % state % init = .false.
 
-            return
-        end subroutine
+      return
+  end subroutine
 
 
-        module function size_method (self) result(vector_size)
-            ! Synopsis: Returns the size of the vector.
-            class(vector_t), intent(in) :: self
-            integer(kind = int64) :: vector_size
+  module function size_method (self) result(vector_size)
+      ! Synopsis: Returns the size of the vector.
+      class(vector_t), intent(in) :: self
+      integer(kind = int64) :: vector_size
 
-            if ( .not. allocated(self % state) ) then
-                vector_size = 0_int64
-            else
+      if ( .not. allocated(self % state) ) then
+          vector_size = 0_int64
+      else
 
-                associate (begin => self % begin % idx, &
-                         & end   => self % avail % idx)
-                    vector_size = end - begin
-                end associate
+          associate (begin => self % begin % idx, &
+                   & end   => self % avail % idx)
+              vector_size = end - begin
+          end associate
 
-            end if
+      end if
 
-            return
-        end function
+      return
+  end function
 
 
-        module subroutine clear_method (self)
-            ! Synopsis: Clears the vector elements.
-            class(vector_t), intent(inout) :: self
+  module subroutine clear_method (self)
+      ! Synopsis: Clears the vector elements.
+      class(vector_t), intent(inout) :: self
 
-            call is_instantiated (self)
+      call is_instantiated (self)
 
-            self % avail % idx = 0_int64
-            self % deref % it  => null()
-            return
-        end subroutine
+      self % avail % idx = 0_int64
+      self % deref % it  => null()
+      return
+  end subroutine
 
 
-        module subroutine vector_vector_t_copy_method (self, vector)
-            class(vector_t), intent(inout) :: self
-            class(vector_t), intent(in) :: vector
+  module subroutine vector_vector_t_copy_method (self, vector)
+      class(vector_t), intent(inout) :: self
+      class(vector_t), intent(in) :: vector
 
 
-            if ( loc(self) /= loc(vector) ) then
+      if ( loc(self) /= loc(vector) ) then
 
-                if ( allocated(vector % array) ) then
+          if ( allocated(vector % array) ) then
 
-                    if ( allocated(vector % array % values) ) then
-                        call vector_vector_t_copy (self, vector)
-                    end if
+              if ( allocated(vector % array % values) ) then
+                  call vector_vector_t_copy (self, vector)
+              end if
 
-                else
+          else
 
-                    call deallocator (self % array)
-                    call allocator   (self)
-                    call instantiate (self)
+              call deallocator (self % array)
+              call allocator   (self)
+              call instantiate (self)
 
-                end if
+          end if
 
-            end if
+      end if
 
 
-            return
-        end subroutine
+      return
+  end subroutine
 
 
-        module subroutine vector_vector_t_copy (to, from)
-            type(vector_t), intent(out), target :: to
-            type(vector_t), intent(in) :: from
-            type(vector_t), allocatable :: aryvec(:)
-            type(vector_t) :: vec
-            integer(kind = int32), allocatable :: aryi32(:)
-            integer(kind = int64), allocatable :: aryi64(:)
-            integer(kind = int64) :: ary_bounds(0:1)
-            integer(kind = int64) :: vec_bounds(0:1)
-            integer(kind = int64) :: first
-            integer(kind = int64) :: last
-            integer(kind = int64) :: lb
-            integer(kind = int64) :: ub
-            integer(kind = int64) :: i64
-            integer(kind = int32) :: i32
-            character(len=*), parameter :: errmsg = &
-                & "dynamic::vector.copy: unimplemented vector<T>"
+  module subroutine vector_vector_t_copy (to, from)
+      type(vector_t), intent(out), target :: to
+      type(vector_t), intent(in) :: from
+      type(vector_t), allocatable :: aryvec(:)
+      type(vector_t) :: vec
+      integer(kind = int32), allocatable :: aryi32(:)
+      integer(kind = int64), allocatable :: aryi64(:)
+      integer(kind = int64) :: ary_bounds(0:1)
+      integer(kind = int64) :: vec_bounds(0:1)
+      integer(kind = int64) :: first
+      integer(kind = int64) :: last
+      integer(kind = int64) :: lb
+      integer(kind = int64) :: ub
+      integer(kind = int64) :: i64
+      integer(kind = int32) :: i32
+      character(len=*), parameter :: errmsg = &
+          & "dynamic::vector.copy: unimplemented vector<T>"
 
 
-            i32 = 0_int32
-            i64 = 0_int64
+      i32 = 0_int32
+      i64 = 0_int64
 
 
-            call allocator (to)
+      call allocator (to)
 
 
-            to % begin % idx = from % begin % idx
-            to % avail % idx = from % avail % idx
-            to % limit % idx = from % limit % idx
-            to % deref % idx = from % deref % idx
+      to % begin % idx = from % begin % idx
+      to % avail % idx = from % avail % idx
+      to % limit % idx = from % limit % idx
+      to % deref % idx = from % deref % idx
 
 
-            lb            = from % begin % idx
-            ub            = from % avail % idx
+      lb            = from % begin % idx
+      ub            = from % avail % idx
 
-            ary_bounds(0) = from % begin % idx
-            ary_bounds(1) = from % avail % idx
+      ary_bounds(0) = from % begin % idx
+      ary_bounds(1) = from % avail % idx
 
-            vec_bounds(0) = from % begin % idx
-            vec_bounds(1) = from % limit % idx
+      vec_bounds(0) = from % begin % idx
+      vec_bounds(1) = from % limit % idx
 
 
-            ! copies from (source) vector into a suitable placeholder
-            associate (values => from % array % values)
+      ! copies from (source) vector into a suitable placeholder
+      associate (values => from % array % values)
 
-                select type (values)
+          select type (values)
 
-                    type is ( integer(kind = int32) )
+              type is ( integer(kind = int32) )
 
-                        call allocator (ary_bounds, aryi32)
-                        call allocator (vec_bounds, to % array % values, &
-                                      & i32)
+                  call allocator (ary_bounds, aryi32)
+                  call allocator (vec_bounds, to % array % values, &
+                                & i32)
 
-                        aryi32(:) = values(lb:ub)
-                        to % state % errmsg(:) = "vector<int32_t>"
+                  aryi32(:) = values(lb:ub)
+                  to % state % errmsg(:) = "vector<int32_t>"
 
 
-                    type is ( integer(kind = int64) )
+              type is ( integer(kind = int64) )
 
 
-                        call allocator (ary_bounds, aryi64)
-                        call allocator (vec_bounds, to % array % values, &
-                                      & i64)
+                  call allocator (ary_bounds, aryi64)
+                  call allocator (vec_bounds, to % array % values, &
+                                & i64)
 
-                        aryi64(:) = values(lb:ub)
-                        to % state % errmsg(:) = "vector<int64_t>"
+                  aryi64(:) = values(lb:ub)
+                  to % state % errmsg(:) = "vector<int64_t>"
 
 
-                    type is (vector_t)
+              type is (vector_t)
 
 
-                        call allocator (ary_bounds, aryvec)
-                        call allocator (vec_bounds, to % array % values, &
-                                      & vec)
+                  call allocator (ary_bounds, aryvec)
+                  call allocator (vec_bounds, to % array % values, &
+                                & vec)
 
-                        aryvec(:) = values(lb:ub)
-                        to % state % errmsg(:) = "vector<vector_t>"
+                  aryvec(:) = values(lb:ub)
+                  to % state % errmsg(:) = "vector<vector_t>"
 
 
-                    class default
+              class default
 
-                        error stop errmsg
+                  error stop errmsg
 
-                end select
+          end select
 
-            end associate
+      end associate
 
 
-            ! copies into (destination) vector
-            associate (values => to % array % values)
+      ! copies into (destination) vector
+      associate (values => to % array % values)
 
-                select type (values)
+          select type (values)
 
-                    type is ( integer(kind = int32) )
-                        values(lb:ub) = aryi32(:)
-                    type is ( integer(kind = int64) )
-                        values(lb:ub) = aryi64(:)
-                    type is (vector_t)
-                        values(lb:ub) = aryvec(:)
-                    class default
-                        error stop "dynamic::vector.copy: unexpected error"
+              type is ( integer(kind = int32) )
+                  values(lb:ub) = aryi32(:)
+              type is ( integer(kind = int64) )
+                  values(lb:ub) = aryi64(:)
+              type is (vector_t)
+                  values(lb:ub) = aryvec(:)
+              class default
+                  error stop "dynamic::vector.copy: unexpected error"
 
-                end select
+          end select
 
-            end associate
+      end associate
 
-            first = to % begin % idx
-            last  = to % avail % idx - 1_int64
-            to % deref % it   => to % array % values(first:last)
-            to % state % init = .true.
+      first = to % begin % idx
+      last  = to % avail % idx - 1_int64
+      to % deref % it   => to % array % values(first:last)
+      to % state % init = .true.
 
-            return
-        end subroutine
+      return
+  end subroutine
 
 
 end submodule
