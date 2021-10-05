@@ -24,68 +24,68 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (VectorClass) vector_int32_t_methods
-    implicit none
-    contains
+implicit none
+contains
 
 
-        module function vector_int32_t_find_method (self, value) result(i)
-            ! Synopsis: Returns index of element having the sought value.
-            class(vector_t), intent(in) :: self
-            integer(kind = int64) :: i
-            integer(kind = int32), intent(in) :: value
+  module function vector_int32_t_find_method (self, value) result(i)
+      ! Synopsis: Returns index of element having the sought value.
+      class(vector_t), intent(in) :: self
+      integer(kind = int64) :: i
+      integer(kind = int32), intent(in) :: value
 
-            call is_empty (self)
-            call find (self, value, i)
+      call is_empty (self)
+      call find (self, value, i)
 
-            return
-        end function
-
-
-        module subroutine vector_int32_t_indexing_method (self, idx, value)
-            ! Synopsis: Addresses the element pointed to by index.
-            class(vector_t), intent(in) :: self
-            integer(kind = int64), intent(in) :: idx
-            integer(kind = int32), intent(out) :: value
-
-            call is_empty (self)
-            call check_bounds (self, idx)
-
-            call indexer (self, idx, value)
-
-            return
-        end subroutine
+      return
+  end function
 
 
-        module subroutine vector_int32_t_push_back_method (self, value)
-            ! Synopsis: Pushes value unto back of vector.
-            class(vector_t), intent(inout) :: self
-            integer(kind = int32), intent(in) :: value
-            call back_inserter (self, value)
-            return
-        end subroutine
+  module subroutine vector_int32_t_indexing_method (self, idx, value)
+      ! Synopsis: Addresses the element pointed to by index.
+      class(vector_t), intent(in) :: self
+      integer(kind = int64), intent(in) :: idx
+      integer(kind = int32), intent(out) :: value
+
+      call is_empty (self)
+      call check_bounds (self, idx)
+
+      call indexer (self, idx, value)
+
+      return
+  end subroutine
 
 
-        module subroutine vector_int32_t_erase_method(vec, i, b, s, v, m, f)
-            ! Synopsis:
-            ! Erases values either by index, range, subscript, or value(s).
-            ! mode: [in|ex]clusive
-            ! flip: inverts logic, erases all but those specified.
-            class(vector_t), intent(inout) :: vec
-            integer(kind = int64), intent(in), optional :: i       ! index
-            integer(kind = int64), intent(in), optional :: b(2)    ! bounds
-            integer(kind = int64), intent(in), optional :: s(:)    ! isubs
-            integer(kind = int32), intent(in), optional :: v(:)    ! values
-            logical(kind = int32), intent(in), optional :: f       ! flip
-            character(len=9), intent(in),      optional :: m       ! mode
+  module subroutine vector_int32_t_push_back_method (self, value)
+      ! Synopsis: Pushes value unto back of vector.
+      class(vector_t), intent(inout) :: self
+      integer(kind = int32), intent(in) :: value
+      call back_inserter (self, value)
+      return
+  end subroutine
 
-            call vector_int32_t_erase_argsCheck (i, b, s, v, m)
 
-            not_empty: if ( vec % size () /= 0_int64 ) then
-                call vector_int32_t_erase (vec, i, b, s, v, m, f)
-            end if not_empty
+  module subroutine vector_int32_t_erase_method(vec, i, b, s, v, m, f)
+      ! Synopsis:
+      ! Erases values either by index, range, subscript, or value(s).
+      ! mode: [in|ex]clusive
+      ! flip: inverts logic, erases all but those specified.
+      class(vector_t), intent(inout) :: vec
+      integer(kind = int64), intent(in), optional :: i       ! index
+      integer(kind = int64), intent(in), optional :: b(2)    ! bounds
+      integer(kind = int64), intent(in), optional :: s(:)    ! isubs
+      integer(kind = int32), intent(in), optional :: v(:)    ! values
+      logical(kind = int32), intent(in), optional :: f       ! flip
+      character(len=9), intent(in),      optional :: m       ! mode
 
-            return
-        end subroutine
+      call vector_int32_t_erase_argsCheck (i, b, s, v, m)
+
+      not_empty: if ( vec % size () /= 0_int64 ) then
+          call vector_int32_t_erase (vec, i, b, s, v, m, f)
+      end if not_empty
+
+      return
+  end subroutine
 
 
 end submodule
