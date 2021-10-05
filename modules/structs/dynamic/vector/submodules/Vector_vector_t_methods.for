@@ -24,32 +24,32 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (VectorClass) vector_vector_t_methods
-    implicit none
-    contains
+implicit none
+contains
 
 
-        module subroutine vector_vector_t_indexing_method (self, i, value)
-            ! Synopsis: Addresses the element pointed to by index.
-            class(vector_t), intent(in) :: self
-            type(vector_t), intent(inout) :: value
-            integer(kind = int64), intent(in) :: i
+  module subroutine vector_vector_t_indexing_method (self, i, value)
+      ! Synopsis: Addresses the element pointed to by index.
+      class(vector_t), intent(in) :: self
+      type(vector_t), intent(inout) :: value
+      integer(kind = int64), intent(in) :: i
 
-            call is_empty (self)
-            call check_bounds (self, i)
+      call is_empty (self)
+      call check_bounds (self, i)
 
-            call indexer (self, i, value)
+      call indexer (self, i, value)
 
-            return
-        end subroutine
+      return
+  end subroutine
 
 
-        module subroutine vector_vector_t_push_back_method (self, value)
-            ! Synopsis: Pushes value unto back of vector.
-            class(vector_t), intent(inout) :: self
-            type(vector_t), intent(in) :: value
-            call back_inserter (self, value)
-            return
-        end subroutine
+  module subroutine vector_vector_t_push_back_method (self, value)
+      ! Synopsis: Pushes value unto back of vector.
+      class(vector_t), intent(inout) :: self
+      type(vector_t), intent(in) :: value
+      call back_inserter (self, value)
+      return
+  end subroutine
 
 
 end submodule
