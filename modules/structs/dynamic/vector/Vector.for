@@ -74,72 +74,71 @@ end module idata
 
 
 module VectorClass
-    use, intrinsic :: iso_fortran_env, only: int32, int64, real64
-    use utils, only: util_allocate_array_int32_by_bounds
-    use utils, only: util_allocate_array_int64_by_bounds
-    use utils, only: util_allocate_array_real64_by_bounds
-    use utils, only: util_reallocate_array_int32_by_bounds
-    use utils, only: util_deallocate_array_int32
-    use utils, only: util_deallocate_array_int64
-    use idata, only: data_t
-    implicit none
-    private
+  use, intrinsic :: iso_fortran_env, only: int32, int64, real64
+  use utils, only: util_allocate_array_int32_by_bounds
+  use utils, only: util_allocate_array_int64_by_bounds
+  use utils, only: util_allocate_array_real64_by_bounds
+  use utils, only: util_reallocate_array_int32_by_bounds
+  use utils, only: util_deallocate_array_int32
+  use utils, only: util_deallocate_array_int64
+  use idata, only: data_t
+  implicit none
+  private
 
 
-    type :: iter_t
-        class(*), pointer, contiguous :: it(:) => null()
-        integer(kind = int64) :: idx = 0_int64
-    end type
+  type :: iter_t
+      class(*), pointer, contiguous :: it(:) => null()
+      integer(kind = int64) :: idx = 0_int64
+  end type
 
 
-    type :: stat_t
-        logical(kind = int64) :: init = .false.
-        character(:), allocatable :: errmsg
-        contains
-            final :: destructor_stat_t
-    end type
+  type :: stat_t
+      logical(kind = int64) :: init = .false.
+      character(:), allocatable :: errmsg
+      contains
+        final :: destructor_stat_t
+  end type
 
 
-    type, public :: vector_t
+  type, public :: vector_t
+      private
+      type(iter_t), allocatable, public :: deref
+      type(iter_t), allocatable :: begin
+      type(iter_t), allocatable :: avail
+      type(iter_t), allocatable :: limit
+      type(data_t), allocatable :: array
+      type(stat_t), allocatable :: state
+      contains
         private
-        type(iter_t), allocatable, public :: deref
-        type(iter_t), allocatable :: begin
-        type(iter_t), allocatable :: avail
-        type(iter_t), allocatable :: limit
-        type(data_t), allocatable :: array
-        type(stat_t), allocatable :: state
-        contains
-            private
-            procedure :: vector_vector_t_copy_method
-            procedure :: vector_int32_t_indexing_method
-            procedure :: vector_int64_t_indexing_method
-            procedure :: vector_real64_t_indexing_method
-            procedure :: vector_vector_t_indexing_method
-            procedure :: vector_int32_t_find_method
-            procedure :: vector_int64_t_find_method
-            procedure :: vector_int32_t_push_back_method
-            procedure :: vector_int64_t_push_back_method
-            procedure :: vector_real64_t_push_back_method
-            procedure :: vector_vector_t_push_back_method
-!           procedure :: vector_int32_t_erase_method
-            generic, public :: assignment(=) => vector_vector_t_copy_method
-            generic, public :: get  => vector_int32_t_indexing_method, &
-                                     & vector_int64_t_indexing_method, &
-                                     & vector_real64_t_indexing_method,&
-                                     & vector_vector_t_indexing_method
-            generic, public :: find => vector_int32_t_find_method, &
-                                     & vector_int64_t_find_method
-!           generic, public :: erase => vector_int32_t_erase_method
-            procedure, public :: erase => vector_int32_t_erase_method
-            generic, public :: push_back => &
-                                     & vector_int32_t_push_back_method, &
-                                     & vector_int64_t_push_back_method, &
-                                     & vector_real64_t_push_back_method,&
-                                     & vector_vector_t_push_back_method
-            procedure, public :: size => size_method
-            procedure, public :: clear => clear_method
-            final :: finalizer
-    end type
+        procedure :: vector_vector_t_copy_method
+        procedure :: vector_int32_t_indexing_method
+        procedure :: vector_int64_t_indexing_method
+        procedure :: vector_real64_t_indexing_method
+        procedure :: vector_vector_t_indexing_method
+        procedure :: vector_int32_t_find_method
+        procedure :: vector_int64_t_find_method
+        procedure :: vector_int32_t_push_back_method
+        procedure :: vector_int64_t_push_back_method
+        procedure :: vector_real64_t_push_back_method
+        procedure :: vector_vector_t_push_back_method
+!       procedure :: vector_int32_t_erase_method
+        generic, public :: assignment(=) => vector_vector_t_copy_method
+        generic, public :: get  => vector_int32_t_indexing_method, &
+                                 & vector_int64_t_indexing_method, &
+                                 & vector_real64_t_indexing_method,&
+                                 & vector_vector_t_indexing_method
+        generic, public :: find => vector_int32_t_find_method, &
+                                 & vector_int64_t_find_method
+!       generic, public :: erase => vector_int32_t_erase_method
+        procedure, public :: erase => vector_int32_t_erase_method
+        generic, public :: push_back => vector_int32_t_push_back_method, &
+                                      & vector_int64_t_push_back_method, &
+                                      & vector_real64_t_push_back_method,&
+                                      & vector_vector_t_push_back_method
+        procedure, public :: size => size_method
+        procedure, public :: clear => clear_method
+        final :: finalizer
+  end type
 
 
   interface vector_t
