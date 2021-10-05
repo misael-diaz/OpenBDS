@@ -244,10 +244,10 @@ module VectorClass
   end interface
 
 
-!   interface to_string
-!       module procedure to_string_int32
-!       module procedure to_string_int64
-!   end interface
+! interface to_string
+!     module procedure to_string_int32
+!     module procedure to_string_int64
+! end interface
 
 
   interface
@@ -539,7 +539,7 @@ module VectorClass
 
     module subroutine vector_int32_t_erase_method (vec, i, b, s, v, m, f)
         ! Synopsis:
-            ! Erases values either by index, range, subscript, or value(s).
+        ! Erases values either by index, range, subscript, or value(s).
         class(vector_t), intent(inout) :: vec
         integer(kind = int64), intent(in), optional :: i       ! index
         integer(kind = int64), intent(in), optional :: b(2)    ! bounds
@@ -747,16 +747,16 @@ module VectorClass
     end subroutine
 
 
-!       module function to_string_int32 (i) result(str)
-!           integer(kind = int32), intent(in) :: i
-!           character(len = 64) :: str
-!       end function
+!   module function to_string_int32 (i) result(str)
+!       integer(kind = int32), intent(in) :: i
+!       character(len = 64) :: str
+!   end function
 
 
-!       module function to_string_int64 (i) result(str)
-!           integer(kind = int64), intent(in) :: i
-!           character(len = 64) :: str
-!       end function
+!   module function to_string_int64 (i) result(str)
+!       integer(kind = int64), intent(in) :: i
+!       character(len = 64) :: str
+!   end function
 
 
     module subroutine destructor_stat_t (s)
