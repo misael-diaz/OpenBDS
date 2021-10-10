@@ -43,15 +43,6 @@ contains
   end subroutine
 
 
-  module subroutine vector_vector_t_push_back_method (self, value)
-      ! Synopsis: Pushes value unto back of vector.
-      class(vector_t), intent(inout) :: self
-      type(vector_t), intent(in) :: value
-      call back_inserter (self, value)
-      return
-  end subroutine
-
-
 end submodule
 
 

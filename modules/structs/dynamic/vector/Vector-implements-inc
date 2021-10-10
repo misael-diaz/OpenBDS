@@ -1,0 +1,53 @@
+#
+# source: Vector-implements-inc
+# author: misael-diaz
+# date:   2021-10-10
+#
+# Synopsis:
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
+#
+#
+# Copyright (C) 2021 Misael Diaz-Maldonado
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+## names
+
+# implementations
+VECTOR_IINT32_FOR = Vector_int32_t_implementations.for
+VECTOR_IINT64_FOR = Vector_int64_t_implementations.for
+VECTOR_IMPR64_FOR = Vector_real64_t_implementations.for
+VECTOR_IVECTT_FOR = Vector_vector_t_implementations.for
+
+# objects
+VECTOR_IINT32_O   = Vector_int32_t_implementations.o
+VECTOR_IINT64_O   = Vector_int64_t_implementations.o
+VECTOR_IMPR64_O   = Vector_real64_t_implementations.o
+VECTOR_IVECTT_O   = Vector_vector_t_implementations.o
+
+## names relative to makefile
+
+# implementations
+VECTOR_IINT32_SRC = submodules/$(VECTOR_IINT32_FOR)
+VECTOR_IINT64_SRC = submodules/$(VECTOR_IINT64_FOR)
+VECTOR_IMPR64_SRC = submodules/$(VECTOR_IMPR64_FOR)
+VECTOR_IVECTT_SRC = submodules/$(VECTOR_IVECTT_FOR)
+
+# objects
+VECTOR_IINT32_OBJ = submodules/$(VECTOR_IINT32_O)
+VECTOR_IINT64_OBJ = submodules/$(VECTOR_IINT64_O)
+VECTOR_IMPR64_OBJ = submodules/$(VECTOR_IMPR64_O)
+VECTOR_IVECTT_OBJ = submodules/$(VECTOR_IVECTT_O)

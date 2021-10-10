@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-include Vector-inc
+include make-inc
 
 all: $(VECTOR_MODULE_OBJ) $(VECTOR_SUBMOD_OBJ)
 
@@ -32,10 +32,36 @@ $(VECTOR_MODULE_OBJ): $(VECTOR_MODULE_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MODULE_SRC) -o\
 	                                  $(VECTOR_MODULE_OBJ)
 
-$(VECTOR_ERASE_METHOD_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_ERASE_METHOD_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_ERASE_METHOD_SRC) -o\
-	                                  $(VECTOR_ERASE_METHOD_OBJ)
+$(VECTOR_ERASE_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_ERASE_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_ERASE_SRC) -o\
+	                                  $(VECTOR_ERASE_OBJ)
 
+$(VECTOR_INT32_PUSH_BACK_OBJ): $(VECTOR_MODULE_OBJ)\
+                               $(VECTOR_INT32_PUSH_BACK_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_INT32_PUSH_BACK_SRC) -o\
+	                                  $(VECTOR_INT32_PUSH_BACK_OBJ)
+
+$(VECTOR_INT64_PUSH_BACK_OBJ): $(VECTOR_MODULE_OBJ)\
+                               $(VECTOR_INT64_PUSH_BACK_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_INT64_PUSH_BACK_SRC) -o\
+	                                  $(VECTOR_INT64_PUSH_BACK_OBJ)
+
+$(VECTOR_REAL64_PUSH_BACK_OBJ): $(VECTOR_MODULE_OBJ)\
+                                $(VECTOR_REAL64_PUSH_BACK_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_REAL64_PUSH_BACK_SRC) -o\
+	                                  $(VECTOR_REAL64_PUSH_BACK_OBJ)
+
+$(VECTOR_VECTOR_PUSH_BACK_OBJ): $(VECTOR_MODULE_OBJ)\
+                                $(VECTOR_VECTOR_PUSH_BACK_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_VECTOR_PUSH_BACK_SRC) -o\
+	                                  $(VECTOR_VECTOR_PUSH_BACK_OBJ)
+
+$(VECTOR_UTILIT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_UTILIT_SRC)
+$(VECTOR_UTILIT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_UTILIT_SRC)
+$(VECTOR_UTILIT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_UTILIT_SRC)
+$(VECTOR_UTILIT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_UTILIT_SRC)
+$(VECTOR_UTILIT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_UTILIT_SRC)
+$(VECTOR_UTILIT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_UTILIT_SRC)
 $(VECTOR_UTILIT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_UTILIT_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_UTILIT_SRC) -o\
 	                                  $(VECTOR_UTILIT_OBJ)
