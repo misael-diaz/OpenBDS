@@ -50,7 +50,11 @@ VECTOR_SUB_OBJ      = $(VECTOR_MOD_DIR)/$(VECTOR_UTILIT_OBJ)\
                       $(VECTOR_MOD_DIR)/$(VECTOR_METR64_OBJ)\
                       $(VECTOR_MOD_DIR)/$(VECTOR_IMPR64_OBJ)\
                       $(VECTOR_MOD_DIR)/$(VECTOR_MVECTT_OBJ)\
-                      $(VECTOR_MOD_DIR)/$(VECTOR_IVECTT_OBJ)
+                      $(VECTOR_MOD_DIR)/$(VECTOR_IVECTT_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_INT32_PUSH_BACK_METHOD_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_INT64_PUSH_BACK_METHOD_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_REAL64_PUSH_BACK_METHOD_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_VECTOR_PUSH_BACK_METHOD_OBJ)
 #                     $(VECTOR_MOD_DIR)/$(VECTOR_ERASE_METHOD_OBJ)
 
 
