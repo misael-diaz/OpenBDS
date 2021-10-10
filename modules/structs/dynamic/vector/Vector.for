@@ -244,6 +244,16 @@ module VectorClass
   end interface
 
 
+  interface backup
+      module procedure vector_int32_t_backup
+  end interface
+
+
+  interface restore
+      module procedure vector_int32_t_restore
+  end interface
+
+
 ! interface to_string
 !     module procedure to_string_int32
 !     module procedure to_string_int64
@@ -441,7 +451,7 @@ module VectorClass
 
     module subroutine vector_int32_t_grow (vector, value)
         ! Synopsis: Doubles the vector size.
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         integer(kind = int32), intent(in) :: value
     end subroutine
 
@@ -461,6 +471,19 @@ module VectorClass
     module subroutine vector_vector_t_grow (vector, value)
         type(vector_t), intent(inout) :: vector
         type(vector_t), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int32_t_backup (vector, array)
+        type(vector_t), intent(in) :: vector
+        integer(kind = int32), intent(inout), allocatable :: array(:)
+    end subroutine
+
+
+    module subroutine vector_int32_t_restore (vector, array, value)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int32), intent(in) :: array(:)
+        integer(kind = int32), intent(in) :: value
     end subroutine
 
 
