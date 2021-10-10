@@ -248,6 +248,7 @@ module VectorClass
       module procedure vector_int32_t_backup
       module procedure vector_int64_t_backup
       module procedure vector_real64_t_backup
+      module procedure vector_vector_t_backup
   end interface
 
 
@@ -255,6 +256,7 @@ module VectorClass
       module procedure vector_int32_t_restore
       module procedure vector_int64_t_restore
       module procedure vector_real64_t_restore
+      module procedure vector_vector_t_restore
   end interface
 
 
@@ -496,6 +498,12 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_vector_t_backup (vector, array)
+        type(vector_t), intent(in) :: vector
+        type(vector_t), intent(inout), allocatable :: array(:)
+    end subroutine
+
+
     module subroutine vector_int32_t_restore (vector, array, value)
         type(vector_t), intent(inout) :: vector
         integer(kind = int32), intent(in) :: array(:)
@@ -514,6 +522,13 @@ module VectorClass
         type(vector_t), intent(inout) :: vector
         real(kind = real64), intent(in) :: array(:)
         real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_restore (vector, array, value)
+        type(vector_t), intent(inout) :: vector
+        type(vector_t), intent(in) :: array(:)
+        type(vector_t), intent(in) :: value
     end subroutine
 
 
