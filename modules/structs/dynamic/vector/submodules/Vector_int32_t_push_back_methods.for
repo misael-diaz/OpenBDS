@@ -91,15 +91,33 @@ contains
 
   module subroutine vector_int32_t_grow (vector, value)
       ! Synopsis: Doubles the vector size.
-      type(vector_t), intent(inout), target :: vector
+      type(vector_t), intent(inout) :: vector
       integer(kind = int64):: lb
       integer(kind = int64):: ub
       integer(kind = int64):: bounds(0:1)
       integer(kind = int32), intent(in) :: value
       integer(kind = int32), allocatable :: array(:)
-      character(len=*), parameter :: errmsg = &
-          & "dynamic::vector.grow: unexpected error"
 
+      call backup  (vector, array)
+
+      vector % limit % idx = 2_int64 * vector % limit % idx !! doubles size
+
+      call restore (vector, array, value)
+
+      return
+  end subroutine vector_int32_t_grow
+
+
+  subroutine vector_int32_t_backup (vector, array)
+      ! Synopsis:
+      ! Creates backup of data contained in vector.
+      type(vector_t), intent(in) :: vector
+      integer(kind = int64):: lb
+      integer(kind = int64):: ub
+      integer(kind = int64):: bounds(0:1)
+      integer(kind = int32), intent(inout), allocatable :: array(:)
+      character(len=*), parameter :: errmsg = &
+          & "dynamic::vector.backup: unexpected error"
 
       ! bounds for copying the data
       lb = vector % begin % idx
@@ -121,21 +139,36 @@ contains
 
       end associate
 
+      return
+  end subroutine vector_int32_t_backup
 
-      vector % limit % idx = 2_int64 * vector % limit % idx
 
+  subroutine vector_int32_t_restore (vector, array, value)
+      ! Synopsis:
+      ! Restores vector with data in placeholder array.
+      type(vector_t), intent(inout) :: vector
+      integer(kind = int64):: lb
+      integer(kind = int64):: ub
+      integer(kind = int64):: bounds(0:1)
+      integer(kind = int32), intent(in) :: array(:)
+      integer(kind = int32), intent(in) :: value
+      character(len=*), parameter :: errmsg = &
+          & "dynamic::vector.restore: unexpected error"
 
+      ! copying bounds
+      lb = vector % begin % idx
+      ub = vector % avail % idx - 1_int64
+      ! grown vector bounds
       bounds(0) = vector % begin % idx
       bounds(1) = vector % limit % idx
       call reallocator (bounds, vector % array % values, value)
 
-      ! copies values in placeholder into (reallocated) vector
+      ! copies values in placeholder into vector
       associate (values => vector % array % values)
 
          select type (values)
               type is ( integer(kind = int32) )
-                  values = 0
-                  values(lb:ub) = array
+                  values(lb:ub) = array(:)
               class default
                   error stop errmsg
           end select
@@ -143,7 +176,7 @@ contains
       end associate
 
       return
-  end subroutine vector_int32_t_grow
+  end subroutine vector_int32_t_restore
 
 
   module subroutine vector_int32_t_initializer (vector, value)
