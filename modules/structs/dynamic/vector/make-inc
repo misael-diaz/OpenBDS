@@ -1,7 +1,7 @@
 #
-# source: Vector-inc
+# source: make-inc
 # author: misael-diaz
-# date:   2021-06-10
+# date:   2021-10-10
 #
 # Synopsis:
 # Include for GNU make, defines source and object files for compilation
@@ -24,33 +24,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# modules directory
-# modules include
-MODULES_DIR = ../../../../modules/utils
-MODULES_INC = -I$(MODULES_DIR)
+include Vector-inc
+include Vector-methods-inc
+include Vector-implements-inc
 
-
-## names
-
-# interface
-VECTOR_MODULE_FOR = Vector.for
-
-# utilities
-VECTOR_UTILIT_FOR = Vector_utils.for
-
-# objects
-VECTOR_MODULE_O   = Vector.o
-VECTOR_UTILIT_O   = Vector_utils.o
-
-
-## names relative to makefile
-
-# interface
-VECTOR_MODULE_SRC = Vector.for
-
-# utilities
-VECTOR_UTILIT_SRC = submodules/$(VECTOR_UTILIT_FOR)
-
-# objects
-VECTOR_MODULE_OBJ = $(VECTOR_MODULE_O)
-VECTOR_UTILIT_OBJ = submodules/$(VECTOR_UTILIT_O)
+# submodules
+VECTOR_SUBMOD_OBJ = $(VECTOR_UTILIT_OBJ) $(VECTOR_OBLIVI_OBJ)\
+                    $(VECTOR_MINT32_OBJ) $(VECTOR_IINT32_OBJ)\
+                    $(VECTOR_MINT64_OBJ) $(VECTOR_IINT64_OBJ)\
+                    $(VECTOR_METR64_OBJ) $(VECTOR_IMPR64_OBJ)\
+                    $(VECTOR_MVECTT_OBJ) $(VECTOR_IVECTT_OBJ)\
+                    $(VECTOR_INT32_PUSH_BACK_OBJ)\
+                    $(VECTOR_INT64_PUSH_BACK_OBJ)\
+                    $(VECTOR_REAL64_PUSH_BACK_OBJ)\
+                    $(VECTOR_VECTOR_PUSH_BACK_OBJ)
+#                   $(VECTOR_ERASE_OBJ)
