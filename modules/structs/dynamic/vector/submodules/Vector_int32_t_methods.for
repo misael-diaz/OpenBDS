@@ -65,29 +65,6 @@ contains
   end subroutine
 
 
-  module subroutine vector_int32_t_erase_method(vec, i, b, s, v, m, f)
-      ! Synopsis:
-      ! Erases values either by index, range, subscript, or value(s).
-      ! mode: [in|ex]clusive
-      ! flip: inverts logic, erases all but those specified.
-      class(vector_t), intent(inout) :: vec
-      integer(kind = int64), intent(in), optional :: i       ! index
-      integer(kind = int64), intent(in), optional :: b(2)    ! bounds
-      integer(kind = int64), intent(in), optional :: s(:)    ! isubs
-      integer(kind = int32), intent(in), optional :: v(:)    ! values
-      logical(kind = int32), intent(in), optional :: f       ! flip
-      character(len=9), intent(in),      optional :: m       ! mode
-
-      call vector_int32_t_erase_argsCheck (i, b, s, v, m)
-
-      not_empty: if ( vec % size () /= 0_int64 ) then
-          call vector_int32_t_erase (vec, i, b, s, v, m, f)
-      end if not_empty
-
-      return
-  end subroutine
-
-
 end submodule
 
 
