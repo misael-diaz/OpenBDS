@@ -35,6 +35,7 @@ module vector_class_tests
     public :: test_vector_copy
     public :: test_vector_find
     public :: test_vector_clear
+    public :: test_vector_erase
     public :: test_vector_iterator
     public :: test_vector_public_iterator
     public :: test_vector_array_vector_t
@@ -364,6 +365,606 @@ module vector_class_tests
             end if
 
             return
+        end subroutine
+
+
+        subroutine test_vector_erase ()
+            ! NOTE:
+            ! Vector stores an index array so that searching
+            ! by value or index yields the same result.
+            ! TODO:
+            ! It is assumed that the user knows that the range
+            ! of the vector is [0, vector % size). For users
+            ! who do not wish to work this way it might be
+            ! in their interest to delete by iterator. Consider
+            ! implementing this feature.
+            type(vector_t), allocatable :: vector, vecopy
+            class(*), pointer, contiguous :: it(:) => null()
+            integer(kind = int32), parameter :: n = 8
+            integer(kind = int64), allocatable :: vs(:), imask(:)
+            logical(kind = int32), allocatable :: mask(:)
+            integer(kind = int32), allocatable :: values(:)
+            integer(kind = int64):: idx, isum, bounds(0:1)
+            integer(kind = int32):: i, j, value, delta, diff
+            integer(kind = int32):: mstat
+
+
+            allocate (vector, vecopy, vs(0:7), mask(0:n-1), stat = mstat)
+            if (mstat /= 0) then
+                error stop "test::vector.get: allocation error"
+            end if
+
+
+            i = 0
+            vector = vector_t ()
+            call vector % erase ()      ! tests erasing an empty vector
+            do while (i /= n)
+                call vector % push_back (i)
+                i = i + 1
+            end do
+            vecopy = vector
+
+
+!           bounds checks
+!           call vector % erase (i = -255_int64)                ! passed
+!           call vector % erase (i =  255_int64)                ! passed
+!           call vector % erase (i = int(n, kind = int64) )     ! passed
+
+
+            ! checks arguments:
+            idx = 0_int64
+
+            do idx = 0_int64, 7_int64
+                vs(idx) = idx
+            end do
+
+            bounds(0) = 0_int64
+            bounds(1) = 1_int64
+
+
+            ! [0] erase the first value
+            value = 0
+            idx = int(value, kind = int64)
+            call vector % erase (i = idx)       ! erase by index
+            idx = vector % find (value)
+
+
+            it => vector % deref % it
+            select type (it)
+                type is ( integer(kind = int32) )
+                    delta = 0
+                    do i = 1, (n - 1)
+                        delta = delta + (it(i) - i)
+                    end do
+                class default
+                    error stop "test::vector.erase(): unexpected error"
+            end select
+
+
+            ! note: value shouldn't exist after the erase
+            write (*, '(1X,A)', advance='no') "[00] test::vector.erase(): "
+            if ( idx == int(value, kind = int64) .or. idx /= -1_int64 ) then
+                print *, "FAIL"
+            else if ( n == vector % size () ) then
+                print *, "FAIL"
+            else if ( delta /= 0 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( size (it) /= (n - 1) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            ! [1] erase the last value (of original vector)
+            vector = vecopy
+            value = 7
+            idx = int(value, kind = int64)
+            call vector % erase (i = idx)
+            idx = vector % find (value)
+
+
+            it => vector % deref % it
+            select type (it)
+                type is ( integer(kind = int32) )
+                    delta = 0
+                    do i = 0, (n - 2)
+                        delta = delta + (it(i + 1) - i)
+                    end do
+                class default
+                    error stop "test::vector.erase(): unexpected error"
+            end select
+
+
+            write (*, '(1X,A)', advance='no') "[01] test::vector.erase(): "
+            if ( idx /= -1_int64 ) then
+                print *, "FAIL"
+            else if ( n == vector % size () ) then
+                print *, "FAIL"
+            else if ( delta /= 0 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( size (it) /= (n - 1) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            ! erase intermediate value
+            vector = vecopy
+            value = 4
+            idx = int(value, kind = int64)
+            mask = .true.
+            mask(idx) = .false.
+            call vector % erase (i = idx)
+            idx = vector % find (value)
+
+
+
+            it => vector % deref % it
+            select type (it)
+                type is ( integer(kind = int32) )
+                    j = 1
+                    delta = 0
+                    do i = 0, (n - 1)
+                        if ( mask(i) ) then
+                            delta = delta + (it(j) - i)
+                            j = j + 1
+                        end if
+                    end do
+                class default
+                    error stop "test::vector.erase(): unexpected error"
+            end select
+
+
+            write (*, '(1X,A)', advance='no') "[02] test::vector.erase(): "
+            if ( idx /= -1_int64 ) then
+                print *, "FAIL"
+            else if ( n == vector % size () ) then
+                print *, "FAIL"
+            else if ( delta /= 0 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( size (it) /= (n - 1) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+!           bounds check
+!           bounds(0) = -255_int64              ! passed
+!           bounds(1) =  255_int64              ! passed
+!           bounds(1) = int(n, kind = int64)    ! passed
+
+
+
+            ! erases by range (all values)
+            vector = vecopy
+            bounds(0) = 0_int64
+            bounds(1) = int(n - 1, kind = int64)
+            call vector % erase (b=bounds)
+
+
+            write (*, '(1X,A)', advance='no') "[03] test::vector.erase(): "
+            if (vector % size() /= 0_int64) then
+                print *, "FAIL"
+            else if ( associated(vector % deref % it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            ! erases values in lb:ub, where ub is last but lb is not first
+            vector = vecopy
+            bounds(0) = 1_int64
+            bounds(1) = int(n - 1, kind = int64)
+            call vector % erase (b=bounds)
+
+            value = 0
+            idx = vector % find (value)
+            it => vector % deref % it
+
+            write (*, '(1X,A)', advance='no') "[04] test::vector.erase(): "
+            if (vector % size() /= 1_int64) then
+                print *, "FAIL"
+            else if ( idx /= int(value, kind = int64) ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+
+            ! erases by range (empty)
+            vector = vecopy
+            bounds(0) = int(n - 1, kind = int64)
+            bounds(1) = 0_int64
+            call vector % erase (b=bounds)
+            it => vector % deref % it
+
+
+
+            write (*, '(1X,A)', advance='no') "[05] test::vector.erase(): "
+            if (vector % size() /= n) then
+                print *, "FAIL"
+            else if ( .not. associated(vector % deref % it) ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            ! erases by range
+            vector = vecopy
+            bounds(0) = 2_int64
+            bounds(1) = int(n - 3, kind = int64)
+            call vector % erase (b=bounds)
+            it => vector % deref % it
+
+
+            ! checks for the remaining values
+            select type (it)
+                type is ( integer(kind = int32) )
+                    
+                    diff = 0
+                    value = 0
+                    diff = diff + ( it(1) - value )
+                    value = 1
+                    diff = diff + ( it(2) - value )
+
+                    value = n - 2
+                    diff = diff + ( it(3) - value )
+                    value = n - 1
+                    diff = diff + ( it(4) - value )
+
+                class default
+                    error stop "unexpected error"
+            end select
+
+
+            write (*, '(1X,A)', advance='no') "[06] test::vector.erase(): "
+            if ( vector % size() /= n - (bounds(1) - bounds(0) + 1) ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( diff /= 0 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+
+            vector = vecopy
+            do idx = 0_int64, 7_int64
+                vs(idx) = idx
+            end do
+            call vector % erase (s=vs)          ! erase by s[ubscript]
+            it => vector % deref % it
+
+
+            write (*, '(1X,A)', advance='no') "[07] test::vector.erase(): "
+            if ( vector % size() /= 0_int64 ) then
+                print *, "FAIL"
+            else if ( associated(it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (vs)
+            allocate( vs(0:6), stat = mstat )
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            vector = vecopy
+            do idx = 0_int64, 6_int64
+                vs(idx) = idx
+            end do
+            call vector % erase (s=vs)
+            it => vector % deref % it
+
+
+            write (*, '(1X,A)', advance='no') "[08] test::vector.erase(): "
+            if ( vector % size() /= 1_int64 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (vs)
+            allocate( vs(1:6), stat = mstat )
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            vector = vecopy
+            do idx = 1_int64, 6_int64
+                vs(idx) = idx
+            end do
+            call vector % erase (s=vs)
+            it => vector % deref % it
+
+
+            write (*, '(1X,A)', advance='no') "[09] test::vector.erase(): "
+            if ( vector % size() /= 2_int64 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (vs)
+            allocate( vs(2:5), stat = mstat )
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            vector = vecopy
+            do idx = 2_int64, 5_int64
+                vs(idx) = idx
+            end do
+            call vector % erase (s=vs)
+            it => vector % deref % it
+
+
+            isum = 0_int64
+            ! searching for the four erased values should make isum = -4
+            do value = 2, 5
+                isum = isum + vector % find (value)
+            end do
+
+
+            write (*, '(1X,A)', advance='no') "[0A] test::vector.erase(): "
+            if ( vector % size() /= 4_int64 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( isum /= -4_int64 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (vs)
+            allocate( vs(4), values(4), stat = mstat )
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            vector = vecopy
+            values(:) = [0, 2, 3, 7]
+            vs(:) = int(values, kind = int64)
+            call vector % erase (s=vs)
+            it => vector % deref % it
+
+
+            isum = 0_int64
+            do i = 1, 4
+                value = values(i)
+                isum = isum + vector % find(value)
+            end do
+
+
+            write (*, '(1X,A)', advance='no') "[0B] test::vector.erase(): "
+            if ( vector % size() /= 4_int64 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( isum /= -4_int64 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+
+            vector = vecopy
+            values(:) = [0, 2, 3, 7]
+            call vector % erase (v=values)      ! erases selected values
+            it => vector % deref % it
+
+
+            isum = 0_int64
+            do i = 1, 4
+                value = values(i)
+                isum = isum + vector % find(value)
+            end do
+
+
+            write (*, '(1X,A)', advance='no') "[0C] test::vector.erase(): "
+            if ( vector % size() /= 4_int64 ) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( isum /= -4_int64 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            ! requests to erase (already) deleted values (does nothing)
+            call vector % erase (v=values)
+
+            write (*, '(1X,A)', advance='no') "[0D] test::vector.erase(): "
+            if ( vector % size() /= 4_int64 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (values)
+            allocate (values(0:7), stat=mstat)
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            ! erases all elements by their values
+            vector = vecopy
+            values(:) = [(i, i = 0, 7)]
+            call vector % erase (v=values)
+            it => vector % deref % it
+
+
+            write (*, '(1X,A)', advance='no') "[0E] test::vector.erase(): "
+            if (vector % size() /= 0_int64) then
+                print *, "FAIL"
+            else if ( associated(vector % deref % it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            deallocate (values)
+            allocate (values(0:5), stat=mstat)
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            vector = vecopy
+            values(:) = [0, (i, i = 2, 5), 7]
+            call vector % erase (v=values)
+            it => vector % deref % it
+
+
+            isum = 0_int64
+            do i = 0, 5
+                value = values(i)
+                isum = isum + vector % find(value)
+            end do
+
+
+            write (*, '(1X,A)', advance='no') "[0F] test::vector.erase(): "
+            if (vector % size() /= 2_int64) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( isum /= -6_int64 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            ! tests possible usage of erasing by vector-subscript
+            vector = vecopy
+            it => vector % deref % it
+
+            deallocate (vs, values)
+            allocate (values(1:4), imask( size(it) ), stat=mstat)
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            imask = 0
+            values(:) = [(2 * i - 1, i = 1, 4)] !! [1, 3, 5, 7]
+            ! masks vector elements matching any of the selected ``values''
+            select type (it)
+
+                type is ( integer(kind = int32) )
+
+                    do idx = 1_int64, size(it, kind = int64)
+                        do j = 1, size(values)
+                            if ( it(idx) == values(j) ) then
+                                imask(idx) = 1
+                                exit
+                            end if
+                        end do
+                    end do
+
+                class default
+                    error stop "test::vector_erase(): unexpected error"
+            end select
+
+            ! assumes that there's at least one matching value (not empty)
+            allocate ( vs( sum(imask) ), stat = mstat )
+            if (mstat /= 0) error stop "test::vector.erase(): unexp* error"
+
+
+            i = 1
+            ! generates a vector-subscript for the iterator
+            do idx = 1_int64, size(imask, kind = int64)
+                if ( imask(idx) == 1 ) then
+                    vs(i) = idx
+                    i = i + 1
+                end if
+            end do
+
+            ! transforms the vector-subscript so that it can be used
+            call vdx (vs)
+            call vector % erase (s=vs)
+            it => vector % deref % it
+
+
+            isum = 0_int64
+            ! checks that the selected values have been erased from vector
+            do i = 1, 4
+                value = values(i)
+                isum = isum + vector % find(value)
+            end do
+
+
+            write (*, '(1X,A)', advance='no') "[10] test::vector.erase(): "
+            if (vector % size() /= 4_int64) then
+                print *, "FAIL"
+            else if ( size (it, kind = int64) /= vector % size () ) then
+                print *, "FAIL"
+            else if ( isum /= -4_int64 ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+
+
+            vector = vecopy
+            call vector % erase ()              ! erases all values
+
+
+            write (*, '(1X,A)', advance='no') "[] test::vector.erase(): "
+            if (vector % size() /= 0_int64) then
+                print *, "FAIL"
+            else if ( associated(vector % deref % it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            write (*, '(1X,A)', advance='no') "[] test::vector.erase(): "
+            if ( associated(vector % deref % it) ) then
+                print *, "FAIL"
+            else
+                print *, "pass"
+            end if
+
+
+            return
+            contains
+                elemental subroutine vdx (idx)
+                    ! transforms iterator index to that of a vector
+                    integer(kind = int64), intent(inout) :: idx
+
+                    idx = idx - 1_int64 !! NOTE: lbound(vec, iter) = (0, 1)
+
+                    return
+                end subroutine
         end subroutine
 
 
@@ -749,6 +1350,7 @@ program test_vector_class
     use vector_class_tests, only: it   => test_vector_public_iterator
     use vector_class_tests, only: cast => test_vector_mold_vector_t
     use vector_class_tests, only: clear => test_vector_clear
+    use vector_class_tests, only: erase => test_vector_erase
     use vector_class_tests, only: array_vector_t => &
                                       & test_vector_array_vector_t
     use vector_class_tests, only: up_array_vector_t => &
@@ -767,6 +1369,7 @@ program test_vector_class
     call up_array_vector_t ()
     call it ()
 
+    call erase ()
 
 end program
 
