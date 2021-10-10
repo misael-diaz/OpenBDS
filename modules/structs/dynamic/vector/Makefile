@@ -32,9 +32,50 @@ $(VECTOR_MODULE_OBJ): $(VECTOR_MODULE_SRC)
 	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MODULE_SRC) -o\
 	                                  $(VECTOR_MODULE_OBJ)
 
-$(VECTOR_SUBMOD_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_SUBMOD_SRC)
-	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_SUBMOD_SRC) -o\
-	                                  $(VECTOR_SUBMOD_OBJ)
+$(VECTOR_ERASE_METHOD_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_ERASE_METHOD_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_ERASE_METHOD_SRC) -o\
+	                                  $(VECTOR_ERASE_METHOD_OBJ)
+
+$(VECTOR_UTILIT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_UTILIT_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_UTILIT_SRC) -o\
+	                                  $(VECTOR_UTILIT_OBJ)
+
+$(VECTOR_OBLIVI_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_OBLIVI_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_OBLIVI_SRC) -o\
+	                                  $(VECTOR_OBLIVI_OBJ)
+
+$(VECTOR_MINT32_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_MINT32_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MINT32_SRC) -o\
+	                                  $(VECTOR_MINT32_OBJ)
+
+$(VECTOR_IINT32_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IINT32_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IINT32_SRC) -o\
+	                                  $(VECTOR_IINT32_OBJ)
+
+$(VECTOR_MINT64_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_MINT64_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MINT64_SRC) -o\
+	                                  $(VECTOR_MINT64_OBJ)
+
+$(VECTOR_IINT64_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IINT64_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IINT64_SRC) -o\
+	                                  $(VECTOR_IINT64_OBJ)
+
+$(VECTOR_METR64_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_METR64_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_METR64_SRC) -o\
+	                                  $(VECTOR_METR64_OBJ)
+
+$(VECTOR_IMPR64_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IMPR64_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IMPR64_SRC) -o\
+	                                  $(VECTOR_IMPR64_OBJ)
+
+$(VECTOR_MVECTT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_MVECTT_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_MVECTT_SRC) -o\
+	                                  $(VECTOR_MVECTT_OBJ)
+
+$(VECTOR_IVECTT_OBJ): $(VECTOR_MODULE_OBJ) $(VECTOR_IVECTT_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(VECTOR_IVECTT_SRC) -o\
+	                                  $(VECTOR_IVECTT_OBJ)
 
 clean:
-	rm -f *.mod *.smod *.o
+	rm -f *.mod *.smod *.o submodules/*.mod \
+	 submodules/*.smod     submodules/*.o

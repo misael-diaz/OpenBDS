@@ -1,11 +1,11 @@
+#!/usr/bin/make
 #
-# source: particles-inc
+# source: Makefile
 # author: misael-diaz
-# date:   2021-06-11
+# date:   2021-06-10
 #
 # Synopsis:
-# Include for GNU make, defines source and object files for compilation
-# of the modules which lay the foundation of the project.
+# Builds the OpenBDS modules
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +24,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# modules directory
-# modules include
-MODULES_DIR = ../../modules/utils
-MODULES_INC = -I$(MODULES_DIR)
+include Tensor-inc
 
+all: $(TENSOR_MODULE_OBJ) $(TENSOR_SUBMOD_OBJ)
 
-# src
-PARTICLES_MODULE_SRC = particles.for
+$(TENSOR_MODULE_OBJ): $(TENSOR_MODULE_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TENSOR_MODULE_SRC) -o\
+	                                  $(TENSOR_MODULE_OBJ)
 
+$(TENSOR_SUBMOD_OBJ): $(TENSOR_MODULE_OBJ)\
+       	                   $(TENSOR_SUBMOD_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TENSOR_SUBMOD_SRC) -o\
+	                                  $(TENSOR_SUBMOD_OBJ)
 
-# objects
-PARTICLES_MODULE_OBJ = particles.o
-
-
-# bundle
-MODULES = $(PARTICLES_MODULE_OBJ)
+clean:
+	rm -f *.mod *.smod *.o

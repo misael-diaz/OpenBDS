@@ -24,7 +24,7 @@
 #
 
 include ../../../modules/utils/utils-inc
-include ../../../modules/particles/particles-inc
+include ../../../modules/particles/module/particles-inc
 
 # modules directory
 # modules include

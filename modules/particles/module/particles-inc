@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: particles-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-11
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,26 +24,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# modules directory
+# modules include
+MODULES_DIR = ../../../modules/utils
+MODULES_INC = -I$(MODULES_DIR)
 
-all: utils_mod math_mod chronos_mod structs_mod random_mod particles_mod
 
-utils_mod:
-	@$(MAKE) -C utils
-math_mod: utils_mod
-	@$(MAKE) -C math
-chronos_mod:
-	@$(MAKE) -C chronos
-structs_mod: utils_mod
-	@$(MAKE) -C structs
-random_mod:
-	@$(MAKE) -C random
-particles_mod:
-	@$(MAKE) -C particles
+# src
+PARTICLES_MODULE_SRC = particles.for
+PARTICLES_SUBMOD_SRC = particles_submod.for
 
-clean:
-	@$(MAKE) -C utils     clean
-	@$(MAKE) -C math      clean
-	@$(MAKE) -C chronos   clean
-	@$(MAKE) -C structs   clean
-	@$(MAKE) -C random    clean
-	@$(MAKE) -C particles clean
+
+# objects
+PARTICLES_MODULE_OBJ = particles.o
+# PARTICLES_SUBMOD_OBJ = particles_submod.o

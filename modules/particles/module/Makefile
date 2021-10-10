@@ -2,7 +2,7 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-06-11
 #
 # Synopsis:
 # Builds the OpenBDS modules
@@ -24,26 +24,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include particles-inc
 
-all: utils_mod math_mod chronos_mod structs_mod random_mod particles_mod
+all: $(PARTICLES_MODULE_OBJ) $(PARTICLES_SUBMOD_OBJ)
 
-utils_mod:
-	@$(MAKE) -C utils
-math_mod: utils_mod
-	@$(MAKE) -C math
-chronos_mod:
-	@$(MAKE) -C chronos
-structs_mod: utils_mod
-	@$(MAKE) -C structs
-random_mod:
-	@$(MAKE) -C random
-particles_mod:
-	@$(MAKE) -C particles
+$(PARTICLES_MODULE_OBJ): $(PARTICLES_MODULE_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(PARTICLES_MODULE_SRC) -o\
+	                                  $(PARTICLES_MODULE_OBJ)
+
+$(PARTICLES_SUBMOD_OBJ): $(PARTICLES_MODULE_OBJ) $(PARTICLES_SUBMOD_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(PARTICLES_SUBMOD_SRC) -o\
+	                                  $(PARTICLES_SUBMOD_OBJ)
 
 clean:
-	@$(MAKE) -C utils     clean
-	@$(MAKE) -C math      clean
-	@$(MAKE) -C chronos   clean
-	@$(MAKE) -C structs   clean
-	@$(MAKE) -C random    clean
-	@$(MAKE) -C particles clean
+	rm -f *.mod *.smod *.o

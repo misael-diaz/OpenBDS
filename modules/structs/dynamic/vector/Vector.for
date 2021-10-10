@@ -5,7 +5,7 @@
 !
 !
 !   Synopsis:
-!   Defines the vector class.
+!   Defines the (dynamic) vector class.
 !
 !
 !   Copyright (C) 2021 Misael Diaz-Maldonado
@@ -23,125 +23,768 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-module vectors
-    use, intrinsic :: iso_fortran_env, only: int32, int64
-    use utils, only: allocator   => util_allocate_array
-    use utils, only: reallocator => util_reallocate_array
-    use utils, only: deallocator => util_deallocate_array
-    implicit none
-    private
+module idata
+  ! Defines the type i[nternal]data of the vector class
+  use, intrinsic :: iso_fortran_env, only: int32, int64
+  implicit none
+  private
 
 
-    type :: iter_t
-        integer(kind = int64) :: idx = 0_int64
-    end type
-
-
-    type :: data_t
-        integer(kind = int32), allocatable :: values(:)
-    end type
-
-
-    type :: stat_t
-        logical(kind = int32) :: init = .false.
-    end type
-
-
-    type, public :: vector_t
+  type, public :: data_t
+      class(*), allocatable :: values(:)
+      contains
         private
-        type(iter_t):: begin
-        type(iter_t):: avail
-        type(iter_t):: limit
-        type(data_t):: array
-        type(stat_t):: state
-        contains
-            private
-            procedure :: addressing_method
-            generic, public :: operator (<) => addressing_method
-            procedure, public :: size => size_method
-            procedure, public :: clear => clear_method
-            procedure, public :: push_back => push_back_method
-            final :: finalizer
-    end type
+!       procedure :: assign
+!       generic, public :: assignment(=) => assign
+        final :: finalizer
+  end type
 
 
-    interface vector_t
-        module procedure default_constructor
-    end interface
+  contains
 
 
-    interface
+!   subroutine assign (to, from)
+!       class(data_t), intent(out) :: to
+!       class(data_t), intent(in) :: from
+!
+!       if ( allocated(from % values) ) then
+!           error stop "dynamic::vector.assignment(=): unimplemented"
+!       end if
+!
+!       return
+!   end subroutine
 
 
-        module function default_constructor () result(vector)
-            ! Synopsis: Returns an empty vector
-            type(vector_t):: vector
-        end function
+    recursive subroutine finalizer (data)
+        type(data_t), intent(inout) :: data
+        integer(kind = int32) :: mstat
+
+        mstat = 0
+        if ( allocated(data % values) ) then
+            deallocate (data % values, stat = mstat)
+        end if
+
+        if (mstat /= 0) error stop "dynamic::vector.data: dealloc err"
+
+        return
+    end subroutine
 
 
-        module function addressing_method (self, idx) result(value)
-            ! Synopsis: Addresses the element pointed to by index.
-            class(vector_t), intent(in) :: self
-            integer(kind = int64), intent(in) :: idx
-            integer(kind = int32) :: value
-        end function
+end module idata
 
 
-        module function size_method (self) result(vector_size)
-            ! Synopsis: Returns the size of the vector.
-            class(vector_t), intent(in) :: self
-            integer(kind = int64) :: vector_size
-        end function
+module VectorClass
+  use, intrinsic :: iso_fortran_env, only: int32, int64, real64
+  use utils, only: util_allocate_array_int32_by_bounds
+  use utils, only: util_allocate_array_int64_by_bounds
+  use utils, only: util_allocate_array_real64_by_bounds
+  use utils, only: util_reallocate_array_int32_by_bounds
+  use utils, only: util_deallocate_array_int32
+  use utils, only: util_deallocate_array_int64
+  use idata, only: data_t
+  implicit none
+  private
 
 
-        module subroutine clear_method (self)
-            ! Synopsis: Clears the vector elements.
-            class(vector_t), intent(inout) :: self
-        end subroutine
+  type :: iter_t
+      class(*), pointer, contiguous :: it(:) => null()
+      integer(kind = int64) :: idx = 0_int64
+  end type
 
 
-        module subroutine push_back_method (self, value)
-            ! Synopsis: Pushes value unto back of vector.
-            class(vector_t), intent(inout) :: self
-            integer(kind = int32), intent(in) :: value
-        end subroutine
+  type :: stat_t
+      logical(kind = int64) :: init = .false.
+      character(:), allocatable :: errmsg
+      contains
+        final :: destructor_stat_t
+  end type
 
 
-        module subroutine insert_back (vector, value)
-            ! Synopsis: Inserts value unto back, vector grows as needed.
-            type(vector_t), intent(inout) :: vector
-            integer(kind = int32), intent(in) :: value
-        end subroutine
+  type, public :: vector_t
+      private
+      type(iter_t), allocatable, public :: deref
+      type(iter_t), allocatable :: begin
+      type(iter_t), allocatable :: avail
+      type(iter_t), allocatable :: limit
+      type(data_t), allocatable :: array
+      type(stat_t), allocatable :: state
+      contains
+        private
+        procedure :: vector_vector_t_copy_method
+        procedure :: vector_int32_t_indexing_method
+        procedure :: vector_int64_t_indexing_method
+        procedure :: vector_real64_t_indexing_method
+        procedure :: vector_vector_t_indexing_method
+        procedure :: vector_int32_t_find_method
+        procedure :: vector_int64_t_find_method
+        procedure :: vector_int32_t_push_back_method
+        procedure :: vector_int64_t_push_back_method
+        procedure :: vector_real64_t_push_back_method
+        procedure :: vector_vector_t_push_back_method
+!       procedure :: vector_int32_t_erase_method
+        generic, public :: assignment(=) => vector_vector_t_copy_method
+        generic, public :: get  => vector_int32_t_indexing_method, &
+                                 & vector_int64_t_indexing_method, &
+                                 & vector_real64_t_indexing_method,&
+                                 & vector_vector_t_indexing_method
+        generic, public :: find => vector_int32_t_find_method, &
+                                 & vector_int64_t_find_method
+!       generic, public :: erase => vector_int32_t_erase_method
+!       procedure, public :: erase => vector_int32_t_erase_method
+        generic, public :: push_back => vector_int32_t_push_back_method, &
+                                      & vector_int64_t_push_back_method, &
+                                      & vector_real64_t_push_back_method,&
+                                      & vector_vector_t_push_back_method
+        procedure, public :: size => size_method
+        procedure, public :: clear => clear_method
+        final :: finalizer
+  end type
 
 
-        module subroutine grow (vector)
-            ! Synopsis: Doubles the vector size.
-            type(vector_t), intent(inout) :: vector
-        end subroutine
+  interface vector_t
+      module procedure default_constructor
+  end interface
 
 
-        module subroutine initializer (vector, value)
-            type(vector_t), intent(inout) :: vector
-            integer(kind = int32), intent(in) :: value
-        end subroutine
+  interface allocator
+      module procedure allocate_iter_t
+      module procedure allocate_data_t
+      module procedure allocate_stat_t
+      module procedure allocate_vector_t
+      module procedure vector_allocate_array_vector_t
+      module procedure vector_int32_t_allocate_dynamic
+      module procedure vector_int64_t_allocate_dynamic
+      module procedure vector_real64_t_allocate_dynamic
+      module procedure vector_vector_t_allocate_dynamic
+      module procedure util_allocate_array_int32_by_bounds
+      module procedure util_allocate_array_int64_by_bounds
+      module procedure util_allocate_array_real64_by_bounds
+  end interface
 
 
-        module subroutine create (vector, value)
-            ! Synopsis: Creates the first element in vector.
-            type(vector_t), intent(inout) :: vector
-            integer(kind = int32), intent(in) :: value
-        end subroutine
+  interface reallocator
+      module procedure vector_allocate_array_vector_t
+      module procedure vector_int32_t_allocate_dynamic
+      module procedure vector_int64_t_allocate_dynamic
+      module procedure vector_real64_t_allocate_dynamic
+      module procedure vector_vector_t_allocate_dynamic
+      module procedure util_reallocate_array_int32_by_bounds
+  end interface
 
 
-        module subroutine finalizer (vector)
-            type(vector_t), intent(inout) :: vector
-        end subroutine
+  interface deallocator
+      module procedure deallocate_iter_t
+      module procedure deallocate_data_t
+      module procedure deallocate_stat_t
+      module procedure vector_int32_t_deallocate_dynamic
+      module procedure vector_int64_t_deallocate_dynamic
+      module procedure vector_vector_t_deallocate_dynamic
+      module procedure util_deallocate_array_int32
+      module procedure util_deallocate_array_int64
+  end interface
 
 
-    end interface
+  interface initializer
+      module procedure vector_int32_t_initializer
+      module procedure vector_int64_t_initializer
+      module procedure vector_real64_t_initializer
+      module procedure vector_vector_t_initializer
+  end interface
+
+
+  interface create
+      module procedure vector_int32_t_create
+      module procedure vector_int64_t_create
+      module procedure vector_real64_t_create
+      module procedure vector_vector_t_create
+  end interface
+
+
+  interface back_inserter
+      module procedure vector_int32_t_push_back
+      module procedure vector_int64_t_push_back
+      module procedure vector_real64_t_push_back
+      module procedure vector_vector_t_push_back
+  end interface
+
+
+  interface insert_back
+      module procedure vector_int32_t_insert_back
+      module procedure vector_int64_t_insert_back
+      module procedure vector_real64_t_insert_back
+      module procedure vector_vector_t_insert_back
+  end interface
+
+
+  interface indexer
+      module procedure vector_int32_t_indexer
+      module procedure vector_int64_t_indexer
+      module procedure vector_real64_t_indexer
+      module procedure vector_vector_t_indexer
+  end interface
+
+
+  interface find
+      module procedure vector_int32_t_findloc_wrapper
+      module procedure vector_int64_t_findloc_wrapper
+  end interface
+
+
+  interface grow
+      module procedure vector_int32_t_grow
+      module procedure vector_int64_t_grow
+      module procedure vector_real64_t_grow
+      module procedure vector_vector_t_grow
+  end interface
+
+
+  interface copy
+      module procedure array_int32_t_copy
+      module procedure array_int64_t_copy
+  end interface
+
+
+! interface to_string
+!     module procedure to_string_int32
+!     module procedure to_string_int64
+! end interface
+
+
+  interface
+
+
+    module function default_constructor () result(vector)
+        ! Synopsis: Returns an empty vector
+        type(vector_t):: vector
+    end function
+
+
+    module subroutine instantiate (vector)
+        type(vector_t), intent(inout) :: vector
+    end subroutine
+
+
+    module function vector_int32_t_find_method (self, value) result(i)
+        class(vector_t), intent(in) :: self
+        integer(kind = int64) :: i
+        integer(kind = int32), intent(in) :: value
+    end function
+
+
+    module function vector_int64_t_find_method (self, value) result(i)
+        class(vector_t), intent(in) :: self
+        integer(kind = int64) :: i
+        integer(kind = int64), intent(in) :: value
+    end function
+
+
+    module subroutine vector_int32_t_findloc_wrapper (vector, value, i)
+        type(vector_t), intent(in) :: vector
+        integer(kind = int64), intent(out) :: i
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_findloc_wrapper (vector, value, i)
+        type(vector_t), intent(in) :: vector
+        integer(kind = int64), intent(out) :: i
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int32_t_indexing_method (self, idx, value)
+        ! Synopsis: Addresses the element pointed to by index.
+        class(vector_t), intent(in) :: self
+        integer(kind = int64), intent(in) :: idx
+        integer(kind = int32), intent(out) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_indexing_method (self, idx, value)
+        ! Synopsis: Addresses the element pointed to by index.
+        class(vector_t), intent(in) :: self
+        integer(kind = int64), intent(in) :: idx
+        integer(kind = int64), intent(out) :: value
+    end subroutine
+
+
+    module subroutine vector_real64_t_indexing_method (self, i, value)
+        ! Synopsis: Addresses the element pointed to by index.
+        class(vector_t), intent(in) :: self
+        real(kind = real64), intent(out) :: value
+        integer(kind = int64), intent(in) :: i
+    end subroutine
+
+
+    module subroutine vector_vector_t_indexing_method (self, i, value)
+        class(vector_t), intent(in) :: self
+        type(vector_t), intent(inout) :: value
+        integer(kind = int64), intent(in) :: i
+    end subroutine
+
+
+    module subroutine vector_int32_t_indexer (vector, idx, value)
+        type(vector_t), intent(in) :: vector
+        integer(kind = int64), intent(in) :: idx
+        integer(kind = int32), intent(out) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_indexer (vector, idx, value)
+        type(vector_t), intent(in) :: vector
+        integer(kind = int64), intent(in) :: idx
+        integer(kind = int64), intent(out) :: value
+    end subroutine
+
+
+    module subroutine vector_real64_t_indexer (vector, idx, value)
+        type(vector_t), intent(in) :: vector
+        real(kind = real64), intent(out) :: value
+        integer(kind = int64), intent(in) :: idx
+    end subroutine
+
+
+    module subroutine vector_vector_t_indexer (vector, idx, value)
+        type(vector_t), intent(in) :: vector
+        type(vector_t), intent(inout) :: value
+        integer(kind = int64), intent(in) :: idx
+    end subroutine
+
+
+    module function size_method (self) result(vector_size)
+        ! Synopsis: Returns the size of the vector.
+        class(vector_t), intent(in) :: self
+        integer(kind = int64) :: vector_size
+    end function
+
+
+    module subroutine clear_method (self)
+        ! Synopsis: Clears the vector elements.
+        class(vector_t), intent(inout) :: self
+    end subroutine
+
+
+    module subroutine vector_int32_t_push_back_method (self, value)
+        class(vector_t), intent(inout) :: self
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_push_back_method (self, value)
+        class(vector_t), intent(inout) :: self
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_real64_t_push_back_method (self, value)
+        class(vector_t), intent(inout) :: self
+        real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_push_back_method (self, value)
+        class(vector_t), intent(inout) :: self
+        type(vector_t), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int32_t_push_back (vector, value)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_push_back (vector, value)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_real64_t_push_back (vector, value)
+        type(vector_t), intent(inout) :: vector
+        real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_push_back (vector, value)
+        type(vector_t), intent(inout) :: vector
+        type(vector_t), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int32_t_insert_back (vector, value)
+        ! Synopsis: Inserts value unto back, vector grows as needed.
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_insert_back (vector, value)
+        ! Synopsis: Inserts value unto back, vector grows as needed.
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_real64_t_insert_back (vector, value)
+        ! Synopsis: Inserts value unto back, vector grows as needed.
+        type(vector_t), intent(inout), target :: vector
+        real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_insert_back (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int32_t_grow (vector, value)
+        ! Synopsis: Doubles the vector size.
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_grow (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_real64_t_grow (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_grow (vector, value)
+        type(vector_t), intent(inout) :: vector
+        type(vector_t), intent(in) :: value
+    end subroutine
+
+
+    module elemental subroutine array_int32_t_copy (dst, src)
+        integer(kind = int32), intent(inout) :: dst
+        integer(kind = int32), intent(in) :: src
+    end subroutine
+
+
+    module elemental subroutine array_int64_t_copy (dst, src)
+        integer(kind = int64), intent(inout) :: dst
+        integer(kind = int64), intent(in) :: src
+    end subroutine
+
+
+    module subroutine vector_vector_t_copy_method (self, vector)
+        class(vector_t), intent(inout) :: self
+        class(vector_t), intent(in) :: vector
+    end subroutine
+
+
+    module subroutine vector_vector_t_copy (to, from)
+        type(vector_t), intent(out), target :: to
+        type(vector_t), intent(in) :: from
+    end subroutine
+
+
+    module subroutine vector_int32_t_initializer (vector, value)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_initializer (vector, value)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_real64_t_initializer (vector, value)
+        type(vector_t), intent(inout) :: vector
+        real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_initializer (vector, value)
+        type(vector_t), intent(inout) :: vector
+        type(vector_t), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int32_t_create (vector, value)
+        ! Synopsis: Creates the first element in vector.
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_create (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_real64_t_create (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_create (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_method (vec, i, b, s, v, m, f)
+        ! Synopsis:
+        ! Erases values either by index, range, subscript, or value(s).
+        class(vector_t), intent(inout) :: vec
+        integer(kind = int64), intent(in), optional :: i       ! index
+        integer(kind = int64), intent(in), optional :: b(2)    ! bounds
+        integer(kind = int64), intent(in), optional :: s(:)    ! isubs
+        integer(kind = int32), intent(in), optional :: v(:)    ! values
+        logical(kind = int32), intent(in), optional :: f       ! flip
+        character(len=9),      intent(in), optional :: m       ! mode
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase (vec, i, b, s, v, m, f)
+        type(vector_t), intent(inout) :: vec
+        integer(kind = int64), intent(in), optional :: i       ! index
+        integer(kind = int64), intent(in), optional :: b(2)    ! bounds
+        integer(kind = int64), intent(in), optional :: s(:)    ! isubs
+        integer(kind = int32), intent(in), optional :: v(:)    ! values
+        logical(kind = int32), intent(in), optional :: f       ! flip
+        character(len=9),      intent(in), optional :: m       ! mode
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_all (vector)
+        type(vector_t), intent(inout) :: vector
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_byIndexShadow (vec, idx, f)
+        type(vector_t), intent(inout) :: vec
+        integer(kind = int64), intent(in) :: idx
+        logical(kind = int32), intent(in), optional :: f
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_by_index (vector, idx)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int64), intent(in) :: idx
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_byRangeShadow (vec, b, f)
+        type(vector_t), intent(inout) :: vec
+        integer(kind = int64), intent(in) :: b(2)
+        logical(kind = int32), intent(in), optional :: f
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_by_range (vector, bounds)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int64), intent(in) :: bounds(2)
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_byVecSubShadow (vec, vs, f)
+        type(vector_t), intent(inout) :: vec
+        integer(kind = int64), intent(in) :: vs(:)
+        logical(kind = int32), intent(in), optional :: f
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_by_subscript (vector, vs)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: vs(:)
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_byValueShadow (vec, elem, f)
+        type(vector_t), intent(inout) :: vec
+        integer(kind = int32), intent(in) :: elem(:)
+        logical(kind = int32), intent(in), optional :: f
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_values (vector, elements)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int32), intent(in) :: elements(:)
+    end subroutine
+
+
+    module subroutine vector_int32_t_trim (vector, vec_bounds)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: vec_bounds(2)
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_intermediate (vector, idx)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: idx
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_final_value (vector)
+        type(vector_t), intent(inout), target :: vector
+    end subroutine
+
+
+    module subroutine vector_int32_t_erase_argsCheck (i, b, s, v, m)
+        integer(kind = int64), intent(in), optional :: i
+        integer(kind = int64), intent(in), optional :: b(2)
+        integer(kind = int64), intent(in), optional :: s(:)
+        integer(kind = int32), intent(in), optional :: v(:)
+        character(len=9),      intent(in), optional :: m
+    end subroutine
+
+
+    module subroutine allocate_vector_t (v)
+        type(vector_t), intent(inout) :: v
+    end subroutine
+
+
+    module subroutine allocate_iter_t (i)
+        type(iter_t), intent(inout), allocatable :: i
+    end subroutine
+
+
+    module subroutine allocate_data_t (d)
+        type(data_t), intent(inout), allocatable :: d
+    end subroutine
+
+
+    module subroutine allocate_stat_t (s)
+        type(stat_t), intent(inout), allocatable :: s
+    end subroutine
+
+
+    module subroutine deallocate_iter_t (i)
+        type(iter_t), intent(inout), allocatable :: i
+    end subroutine
+
+
+    module subroutine vector_int32_t_allocate_dynamic (b, array, value)
+        integer(kind = int64), intent(in) :: b(0:1)
+        class(*), intent(inout), allocatable :: array(:)
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_allocate_dynamic (b, array, value)
+        integer(kind = int64), intent(in) :: b(0:1)
+        class(*), intent(inout), allocatable :: array(:)
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_real64_t_allocate_dynamic (b, ary, value)
+        integer(kind = int64), intent(in) :: b(0:1)
+        class(*), intent(inout), allocatable :: ary(:)
+        real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_allocate_dynamic (b, ary, value)
+        type(vector_t), intent(in) :: value
+        class(*), intent(inout), allocatable :: ary(:)
+        integer(kind = int64), intent(in) :: b(0:1)
+    end subroutine
+
+
+    module subroutine vector_allocate_array_vector_t (b, array)
+        type(vector_t), intent(inout), allocatable :: array(:)
+        integer(kind = int64), intent(in) :: b(0:1)
+    end subroutine
+
+
+    module subroutine deallocate_data_t (d)
+        type(data_t), intent(inout), allocatable :: d
+    end subroutine
+
+
+    module subroutine deallocate_stat_t (s)
+        type(stat_t), intent(inout), allocatable :: s
+    end subroutine
+
+
+    module subroutine vector_int32_t_deallocate_dynamic (array, value)
+        class(*), intent(inout), allocatable :: array(:)
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_int64_t_deallocate_dynamic (array, value)
+        class(*), intent(inout), allocatable :: array(:)
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_deallocate_dynamic (array, value)
+        type(vector_t), intent(in) :: value
+        class(*), intent(inout), allocatable :: array(:)
+    end subroutine
+
+
+    module subroutine is_empty (vector)
+        type(vector_t), intent(in) :: vector
+    end subroutine
+
+
+    module subroutine is_instantiated (vector)
+        type(vector_t), intent(inout) :: vector
+    end subroutine
+
+
+    module subroutine check_bounds (vector, idx)
+        type(vector_t), intent(in) :: vector
+        integer(kind = int64), intent(in) :: idx
+    end subroutine
+
+
+!   module function to_string_int32 (i) result(str)
+!       integer(kind = int32), intent(in) :: i
+!       character(len = 64) :: str
+!   end function
+
+
+!   module function to_string_int64 (i) result(str)
+!       integer(kind = int64), intent(in) :: i
+!       character(len = 64) :: str
+!   end function
+
+
+    module subroutine destructor_stat_t (s)
+        type(stat_t), intent(inout) :: s
+    end subroutine
+
+
+    module recursive subroutine finalizer (vector)
+        type(vector_t), intent(inout) :: vector
+    end subroutine
+
+
+  end interface
+
+
 end module
 
 
 ! References:
 ! SJ Chapman, FORTRAN for Scientists and Engineers, fourth edition
 ! A Koenig and B Moo, Accelerated C++ Practical Programming by Example
+
+
+! TODO:
+! [x] IMPLEMENT type-bound assignment for the data component of vector.
+! [x] make the components of :[vector_t]: allocatable
+! [x] Implement a wrapper for the findloc intrinsic. Full support is
+!     not intended. Just for the case in which array, value, and dim
+!     are supplied (the result is a scalar).
+!     This method will be used for testing the minimalistic neighbor-list
+!     implemented in test/modules/math/vector.

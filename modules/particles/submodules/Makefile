@@ -25,25 +25,10 @@
 #
 
 
-all: utils_mod math_mod chronos_mod structs_mod random_mod particles_mod
+all: spheres_submodule
 
-utils_mod:
-	@$(MAKE) -C utils
-math_mod: utils_mod
-	@$(MAKE) -C math
-chronos_mod:
-	@$(MAKE) -C chronos
-structs_mod: utils_mod
-	@$(MAKE) -C structs
-random_mod:
-	@$(MAKE) -C random
-particles_mod:
-	@$(MAKE) -C particles
+spheres_submodule:
+	@$(MAKE) -C spheres
 
 clean:
-	@$(MAKE) -C utils     clean
-	@$(MAKE) -C math      clean
-	@$(MAKE) -C chronos   clean
-	@$(MAKE) -C structs   clean
-	@$(MAKE) -C random    clean
-	@$(MAKE) -C particles clean
+	@$(MAKE) -C spheres clean

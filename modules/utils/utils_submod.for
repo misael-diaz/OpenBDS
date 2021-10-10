@@ -24,123 +24,218 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 submodule (utils) util_implementations
-    use, intrinsic :: iso_fortran_env, only: int32, int64
-    implicit none
-    contains
+implicit none
+contains
 
 
-        module subroutine util_allocate_array_by_bounds (bounds, values)
-            integer(kind = int64), intent(in) :: bounds(0:1)
-            integer(kind = int64) :: lb
-            integer(kind = int64) :: ub
-            integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
+  module subroutine util_allocate_array_int32_by_bounds (b, values)
+      integer(kind = int64), intent(in) :: b(0:1)
+      integer(kind = int64) :: lb
+      integer(kind = int64) :: ub
+      integer(kind = int32), intent(inout), allocatable :: values(:)
+      integer(kind = int32) :: mstat
 
-            lb = bounds(0)
-            ub = bounds(1)
-            allocate (values(lb:ub), stat = mstat)
-            if (mstat /= 0) then
-                error stop "util_allocate_array: insufficient memory"
-            end if
+      call util_deallocate_array (values)
 
-            return
-        end subroutine
+      lb = b(0)
+      ub = b(1)
+      allocate (values(lb:ub), stat = mstat)
+      if (mstat /= 0) then
+          error stop "util_allocate_array: insufficient memory"
+      end if
 
-
-        module subroutine util_allocate_array_int64_by_size (n, values)
-            integer(kind = int64), intent(in) :: n
-            integer(kind = int64), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
-
-            allocate (values(n), stat = mstat)
-            if (mstat /= 0) then
-                error stop "util_allocate_array: insufficient memory"
-            end if
-
-            return
-        end subroutine
+      return
+  end subroutine
 
 
-        module subroutine util_allocate_array_int32_by_size (n, values)
-            integer(kind = int64), intent(in) :: n
-            integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
+  module subroutine util_allocate_array_int64_by_bounds (b, values)
+      integer(kind = int64), intent(in) :: b(0:1)
+      integer(kind = int64), intent(inout), allocatable :: values(:)
+      integer(kind = int64) :: lb
+      integer(kind = int64) :: ub
+      integer(kind = int32) :: mstat
 
-            allocate (values(n), stat = mstat)
-            if (mstat /= 0) then
-                error stop "util_allocate_array: insufficient memory"
-            end if
+      call util_deallocate_array (values)
 
-            return
-        end subroutine
+      lb = b(0)
+      ub = b(1)
+      allocate (values(lb:ub), stat = mstat)
+      if (mstat /= 0) then
+          error stop "util_allocate_array: insufficient memory"
+      end if
 
-
-        module subroutine util_reallocate_array_by_bounds (bounds, values)
-            integer(kind = int64), intent(in) :: bounds(0:1)
-            integer(kind = int64) :: lb
-            integer(kind = int64) :: ub
-            integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
-
-            call util_deallocate_array (values)
-
-            lb = bounds(0)
-            ub = bounds(1)
-            allocate (values(lb:ub), stat = mstat)
-            if (mstat /= 0) then
-                error stop "util_reallocate_array: insufficient memory"
-            end if
-
-            return
-        end subroutine
+      return
+  end subroutine
 
 
-        module subroutine util_reallocate_array_by_size (n, values)
-            integer(kind = int64), intent(in) :: n
-            integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat
+  module subroutine util_allocate_array_real64_by_bounds (b, values)
+      integer(kind = int64), intent(in) :: b(0:1)
+      real(kind = real64), intent(inout), allocatable :: values(:)
+      integer(kind = int64) :: lb
+      integer(kind = int64) :: ub
+      integer(kind = int32) :: mstat
 
-            call util_deallocate_array (values)
+      call util_deallocate_array (values)
 
-            allocate (values(n), stat = mstat)
-            if (mstat /= 0) then
-                error stop "util_reallocate_array: insufficient memory"
-            end if
+      lb = b(0)
+      ub = b(1)
+      allocate (values(lb:ub), stat = mstat)
+      if (mstat /= 0) then
+          error stop "util_allocate_array: insufficient memory"
+      end if
 
-            return
-        end subroutine
-
-
-        module subroutine util_deallocate_array_int32 (values)
-            integer(kind = int32), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat = 0
-
-            if ( allocated(values) ) then
-                deallocate(values, stat = mstat)
-            end if
-
-            if (mstat /= 0) then
-                error stop "util_deallocate_array: unexpected error"
-            end if
-
-            return
-        end subroutine
+      return
+  end subroutine
 
 
-        module subroutine util_deallocate_array_int64 (values)
-            integer(kind = int64), intent(inout), allocatable :: values(:)
-            integer(kind = int32) :: mstat = 0
+  module subroutine util_allocate_array_real64_by_size (n, values)
+      integer(kind = int64), intent(in) :: n
+      real(kind = real64), intent(inout), allocatable :: values(:)
+      integer(kind = int32) :: mstat
 
-            if ( allocated(values) ) then
-                deallocate(values, stat = mstat)
-            end if
+      call util_deallocate_array (values)
 
-            if (mstat /= 0) then
-                error stop "util_deallocate_array: unexpected error"
-            end if
+      allocate (values(n), stat = mstat)
+      if (mstat /= 0) then
+          error stop "util_allocate_array: insufficient memory"
+      end if
 
-            return
-        end subroutine
+      return
+  end subroutine
+
+
+  module subroutine util_allocate_array_int64_by_size (n, values)
+      integer(kind = int64), intent(in) :: n
+      integer(kind = int64), intent(inout), allocatable :: values(:)
+      integer(kind = int32) :: mstat
+
+      call util_deallocate_array (values)
+
+      allocate (values(n), stat = mstat)
+      if (mstat /= 0) then
+          error stop "util_allocate_array: insufficient memory"
+      end if
+
+      return
+  end subroutine
+
+
+  module subroutine util_allocate_array_int32_by_size (n, values)
+      integer(kind = int64), intent(in) :: n
+      integer(kind = int32), intent(inout), allocatable :: values(:)
+      integer(kind = int32) :: mstat
+
+      call util_deallocate_array (values)
+
+      allocate (values(n), stat = mstat)
+      if (mstat /= 0) then
+          error stop "util_allocate_array: insufficient memory"
+      end if
+
+      return
+  end subroutine
+
+
+  module subroutine util_reallocate_array_int32_by_bounds (b, values)
+      integer(kind = int64), intent(in) :: b(0:1)
+      integer(kind = int64) :: lb
+      integer(kind = int64) :: ub
+      integer(kind = int32), intent(inout), allocatable :: values(:)
+      integer(kind = int32) :: mstat
+
+      call util_deallocate_array (values)
+
+      lb = b(0)
+      ub = b(1)
+      allocate (values(lb:ub), stat = mstat)
+      if (mstat /= 0) then
+          error stop "util_reallocate_array: insufficient memory"
+      end if
+
+      return
+  end subroutine
+
+
+  module subroutine util_reallocate_array_int32_by_size (n, values)
+      integer(kind = int64), intent(in) :: n
+      integer(kind = int32), intent(inout), allocatable :: values(:)
+      integer(kind = int32) :: mstat
+
+      call util_deallocate_array (values)
+
+      allocate (values(n), stat = mstat)
+      if (mstat /= 0) then
+          error stop "util_reallocate_array: insufficient memory"
+      end if
+
+      return
+  end subroutine
+
+  module subroutine util_reallocate_array_int64_by_size (n, values)
+      integer(kind = int64), intent(in) :: n
+      integer(kind = int64), intent(inout), allocatable :: values(:)
+      integer(kind = int32) :: mstat
+
+      call util_deallocate_array (values)
+
+      allocate (values(n), stat = mstat)
+      if (mstat /= 0) then
+          error stop "util_reallocate_array: insufficient memory"
+      end if
+
+      return
+  end subroutine
+
+
+  module subroutine util_deallocate_array_int32 (values)
+      integer(kind = int32), intent(inout), allocatable :: values(:)
+      integer(kind = int32) :: mstat
+
+      mstat = 0
+      if ( allocated(values) ) then
+          deallocate(values, stat = mstat)
+      end if
+
+      if (mstat /= 0) then
+          error stop "util_deallocate_array: unexpected error"
+      end if
+
+      return
+  end subroutine
+
+
+  module subroutine util_deallocate_array_int64 (values)
+      integer(kind = int64), intent(inout), allocatable :: values(:)
+      integer(kind = int32) :: mstat
+
+      mstat = 0
+      if ( allocated(values) ) then
+          deallocate(values, stat = mstat)
+      end if
+
+      if (mstat /= 0) then
+          error stop "util_deallocate_array: unexpected error"
+      end if
+
+      return
+  end subroutine
+
+
+  module subroutine util_deallocate_array_real64 (values)
+      real(kind = real64), intent(inout), allocatable :: values(:)
+      integer(kind = int32) :: mstat
+
+      mstat = 0
+      if ( allocated(values) ) then
+          deallocate(values, stat = mstat)
+      end if
+
+      if (mstat /= 0) then
+          error stop "util_deallocate_array: unexpected error"
+      end if
+
+      return
+  end subroutine
 
 
 end submodule

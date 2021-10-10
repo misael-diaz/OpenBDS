@@ -31,12 +31,14 @@ FC = gfortran-10
 # FORTRAN Compiler Options
 FC_OPT = -std=f2018 -ffree-form -fall-intrinsics -g -fbacktrace\
          -fcheck=all -ffpe-trap=invalid,zero,overflow -O0\
-         -Wall -Wextra -Wimplicit-interface -Warray-temporaries\
+         -Wall -Wimplicit-interface -Warray-temporaries\
          -Wrealloc-lhs-all -Wunderflow -Wtabs\
          -Wsurprising -Wreal-q-constant -Winteger-division\
          -Wconversion-extra -Wfrontend-loop-interchange\
          -Wcharacter-truncation -Wampersand -Waliasing -Wpedantic\
-         -Werror #-Wuse-without-only
+         -Wextra -Wuse-without-only #-Werror
 
+# FC_OPT = -std=f2018 -ffree-form -fall-intrinsics -O2 -ftree-vectorize\
+#          -fopt-info-vec-missed # -fopt-info-vec
 # libraries
 LIB =

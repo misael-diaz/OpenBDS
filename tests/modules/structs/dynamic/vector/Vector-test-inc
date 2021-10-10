@@ -41,7 +41,17 @@ UTILS_SUB_OBJ       = $(UTILS_MOD_DIR)/$(UTILS_SUBMOD_OBJ)
 CHRONOS_MOD_OBJ     = $(CHRONOS_MOD_DIR)/$(CHRONOS_MODULE_OBJ)
 CHRONOS_SUB_OBJ     = $(CHRONOS_MOD_DIR)/$(CHRONOS_SUBMOD_OBJ)
 VECTOR_MOD_OBJ      = $(VECTOR_MOD_DIR)/$(VECTOR_MODULE_OBJ)
-VECTOR_SUB_OBJ      = $(VECTOR_MOD_DIR)/$(VECTOR_SUBMOD_OBJ)
+VECTOR_SUB_OBJ      = $(VECTOR_MOD_DIR)/$(VECTOR_UTILIT_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_OBLIVI_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_MINT32_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_IINT32_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_MINT64_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_IINT64_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_METR64_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_IMPR64_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_MVECTT_OBJ)\
+                      $(VECTOR_MOD_DIR)/$(VECTOR_IVECTT_OBJ)
+#                     $(VECTOR_MOD_DIR)/$(VECTOR_ERASE_METHOD_OBJ)
 
 
 # src

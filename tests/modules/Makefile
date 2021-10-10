@@ -25,7 +25,7 @@
 #
 
 
-all: test_chronos test_structs test_random test_particles
+all: test_chronos test_structs test_random test_math #test_particles
 
 test_chronos:
 	@$(MAKE) -C chronos
@@ -36,6 +36,9 @@ test_structs:
 test_random:
 	@$(MAKE) -C random
 
+test_math:
+	@$(MAKE) -C math
+
 test_particles:
 	@$(MAKE) -C particles
 
@@ -43,4 +46,5 @@ clean:
 	@$(MAKE) -C chronos   clean
 	@$(MAKE) -C structs   clean
 	@$(MAKE) -C random    clean
+	@$(MAKE) -C math      clean
 	@$(MAKE) -C particles clean
