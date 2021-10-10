@@ -92,9 +92,6 @@ contains
   module subroutine vector_int32_t_grow (vector, value)
       ! Synopsis: Doubles the vector size.
       type(vector_t), intent(inout) :: vector
-      integer(kind = int64):: lb
-      integer(kind = int64):: ub
-      integer(kind = int64):: bounds(0:1)
       integer(kind = int32), intent(in) :: value
       integer(kind = int32), allocatable :: array(:)
 
@@ -116,8 +113,6 @@ contains
       integer(kind = int64):: ub
       integer(kind = int64):: bounds(0:1)
       integer(kind = int32), intent(inout), allocatable :: array(:)
-      character(len=*), parameter :: errmsg = &
-          & "dynamic::vector.backup: unexpected error"
 
       ! bounds for copying the data
       lb = vector % begin % idx
