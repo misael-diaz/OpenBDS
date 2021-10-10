@@ -43,15 +43,6 @@ contains
   end subroutine
 
 
-  module subroutine vector_real64_t_push_back_method (self, value)
-      ! Synopsis: Pushes value unto back of vector.
-      class(vector_t), intent(inout) :: self
-      real(kind = real64), intent(in) :: value
-      call back_inserter (self, value)
-      return
-  end subroutine
-
-
 end submodule
 
 
