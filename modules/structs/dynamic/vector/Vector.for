@@ -130,7 +130,7 @@ module VectorClass
         generic, public :: find => vector_int32_t_find_method, &
                                  & vector_int64_t_find_method
 !       generic, public :: erase => vector_int32_t_erase_method
-        procedure, public :: erase => vector_int32_t_erase_method
+!       procedure, public :: erase => vector_int32_t_erase_method
         generic, public :: push_back => vector_int32_t_push_back_method, &
                                       & vector_int64_t_push_back_method, &
                                       & vector_real64_t_push_back_method,&
