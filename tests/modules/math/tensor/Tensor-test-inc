@@ -25,6 +25,8 @@
 
 include ../../../../modules/utils/utils-inc
 include ../../../../modules/structs/dynamic/vector/Vector-inc
+include ../../../../modules/structs/dynamic/vector/Vector-methods-inc
+include ../../../../modules/structs/dynamic/vector/Vector-implements-inc
 include ../../../../modules/math/tensor/Tensor-inc
 
 # modules directory

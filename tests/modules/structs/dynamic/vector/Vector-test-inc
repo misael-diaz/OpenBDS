@@ -26,6 +26,8 @@
 include ../../../../../modules/utils/utils-inc
 include ../../../../../modules/chronos/chronos-inc
 include ../../../../../modules/structs/dynamic/vector/Vector-inc
+include ../../../../../modules/structs/dynamic/vector/Vector-methods-inc
+include ../../../../../modules/structs/dynamic/vector/Vector-implements-inc
 
 # modules directory
 # modules include
