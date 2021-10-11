@@ -155,36 +155,46 @@ contains
 
       ! copies from (source) vector into a suitable placeholder
       associate (values => from % array % values)
-
           select type (values)
-
               type is ( integer(kind = int32) )
-
                   call backup (from, aryi32)
-                  call allocator (vec_bounds, to % array % values, i32)
-
-                  to % state % errmsg(:) = "vector<int32_t>"
-
               type is ( integer(kind = int64) )
-
                   call backup (from, aryi64)
-                  call allocator (vec_bounds, to % array % values, i64)
-
-                  to % state % errmsg(:) = "vector<int64_t>"
-
               type is (vector_t)
-
                   call backup (from, aryvec)
-                  call allocator (vec_bounds, to % array % values, vec)
-
-                  to % state % errmsg(:) = "vector<vector_t>"
-
               class default
-
                   error stop errmsg
-
           end select
+      end associate
 
+
+      ! allocates the internal vector array
+      associate (values => from % array % values)
+          select type (values)
+              type is ( integer(kind = int32) )
+                  call allocator (vec_bounds, to % array % values, i32)
+              type is ( integer(kind = int64) )
+                  call allocator (vec_bounds, to % array % values, i64)
+              type is (vector_t)
+                  call allocator (vec_bounds, to % array % values, vec)
+              class default
+                  error stop errmsg
+          end select
+      end associate
+
+
+      ! defines the error message
+      associate (values => from % array % values)
+          select type (values)
+              type is ( integer(kind = int32) )
+                  to % state % errmsg(:) = "vector<int32_t>"
+              type is ( integer(kind = int64) )
+                  to % state % errmsg(:) = "vector<int64_t>"
+              type is (vector_t)
+                  to % state % errmsg(:) = "vector<vector_t>"
+              class default
+                  error stop errmsg
+          end select
       end associate
 
 
