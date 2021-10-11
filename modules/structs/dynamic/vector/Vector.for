@@ -241,6 +241,7 @@ module VectorClass
 
   interface push
       module procedure vector_int32_t_push
+      module procedure vector_int64_t_push
   end interface
 
 
@@ -443,7 +444,7 @@ module VectorClass
 
     module subroutine vector_int64_t_insert_back (vector, value)
         ! Synopsis: Inserts value unto back, vector grows as needed.
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         integer(kind = int64), intent(in) :: value
     end subroutine
 
@@ -541,6 +542,12 @@ module VectorClass
     module pure subroutine vector_int32_t_push (vector, value)
         type(vector_t), intent(inout), target :: vector
         integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module pure subroutine vector_int64_t_push (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: value
     end subroutine
 
 
