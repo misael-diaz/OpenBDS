@@ -243,6 +243,7 @@ module VectorClass
       module procedure vector_int32_t_push
       module procedure vector_int64_t_push
       module procedure vector_real64_t_push
+      module procedure vector_vector_t_push
   end interface
 
 
@@ -458,7 +459,7 @@ module VectorClass
 
 
     module subroutine vector_vector_t_insert_back (vector, value)
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         type(vector_t), intent(in) :: value
     end subroutine
 
@@ -555,6 +556,12 @@ module VectorClass
     module pure subroutine vector_real64_t_push (vector, value)
         type(vector_t), intent(inout), target :: vector
         real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_push (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(in) :: value
     end subroutine
 
 
