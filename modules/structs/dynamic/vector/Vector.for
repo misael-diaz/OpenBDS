@@ -152,6 +152,7 @@ module VectorClass
       module procedure allocate_data_t
       module procedure allocate_stat_t
       module procedure allocate_vector_t
+      module procedure vector_allocate_errmsg
       module procedure vector_allocate_array_vector_t
       module procedure vector_int32_t_allocate_dynamic
       module procedure vector_int64_t_allocate_dynamic
@@ -767,6 +768,12 @@ module VectorClass
 
     module subroutine deallocate_iter_t (i)
         type(iter_t), intent(inout), allocatable :: i
+    end subroutine
+
+
+    module subroutine vector_allocate_errmsg (vector, errMSG)
+        type(vector_t), intent(inout) :: vector
+        character(*), intent(in) :: errMSG
     end subroutine
 
 
