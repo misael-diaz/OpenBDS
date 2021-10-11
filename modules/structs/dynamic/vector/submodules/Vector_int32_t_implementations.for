@@ -86,50 +86,11 @@ end submodule
 
 
 ! The vector class presented by Koening and Moo inspired me to write my
-! own in fortran. I borrowed some of their ideas to implement it.
+! own in FORTRAN. I borrowed some of their ideas to implement it.
 
 
 ! Comments:
-! A vector is a container that holds values of the same type. The
-! "default class" in select type constructs sometimes is used as a
-! mechanism that saves the user from catastrophy:
-! An array in Fortran can only hold values of the same type and so the
-! vector class which uses the Fortran array as the underlying data
-! structure to store values.
-
-
-! TODO:
-! [x] GUARD against indexing beyond the bounds of the vector
-! [x] CHECK procedures that attempt to use the vector (allocatable)
-!     components. Instantiating the vector might suffice to fix some.
-! [x] CHECK procedures that rely on the status value to make decisions.
-!     Note that the status component is now an allocatable, so that it
-!     is unsafe to check for its value since it could be unallocated.
-!     A possible solution is to check for the allocation status first,
-!     then check for the value.
-! [ ] PARTITION further into submodules. Idea: keep methods in a submodule
-!     and implementations in another. You will need another for utility
-!     procedures (for memory management).
-! [x] IMPLEMENT method that returns an iterator to values in the asymmetric
-!     range [begin, avail). Implement the iterator as a pointer.
-! [ ] IMPLEMENT a polymorphic push-back method (value is of type class(*)).
-!     Use a select type construct to determine what version
-!     (of "proxy" procedure) to call at runtime.
-!     Note: Most methods delegates work to a "proxy" of sorts. The method
-!     test_polymorphic_method() may be used as a template for other ones.
-! [ ] GUARD against using the vector to store integers of different types.
-!     If the user inserts a 32-bit integer it won't be able to insert
-!     a 64-bit integer unless the vector contents are cleared. A possible
-!     implementation is to check the allocation status of its counterpart
-!     upon calls to the push-back method.
-! [x] EXPERIMENT with dynamically allocated strings. Not fully supported
-!     by GNU Fortran Compiler. Cannot use them without disabling some
-!     compiler options I would like to retain.
-
-
-! Comments:
-! For now iterators are implemented as indexes.
-!
+! A vector is a container that holds values of the same type.
 
 
 ! Comments on Procedures:
@@ -138,28 +99,13 @@ end submodule
 ! Allocates one more element on purpose to compute the size of the
 ! vector via: (end - begin) as in c++.
 !
-!
 ! function findloc_wrapper_method (self, value) result(idx)
 ! lower and upper bounds (lb, ub) are chosen so that we do not include
 ! the element pointed to by (end). It's a valid index but it should not
 ! be referenced since it does not hold an actual value.
 !
-! Index returned by findloc intrinsic has been adjusted by one to
-! account for the array bounds. I am unsure if this a BUG in the
-! implementation of findloc or a misinterpretation on my part.
-! Both the Intel and GNU Fortran Compilers yield the same result.
-! I cannot conclude anything from that but at least account for it
-! when using the compilers I have available.
-!
-! Documentation of findloc from GNU Fortran Compiler:
-! Determines the *location* of the element in the array with the value
-! given in the VALUE argument ... They used *location* instead of index
-! so maybe the user is responsible for obtaining the index from the
-! location as it has been done here.
-!
-!
 ! subroutine clear_method()
-! Placing the /avail/ iterator at the beginning is equivalent to
+! Placing the `avail' iterator at the beginning is equivalent to
 ! clearing the vector without deallocating memory. I have designed
 ! the vector class thinking on how it will be used for keeping
 ! track of neighbors. In that context it's convenient to
