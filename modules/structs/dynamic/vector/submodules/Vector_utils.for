@@ -110,6 +110,55 @@ contains
   end subroutine
 
 
+  module subroutine vector_allocate_errmsg (vector, errMSG)
+      ! Synopsis: Allocates memory for the error message `errMSG'.
+      type(vector_t), intent(inout) :: vector
+      integer(kind = int32) :: mstat
+      character(*), intent(in) :: errMSG
+      character(*), parameter :: name = 'dynamic::vector.alloc_errMSG():'
+      character(*), parameter :: mallocErr  = name // ' ' // &
+          & 'memory (de)allocation error'
+      character(*), parameter :: unexpected = name // ' ' // &
+          & 'vector has not been instantiated'
+
+      call state_check
+      call dealloc_errmsg
+
+
+      allocate (character( len=len(errMSG) ) :: vector % state % errmsg, &
+              & stat = mstat)
+
+      if (mstat /= 0) then
+          error stop mallocErr
+      end if
+
+
+      return
+      contains
+
+          subroutine state_check
+
+              if ( .not. allocated (vector % state) ) then
+                  error stop unexpected
+              end if
+
+              return
+          end subroutine
+
+
+          subroutine dealloc_errmsg
+
+              if ( allocated (vector % state % errmsg) ) then
+                  deallocate (vector % state % errmsg, stat=mstat)
+                  if (mstat /= 0) error stop mallocErr
+              end if
+
+              return
+          end subroutine
+
+  end subroutine vector_allocate_errmsg
+
+
   module subroutine vector_int32_t_allocate_dynamic (b, array, value)
       integer(kind = int64), intent(in) :: b(0:1)       ! b[ounds]
       class(*), intent(inout), allocatable :: array(:)

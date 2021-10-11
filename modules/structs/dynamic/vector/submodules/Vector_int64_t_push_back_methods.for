@@ -206,15 +206,8 @@ contains
           & "dynamic::vector.error: container of 64-bit integers"
 
 
-!     TODO: consider moving to utils of the vector class
-      allocate(character(len=len(errmsg)):: vector % state % errmsg,&
-             & stat = mstat)
-      if (mstat /= 0) then
-          error stop "dynamic::vector.create: allocation error"
-      end if
-
-
       ! allocates memory for vector
+      call allocator (vector, errmsg)
       call allocator (bounds, vector % array % values, value)
 
       ! sets the vector state variables
