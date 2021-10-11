@@ -85,6 +85,7 @@ module VectorClass
   implicit none
   private
 
+  integer(kind = int64), parameter :: VECTOR_MIN_SIZE = 8_int64
 
   type :: iter_t
       class(*), pointer, contiguous :: it(:) => null()
@@ -235,6 +236,14 @@ module VectorClass
       module procedure vector_int64_t_grow
       module procedure vector_real64_t_grow
       module procedure vector_vector_t_grow
+  end interface
+
+
+  interface push
+      module procedure vector_int32_t_push
+      module procedure vector_int64_t_push
+      module procedure vector_real64_t_push
+      module procedure vector_vector_t_push
   end interface
 
 
@@ -430,27 +439,27 @@ module VectorClass
 
     module subroutine vector_int32_t_insert_back (vector, value)
         ! Synopsis: Inserts value unto back, vector grows as needed.
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         integer(kind = int32), intent(in) :: value
     end subroutine
 
 
     module subroutine vector_int64_t_insert_back (vector, value)
         ! Synopsis: Inserts value unto back, vector grows as needed.
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         integer(kind = int64), intent(in) :: value
     end subroutine
 
 
     module subroutine vector_real64_t_insert_back (vector, value)
         ! Synopsis: Inserts value unto back, vector grows as needed.
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         real(kind = real64), intent(in) :: value
     end subroutine
 
 
     module subroutine vector_vector_t_insert_back (vector, value)
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         type(vector_t), intent(in) :: value
     end subroutine
 
@@ -528,6 +537,30 @@ module VectorClass
     module subroutine vector_vector_t_restore (vector, array, value)
         type(vector_t), intent(inout) :: vector
         type(vector_t), intent(in) :: array(:)
+        type(vector_t), intent(in) :: value
+    end subroutine
+
+
+    module pure subroutine vector_int32_t_push (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module pure subroutine vector_int64_t_push (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module pure subroutine vector_real64_t_push (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_push (vector, value)
+        type(vector_t), intent(inout), target :: vector
         type(vector_t), intent(in) :: value
     end subroutine
 
