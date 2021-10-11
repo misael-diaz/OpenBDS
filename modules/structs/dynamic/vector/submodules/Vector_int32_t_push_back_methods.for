@@ -58,13 +58,25 @@ contains
 
   module subroutine vector_int32_t_insert_back (vector, value)
       ! Synopsis: Inserts value unto back, vector grows as needed.
-      type(vector_t), intent(inout), target :: vector
+      type(vector_t), intent(inout) :: vector
       integer(kind = int32), intent(in) :: value
 
 
       if (vector % avail % idx == vector % limit % idx) then
           call grow (vector, value)
       end if
+
+      call push (vector, value)
+
+
+      return
+  end subroutine
+
+
+  module pure subroutine vector_int32_t_push (vector, value)
+      ! Synopsis: pushes value unto the back of vector.
+      type(vector_t), intent(inout), target :: vector
+      integer(kind = int32), intent(in) :: value
 
 
       associate (begin  => vector % begin % idx,  &
@@ -86,7 +98,7 @@ contains
 
 
       return
-  end subroutine
+  end subroutine vector_int32_t_push
 
 
   module subroutine vector_int32_t_grow (vector, value)
@@ -185,54 +197,35 @@ contains
   module subroutine vector_int32_t_create (vector, value)
       ! Synopsis: Creates the first element in vector.
       type(vector_t), intent(inout), target :: vector
-      integer(kind = int64) :: bounds(0:1)
       integer(kind = int64), parameter :: lb = 0_int64
-      integer(kind = int64), parameter :: ub = 8_int64
+      integer(kind = int64), parameter :: ub = VECTOR_MIN_SIZE
+      integer(kind = int64), parameter :: bounds(0:1) = [lb, ub]
       integer(kind = int32), intent(in) :: value
       integer(kind = int32) :: mstat
       character(len=*), parameter :: errmsg = &
           & "dynamic::vector.error: container of 32-bit integers"
 
 
-!           TODO: consider moving to utils of the vector class
+!     TODO: consider moving to utils of the vector class
       allocate(character(len=len(errmsg)):: vector % state % errmsg,&
              & stat = mstat)
       if (mstat /= 0) then
           error stop "dynamic::vector.create: allocation error"
       end if
-      vector % state % errmsg(:) = errmsg
 
 
-      bounds(0) = lb
-      bounds(1) = ub
+      ! allocates memory for vector
       call allocator (bounds, vector % array % values, value)
 
+      ! sets the vector state variables
+      vector % begin % idx = 0_int64
+      vector % avail % idx = 0_int64
+      vector % limit % idx = VECTOR_MIN_SIZE
+      vector % state % errmsg(:) = errMSG
 
-      associate (begin  => vector % begin % idx,  &
-               & avail  => vector % avail % idx,  &
-               & limit  => vector % limit % idx,  &
-               & state  => vector % state % init, &
-               & values => vector % array % values)
-
-
-          begin = lb
-          avail = lb
-          limit = ub
-
-
-          select type (values)
-              type is ( integer(kind = int32) )
-                  values         = 0
-                  values (avail) = value
-              class default
-                  error stop "dynamic::vector.create: unexpected err"
-          end select
-
-          vector % deref % it => vector % array % values(begin:avail)
-          avail = avail + 1_int64
-          state = .true.
-
-      end associate
+      ! initializes the vector
+      call push (vector, value)
+      vector % state % init = .true.
 
 
       return
