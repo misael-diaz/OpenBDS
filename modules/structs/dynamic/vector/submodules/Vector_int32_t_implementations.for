@@ -98,35 +98,6 @@ end submodule
 ! structure to store values.
 
 
-! TODO:
-! [x] GUARD against indexing beyond the bounds of the vector
-! [x] CHECK procedures that attempt to use the vector (allocatable)
-!     components. Instantiating the vector might suffice to fix some.
-! [x] CHECK procedures that rely on the status value to make decisions.
-!     Note that the status component is now an allocatable, so that it
-!     is unsafe to check for its value since it could be unallocated.
-!     A possible solution is to check for the allocation status first,
-!     then check for the value.
-! [x] PARTITION further into submodules. Idea: keep methods in a submodule
-!     and implementations in another. You will need another for utility
-!     procedures (for memory management).
-! [x] IMPLEMENT method that returns an iterator to values in the asymmetric
-!     range [begin, avail). Implement the iterator as a pointer.
-! [x] IMPLEMENT a polymorphic push-back method (value is of type class(*)).
-!     Use a select type construct to determine what version
-!     (of "proxy" procedure) to call at runtime.
-!     Note: Most methods delegates work to a "proxy" of sorts. The method
-!     test_polymorphic_method() may be used as a template for other ones.
-! [x] GUARD against using the vector to store integers of different types.
-!     If the user inserts a 32-bit integer it won't be able to insert
-!     a 64-bit integer unless the vector contents are cleared. A possible
-!     implementation is to check the allocation status of its counterpart
-!     upon calls to the push-back method.
-! [x] EXPERIMENT with dynamically allocated strings. Not fully supported
-!     by GNU Fortran Compiler. Cannot use them without disabling some
-!     compiler options I would like to retain.
-
-
 ! Comments:
 ! For now iterators are implemented as indexes.
 !
