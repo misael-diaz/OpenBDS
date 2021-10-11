@@ -86,21 +86,11 @@ end submodule
 
 
 ! The vector class presented by Koening and Moo inspired me to write my
-! own in fortran. I borrowed some of their ideas to implement it.
+! own in FORTRAN. I borrowed some of their ideas to implement it.
 
 
 ! Comments:
-! A vector is a container that holds values of the same type. The
-! "default class" in select type constructs sometimes is used as a
-! mechanism that saves the user from catastrophy:
-! An array in Fortran can only hold values of the same type and so the
-! vector class which uses the Fortran array as the underlying data
-! structure to store values.
-
-
-! Comments:
-! For now iterators are implemented as indexes.
-!
+! A vector is a container that holds values of the same type.
 
 
 ! Comments on Procedures:
@@ -109,28 +99,13 @@ end submodule
 ! Allocates one more element on purpose to compute the size of the
 ! vector via: (end - begin) as in c++.
 !
-!
 ! function findloc_wrapper_method (self, value) result(idx)
 ! lower and upper bounds (lb, ub) are chosen so that we do not include
 ! the element pointed to by (end). It's a valid index but it should not
 ! be referenced since it does not hold an actual value.
 !
-! Index returned by findloc intrinsic has been adjusted by one to
-! account for the array bounds. I am unsure if this a BUG in the
-! implementation of findloc or a misinterpretation on my part.
-! Both the Intel and GNU Fortran Compilers yield the same result.
-! I cannot conclude anything from that but at least account for it
-! when using the compilers I have available.
-!
-! Documentation of findloc from GNU Fortran Compiler:
-! Determines the *location* of the element in the array with the value
-! given in the VALUE argument ... They used *location* instead of index
-! so maybe the user is responsible for obtaining the index from the
-! location as it has been done here.
-!
-!
 ! subroutine clear_method()
-! Placing the /avail/ iterator at the beginning is equivalent to
+! Placing the `avail' iterator at the beginning is equivalent to
 ! clearing the vector without deallocating memory. I have designed
 ! the vector class thinking on how it will be used for keeping
 ! track of neighbors. In that context it's convenient to
