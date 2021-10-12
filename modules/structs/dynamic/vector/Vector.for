@@ -245,6 +245,10 @@ module VectorClass
       module procedure vector_int64_t_push
       module procedure vector_real64_t_push
       module procedure vector_vector_t_push
+      module procedure vector_int32_t_push_array
+      module procedure vector_int64_t_push_array
+      module procedure vector_real64_t_push_array
+      module procedure vector_vector_t_push_array
   end interface
 
 
@@ -563,6 +567,30 @@ module VectorClass
     module subroutine vector_vector_t_push (vector, value)
         type(vector_t), intent(inout), target :: vector
         type(vector_t), intent(in) :: value
+    end subroutine
+
+
+    module pure subroutine vector_int32_t_push_array (vector, array)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int32), intent(in) :: array(:)
+    end subroutine
+
+
+    module pure subroutine vector_int64_t_push_array (vector, array)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: array(:)
+    end subroutine
+
+
+    module pure subroutine vector_real64_t_push_array (vector, array)
+        type(vector_t), intent(inout), target :: vector
+        real(kind = real64), intent(in) :: array(:)
+    end subroutine
+
+
+    module subroutine vector_vector_t_push_array (vector, array)
+        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(in) :: array(:)
     end subroutine
 
 
