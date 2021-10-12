@@ -124,7 +124,7 @@ contains
       integer(kind = int64), allocatable :: aryi64(:)
       integer(kind = int32), allocatable :: aryi32(:)
       real(kind = real64), allocatable :: aryr64(:)
-      integer(kind = int64) :: vec_bounds(0:1)
+      integer(kind = int64) :: bounds(0:1)
       integer(kind = int64) :: lb
       integer(kind = int64) :: ub
       real(kind = real64), parameter :: r64 = 0.0_real64
@@ -153,8 +153,8 @@ contains
               ub = from % avail % idx - 1_int64
 
               ! defines the size limit of the (destination) vector
-              vec_bounds(0) = from % begin % idx
-              vec_bounds(1) = from % limit % idx
+              bounds(0) = from % begin % idx
+              bounds(1) = from % limit % idx
 
               return
           end subroutine
@@ -202,13 +202,13 @@ contains
               associate (values => from % array % values)
                   select type (values)
                       type is ( integer(kind = int32) )
-                          call allocator (vec_bounds, to % array % values, i32)
+                          call allocator (bounds, to % array % values, i32)
                       type is ( integer(kind = int64) )
-                          call allocator (vec_bounds, to % array % values, i64)
+                          call allocator (bounds, to % array % values, i64)
                       type is ( real(kind = real64) )
-                          call allocator (vec_bounds, to % array % values, r64)
+                          call allocator (bounds, to % array % values, r64)
                       type is (vector_t)
-                          call allocator (vec_bounds, to % array % values, vec)
+                          call allocator (bounds, to % array % values, vec)
                       class default
                           error stop errmsg
                       end select
