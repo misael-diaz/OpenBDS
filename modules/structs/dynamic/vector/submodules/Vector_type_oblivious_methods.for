@@ -132,6 +132,8 @@ contains
       integer(kind = int32), parameter :: i32 = 0_int32
       character(len=*), parameter :: errmsg = &
           & "dynamic::vector.copy: unimplemented vector<T>"
+      character(len=*), parameter :: unexpected = &
+          & "dynamic::vector.copy: unexpected error"
       character(len=*), parameter :: name = 'dynamic::vector.error:'
       character(len=*), parameter :: errmsg_i32 = name // ' ' // &
           & 'container of 32-bit integers'
@@ -265,7 +267,7 @@ contains
                       type is (vector_t)
                           call push (to, aryvec)
                       class default
-                          error stop "dynamic::vector.copy: unexpected error"
+                          error stop unexpected
                   end select
               end associate
 
