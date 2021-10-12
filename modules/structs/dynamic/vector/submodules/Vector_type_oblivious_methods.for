@@ -116,118 +116,170 @@ contains
 
 
   module subroutine vector_vector_t_copy (to, from)
+      ! implements copying a vector into another
       type(vector_t), intent(out), target :: to
       type(vector_t), intent(in) :: from
       type(vector_t), allocatable :: aryvec(:)
       type(vector_t) :: vec
-      integer(kind = int32), allocatable :: aryi32(:)
       integer(kind = int64), allocatable :: aryi64(:)
-      integer(kind = int64) :: ary_bounds(0:1)
-      integer(kind = int64) :: vec_bounds(0:1)
-      integer(kind = int64) :: first
-      integer(kind = int64) :: last
+      integer(kind = int32), allocatable :: aryi32(:)
+      real(kind = real64), allocatable :: aryr64(:)
+      integer(kind = int64) :: bounds(0:1)
       integer(kind = int64) :: lb
       integer(kind = int64) :: ub
-      integer(kind = int64) :: i64
-      integer(kind = int32) :: i32
+      real(kind = real64), parameter :: r64 = 0.0_real64
+      integer(kind = int64), parameter :: i64 = 0_int64
+      integer(kind = int32), parameter :: i32 = 0_int32
       character(len=*), parameter :: errmsg = &
           & "dynamic::vector.copy: unimplemented vector<T>"
+      character(len=*), parameter :: name = 'dynamic::vector.error:'
+      character(len=*), parameter :: errmsg_i32 = name // ' ' // &
+          & 'container of 32-bit integers'
+      character(len=*), parameter :: errmsg_i64 = name // ' ' // &
+          & 'container of 64-bit integers'
+      character(len=*), parameter :: errmsg_r64 = name // ' ' // &
+          & 'container of 64-bit reals'
+      character(len=*), parameter :: errmsg_vec = name // ' ' // &
+          & 'container of vectors'
 
+      call limit        !! defines vector limits
+      call init         !! initializes (destination) vector
+      call fetch        !! fetches data for copying
+      call alloc        !! allocates internal array of (destination) vector
+      call error        !! sets the error message of (destination) vector
+      call push         !! pushes data into (destination) vector
+      call bind         !! binds the iterator of the (destination) vector
 
-      i32 = 0_int32
-      i64 = 0_int64
-
-
-      call allocator (to)
-
-
-      to % begin % idx = from % begin % idx
-      to % avail % idx = from % avail % idx
-      to % limit % idx = from % limit % idx
-      to % deref % idx = from % deref % idx
-
-
-      lb            = from % begin % idx
-      ub            = from % avail % idx
-
-      ary_bounds(0) = from % begin % idx
-      ary_bounds(1) = from % avail % idx
-
-      vec_bounds(0) = from % begin % idx
-      vec_bounds(1) = from % limit % idx
-
-
-      ! copies from (source) vector into a suitable placeholder
-      associate (values => from % array % values)
-
-          select type (values)
-
-              type is ( integer(kind = int32) )
-
-                  call allocator (ary_bounds, aryi32)
-                  call allocator (vec_bounds, to % array % values, &
-                                & i32)
-
-                  aryi32(:) = values(lb:ub)
-                  to % state % errmsg(:) = "vector<int32_t>"
-
-
-              type is ( integer(kind = int64) )
-
-
-                  call allocator (ary_bounds, aryi64)
-                  call allocator (vec_bounds, to % array % values, &
-                                & i64)
-
-                  aryi64(:) = values(lb:ub)
-                  to % state % errmsg(:) = "vector<int64_t>"
-
-
-              type is (vector_t)
-
-
-                  call allocator (ary_bounds, aryvec)
-                  call allocator (vec_bounds, to % array % values, &
-                                & vec)
-
-                  aryvec(:) = values(lb:ub)
-                  to % state % errmsg(:) = "vector<vector_t>"
-
-
-              class default
-
-                  error stop errmsg
-
-          end select
-
-      end associate
-
-
-      ! copies into (destination) vector
-      associate (values => to % array % values)
-
-          select type (values)
-
-              type is ( integer(kind = int32) )
-                  values(lb:ub) = aryi32(:)
-              type is ( integer(kind = int64) )
-                  values(lb:ub) = aryi64(:)
-              type is (vector_t)
-                  values(lb:ub) = aryvec(:)
-              class default
-                  error stop "dynamic::vector.copy: unexpected error"
-
-          end select
-
-      end associate
-
-      first = to % begin % idx
-      last  = to % avail % idx - 1_int64
-      to % deref % it   => to % array % values(first:last)
       to % state % init = .true.
 
       return
-  end subroutine
+      contains
+
+          subroutine limit
+
+              ! defines internal array bounds of (source) vector
+              lb = from % begin % idx
+              ub = from % avail % idx - 1_int64
+
+              ! defines the size limit of the (destination) vector
+              bounds(0) = from % begin % idx
+              bounds(1) = from % limit % idx
+
+              return
+          end subroutine
+
+
+          subroutine init
+              ! initializes (destination) vector fields
+
+              call allocator (to)
+
+              to % begin % idx = from % begin % idx
+              to % avail % idx = from % avail % idx
+              to % limit % idx = from % limit % idx
+              to % deref % idx = from % deref % idx
+
+              return
+          end subroutine
+
+
+          subroutine fetch
+              ! fetches (source) data and puts it in a suitable placeholder
+
+              associate (values => from % array % values)
+                  select type (values)
+                      type is ( integer(kind = int32) )
+                          call backup (from, aryi32)
+                      type is ( integer(kind = int64) )
+                          call backup (from, aryi64)
+                      type is ( real(kind = real64) )
+                          call backup (from, aryr64)
+                      type is (vector_t)
+                          call backup (from, aryvec)
+                      class default
+                          error stop errmsg
+                      end select
+              end associate
+
+              return
+          end subroutine
+
+
+          subroutine alloc
+
+              ! allocates the internal array of the (destination) vector
+              associate (values => from % array % values)
+                  select type (values)
+                      type is ( integer(kind = int32) )
+                          call allocator (bounds, to % array % values, i32)
+                      type is ( integer(kind = int64) )
+                          call allocator (bounds, to % array % values, i64)
+                      type is ( real(kind = real64) )
+                          call allocator (bounds, to % array % values, r64)
+                      type is (vector_t)
+                          call allocator (bounds, to % array % values, vec)
+                      class default
+                          error stop errmsg
+                      end select
+              end associate
+
+              return
+          end subroutine
+
+
+          subroutine error
+              ! defines the error message of the (destination) vector
+
+              associate (values => from % array % values)
+                  select type (values)
+                      type is ( integer(kind = int32) )
+                          to % state % errmsg(:) = errmsg_i32
+                      type is ( integer(kind = int64) )
+                          to % state % errmsg(:) = errmsg_i64
+                      type is ( real(kind = real64) )
+                          to % state % errmsg(:) = errmsg_r64
+                      type is (vector_t)
+                          to % state % errmsg(:) = errmsg_vec
+                      class default
+                          error stop errmsg
+                  end select
+              end associate
+
+              return
+          end subroutine
+
+
+          subroutine push
+              ! pushes data into (destination) vector
+
+              associate (values => to % array % values)
+                  select type (values)
+                      type is ( integer(kind = int32) )
+                          values(lb:ub) = aryi32(:)
+                      type is ( integer(kind = int64) )
+                          values(lb:ub) = aryi64(:)
+                      type is ( real(kind = real64) )
+                          values(lb:ub) = aryr64(:)
+                      type is (vector_t)
+                          values(lb:ub) = aryvec(:)
+                      class default
+                          error stop "dynamic::vector.copy: unexpected error"
+                  end select
+              end associate
+
+              return
+          end subroutine
+
+
+          subroutine bind
+              ! binds iterator of (destination) vector
+
+              to % deref % it => to % array % values(lb:ub)
+
+              return
+          end subroutine
+
+  end subroutine vector_vector_t_copy
 
 
 end submodule
