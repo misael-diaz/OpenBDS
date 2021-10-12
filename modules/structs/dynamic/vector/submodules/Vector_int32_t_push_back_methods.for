@@ -235,7 +235,6 @@ contains
       integer(kind = int64), parameter :: ub = VECTOR_MIN_SIZE
       integer(kind = int64), parameter :: bounds(0:1) = [lb, ub]
       integer(kind = int32), intent(in) :: value
-      integer(kind = int32) :: mstat
       character(len=*), parameter :: errmsg = &
           & "dynamic::vector.error: container of 32-bit integers"
 
