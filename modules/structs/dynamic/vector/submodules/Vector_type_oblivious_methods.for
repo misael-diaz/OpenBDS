@@ -1,4 +1,3 @@
-!
 !   source: Vector_type_oblivious_methods.for
 !   author: misael-diaz
 !   date:   2021-06-28
@@ -174,12 +173,11 @@ contains
               ! Synopsis:
               ! Initializes (destination) fields from (source) vector while
               ! leaving the `avail' field and the `iterator' to be set by
-              ! the generic `push' method.
+              ! the generic `push' method at an appropriate time.
 
-              call allocator (to)
+              call instantiate (to)
 
               to % begin % idx = from % begin % idx
-              to % avail % idx = 0_int64
               to % limit % idx = from % limit % idx
               to % deref % idx = from % deref % idx
 
