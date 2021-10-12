@@ -96,13 +96,11 @@ contains
           if ( allocated(vector % array) ) then
 
               if ( allocated(vector % array % values) ) then
-                  call deallocator (self % array)
                   call vector_vector_t_copy (self, vector)
               end if
 
           else
 
-              call deallocator (self % array)
               call instantiate (self)
 
           end if
