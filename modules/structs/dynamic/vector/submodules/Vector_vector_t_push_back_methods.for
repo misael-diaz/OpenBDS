@@ -101,6 +101,40 @@ contains
   end subroutine vector_vector_t_push
 
 
+  module subroutine vector_vector_t_push_array (vector, array)
+      ! Synopsis: pushes value unto the back of vector.
+      type(vector_t), intent(inout), target :: vector
+      type(vector_t), intent(in) :: array(:)
+      integer(kind = int64) :: numel
+      integer(kind = int64) :: final
+
+
+      numel = size(array = array, dim = 1, kind = int64)
+
+      associate (begin  => vector % begin % idx,  &
+               & avail  => vector % avail % idx,  &
+               & values => vector % array % values)
+
+          final = avail + numel - 1_int64
+
+          select type (values)
+              type is (vector_t)
+                  values (avail:final) = array(:)
+              class default
+                  ! caters inserting mixed-types
+                  error stop vector % state % errmsg
+          end select
+
+          vector % deref % it => vector % array % values(begin:final)
+          avail = avail + numel
+
+      end associate
+
+
+      return
+  end subroutine vector_vector_t_push_array
+
+
   module subroutine vector_vector_t_grow (vector, value)
       ! Synopsis: Doubles the vector size.
       type(vector_t), intent(inout) :: vector
@@ -201,7 +235,6 @@ contains
       integer(kind = int64), parameter :: ub = VECTOR_MIN_SIZE
       integer(kind = int64), parameter :: bounds(0:1) = [lb, ub]
       type(vector_t), intent(in) :: value
-      integer(kind = int32) :: mstat
       character(len=*), parameter :: errmsg = &
           & "dynamic::vector.error: container of vectors"
 
