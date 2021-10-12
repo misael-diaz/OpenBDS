@@ -132,6 +132,15 @@ contains
       integer(kind = int32), parameter :: i32 = 0_int32
       character(len=*), parameter :: errmsg = &
           & "dynamic::vector.copy: unimplemented vector<T>"
+      character(len=*), parameter :: name = 'dynamic::vector.error:'
+      character(len=*), parameter :: errmsg_i32 = name // ' ' // &
+          & 'container of 32-bit integers'
+      character(len=*), parameter :: errmsg_i64 = name // ' ' // &
+          & 'container of 64-bit integers'
+      character(len=*), parameter :: errmsg_r64 = name // ' ' // &
+          & 'container of 64-bit reals'
+      character(len=*), parameter :: errmsg_vec = name // ' ' // &
+          & 'container of vectors'
 
       call limit        !! defines vector limits
       call init         !! initializes (destination) vector
@@ -224,13 +233,13 @@ contains
               associate (values => from % array % values)
                   select type (values)
                       type is ( integer(kind = int32) )
-                          to % state % errmsg(:) = "vector<int32_t>"
+                          to % state % errmsg(:) = errmsg_i32
                       type is ( integer(kind = int64) )
-                          to % state % errmsg(:) = "vector<int64_t>"
+                          to % state % errmsg(:) = errmsg_i64
                       type is ( real(kind = real64) )
-                          to % state % errmsg(:) = "vector<real64_t>"
+                          to % state % errmsg(:) = errmsg_r64
                       type is (vector_t)
-                          to % state % errmsg(:) = "vector<vector_t>"
+                          to % state % errmsg(:) = errmsg_vec
                       class default
                           error stop errmsg
                   end select
