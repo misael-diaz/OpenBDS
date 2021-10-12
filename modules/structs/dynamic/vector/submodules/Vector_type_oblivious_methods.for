@@ -97,13 +97,13 @@ contains
           if ( allocated(vector % array) ) then
 
               if ( allocated(vector % array % values) ) then
+                  call deallocator (self % array)
                   call vector_vector_t_copy (self, vector)
               end if
 
           else
 
               call deallocator (self % array)
-              call allocator   (self)
               call instantiate (self)
 
           end if
@@ -145,10 +145,9 @@ contains
       call limit        !! defines vector limits
       call init         !! initializes (destination) vector
       call fetch        !! fetches data for copying
-      call alloc        !! allocates internal array of (destination) vector
+      call clone        !! clones the type of the internal array
       call error        !! sets the error message of (destination) vector
-      call push         !! pushes data into (destination) vector
-      call bind         !! binds the iterator of the (destination) vector
+      call copy         !! copies data into (destination) vector
 
       to % state % init = .true.
 
@@ -170,12 +169,15 @@ contains
 
 
           subroutine init
-              ! initializes (destination) vector fields
+              ! Synopsis:
+              ! Initializes (destination) fields from (source) vector while
+              ! leaving the `avail' field and the `iterator' to be set by
+              ! the generic `push' method.
 
               call allocator (to)
 
               to % begin % idx = from % begin % idx
-              to % avail % idx = from % avail % idx
+              to % avail % idx = 0_int64
               to % limit % idx = from % limit % idx
               to % deref % idx = from % deref % idx
 
@@ -205,9 +207,9 @@ contains
           end subroutine
 
 
-          subroutine alloc
+          subroutine clone
+              ! clones the type of the internal array from (source)
 
-              ! allocates the internal array of the (destination) vector
               associate (values => from % array % values)
                   select type (values)
                       type is ( integer(kind = int32) )
@@ -249,19 +251,19 @@ contains
           end subroutine
 
 
-          subroutine push
-              ! pushes data into (destination) vector
+          subroutine copy
+              ! copies data from placeholder into (destination) vector
 
               associate (values => to % array % values)
                   select type (values)
                       type is ( integer(kind = int32) )
-                          values(lb:ub) = aryi32(:)
+                          call push (to, aryi32)
                       type is ( integer(kind = int64) )
-                          values(lb:ub) = aryi64(:)
+                          call push (to, aryi64)
                       type is ( real(kind = real64) )
-                          values(lb:ub) = aryr64(:)
+                          call push (to, aryr64)
                       type is (vector_t)
-                          values(lb:ub) = aryvec(:)
+                          call push (to, aryvec)
                       class default
                           error stop "dynamic::vector.copy: unexpected error"
                   end select
@@ -270,14 +272,6 @@ contains
               return
           end subroutine
 
-
-          subroutine bind
-              ! binds iterator of (destination) vector
-
-              to % deref % it => to % array % values(lb:ub)
-
-              return
-          end subroutine
 
   end subroutine vector_vector_t_copy
 
