@@ -62,52 +62,93 @@ contains
   module subroutine allocate_iter_t (i)
       type(iter_t), intent(inout), allocatable :: i
       integer(kind = int32) :: mstat
+      character(*), parameter :: errMSG = &
+          & "vector.allocate_iter_t: (de)allocation error"
 
-      mstat = 0
-      if ( .not. allocated(i) ) then
-          allocate (i, stat = mstat)
-      end if
+      call dealloc
 
-      if (mstat /= 0) then
-          error stop "vector.allocate_iter_t: allocation error"
-      end if
+      allocate (i, stat = mstat)
+      if (mstat /= 0) error stop errMSG
 
       return
+      contains
+
+          subroutine dealloc
+
+              mstat = 0
+              if ( allocated(i) ) then
+                  deallocate (i, stat = mstat)
+              end if
+
+              if (mstat /= 0) then
+                  error stop errMSG
+              end if
+
+              return
+          end subroutine
   end subroutine
 
 
   module subroutine allocate_data_t (d)
       type(data_t), intent(inout), allocatable :: d
       integer(kind = int32) :: mstat
+      character(*), parameter :: errMSG = &
+          & "vector.allocate_data_t: (de)allocation error"
 
-      mstat = 0
-      if ( .not. allocated(d) ) then
-          allocate (d, stat = mstat)
-      end if
+      call dealloc
 
-      if (mstat /= 0) then
-          error stop "vector.allocate_data_t: allocation error"
-      end if
+      allocate (d, stat = mstat)
+      if (mstat /= 0) error stop errMSG
 
       return
-  end subroutine
+      contains
+
+          subroutine dealloc
+
+              mstat = 0
+              if ( allocated(d) ) then
+                  deallocate (d, stat = mstat)
+              end if
+
+              if (mstat /= 0) then
+                  error stop errMSG
+              end if
+
+              return
+          end subroutine
+
+  end subroutine allocate_data_t
 
 
   module subroutine allocate_stat_t (s)
       type(stat_t), intent(inout), allocatable :: s
       integer(kind = int32) :: mstat
+      character(*), parameter :: errMSG = &
+          & "vector.allocate_stat_t: (de)allocation error"
 
-      mstat = 0
-      if ( .not. allocated(s) ) then
-          allocate (s, stat = mstat)
-      end if
+      call dealloc
 
-      if (mstat /= 0) then
-          error stop "vector.allocate_stat_t: allocation error"
-      end if
+      allocate (s, stat = mstat)
+      if (mstat /= 0) error stop errMSG
 
       return
-  end subroutine
+      contains
+
+          subroutine dealloc
+
+              mstat = 0
+              if ( allocated(s) ) then
+                  deallocate (s, stat = mstat)
+              end if
+
+              if (mstat /= 0) then
+                  error stop errMSG
+              end if
+
+              return
+          end subroutine
+
+  end subroutine allocate_stat_t
 
 
   module subroutine vector_allocate_errmsg (vector, errMSG)
@@ -500,6 +541,17 @@ contains
 !
 !           return
 !       end function
+
+
+  module subroutine destructor_iter_t (i)
+      type(iter_t), intent(inout) :: i
+
+      if ( associated(i % it) ) then
+          i % it => null()
+      end if
+
+      return
+  end subroutine
 
 
   module subroutine destructor_stat_t (s)

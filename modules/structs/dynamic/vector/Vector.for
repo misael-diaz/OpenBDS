@@ -90,6 +90,8 @@ module VectorClass
   type :: iter_t
       class(*), pointer, contiguous :: it(:) => null()
       integer(kind = int64) :: idx = 0_int64
+      contains
+        final :: destructor_iter_t
   end type
 
 
@@ -893,6 +895,11 @@ module VectorClass
 !       integer(kind = int64), intent(in) :: i
 !       character(len = 64) :: str
 !   end function
+
+
+    module subroutine destructor_iter_t (i)
+        type(iter_t), intent(inout) :: i
+    end subroutine
 
 
     module subroutine destructor_stat_t (s)
