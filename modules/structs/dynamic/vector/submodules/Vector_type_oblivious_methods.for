@@ -121,11 +121,13 @@ contains
       type(vector_t), intent(in) :: from
       type(vector_t), allocatable :: aryvec(:)
       type(vector_t) :: vec
-      integer(kind = int32), allocatable :: aryi32(:)
       integer(kind = int64), allocatable :: aryi64(:)
+      integer(kind = int32), allocatable :: aryi32(:)
+      real(kind = real64), allocatable :: aryr64(:)
       integer(kind = int64) :: vec_bounds(0:1)
       integer(kind = int64) :: lb
       integer(kind = int64) :: ub
+      real(kind = real64), parameter :: r64 = 0.0_real64
       integer(kind = int64), parameter :: i64 = 0_int64
       integer(kind = int32), parameter :: i32 = 0_int32
       character(len=*), parameter :: errmsg = &
@@ -181,6 +183,8 @@ contains
                           call backup (from, aryi32)
                       type is ( integer(kind = int64) )
                           call backup (from, aryi64)
+                      type is ( real(kind = real64) )
+                          call backup (from, aryr64)
                       type is (vector_t)
                           call backup (from, aryvec)
                       class default
@@ -201,6 +205,8 @@ contains
                           call allocator (vec_bounds, to % array % values, i32)
                       type is ( integer(kind = int64) )
                           call allocator (vec_bounds, to % array % values, i64)
+                      type is ( real(kind = real64) )
+                          call allocator (vec_bounds, to % array % values, r64)
                       type is (vector_t)
                           call allocator (vec_bounds, to % array % values, vec)
                       class default
@@ -221,6 +227,8 @@ contains
                           to % state % errmsg(:) = "vector<int32_t>"
                       type is ( integer(kind = int64) )
                           to % state % errmsg(:) = "vector<int64_t>"
+                      type is ( real(kind = real64) )
+                          to % state % errmsg(:) = "vector<real64_t>"
                       type is (vector_t)
                           to % state % errmsg(:) = "vector<vector_t>"
                       class default
@@ -241,6 +249,8 @@ contains
                           values(lb:ub) = aryi32(:)
                       type is ( integer(kind = int64) )
                           values(lb:ub) = aryi64(:)
+                      type is ( real(kind = real64) )
+                          values(lb:ub) = aryr64(:)
                       type is (vector_t)
                           values(lb:ub) = aryvec(:)
                       class default
