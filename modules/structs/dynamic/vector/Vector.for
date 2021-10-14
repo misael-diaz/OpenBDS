@@ -23,6 +23,38 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+module bits
+use, intrinsic :: iso_fortran_env, only: int32, int64
+implicit none
+private
+save
+public :: BITS_MAX_BIT
+public :: imsb
+
+integer(kind = int32), parameter :: BITS_MAX_BIT = 63
+
+contains
+
+  pure function imsb (n) result(msb)
+      ! Synopsis:
+      ! Finds the Most Significant Bit MSB of a 64-bit (signed) integer.
+      integer(kind = int64), intent(in) :: n    !! 64-bit integer
+      integer(kind = int32) :: pos              !! position
+      integer(kind = int32) :: msb              !! most significant bit
+
+      msb = 0
+      do pos = 0, 63
+          if ( btest(n, pos) ) then
+              msb = pos
+          end if
+      end do
+
+      return
+  end function
+
+end module bits
+
+
 module idata
   ! Defines the type i[nternal]data of the vector class
   use, intrinsic :: iso_fortran_env, only: int32, int64
