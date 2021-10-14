@@ -142,9 +142,7 @@ contains
       type(vector_t), allocatable :: array(:)
 
       call backup  (vector, array)
-
-      vector % limit % idx = 2_int64 * vector % limit % idx !! doubles size
-
+      call double  (vector)
       call restore (vector, array, value)
 
       return

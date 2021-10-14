@@ -113,6 +113,8 @@ module VectorClass
   use utils, only: util_reallocate_array_int32_by_bounds
   use utils, only: util_deallocate_array_int32
   use utils, only: util_deallocate_array_int64
+  use bits,  only: BITS_MAX_BIT
+  use bits,  only: imsb
   use idata, only: data_t
   implicit none
   private
@@ -305,6 +307,11 @@ module VectorClass
       module procedure vector_int64_t_restore
       module procedure vector_real64_t_restore
       module procedure vector_vector_t_restore
+  end interface
+
+
+  interface double
+      module procedure double_vector_size
   end interface
 
 
@@ -914,6 +921,11 @@ module VectorClass
     module subroutine check_bounds (vector, idx)
         type(vector_t), intent(in) :: vector
         integer(kind = int64), intent(in) :: idx
+    end subroutine
+
+
+    module pure subroutine double_vector_size (vector)
+        type(vector_t), intent(inout) :: vector
     end subroutine
 
 
