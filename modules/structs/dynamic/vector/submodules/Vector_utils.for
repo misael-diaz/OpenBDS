@@ -521,6 +521,41 @@ contains
   end subroutine
 
 
+  pure subroutine double_vector_size (vector)
+      ! Synopsis:
+      ! Doubles the vector-size at most, complains if doing so would yield
+      ! an ill-formed object.
+      type(vector_t), intent(inout) :: vector
+      integer(kind = int64) :: limit            !! vector-size
+      integer(kind = int64) :: mask             !! bitmask
+      integer(kind = int32) :: msb              !! most significant bit
+      character(*), parameter :: errMSG = &     !! error message
+          & 'vector has reached its size limit'
+
+      limit = vector % limit % idx
+
+      mask = 0_int64
+      msb = imsb(limit) + 1
+      call illformed_check
+
+      limit = ibset(mask, msb)
+      vector % limit % idx = limit
+
+      return
+      contains
+
+          pure subroutine illformed_check
+              ! checks if doubling the size yields an ill-formed object
+              if ( msb == BITS_MAX_BIT ) then
+                  error stop errMSG
+              end if
+
+              return
+          end subroutine
+
+  end subroutine double_vector_size
+
+
 !       module function to_string_int32 (i) result(str)
 !           integer(kind = int32), intent(in) :: i
 !           character(len = 64) :: str
