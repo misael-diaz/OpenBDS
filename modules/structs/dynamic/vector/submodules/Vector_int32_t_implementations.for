@@ -32,9 +32,9 @@ contains
       ! Synopsis: Creates a vector having `n' copies of `value'.
       type(vector_t), allocatable :: vec
       integer(kind = int64), intent(in) :: n
-      integer(kind = int64) :: bounds(0:1)
       integer(kind = int32), intent(in) :: value
       integer(kind = int32) :: mstat
+      integer(kind = int64) :: bounds(0:1)
       character(*), parameter :: errMSG = &
           & "vector(): the number of copies must be a positive integer"
 
