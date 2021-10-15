@@ -30,6 +30,7 @@ module vector_class_tests
     implicit none
     integer(kind = int64), parameter :: max_vector_size = 1048576_int64
     private
+    public :: test_vector_fill_constructor
     public :: test_vector_get
     public :: test_vector_push_back
     public :: test_vector_copy
@@ -41,6 +42,46 @@ module vector_class_tests
     public :: test_vector_up_array_vector_t
     public :: test_vector_mold_vector_t
     contains
+
+        subroutine test_vector_fill_constructor ()
+            type(vector_t), allocatable :: vector
+            class(*), pointer, contiguous :: it(:) => null()
+            integer(kind = int64), parameter :: numel = 64_int64
+            integer(kind = int64):: diff
+            integer(kind = int32), parameter :: value = 64
+            integer(kind = int32):: mstat
+
+
+            allocate (vector, stat=mstat)
+            if (mstat /= 0) error stop 'test.vector(): allocation error'
+
+            ! constructs a vector having `numel' copies of `value'
+            vector = vector_t (numel, value)
+            it => vector % deref % it
+
+
+            select type (it)
+                type is ( integer(kind = int32) )
+                    diff = int(sum(it), kind = int64) - numel * value
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            write (*, '(A)', advance='no') '[00] test-vector.construct(): '
+            if ( vector % size () /= numel ) then
+                print *, 'FAIL'
+            else if (diff /= 0_int64) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            deallocate (vector)
+
+            return
+        end subroutine
 
 
         subroutine test_vector_push_back ()
@@ -741,6 +782,7 @@ end module
 
 
 program test_vector_class
+    use vector_class_tests, only: construct => test_vector_fill_constructor
     use vector_class_tests, only: get => test_vector_get
     use vector_class_tests, only: push_back => test_vector_push_back
     use vector_class_tests, only: copy => test_vector_copy
@@ -756,6 +798,7 @@ program test_vector_class
     implicit none
 
 
+    call construct ()
     call push_back ()
     call copy ()
     call get ()
