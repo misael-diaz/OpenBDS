@@ -28,6 +28,34 @@ implicit none
 contains
 
 
+  module function vector_int32_t_fillConstructor (n, value) result(vec)
+      type(vector_t), allocatable :: vec
+      integer(kind = int64), intent(in) :: n
+      integer(kind = int64) :: bounds(0:1)
+      integer(kind = int32), intent(in) :: value
+      integer(kind = int32) :: mstat
+
+      allocate (vec, stat=mstat)
+      if (mstat /= 0) error stop 'memory allocation error'
+
+      call instantiate (vec)
+
+      ! sets the vector limits
+      vec % limit % idx = n
+      call double (vec)
+
+      bounds(0) = 0_int64
+      bounds(1) = vec % limit % idx
+      call allocator (bounds, vec % array % values, value)
+
+      call push (vec, n, value) !! pushes `n' copies of value unto vector
+
+      vec % state % init = .true.
+
+      return
+  end function vector_int32_t_fillConstructor
+
+
   module subroutine vector_int32_t_findloc_wrapper (vector, value, i)
       type(vector_t), intent(in) :: vector
       integer(kind = int64), intent(out) :: i
