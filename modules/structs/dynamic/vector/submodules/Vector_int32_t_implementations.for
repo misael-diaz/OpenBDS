@@ -37,11 +37,23 @@ contains
       integer(kind = int64) :: bounds(0:1)
       character(*), parameter :: errMSG = &
           & "vector(): the number of copies must be a positive integer"
+      character(len=*), parameter :: name = 'dynamic::vector.error:'
+      character(len=*), parameter :: errmsg_i32 = name // ' ' // &
+          & 'container of 32-bit integers'
+      character(len=*), parameter :: errmsg_i64 = name // ' ' // &
+          & 'container of 64-bit integers'
+      character(len=*), parameter :: errmsg_r64 = name // ' ' // &
+          & 'container of 64-bit reals'
+      character(len=*), parameter :: errmsg_vec = name // ' ' // &
+          & 'container of vectors'
+      character(len=*), parameter :: unimplmntd = name // ' ' // &
+          & 'unimplemented vector<T>'
 
       call check                !! complains on invalid inputs
       call alloc                !! allocates memory for vector
       call instantiate (vec)    !! initializes the vector components
       call tailor               !! tailors the vector to store `n' copies
+      call error                !! sets the internal error message
 
 
       ! pushes `n' copies of the value `value' unto vector
@@ -88,6 +100,41 @@ contains
 
               return
           end subroutine
+
+
+          subroutine error
+              ! defines the internal error message of vector
+
+              associate (values => vec % array % values)
+                  select type (values)
+
+                      type is ( integer(kind = int32) )
+
+                          call allocator      (vec, errmsg_i32)
+                          vec % state % errmsg(:) = errmsg_i32
+
+                      type is ( integer(kind = int64) )
+
+                          call allocator      (vec, errmsg_i64)
+                          vec % state % errmsg(:) = errmsg_i64
+
+                      type is ( real(kind = real64) )
+
+                          call allocator      (vec, errmsg_r64)
+                          vec % state % errmsg(:) = errmsg_r64
+
+                      type is (vector_t)
+                          call allocator      (vec, errmsg_vec)
+                          vec % state % errmsg(:) = errmsg_vec
+
+                      class default
+                          error stop unimplmntd
+
+                  end select
+              end associate
+
+              return
+          end subroutine error
 
   end function vector_int32_t_fillConstructor
 
