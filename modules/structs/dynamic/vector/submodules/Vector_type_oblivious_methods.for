@@ -274,7 +274,7 @@ contains
 
 
           subroutine valid
-              ! validates iterators by destroying and re-associating them
+              ! validates iterators by re-associating them
 
               associate (begin => to % begin % idx, &
                        & avail => to % avail % idx, &
@@ -283,7 +283,6 @@ contains
                       type is (vector_t)
 
                           do i = begin, avail - 1_int64
-                              call allocator (array(i) % deref)
                               b = array(i) % begin % idx
                               e = array(i) % avail % idx - 1_int64
                               associate (vals => array(i) % array % values)
