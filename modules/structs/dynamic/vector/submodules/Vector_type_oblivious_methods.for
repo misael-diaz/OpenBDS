@@ -124,6 +124,7 @@ contains
       integer(kind = int64) :: bounds(0:1)
       integer(kind = int64) :: lb
       integer(kind = int64) :: ub
+      integer(kind = int64) :: i, b, e
       real(kind = real64), parameter :: r64 = 0.0_real64
       integer(kind = int64), parameter :: i64 = 0_int64
       integer(kind = int32), parameter :: i32 = 0_int32
@@ -147,6 +148,7 @@ contains
       call clone        !! clones the type of the internal array
       call error        !! sets the error message of (destination) vector
       call copy         !! copies data into (destination) vector
+      call valid
 
       to % state % init = .true.
 
@@ -271,8 +273,42 @@ contains
           end subroutine
 
 
+          subroutine valid
+              ! validates iterators by destroying and re-associating them
+
+              associate (begin => to % begin % idx, &
+                       & avail => to % avail % idx, &
+                       & array => to % array % values)
+                  select type (array)
+                      type is (vector_t)
+
+                          do i = begin, avail - 1_int64
+                              call allocator (array(i) % deref)
+                              b = array(i) % begin % idx
+                              e = array(i) % avail % idx - 1_int64
+                              associate (vals => array(i) % array % values)
+                                  array(i) % deref % it => vals(b:e)
+                              end associate
+                          end do
+
+                  end select
+              end associate
+
+              return
+          end subroutine
+
   end subroutine vector_vector_t_copy
 
+
+  subroutine vector_print_container_address_method (self)
+      class(vector_t), intent(in) :: self
+
+
+      print *, 'address(array, iter): ', loc( self % array % values ), &
+                                       & loc( self % deref % it )
+
+      return
+  end subroutine
 
 end submodule
 
