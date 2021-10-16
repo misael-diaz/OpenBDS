@@ -233,16 +233,30 @@ contains
 
               associate (values => from % array % values)
                   select type (values)
+
                       type is ( integer(kind = int32) )
+
+                          call allocator      (to, errmsg_i32)
                           to % state % errmsg(:) = errmsg_i32
+
                       type is ( integer(kind = int64) )
+
+                          call allocator      (to, errmsg_i64)
                           to % state % errmsg(:) = errmsg_i64
+
                       type is ( real(kind = real64) )
+
+                          call allocator      (to, errmsg_r64)
                           to % state % errmsg(:) = errmsg_r64
+
                       type is (vector_t)
+
+                          call allocator      (to, errmsg_vec)
                           to % state % errmsg(:) = errmsg_vec
+
                       class default
                           error stop errmsg
+
                   end select
               end associate
 
