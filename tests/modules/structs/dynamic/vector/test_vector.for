@@ -45,14 +45,16 @@ module vector_class_tests
 
         subroutine test_vector_fill_constructor ()
             type(vector_t), allocatable :: vector
+            type(vector_t), allocatable :: vofvec  !! vector of vectors
             class(*), pointer, contiguous :: it(:) => null()
+            class(*), pointer, contiguous :: iter(:) => null()
             integer(kind = int64), parameter :: numel = 64_int64
-            integer(kind = int64):: diff
+            integer(kind = int64):: i, j, diff
             integer(kind = int32), parameter :: value = 64
             integer(kind = int32):: mstat
 
 
-            allocate (vector, stat=mstat)
+            allocate (vector, vofvec, stat=mstat)
             if (mstat /= 0) error stop 'test.vector(): allocation error'
 
             ! constructs a vector having `numel' copies of `value'
@@ -78,7 +80,44 @@ module vector_class_tests
             end if
 
 
-            deallocate (vector)
+            ! creates a vector of vectors
+            vofvec = vector_t (numel, vector)
+
+            ! checks that the iterators point to distintc `internal' arrays
+            diff = 0_int64
+            iter => vofvec % deref % it
+            select type (iter)
+                type is (vector_t)
+                    do i = 1_int64, (numel - 1_int64)
+                        do j = i + 1_int64, numel
+
+                            associate (it_1 => iter(i) % deref % it, &
+                                     & it_2 => iter(j) % deref % it)
+
+                                if ( loc(it_1) == loc(it_2) ) then
+                                    diff = diff + 1_int64
+                                end if
+
+                            end associate
+
+                        end do
+                    end do
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            write (*, '(A)', advance='no') '[01] test-vector.construct(): '
+            if ( vofvec % size () /= numel ) then
+                print *, 'FAIL'
+            else if (diff /= 0_int64) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            deallocate (vector, vofvec)
 
             return
         end subroutine

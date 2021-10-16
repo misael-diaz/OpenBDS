@@ -174,6 +174,7 @@ module VectorClass
                                       & vector_vector_t_push_back_method
         procedure, public :: size => size_method
         procedure, public :: clear => clear_method
+        procedure, public :: addr => vector_print_container_address_method
         final :: finalizer
   end type
 
@@ -183,6 +184,7 @@ module VectorClass
       module procedure vector_int32_t_fillConstructor
       module procedure vector_int64_t_fillConstructor
       module procedure vector_real64_t_fillConstructor
+      module procedure vector_vector_t_fillConstructor
   end interface
 
 
@@ -287,6 +289,7 @@ module VectorClass
       module procedure vector_int32_t_push_n_copies
       module procedure vector_int64_t_push_n_copies
       module procedure vector_real64_t_push_n_copies
+      module procedure vector_vector_t_push_n_copies
       module procedure vector_int32_t_push_array
       module procedure vector_int64_t_push_array
       module procedure vector_real64_t_push_array
@@ -354,6 +357,13 @@ module VectorClass
         type(vector_t), allocatable :: vec
         integer(kind = int64), intent(in) :: n
         real(kind = real64), intent(in) :: value
+    end function
+
+
+    module function vector_vector_t_fillConstructor (n, value) result(vec)
+        type(vector_t), allocatable :: vec
+        type(vector_t), intent(in) :: value
+        integer(kind = int64), intent(in) :: n
     end function
 
 
@@ -459,6 +469,12 @@ module VectorClass
     module subroutine clear_method (self)
         ! Synopsis: Clears the vector elements.
         class(vector_t), intent(inout) :: self
+    end subroutine
+
+
+    module subroutine vector_print_container_address_method (self)
+        ! Synopsis: Prints the addresses of the internal array and iterator.
+        class(vector_t), intent(in) :: self
     end subroutine
 
 
@@ -656,6 +672,13 @@ module VectorClass
         type(vector_t), intent(inout), target :: vector
         integer(kind = int64), intent(in) :: n
         real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_push_n_copies (vector, n, value)
+        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(in) :: value
+        integer(kind = int64), intent(in) :: n
     end subroutine
 
 
