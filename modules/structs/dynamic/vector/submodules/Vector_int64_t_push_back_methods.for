@@ -135,6 +135,41 @@ contains
   end subroutine vector_int64_t_push_array
 
 
+  module pure subroutine vector_int64_t_push_n_copies (vector, n, value)
+      ! Synopsis: pushes `n' copies of value unto the back of vector.
+      type(vector_t), intent(inout), target :: vector
+      integer(kind = int64), intent(in) :: value
+      integer(kind = int64), intent(in) :: n
+      integer(kind = int64) :: numel
+      integer(kind = int64) :: final
+
+
+      numel = n
+
+      associate (begin  => vector % begin % idx,  &
+               & avail  => vector % avail % idx,  &
+               & values => vector % array % values)
+
+          final = avail + numel - 1_int64
+
+          select type (values)
+              type is ( integer(kind = int64) )
+                  values (avail:final) = value
+              class default
+                  ! caters inserting mixed-types
+                  error stop vector % state % errmsg
+          end select
+
+          vector % deref % it => vector % array % values(begin:final)
+          avail = avail + numel
+
+      end associate
+
+
+      return
+  end subroutine vector_int64_t_push_n_copies
+
+
   module subroutine vector_int64_t_grow (vector, value)
       ! Synopsis: Doubles the vector size.
       type(vector_t), intent(inout) :: vector

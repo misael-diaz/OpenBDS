@@ -181,6 +181,7 @@ module VectorClass
   interface vector_t
       module procedure default_constructor
       module procedure vector_int32_t_fillConstructor
+      module procedure vector_int64_t_fillConstructor
   end interface
 
 
@@ -283,6 +284,7 @@ module VectorClass
       module procedure vector_real64_t_push
       module procedure vector_vector_t_push
       module procedure vector_int32_t_push_n_copies
+      module procedure vector_int64_t_push_n_copies
       module procedure vector_int32_t_push_array
       module procedure vector_int64_t_push_array
       module procedure vector_real64_t_push_array
@@ -336,6 +338,13 @@ module VectorClass
         type(vector_t), allocatable :: vec
         integer(kind = int64), intent(in) :: n
         integer(kind = int32), intent(in) :: value
+    end function
+
+
+    module function vector_int64_t_fillConstructor (n, value) result(vec)
+        type(vector_t), allocatable :: vec
+        integer(kind = int64), intent(in) :: n
+        integer(kind = int64), intent(in) :: value
     end function
 
 
@@ -624,6 +633,13 @@ module VectorClass
         type(vector_t), intent(inout), target :: vector
         integer(kind = int64), intent(in) :: n
         integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module pure subroutine vector_int64_t_push_n_copies (vector, n, value)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: n
+        integer(kind = int64), intent(in) :: value
     end subroutine
 
 
