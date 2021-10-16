@@ -93,14 +93,13 @@ contains
 
 
           subroutine valid
-              ! recreates iterators to validate them
+                  ! re-associates iterators to validate them
 
               iter => vec % deref % it
               select type (iter)
                   type is (vector_t)
                       do idx = 1, n
 
-                          call allocator (iter(idx) % deref)
                           b = iter(idx) % begin % idx
                           e = iter(idx) % avail % idx - 1_int64
                           associate (values => iter(idx) % array % values)
