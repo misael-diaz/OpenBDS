@@ -40,25 +40,16 @@ contains
       character(len=*), parameter :: name = 'dynamic::vector.error:'
       character(len=*), parameter :: errmsg_i32 = name // ' ' // &
           & 'container of 32-bit integers'
-      character(len=*), parameter :: errmsg_i64 = name // ' ' // &
-          & 'container of 64-bit integers'
-      character(len=*), parameter :: errmsg_r64 = name // ' ' // &
-          & 'container of 64-bit reals'
-      character(len=*), parameter :: errmsg_vec = name // ' ' // &
-          & 'container of vectors'
       character(len=*), parameter :: unimplmntd = name // ' ' // &
           & 'unimplemented vector<T>'
 
       call check                !! complains on invalid inputs
       call alloc                !! allocates memory for vector
-      call instantiate (vec)    !! initializes the vector components
+      call init                 !! initializes the vector components
       call tailor               !! tailors the vector to store `n' copies
       call error                !! sets the internal error message
-
-
-      ! pushes `n' copies of the value `value' unto vector
-      call push (vec, n, value)
-
+      call insert               !! pushes `n' copies of `value' unto vector
+      call valid                !! validates iterator(s)
 
       vec % state % init = .true.
 
@@ -88,6 +79,15 @@ contains
           end subroutine
 
 
+          subroutine init
+              ! provides initial values to the vector components
+
+              call instantiate (vec)
+
+              return
+          end subroutine
+
+
           subroutine tailor
               ! tailors the vector size based on the number of copies
 
@@ -107,34 +107,34 @@ contains
 
               associate (values => vec % array % values)
                   select type (values)
-
                       type is ( integer(kind = int32) )
-
                           call allocator      (vec, errmsg_i32)
                           vec % state % errmsg(:) = errmsg_i32
-
-                      type is ( integer(kind = int64) )
-
-                          call allocator      (vec, errmsg_i64)
-                          vec % state % errmsg(:) = errmsg_i64
-
-                      type is ( real(kind = real64) )
-
-                          call allocator      (vec, errmsg_r64)
-                          vec % state % errmsg(:) = errmsg_r64
-
-                      type is (vector_t)
-                          call allocator      (vec, errmsg_vec)
-                          vec % state % errmsg(:) = errmsg_vec
-
                       class default
                           error stop unimplmntd
-
                   end select
               end associate
 
               return
           end subroutine error
+
+
+          subroutine insert
+              ! inserts values unto the back of vector
+
+              call push (vec, n, value)
+
+              return
+          end subroutine
+
+
+          subroutine valid
+              ! validates iterators by re-associating them
+
+              call vector_validate_iterator (vec)
+
+              return
+          end subroutine
 
   end function vector_int32_t_fillConstructor
 
