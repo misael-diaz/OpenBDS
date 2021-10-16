@@ -730,6 +730,11 @@ module VectorClass
     end subroutine
 
 
+    module recursive subroutine vector_validate_iterator (vector)
+        type(vector_t), intent(inout), target :: vector
+    end subroutine
+
+
     module subroutine vector_int32_t_initializer (vector, value)
         type(vector_t), intent(inout) :: vector
         integer(kind = int32), intent(in) :: value

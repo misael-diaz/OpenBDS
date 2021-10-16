@@ -260,10 +260,10 @@ module vector_class_tests
                 error stop "test::vector.array: allocation error"
             end if
 
-!! BUG      vector[(:)] = create () ! Iterators point to the same object !
+!! BUG      vector[(:)] = create ()     !! iterators point to invalid obj
             do i = 1_int64, 2_int64
                 ! instantiates array of vectors the right way
-                vector(i) = create ()
+                vector(i) = create ()   !! invokes ``assignment'' method
             end do
 
 

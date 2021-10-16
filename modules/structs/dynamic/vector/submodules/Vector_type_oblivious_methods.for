@@ -124,7 +124,6 @@ contains
       integer(kind = int64) :: bounds(0:1)
       integer(kind = int64) :: lb
       integer(kind = int64) :: ub
-      integer(kind = int64) :: i, b, e
       real(kind = real64), parameter :: r64 = 0.0_real64
       integer(kind = int64), parameter :: i64 = 0_int64
       integer(kind = int32), parameter :: i32 = 0_int32
@@ -148,7 +147,7 @@ contains
       call clone        !! clones the type of the internal array
       call error        !! sets the error message of (destination) vector
       call copy         !! copies data into (destination) vector
-      call valid
+      call valid        !! validates iterators
 
       to % state % init = .true.
 
@@ -276,22 +275,7 @@ contains
           subroutine valid
               ! validates iterators by re-associating them
 
-              associate (begin => to % begin % idx, &
-                       & avail => to % avail % idx, &
-                       & array => to % array % values)
-                  select type (array)
-                      type is (vector_t)
-
-                          do i = begin, avail - 1_int64
-                              b = array(i) % begin % idx
-                              e = array(i) % avail % idx - 1_int64
-                              associate (vals => array(i) % array % values)
-                                  array(i) % deref % it => vals(b:e)
-                              end associate
-                          end do
-
-                  end select
-              end associate
+              call vector_validate_iterator (to)
 
               return
           end subroutine
@@ -308,6 +292,61 @@ contains
 
       return
   end subroutine
+
+
+  module recursive subroutine vector_validate_iterator (vector)
+      ! validates iterators by re-associating them
+
+      type(vector_t), intent(inout), target :: vector
+      integer(kind = int64) :: i, b, e
+
+      associate (begin => vector % begin % idx, &
+               & avail => vector % avail % idx, &
+               & ary => vector % array % values)
+
+          select type (ary)
+
+              type is (vector_t)                !! vector of vectors
+
+
+                  do i = begin, (avail - 1_int64)
+
+                      call vector_validate_iterator ( ary(i) )
+
+                      b = ary(i) % begin % idx
+                      e = ary(i) % avail % idx - 1_int64
+                      ary(i) % deref % it => ary(i) % array % values(b:e)
+
+                  end do
+
+
+              type is ( integer(kind = int32) ) !! vector<int32_t>
+
+                  b = vector % begin % idx
+                  e = vector % avail % idx - 1_int64
+                  vector % deref % it => vector % array % values(b:e)
+
+              type is ( integer(kind = int64) ) !! vector<int64_t>
+
+                  b = vector % begin % idx
+                  e = vector % avail % idx - 1_int64
+                  vector % deref % it => vector % array % values(b:e)
+
+              type is ( real(kind = real64) )   !! vector<real64_t>
+
+                  b = vector % begin % idx
+                  e = vector % avail % idx - 1_int64
+                  vector % deref % it => vector % array % values(b:e)
+
+              class default
+                  error stop 'validate iterators: unexpected error'
+
+          end select
+
+      end associate
+
+      return
+  end subroutine vector_validate_iterator
 
 end submodule
 

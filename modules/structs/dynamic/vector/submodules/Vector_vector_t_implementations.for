@@ -33,10 +33,8 @@ contains
       type(vector_t), allocatable :: vec
       type(vector_t), intent(in) :: value
       integer(kind = int64), intent(in) :: n
-      class(*), pointer, contiguous :: iter(:) => null()
       integer(kind = int32) :: mstat
       integer(kind = int64) :: bounds(0:1)
-      integer(kind = int64) :: b, e, idx
       character(*), parameter :: errMSG = &
           & "vector(): the number of copies must be a positive integer"
 
@@ -93,23 +91,9 @@ contains
 
 
           subroutine valid
-                  ! re-associates iterators to validate them
+              ! re-associates iterators to validate them
 
-              iter => vec % deref % it
-              select type (iter)
-                  type is (vector_t)
-                      do idx = 1, n
-
-                          b = iter(idx) % begin % idx
-                          e = iter(idx) % avail % idx - 1_int64
-                          associate (values => iter(idx) % array % values)
-                              iter(idx) % deref % it => values(b:e)
-                          end associate
-
-                      end do
-                  class default
-                      error stop 'vector(): unexpected error'
-              end select
+              call vector_validate_iterator (vec)
 
               return
           end subroutine
