@@ -314,6 +314,10 @@ contains
       type(vector_t), intent(inout), target :: vector
       integer(kind = int64) :: i, b, e
 
+      if ( .not. allocated(vector % array) ) then
+          call instantiate (vector)             !! caters `empty' vectors
+      end if
+
       associate (begin => vector % begin % idx, &
                & avail => vector % avail % idx, &
                & ary => vector % array % values)
@@ -353,7 +357,7 @@ contains
                   vector % deref % it => vector % array % values(b:e)
 
               class default
-                  error stop 'validate iterators: unexpected error'
+                  vector % deref % it => null()
 
           end select
 
