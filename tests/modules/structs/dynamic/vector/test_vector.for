@@ -44,47 +44,76 @@ module vector_class_tests
     contains
 
         subroutine test_vector_fill_constructor ()
-            type(vector_t), allocatable :: vector
+            type(vector_t), allocatable :: v_i32   !! vector <int32_t>
+            type(vector_t), allocatable :: v_i64   !! vector <int64_t>
+            type(vector_t), allocatable :: v_r64   !! vector <real64_t>
             type(vector_t), allocatable :: vofvec  !! vector of vectors
+            type(vector_t), allocatable :: avofvec !! another vec of vecs
             class(*), pointer, contiguous :: it(:) => null()
             class(*), pointer, contiguous :: iter(:) => null()
             integer(kind = int64), parameter :: numel = 64_int64
-            integer(kind = int64):: i, j, diff
+            integer(kind = int64):: i, j, k, diff(3), diffs(2)
             integer(kind = int32), parameter :: value = 64
             integer(kind = int32):: mstat
 
 
-            allocate (vector, vofvec, stat=mstat)
+            allocate (v_i32, v_i64, v_r64, vofvec, avofvec, stat=mstat)
             if (mstat /= 0) error stop 'test.vector(): allocation error'
 
-            ! constructs a vector having `numel' copies of `value'
-            vector = vector_t (numel, value)
-            it => vector % deref % it
+            ! constructs vectors having `numel' copies of `value'
+            v_i32 = vector_t (numel, value)
+            v_i64 = vector_t (numel, int (value, kind = int64) )
+            v_r64 = vector_t (numel, real(value, kind = real64) )
 
 
+            ! checks the stored values for consistency
+            it => v_i32 % deref % it
             select type (it)
                 type is ( integer(kind = int32) )
-                    diff = int(sum(it), kind = int64) - numel * value
+                    diff(1) = int(sum(it), kind = int64) - numel * value
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            it => v_i64 % deref % it
+            select type (it)
+                type is ( integer(kind = int64) )
+                    diff(2) = sum(it) - numel * value
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            it => v_r64 % deref % it
+            select type (it)
+                type is ( real(kind = real64) )
+                    diff(3) = nint( sum(it), kind=int64 ) - numel * value
                 class default
                     error stop 'test.vector(): unexpected error'
             end select
 
 
             write (*, '(A)', advance='no') '[00] test-vector.construct(): '
-            if ( vector % size () /= numel ) then
+            if (v_i32 % size() /= numel .or. v_i64 % size() /= numel) then
                 print *, 'FAIL'
-            else if (diff /= 0_int64) then
+            else if (v_r64 % size() /= numel) then
+                print *, 'FAIL'
+            else if (diff(1) /= 0_int64 .or. diff(2) /= 0_int64) then
+                print *, 'FAIL'
+            else if (diff(3) /= 0_int64) then
                 print *, 'FAIL'
             else
                 print *, 'pass'
             end if
 
 
-            ! creates a vector of vectors
-            vofvec = vector_t (numel, vector)
+            ! creates vectors of vectors
+            vofvec  = vector_t (numel, v_i32)   !! vec < vec<T> >
+            avofvec = vector_t (numel, vofvec)  !! vec < vec < vec<T> > >
 
             ! checks that the iterators point to distintc `internal' arrays
-            diff = 0_int64
+            diffs(:) = 0_int64
             iter => vofvec % deref % it
             select type (iter)
                 type is (vector_t)
@@ -95,7 +124,7 @@ module vector_class_tests
                                      & it_2 => iter(j) % deref % it)
 
                                 if ( loc(it_1) == loc(it_2) ) then
-                                    diff = diff + 1_int64
+                                    diffs(1) = diffs(1) + 1_int64
                                 end if
 
                             end associate
@@ -107,17 +136,40 @@ module vector_class_tests
             end select
 
 
+            ! same as above but for a `vector < vector < vector<T> > >'
+            diffs(2) = 0_int64
+            iter => avofvec % deref % it
+            select type (iter)
+                type is (vector_t)
+                    do k = 1_int64, numel
+                        associate (it => iter(k) % deref % it)
+                            do i = 1_int64, (numel - 1_int64)
+                                do j = i + 1_int64, numel
+
+                                    if (loc( it(i) ) == loc( it(j) )) then
+                                        diffs(2) = diffs(2) + 1_int64
+                                    end if
+
+                                end do
+                            end do
+                        end associate
+                    end do
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
             write (*, '(A)', advance='no') '[01] test-vector.construct(): '
             if ( vofvec % size () /= numel ) then
                 print *, 'FAIL'
-            else if (diff /= 0_int64) then
+            else if (diffs(1) /= 0_int64 .or. diffs(2) /= 0_int64) then
                 print *, 'FAIL'
             else
                 print *, 'pass'
             end if
 
 
-            deallocate (vector, vofvec)
+            deallocate (v_i32, v_i64, v_r64, vofvec, avofvec)
 
             return
         end subroutine
