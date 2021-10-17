@@ -50,6 +50,7 @@ contains
       call error                !! sets the internal error message
       call insert               !! pushes `n' copies of `value' unto vector
       call valid                !! validates iterators
+!     call debug
 
       vec % state % init = .true.
 
@@ -132,6 +133,26 @@ contains
               ! re-associates iterators to validate them
 
               call vector_validate_iterator (vec)
+
+              return
+          end subroutine
+
+
+          subroutine debug
+              ! prints the addresses of the internal array and iterator
+
+              class(*), pointer, contiguous :: iter(:) => null()
+              integer(kind = int64) :: i
+
+              iter => vec % deref % it
+              select type (iter)
+                  type is (vector_t)
+
+                      do i = 1_int64, n
+                          call iter(i) % addr()
+                      end do
+
+              end select
 
               return
           end subroutine

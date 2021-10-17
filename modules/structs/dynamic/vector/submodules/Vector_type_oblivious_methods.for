@@ -148,6 +148,7 @@ contains
       call error        !! sets the error message of (destination) vector
       call copy         !! copies data into (destination) vector
       call valid        !! validates iterators
+!!    call debug
 
       to % state % init = .true.
 
@@ -294,6 +295,26 @@ contains
               return
           end subroutine
 
+
+          subroutine debug
+              ! prints the addresses of the internal array and iterator
+
+              class(*), pointer, contiguous :: iter(:) => null()
+              integer(kind = int64) :: i
+
+              iter => to % deref % it
+              select type (iter)
+                  type is (vector_t)
+
+                      do i = 1_int64, size(iter, kind = int64)
+                          call iter(i) % addr()
+                      end do
+
+              end select
+
+              return
+          end subroutine
+
   end subroutine vector_vector_t_copy
 
 
@@ -316,7 +337,18 @@ contains
 
       if ( .not. allocated(vector % array) ) then
           call instantiate (vector)             !! caters `empty' vectors
+      else
+          if ( .not. allocated (vector % array % values) ) then
+              vector % deref % it => null()
+          else
+              call assoc
+          end if
       end if
+
+      return
+      contains
+
+      recursive subroutine assoc
 
       associate (begin => vector % begin % idx, &
                & avail => vector % avail % idx, &
@@ -333,7 +365,12 @@ contains
 
                       b = ary(i) % begin % idx
                       e = ary(i) % avail % idx - 1_int64
-                      ary(i) % deref % it => ary(i) % array % values(b:e)
+                      if (e >= b) then
+                          ! caters `empty' vectors
+                          ary(i) % deref % it => ary(i) % array % values(b:e)
+                      else
+                          ary(i) % deref % it => null()
+                      end if
 
                   end do
 
@@ -357,13 +394,14 @@ contains
                   vector % deref % it => vector % array % values(b:e)
 
               class default
-                  vector % deref % it => null()
+                  error stop 'validate iterators: unexpected error'
 
           end select
 
       end associate
-
       return
+      end subroutine
+
   end subroutine vector_validate_iterator
 
 end submodule
