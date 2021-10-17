@@ -44,11 +44,13 @@ module vector_class_tests
     contains
 
         subroutine test_vector_fill_constructor ()
+            type(vector_t), allocatable :: vector  !! `empty' vector
             type(vector_t), allocatable :: v_i32   !! vector <int32_t>
             type(vector_t), allocatable :: v_i64   !! vector <int64_t>
             type(vector_t), allocatable :: v_r64   !! vector <real64_t>
             type(vector_t), allocatable :: vofvec  !! vector of vectors
             type(vector_t), allocatable :: avofvec !! another vec of vecs
+            type(vector_t), allocatable :: yavofv  !! yet another v of vecs
             class(*), pointer, contiguous :: it(:) => null()
             class(*), pointer, contiguous :: iter(:) => null()
             integer(kind = int64), parameter :: numel = 64_int64
@@ -57,8 +59,10 @@ module vector_class_tests
             integer(kind = int32):: mstat
 
 
-            allocate (v_i32, v_i64, v_r64, vofvec, avofvec, stat=mstat)
+            allocate (vector, v_i32, v_i64, v_r64, vofvec, avofvec, &
+                    & yavofv, stat=mstat)
             if (mstat /= 0) error stop 'test.vector(): allocation error'
+
 
             ! constructs vectors having `numel' copies of `value'
             v_i32 = vector_t (numel, value)
@@ -168,8 +172,11 @@ module vector_class_tests
                 print *, 'pass'
             end if
 
+            vector = vector_t ()                !! `empty' vector <T>
+            yavofv = vector_t (numel, vector)   !! vector < vector<T> >
 
-            deallocate (v_i32, v_i64, v_r64, vofvec, avofvec)
+            deallocate (vector, v_i32, v_i64, v_r64, vofvec, avofvec, &
+                      & yavofv)
 
             return
         end subroutine
