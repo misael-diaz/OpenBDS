@@ -37,16 +37,19 @@ contains
       integer(kind = int64) :: bounds(0:1)
       character(*), parameter :: errMSG = &
           & "vector(): the number of copies must be a positive integer"
+      character(len=*), parameter :: name = 'dynamic::vector.error:'
+      character(len=*), parameter :: errmsg_i64 = name // ' ' // &
+          & 'container of 64-bit integers'
+      character(len=*), parameter :: unimplmntd = name // ' ' // &
+          & 'unimplemented vector<T>'
 
       call check                !! complains on invalid inputs
       call alloc                !! allocates memory for vector
-      call instantiate (vec)    !! initializes the vector components
+      call init                 !! initializes the vector components
       call tailor               !! tailors the vector to store `n' copies
-
-
-      ! pushes `n' copies of the value `value' unto vector
-      call push (vec, n, value)
-
+      call error                !! sets the internal error message
+      call insert               !! pushes `n' copies of `value' unto vector
+      call valid                !! validates iterator(s)
 
       vec % state % init = .true.
 
@@ -76,6 +79,15 @@ contains
           end subroutine
 
 
+          subroutine init
+              ! provides initial values to the vector components
+
+              call instantiate (vec)
+
+              return
+          end subroutine
+
+
           subroutine tailor
               ! tailors the vector size based on the number of copies
 
@@ -85,6 +97,41 @@ contains
               bounds(0) = 0_int64
               bounds(1) = vec % limit % idx
               call allocator (bounds, vec % array % values, value)
+
+              return
+          end subroutine
+
+
+          subroutine error
+              ! defines the internal error message of vector
+
+              associate (values => vec % array % values)
+                  select type (values)
+                      type is ( integer(kind = int64) )
+                          call allocator      (vec, errmsg_i64)
+                          vec % state % errmsg(:) = errmsg_i64
+                      class default
+                          error stop unimplmntd
+                  end select
+              end associate
+
+              return
+          end subroutine error
+
+
+          subroutine insert
+              ! inserts values unto the back of vector
+
+              call push (vec, n, value)
+
+              return
+          end subroutine
+
+
+          subroutine valid
+              ! validates iterators by re-associating them
+
+              call vector_validate_iterator (vec)
 
               return
           end subroutine
