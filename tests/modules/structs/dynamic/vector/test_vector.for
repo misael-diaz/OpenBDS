@@ -30,6 +30,7 @@ module vector_class_tests
     implicit none
     integer(kind = int64), parameter :: max_vector_size = 1048576_int64
     private
+    public :: test_vector_fill_constructor
     public :: test_vector_get
     public :: test_vector_push_back
     public :: test_vector_copy
@@ -41,6 +42,225 @@ module vector_class_tests
     public :: test_vector_up_array_vector_t
     public :: test_vector_mold_vector_t
     contains
+
+        subroutine test_vector_fill_constructor ()
+            type(vector_t), allocatable :: vector  !! `empty' vector
+            type(vector_t), allocatable :: v_i32   !! vector <int32_t>
+            type(vector_t), allocatable :: v_i64   !! vector <int64_t>
+            type(vector_t), allocatable :: v_r64   !! vector <real64_t>
+            type(vector_t), allocatable :: vofvec  !! vector of vectors
+            type(vector_t), allocatable :: avofvec !! another vec of vecs
+            type(vector_t), allocatable :: yavofv  !! yet another v of vecs
+            class(*), pointer, contiguous :: it(:) => null()
+            class(*), pointer, contiguous :: iter(:) => null()
+            integer(kind = int64), parameter :: numel = 64_int64
+            integer(kind = int64):: i, j, k, l, diff(3), diffs(3), addr(2)
+            integer(kind = int32), parameter :: value = 64
+            integer(kind = int32):: mstat
+
+
+            allocate (vector, v_i32, v_i64, v_r64, vofvec, avofvec, &
+                    & yavofv, stat=mstat)
+            if (mstat /= 0) error stop 'test.vector(): allocation error'
+
+
+            ! constructs vectors having `numel' copies of `value'
+            v_i32 = vector_t (numel, value)
+            v_i64 = vector_t (numel, int (value, kind = int64) )
+            v_r64 = vector_t (numel, real(value, kind = real64) )
+
+
+            ! checks the stored values for consistency
+            it => v_i32 % deref % it
+            select type (it)
+                type is ( integer(kind = int32) )
+                    diff(1) = int(sum(it), kind = int64) - numel * value
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            it => v_i64 % deref % it
+            select type (it)
+                type is ( integer(kind = int64) )
+                    diff(2) = sum(it) - numel * value
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            it => v_r64 % deref % it
+            select type (it)
+                type is ( real(kind = real64) )
+                    diff(3) = nint( sum(it), kind=int64 ) - numel * value
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            write (*, '(A)', advance='no') '[00] test-vector.construct(): '
+            if (v_i32 % size() /= numel .or. v_i64 % size() /= numel) then
+                print *, 'FAIL'
+            else if (v_r64 % size() /= numel) then
+                print *, 'FAIL'
+            else if (diff(1) /= 0_int64 .or. diff(2) /= 0_int64) then
+                print *, 'FAIL'
+            else if (diff(3) /= 0_int64) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            ! creates vectors of vectors
+            vofvec  = vector_t (numel, v_i32)   !! vec < vec<T> >
+            avofvec = vector_t (numel, vofvec)  !! vec < vec < vec<T> > >
+
+            ! checks that the iterators point to distintc `internal' arrays
+            diffs(:) = 0_int64
+            iter => vofvec % deref % it
+            select type (iter)
+                type is (vector_t)
+                    do i = 1_int64, (numel - 1_int64)
+                        do j = i + 1_int64, numel
+
+                            associate (it_1 => iter(i) % deref % it, &
+                                     & it_2 => iter(j) % deref % it)
+
+                                if ( loc(it_1) == loc(it_2) ) then
+                                    diffs(1) = diffs(1) + 1_int64
+                                end if
+
+                            end associate
+
+                        end do
+                    end do
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            ! same as above but for a `vector < vector < vector<T> > >'
+            diffs(2) = 0_int64
+            iter => avofvec % deref % it
+            select type (iter)
+                type is (vector_t)
+
+                    ! checks for aliasing at the deepest nesting level
+                    ! within the same intermediate vector
+                    do k = 1_int64, numel
+                        associate (it => iter(k) % deref % it)
+                            do i = 1_int64, (numel - 1_int64)
+                                do j = i + 1_int64, numel
+
+                                    if (loc( it(i) ) == loc( it(j) )) then
+                                        diffs(2) = diffs(2) + 1_int64
+                                    end if
+
+                                end do
+                            end do
+                        end associate
+                    end do
+
+                    ! also checks for aliasing at the deepest level but
+                    ! between different intermediate vectors
+                    do k = 1_int64, (numel - 1_int64)
+                        do l = k + 1_int64, numel
+
+                            associate (it_1 => iter(k) % deref % it, &
+                                     & it_2 => iter(l) % deref % it)
+
+                                do i = 1_int64, numel
+                                    do j = 1_int64, numel
+
+                                        addr(1) = loc( it_1(i) )
+                                        addr(2) = loc( it_2(j) )
+                                        if ( addr(1) == addr(2) ) then
+                                            diffs(2) = diffs(2) + 1_int64
+                                        end if
+
+                                    end do
+                                end do
+
+                            end associate
+
+                        end do
+                    end do
+
+                    ! checks for aliasing among the intermediate vectors
+                    do k = 1_int64, (numel - 1_int64)
+                        do l = k + 1_int64, numel
+
+                            associate ( it_1 => iter(k), it_2 => iter(l) )
+
+                                if ( loc(it_1) == loc(it_2) ) then
+                                    diffs(2) = diffs(2) + 1_int64
+                                end if
+
+                            end associate
+
+                        end do
+                    end do
+
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            write (*, '(A)', advance='no') '[01] test-vector.construct(): '
+            if ( vofvec % size () /= numel ) then
+                print *, 'FAIL'
+            else if (diffs(1) /= 0_int64 .or. diffs(2) /= 0_int64) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+            vector = vector_t ()                !! `empty' vector <T>
+            yavofv = vector_t (numel, vector)   !! vector < vector<T> >
+
+            ! checks that the iterator of the `empty' vectors point to NULL
+            diffs(3) = 0_int64
+            iter => yavofv % deref % it
+            select type (iter)
+                type is (vector_t)
+                    do i = 1_int64, (numel - 1_int64)
+                        do j = i + 1_int64, numel
+
+                            associate (it_1 => iter(i) % deref % it, &
+                                     & it_2 => iter(j) % deref % it)
+
+                                if ( loc(it_1) == loc(it_2) ) then
+                                    if ( loc(it_1) /= 0_int64 ) then
+                                        ! increments if different from NULL
+                                        diffs(3) = diffs(3) + 1_int64
+                                    end if
+                                end if
+
+                            end associate
+
+                        end do
+                    end do
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            write (*, '(A)', advance='no') '[02] test-vector.construct(): '
+            if ( yavofv % size () /= numel ) then
+                print *, 'FAIL'
+            else if (diffs(3) /= 0_int64) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            deallocate (vector, v_i32, v_i64, v_r64, vofvec, avofvec, &
+                      & yavofv)
+
+            return
+        end subroutine
 
 
         subroutine test_vector_push_back ()
@@ -180,10 +400,10 @@ module vector_class_tests
                 error stop "test::vector.array: allocation error"
             end if
 
-!! BUG      vector[(:)] = create () ! Iterators point to the same object !
+!! BUG      vector[(:)] = create ()     !! iterators point to invalid obj
             do i = 1_int64, 2_int64
                 ! instantiates array of vectors the right way
-                vector(i) = create ()
+                vector(i) = create ()   !! invokes ``assignment'' method
             end do
 
 
@@ -741,6 +961,7 @@ end module
 
 
 program test_vector_class
+    use vector_class_tests, only: construct => test_vector_fill_constructor
     use vector_class_tests, only: get => test_vector_get
     use vector_class_tests, only: push_back => test_vector_push_back
     use vector_class_tests, only: copy => test_vector_copy
@@ -756,6 +977,7 @@ program test_vector_class
     implicit none
 
 
+    call construct ()
     call push_back ()
     call copy ()
     call get ()

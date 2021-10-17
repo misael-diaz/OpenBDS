@@ -23,6 +23,38 @@
 !   You should have received a copy of the GNU General Public License
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+module bits
+use, intrinsic :: iso_fortran_env, only: int32, int64
+implicit none
+private
+save
+public :: BITS_MAX_BIT
+public :: imsb
+
+integer(kind = int32), parameter :: BITS_MAX_BIT = 63
+
+contains
+
+  pure function imsb (n) result(msb)
+      ! Synopsis:
+      ! Finds the Most Significant Bit MSB of a 64-bit (signed) integer.
+      integer(kind = int64), intent(in) :: n    !! 64-bit integer
+      integer(kind = int32) :: pos              !! position
+      integer(kind = int32) :: msb              !! most significant bit
+
+      msb = 0
+      do pos = 0, 63
+          if ( btest(n, pos) ) then
+              msb = pos
+          end if
+      end do
+
+      return
+  end function
+
+end module bits
+
+
 module idata
   ! Defines the type i[nternal]data of the vector class
   use, intrinsic :: iso_fortran_env, only: int32, int64
@@ -81,6 +113,8 @@ module VectorClass
   use utils, only: util_reallocate_array_int32_by_bounds
   use utils, only: util_deallocate_array_int32
   use utils, only: util_deallocate_array_int64
+  use bits,  only: BITS_MAX_BIT
+  use bits,  only: imsb
   use idata, only: data_t
   implicit none
   private
@@ -90,6 +124,8 @@ module VectorClass
   type :: iter_t
       class(*), pointer, contiguous :: it(:) => null()
       integer(kind = int64) :: idx = 0_int64
+      contains
+        final :: destructor_iter_t
   end type
 
 
@@ -138,12 +174,17 @@ module VectorClass
                                       & vector_vector_t_push_back_method
         procedure, public :: size => size_method
         procedure, public :: clear => clear_method
+        procedure, public :: addr => vector_print_container_address_method
         final :: finalizer
   end type
 
 
   interface vector_t
       module procedure default_constructor
+      module procedure vector_int32_t_fillConstructor
+      module procedure vector_int64_t_fillConstructor
+      module procedure vector_real64_t_fillConstructor
+      module procedure vector_vector_t_fillConstructor
   end interface
 
 
@@ -245,6 +286,10 @@ module VectorClass
       module procedure vector_int64_t_push
       module procedure vector_real64_t_push
       module procedure vector_vector_t_push
+      module procedure vector_int32_t_push_n_copies
+      module procedure vector_int64_t_push_n_copies
+      module procedure vector_real64_t_push_n_copies
+      module procedure vector_vector_t_push_n_copies
       module procedure vector_int32_t_push_array
       module procedure vector_int64_t_push_array
       module procedure vector_real64_t_push_array
@@ -274,6 +319,11 @@ module VectorClass
   end interface
 
 
+  interface double
+      module procedure double_vector_size
+  end interface
+
+
 ! interface to_string
 !     module procedure to_string_int32
 !     module procedure to_string_int64
@@ -286,6 +336,34 @@ module VectorClass
     module function default_constructor () result(vector)
         ! Synopsis: Returns an empty vector
         type(vector_t):: vector
+    end function
+
+
+    module function vector_int32_t_fillConstructor (n, value) result(vec)
+        type(vector_t), allocatable :: vec
+        integer(kind = int64), intent(in) :: n
+        integer(kind = int32), intent(in) :: value
+    end function
+
+
+    module function vector_int64_t_fillConstructor (n, value) result(vec)
+        type(vector_t), allocatable :: vec
+        integer(kind = int64), intent(in) :: n
+        integer(kind = int64), intent(in) :: value
+    end function
+
+
+    module function vector_real64_t_fillConstructor (n, value) result(vec)
+        type(vector_t), allocatable :: vec
+        integer(kind = int64), intent(in) :: n
+        real(kind = real64), intent(in) :: value
+    end function
+
+
+    module function vector_vector_t_fillConstructor (n, value) result(vec)
+        type(vector_t), allocatable :: vec
+        type(vector_t), intent(in) :: value
+        integer(kind = int64), intent(in) :: n
     end function
 
 
@@ -391,6 +469,12 @@ module VectorClass
     module subroutine clear_method (self)
         ! Synopsis: Clears the vector elements.
         class(vector_t), intent(inout) :: self
+    end subroutine
+
+
+    module subroutine vector_print_container_address_method (self)
+        ! Synopsis: Prints the addresses of the internal array and iterator.
+        class(vector_t), intent(in) :: self
     end subroutine
 
 
@@ -570,6 +654,34 @@ module VectorClass
     end subroutine
 
 
+    module pure subroutine vector_int32_t_push_n_copies (vector, n, value)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: n
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module pure subroutine vector_int64_t_push_n_copies (vector, n, value)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: n
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
+    module pure subroutine vector_real64_t_push_n_copies (vector, n, value)
+        type(vector_t), intent(inout), target :: vector
+        integer(kind = int64), intent(in) :: n
+        real(kind = real64), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_vector_t_push_n_copies (vector, n, value)
+        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(in) :: value
+        integer(kind = int64), intent(in) :: n
+    end subroutine
+
+
     module pure subroutine vector_int32_t_push_array (vector, array)
         type(vector_t), intent(inout), target :: vector
         integer(kind = int32), intent(in) :: array(:)
@@ -615,6 +727,11 @@ module VectorClass
     module subroutine vector_vector_t_copy (to, from)
         type(vector_t), intent(out), target :: to
         type(vector_t), intent(in) :: from
+    end subroutine
+
+
+    module recursive subroutine vector_validate_iterator (vector)
+        type(vector_t), intent(inout), target :: vector
     end subroutine
 
 
@@ -883,6 +1000,11 @@ module VectorClass
     end subroutine
 
 
+    module pure subroutine double_vector_size (vector)
+        type(vector_t), intent(inout) :: vector
+    end subroutine
+
+
 !   module function to_string_int32 (i) result(str)
 !       integer(kind = int32), intent(in) :: i
 !       character(len = 64) :: str
@@ -893,6 +1015,11 @@ module VectorClass
 !       integer(kind = int64), intent(in) :: i
 !       character(len = 64) :: str
 !   end function
+
+
+    module subroutine destructor_iter_t (i)
+        type(iter_t), intent(inout) :: i
+    end subroutine
 
 
     module subroutine destructor_stat_t (s)

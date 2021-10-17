@@ -1,4 +1,3 @@
-!
 !   source: Vector_type_oblivious_methods.for
 !   author: misael-diaz
 !   date:   2021-06-28
@@ -97,13 +96,11 @@ contains
           if ( allocated(vector % array) ) then
 
               if ( allocated(vector % array % values) ) then
-                  call deallocator (self % array)
                   call vector_vector_t_copy (self, vector)
               end if
 
           else
 
-              call deallocator (self % array)
               call instantiate (self)
 
           end if
@@ -150,6 +147,8 @@ contains
       call clone        !! clones the type of the internal array
       call error        !! sets the error message of (destination) vector
       call copy         !! copies data into (destination) vector
+      call valid        !! validates iterators
+!!    call debug
 
       to % state % init = .true.
 
@@ -174,12 +173,11 @@ contains
               ! Synopsis:
               ! Initializes (destination) fields from (source) vector while
               ! leaving the `avail' field and the `iterator' to be set by
-              ! the generic `push' method.
+              ! the generic `push' method at an appropriate time.
 
-              call allocator (to)
+              call instantiate (to)
 
               to % begin % idx = from % begin % idx
-              to % avail % idx = 0_int64
               to % limit % idx = from % limit % idx
               to % deref % idx = from % deref % idx
 
@@ -236,16 +234,30 @@ contains
 
               associate (values => from % array % values)
                   select type (values)
+
                       type is ( integer(kind = int32) )
+
+                          call allocator      (to, errmsg_i32)
                           to % state % errmsg(:) = errmsg_i32
+
                       type is ( integer(kind = int64) )
+
+                          call allocator      (to, errmsg_i64)
                           to % state % errmsg(:) = errmsg_i64
+
                       type is ( real(kind = real64) )
+
+                          call allocator      (to, errmsg_r64)
                           to % state % errmsg(:) = errmsg_r64
+
                       type is (vector_t)
+
+                          call allocator      (to, errmsg_vec)
                           to % state % errmsg(:) = errmsg_vec
+
                       class default
                           error stop errmsg
+
                   end select
               end associate
 
@@ -275,8 +287,122 @@ contains
           end subroutine
 
 
+          subroutine valid
+              ! validates iterators by re-associating them
+
+              call vector_validate_iterator (to)
+
+              return
+          end subroutine
+
+
+          subroutine debug
+              ! prints the addresses of the internal array and iterator
+
+              class(*), pointer, contiguous :: iter(:) => null()
+              integer(kind = int64) :: i
+
+              iter => to % deref % it
+              select type (iter)
+                  type is (vector_t)
+
+                      do i = 1_int64, size(iter, kind = int64)
+                          call iter(i) % addr()
+                      end do
+
+              end select
+
+              return
+          end subroutine
+
   end subroutine vector_vector_t_copy
 
+
+  subroutine vector_print_container_address_method (self)
+      class(vector_t), intent(in) :: self
+
+
+      print *, 'address(array, iter): ', loc( self % array % values ), &
+                                       & loc( self % deref % it )
+
+      return
+  end subroutine
+
+
+  module recursive subroutine vector_validate_iterator (vector)
+      ! validates iterators by re-associating them
+
+      type(vector_t), intent(inout), target :: vector
+      integer(kind = int64) :: i, b, e
+
+      if ( .not. allocated(vector % array) ) then
+          call instantiate (vector)             !! caters `empty' vectors
+      else
+          if ( .not. allocated (vector % array % values) ) then
+              vector % deref % it => null()
+          else
+              call assoc
+          end if
+      end if
+
+      return
+      contains
+
+      recursive subroutine assoc
+
+      associate (begin => vector % begin % idx, &
+               & avail => vector % avail % idx, &
+               & ary => vector % array % values)
+
+          select type (ary)
+
+              type is (vector_t)                !! vector of vectors
+
+
+                  do i = begin, (avail - 1_int64)
+
+                      call vector_validate_iterator ( ary(i) )
+
+                      b = ary(i) % begin % idx
+                      e = ary(i) % avail % idx - 1_int64
+                      if (e >= b) then
+                          ! caters `empty' vectors
+                          ary(i) % deref % it => ary(i) % array % values(b:e)
+                      else
+                          ary(i) % deref % it => null()
+                      end if
+
+                  end do
+
+
+              type is ( integer(kind = int32) ) !! vector<int32_t>
+
+                  b = vector % begin % idx
+                  e = vector % avail % idx - 1_int64
+                  vector % deref % it => vector % array % values(b:e)
+
+              type is ( integer(kind = int64) ) !! vector<int64_t>
+
+                  b = vector % begin % idx
+                  e = vector % avail % idx - 1_int64
+                  vector % deref % it => vector % array % values(b:e)
+
+              type is ( real(kind = real64) )   !! vector<real64_t>
+
+                  b = vector % begin % idx
+                  e = vector % avail % idx - 1_int64
+                  vector % deref % it => vector % array % values(b:e)
+
+              class default
+                  error stop 'validate iterators: unexpected error'
+
+          end select
+
+      end associate
+      return
+      end subroutine
+
+  end subroutine vector_validate_iterator
 
 end submodule
 
