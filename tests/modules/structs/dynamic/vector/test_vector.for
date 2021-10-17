@@ -54,7 +54,7 @@ module vector_class_tests
             class(*), pointer, contiguous :: it(:) => null()
             class(*), pointer, contiguous :: iter(:) => null()
             integer(kind = int64), parameter :: numel = 64_int64
-            integer(kind = int64):: i, j, k, diff(3), diffs(2)
+            integer(kind = int64):: i, j, k, diff(3), diffs(3)
             integer(kind = int32), parameter :: value = 64
             integer(kind = int32):: mstat
 
@@ -174,6 +174,43 @@ module vector_class_tests
 
             vector = vector_t ()                !! `empty' vector <T>
             yavofv = vector_t (numel, vector)   !! vector < vector<T> >
+
+            ! checks that the iterator of the `empty' vectors point to NULL
+            diffs(3) = 0_int64
+            iter => yavofv % deref % it
+            select type (iter)
+                type is (vector_t)
+                    do i = 1_int64, (numel - 1_int64)
+                        do j = i + 1_int64, numel
+
+                            associate (it_1 => iter(i) % deref % it, &
+                                     & it_2 => iter(j) % deref % it)
+
+                                if ( loc(it_1) == loc(it_2) ) then
+                                    if ( loc(it_1) /= 0_int64 ) then
+                                        ! increments if different from NULL
+                                        diffs(3) = diffs(3) + 1_int64
+                                    end if
+                                end if
+
+                            end associate
+
+                        end do
+                    end do
+                class default
+                    error stop 'test.vector(): unexpected error'
+            end select
+
+
+            write (*, '(A)', advance='no') '[02] test-vector.construct(): '
+            if ( yavofv % size () /= numel ) then
+                print *, 'FAIL'
+            else if (diffs(3) /= 0_int64) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
 
             deallocate (vector, v_i32, v_i64, v_r64, vofvec, avofvec, &
                       & yavofv)
