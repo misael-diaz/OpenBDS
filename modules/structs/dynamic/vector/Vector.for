@@ -335,7 +335,7 @@ module VectorClass
 
     module function default_constructor () result(vector)
         ! Synopsis: Returns an empty vector
-        type(vector_t):: vector
+        type(vector_t), allocatable :: vector
     end function
 
 
