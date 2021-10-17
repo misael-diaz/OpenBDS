@@ -54,7 +54,7 @@ module vector_class_tests
             class(*), pointer, contiguous :: it(:) => null()
             class(*), pointer, contiguous :: iter(:) => null()
             integer(kind = int64), parameter :: numel = 64_int64
-            integer(kind = int64):: i, j, k, diff(3), diffs(3)
+            integer(kind = int64):: i, j, k, l, diff(3), diffs(3), addr(2)
             integer(kind = int32), parameter :: value = 64
             integer(kind = int32):: mstat
 
@@ -145,6 +145,9 @@ module vector_class_tests
             iter => avofvec % deref % it
             select type (iter)
                 type is (vector_t)
+
+                    ! checks for aliasing at the deepest nesting level
+                    ! within the same intermediate vector
                     do k = 1_int64, numel
                         associate (it => iter(k) % deref % it)
                             do i = 1_int64, (numel - 1_int64)
@@ -158,6 +161,47 @@ module vector_class_tests
                             end do
                         end associate
                     end do
+
+                    ! also checks for aliasing at the deepest level but
+                    ! between different intermediate vectors
+                    do k = 1_int64, (numel - 1_int64)
+                        do l = k + 1_int64, numel
+
+                            associate (it_1 => iter(k) % deref % it, &
+                                     & it_2 => iter(l) % deref % it)
+
+                                do i = 1_int64, numel
+                                    do j = 1_int64, numel
+
+                                        addr(1) = loc( it_1(i) )
+                                        addr(2) = loc( it_2(j) )
+                                        if ( addr(1) == addr(2) ) then
+                                            diffs(2) = diffs(2) + 1_int64
+                                        end if
+
+                                    end do
+                                end do
+
+                            end associate
+
+                        end do
+                    end do
+
+                    ! checks for aliasing among the intermediate vectors
+                    do k = 1_int64, (numel - 1_int64)
+                        do l = k + 1_int64, numel
+
+                            associate ( it_1 => iter(k), it_2 => iter(l) )
+
+                                if ( loc(it_1) == loc(it_2) ) then
+                                    diffs(2) = diffs(2) + 1_int64
+                                end if
+
+                            end associate
+
+                        end do
+                    end do
+
                 class default
                     error stop 'test.vector(): unexpected error'
             end select
