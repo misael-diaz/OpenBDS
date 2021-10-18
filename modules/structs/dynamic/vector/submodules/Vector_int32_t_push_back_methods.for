@@ -65,6 +65,25 @@ contains
   end subroutine
 
 
+  module subroutine vector_int32_t_push_back_array (vector, array)
+      ! Synopsis: Pushes 32-bit integer array unto back of vector.
+      type(vector_t), intent(inout) :: vector
+      integer(kind = int32), intent(in) :: array(:)
+
+
+      call is_instantiated (vector)
+
+
+      if ( vector % state % init ) then
+          call insert_back (vector, array)
+      else
+          call initializer (vector, array)
+      end if
+
+      return
+  end subroutine
+
+
   module subroutine vector_int32_t_insert_back (vector, value)
       ! Synopsis: Inserts value unto back, vector grows as needed.
       type(vector_t), intent(inout) :: vector
@@ -77,6 +96,26 @@ contains
 
       call push (vector, value)
 
+
+      return
+  end subroutine
+
+
+  module subroutine vector_int32_t_insert_back_array (vector, array)
+      ! Synopsis: Inserts array unto back, grows vector if needed.
+      type(vector_t), intent(inout) :: vector
+      integer(kind = int64) :: numel, avail, limit
+      integer(kind = int32), intent(in) :: array(:)
+
+      numel = size(array = array, dim = 1, kind = int64)
+      avail = vector % avail % idx
+      limit = vector % limit % idx
+
+      if ( numel > (limit - avail) ) then
+          call grow (vector, array)
+      end if
+
+      call push (vector, array)
 
       return
   end subroutine
@@ -108,45 +147,6 @@ contains
 
       return
   end subroutine vector_int32_t_push
-
-
-  module subroutine vector_int32_t_push_back_array (vector, array)
-      ! Synopsis: Pushes 32-bit integer array unto back of vector.
-      type(vector_t), intent(inout) :: vector
-      integer(kind = int32), intent(in) :: array(:)
-
-
-      call is_instantiated (vector)
-
-
-      if ( vector % state % init ) then
-          call insert_back (vector, array)
-      else
-          call initializer (vector, array)
-      end if
-
-      return
-  end subroutine
-
-
-  module subroutine vector_int32_t_insert_back_array (vector, array)
-      ! Synopsis: Inserts array unto back, grows vector if needed.
-      type(vector_t), intent(inout) :: vector
-      integer(kind = int64) :: numel, avail, limit
-      integer(kind = int32), intent(in) :: array(:)
-
-      numel = size(array = array, dim = 1, kind = int64)
-      avail = vector % avail % idx
-      limit = vector % limit % idx
-
-      if ( numel > (limit - avail) ) then
-          call grow (vector, array)
-      end if
-
-      call push (vector, array)
-
-      return
-  end subroutine
 
 
   module pure subroutine vector_int32_t_push_array (vector, array)
