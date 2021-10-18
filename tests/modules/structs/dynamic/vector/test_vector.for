@@ -1044,7 +1044,8 @@ program test_vector_class
     use vector_class_tests, only: construct => test_vector_fill_constructor
     use vector_class_tests, only: get => test_vector_get
     use vector_class_tests, only: push_back => test_vector_push_back
-    use vector_class_tests, only: push_back_array => test_vector_push_back_array
+    use vector_class_tests, only: push_back_array => &
+                                      & test_vector_push_back_array
     use vector_class_tests, only: copy => test_vector_copy
     use vector_class_tests, only: find => test_vector_find
     use vector_class_tests, only: iter => test_vector_iterator
