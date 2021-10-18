@@ -521,18 +521,23 @@ contains
   end subroutine
 
 
-  pure subroutine double_vector_size (vector)
+  pure subroutine double_vector_size (vector, alloc)
       ! Synopsis:
       ! Doubles the vector-size at most, complains if doing so would yield
       ! an ill-formed object.
       type(vector_t), intent(inout) :: vector
+      integer(kind = int64), intent(in), optional :: alloc
       integer(kind = int64) :: limit            !! vector-size
       integer(kind = int64) :: mask             !! bitmask
       integer(kind = int32) :: msb              !! most significant bit
       character(*), parameter :: errMSG = &     !! error message
           & 'vector has reached its size limit'
 
-      limit = vector % limit % idx
+      if ( present(alloc) ) then
+          limit = alloc
+      else
+          limit = vector % limit % idx
+      end if
 
       mask = 0_int64
       msb = imsb(limit) + 1
