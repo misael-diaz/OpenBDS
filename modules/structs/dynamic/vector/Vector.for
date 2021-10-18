@@ -170,10 +170,10 @@ module VectorClass
 !       generic, public :: erase => vector_int32_t_erase_method
 !       procedure, public :: erase => vector_int32_t_erase_method
         generic, public :: push_back => vector_int32_t_push_back_method, &
-                                      & vector_int64_t_push_back_method, &
-                                      & vector_real64_t_push_back_method,&
-                                      & vector_vector_t_push_back_method,&
-                                      & vector_int32_t_push_back_array_method
+                              & vector_int64_t_push_back_method, &
+                              & vector_real64_t_push_back_method,&
+                              & vector_vector_t_push_back_method,&
+                              & vector_int32_t_push_back_array_method
         procedure, public :: size => size_method
         procedure, public :: clear => clear_method
         procedure, public :: addr => vector_print_container_address_method
