@@ -33,6 +33,7 @@ module vector_class_tests
     public :: test_vector_fill_constructor
     public :: test_vector_get
     public :: test_vector_push_back
+    public :: test_vector_push_back_array
     public :: test_vector_copy
     public :: test_vector_find
     public :: test_vector_clear
@@ -385,6 +386,85 @@ module vector_class_tests
 
             return
         end subroutine
+
+
+        subroutine test_vector_push_back_array ()
+            ! tests pushing an array unto the back of a vector
+            type(vector_t), allocatable :: vector
+            integer(kind = int32) :: i, j
+            integer(kind = int32), parameter :: array(*) = [(i, i = 0, 63)]
+            integer(kind = int32) :: diff
+            integer(kind = int32) :: mstat
+            integer(kind = int32), parameter :: numel = &
+                  & size(array = array, dim = 1, kind = int32)
+
+
+            allocate (vector, stat=mstat)
+            if (mstat /= 0) error stop 'test-push-back: allocation error'
+
+
+            vector = vector_t ()                !! instantiates vector
+            call vector % push_back (array)     !! pushes array unto back
+
+
+            ! checks for differences between stored and input values
+            associate (it => vector % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        diff = sum(it - array)
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            write (*, '(A)', advance='no') '[00] test-push-back-array(): '
+            if ( vector % size() /= int(numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if (diff /= 0) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            ! pushes more arrays to test growing the vector
+            call vector % push_back (array)
+            call vector % push_back (array)
+            call vector % push_back (array)
+
+
+            diff = 0
+            ! checks for differences between stored and input values
+            associate (it => vector % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        do i = 0, 3
+                            do j = 1, numel
+                                diff = diff + it(j + i * numel) - array(j)
+                            end do
+                        end do
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            write (*, '(A)', advance='no') '[01] test-push-back-array(): '
+            if ( vector % size() /= int(4 * numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if (diff /= 0) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            deallocate (vector)
+
+
+            return
+        end subroutine test_vector_push_back_array
 
 
         subroutine test_vector_array_vector_t ()
@@ -964,6 +1044,7 @@ program test_vector_class
     use vector_class_tests, only: construct => test_vector_fill_constructor
     use vector_class_tests, only: get => test_vector_get
     use vector_class_tests, only: push_back => test_vector_push_back
+    use vector_class_tests, only: push_back_array => test_vector_push_back_array
     use vector_class_tests, only: copy => test_vector_copy
     use vector_class_tests, only: find => test_vector_find
     use vector_class_tests, only: iter => test_vector_iterator
@@ -979,6 +1060,7 @@ program test_vector_class
 
     call construct ()
     call push_back ()
+    call push_back_array ()
     call copy ()
     call get ()
     call iter ()
