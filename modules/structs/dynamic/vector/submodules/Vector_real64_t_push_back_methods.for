@@ -252,7 +252,7 @@ contains
   end subroutine
 
 
-  subroutine vector_real64_t_backup (vector, array)
+  module subroutine vector_real64_t_backup (vector, array)
       ! Synopsis:
       ! Creates backup of data contained in vector.
       type(vector_t), intent(in) :: vector
@@ -285,7 +285,7 @@ contains
   end subroutine vector_real64_t_backup
 
 
-  subroutine vector_real64_t_restore (vector, array, value)
+  module subroutine vector_real64_t_restore (vector, array, value)
       ! Synopsis:
       ! Restores vector with data in placeholder array.
       type(vector_t), intent(inout) :: vector
