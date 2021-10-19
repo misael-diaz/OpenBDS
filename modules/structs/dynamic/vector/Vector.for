@@ -159,6 +159,7 @@ module VectorClass
         procedure :: vector_real64_t_push_back_method
         procedure :: vector_vector_t_push_back_method
         procedure :: vector_int32_t_push_back_array_method
+        procedure :: vector_int64_t_push_back_array_method
 !       procedure :: vector_int32_t_erase_method
         generic, public :: assignment(=) => vector_vector_t_copy_method
         generic, public :: get  => vector_int32_t_indexing_method, &
@@ -173,7 +174,8 @@ module VectorClass
                               & vector_int64_t_push_back_method, &
                               & vector_real64_t_push_back_method,&
                               & vector_vector_t_push_back_method,&
-                              & vector_int32_t_push_back_array_method
+                              & vector_int32_t_push_back_array_method, &
+                              & vector_int64_t_push_back_array_method
         procedure, public :: size => size_method
         procedure, public :: clear => clear_method
         procedure, public :: addr => vector_print_container_address_method
@@ -235,6 +237,7 @@ module VectorClass
       module procedure vector_real64_t_initializer
       module procedure vector_vector_t_initializer
       module procedure vector_int32_t_initializerArray
+      module procedure vector_int64_t_initializerArray
   end interface
 
 
@@ -244,6 +247,7 @@ module VectorClass
       module procedure vector_real64_t_create
       module procedure vector_vector_t_create
       module procedure vector_int32_t_createArray
+      module procedure vector_int64_t_createArray
   end interface
 
 
@@ -253,6 +257,7 @@ module VectorClass
       module procedure vector_real64_t_push_back
       module procedure vector_vector_t_push_back
       module procedure vector_int32_t_push_back_array
+      module procedure vector_int64_t_push_back_array
   end interface
 
 
@@ -262,6 +267,7 @@ module VectorClass
       module procedure vector_real64_t_insert_back
       module procedure vector_vector_t_insert_back
       module procedure vector_int32_t_insert_back_array
+      module procedure vector_int64_t_insert_back_array
   end interface
 
 
@@ -285,6 +291,7 @@ module VectorClass
       module procedure vector_real64_t_grow
       module procedure vector_vector_t_grow
       module procedure vector_int32_t_growArray
+      module procedure vector_int64_t_growArray
   end interface
 
 
@@ -515,6 +522,12 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_int64_t_push_back_array_method (self, array)
+        class(vector_t), intent(inout) :: self
+        integer(kind = int64), intent(in) :: array(:)
+    end subroutine
+
+
     module subroutine vector_int32_t_push_back (vector, value)
         type(vector_t), intent(inout) :: vector
         integer(kind = int32), intent(in) :: value
@@ -542,6 +555,12 @@ module VectorClass
     module subroutine vector_int32_t_push_back_array (vector, array)
         type(vector_t), intent(inout) :: vector
         integer(kind = int32), intent(in) :: array(:)
+    end subroutine
+
+
+    module subroutine vector_int64_t_push_back_array (vector, array)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int64), intent(in) :: array(:)
     end subroutine
 
 
@@ -579,6 +598,11 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_int64_t_insert_back_array (vector, array)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int64), intent(in) :: array(:)
+    end subroutine
+
 
     module subroutine vector_int32_t_grow (vector, value)
         ! Synopsis: Doubles the vector size.
@@ -609,6 +633,12 @@ module VectorClass
         ! Synopsis: Grows vector so that it can store the array `values'.
         type(vector_t), intent(inout) :: vector
         integer(kind = int32), intent(in) :: values(:)
+    end subroutine
+
+
+    module subroutine vector_int64_t_growArray (vector, values)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int64), intent(in) :: values(:)
     end subroutine
 
 
@@ -800,6 +830,12 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_int64_t_initializerArray (vector, array)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int64), intent(in) :: array(:)
+    end subroutine
+
+
     module subroutine vector_int32_t_create (vector, value)
         ! Synopsis: Creates the first element in vector.
         type(vector_t), intent(inout), target :: vector
@@ -829,6 +865,12 @@ module VectorClass
         ! Synopsis: Creates vector from array.
         type(vector_t), intent(inout) :: vector
         integer(kind = int32), intent(in) :: array(:)
+    end subroutine
+
+
+    module subroutine vector_int64_t_createArray (vector, array)
+        type(vector_t), intent(inout) :: vector
+        integer(kind = int64), intent(in) :: array(:)
     end subroutine
 
 
