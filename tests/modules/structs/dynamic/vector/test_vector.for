@@ -33,6 +33,7 @@ module vector_class_tests
     public :: test_vector_fill_constructor
     public :: test_vector_get
     public :: test_vector_push_back
+    public :: test_vector_push_back_array
     public :: test_vector_copy
     public :: test_vector_find
     public :: test_vector_clear
@@ -385,6 +386,223 @@ module vector_class_tests
 
             return
         end subroutine
+
+
+        subroutine test_vector_push_back_array ()
+            ! tests pushing an array unto the back of a vector
+            type(vector_t), allocatable :: vector
+            type(vector_t), allocatable :: veci64
+            type(vector_t), allocatable :: vecr64
+            type(vector_t), allocatable :: vofvec
+            type(vector_t), allocatable :: aryvec(:)
+            integer(kind = int64) :: k
+            integer(kind = int32) :: i, j
+            integer(kind = int32) :: diff(2)
+            integer(kind = int64) :: diffs(2)
+            integer(kind = int64), parameter :: b = 0_int64, e = 63_int64
+            integer(kind = int64), parameter :: ary64(*) = [(k, k = b, e)]
+            integer(kind = int32), parameter :: array(*) = [(i, i = 0, 63)]
+            integer(kind = int32) :: mstat
+            integer(kind = int32), parameter :: numel = &
+                  & size(array = array, dim = 1, kind = int32)
+
+
+            allocate (vector, veci64, vecr64, aryvec(numel), vofvec, &
+                    & stat=mstat)
+            if (mstat /= 0) error stop 'test-push-back: allocation error'
+
+
+            vector = vector_t ()                !! instantiates vector
+            call vector % push_back (array)     !! pushes array unto back
+            call veci64 % push_back (ary64)
+            call vecr64 % push_back ( real(ary64, kind = real64) )
+
+            do i = 1, numel
+                aryvec(i) = vector
+            end do
+
+            call vofvec % push_back (aryvec)
+
+            ! checks for differences between stored and input values
+            associate (it => vector % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        diff(1) = sum(it - array)
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            associate (it => veci64 % deref % it)
+                select type (it)
+                    type is ( integer(kind = int64) )
+                        diffs(1) = sum(it - ary64)
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            associate (it => vecr64 % deref % it)
+                select type (it)
+                    type is ( real(kind = real64) )
+                        diffs(2) = sum( nint(it, kind = int64) - ary64)
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            diff(2) = 0
+            associate (iter => vofvec % deref % it)
+                select type (iter)
+                    type is (vector_t)
+                        do i = 1, numel
+                            associate ( it => iter(i) % deref % it )
+                                select type (it)
+                                    type is ( integer(kind = int32) )
+                                        diff(2) = diff(2) + sum(it - array)
+                                    class default
+                                        error stop 'unexpected error'
+                                end select
+                            end associate
+                        end do
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            write (*, '(A)', advance='no') '[00] test-push-back-array(): '
+            if ( vector % size() /= int(numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if ( veci64 % size() /= int(numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if ( vecr64 % size() /= int(numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if ( vofvec % size() /= int(numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if (diff(1) /= 0 .or. diff(2) /= 0) then
+                print *, 'FAIL'
+            else if (diffs(1) /= 0_int64 .or. diffs(2) /= 0_int64) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            ! pushes more arrays to test growing the vector
+            call vector % push_back (array)
+            call vector % push_back (array)
+            call vector % push_back (array)
+
+            call veci64 % push_back (ary64)
+            call veci64 % push_back (ary64)
+            call veci64 % push_back (ary64)
+
+            call vecr64 % push_back ( real(ary64, kind=real64) )
+            call vecr64 % push_back ( real(ary64, kind=real64) )
+            call vecr64 % push_back ( real(ary64, kind=real64) )
+
+            call vofvec % push_back (aryvec)
+            call vofvec % push_back (aryvec)
+            call vofvec % push_back (aryvec)
+
+
+            diff(1) = 0
+            ! checks for differences between stored and input values
+            associate (it => vector % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        do i = 0, 3
+                            do j = 1, numel
+                                diff(1) = diff(1) + it(j + i * numel) - &
+                                    & array(j)
+                            end do
+                        end do
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            diffs(1) = 0_int64
+            associate (it => veci64 % deref % it)
+                select type (it)
+                    type is ( integer(kind = int64) )
+                        do i = 0, 3
+                            do j = 1, numel
+                                diffs(1) = diffs(1) + it(j + i * numel) - &
+                                    & ary64(j)
+                            end do
+                        end do
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            diffs(2) = 0_int64
+            associate (it => vecr64 % deref % it)
+                select type (it)
+                    type is ( real(kind = real64) )
+                        do i = 0, 3
+                            do j = 1, numel
+                                diffs(2) = diffs(2) + &
+                                  & nint(it(j + i * numel), kind=int64) - &
+                                  & ary64(j)
+                            end do
+                        end do
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            diff(2) = 0
+            associate (iter => vofvec % deref % it)
+                select type (iter)
+                    type is (vector_t)
+                        do i = 1, 4 * numel
+                            associate ( it => iter(i) % deref % it )
+                                select type (it)
+                                    type is ( integer(kind = int32) )
+                                        diff(2) = diff(2) + sum(it - array)
+                                    class default
+                                        error stop 'unexpected error'
+                                end select
+                            end associate
+                        end do
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            write (*, '(A)', advance='no') '[01] test-push-back-array(): '
+            if ( vector % size() /= int(4 * numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if ( veci64 % size() /= int(4 * numel, kind=int64) ) then
+                print *, 'FAIL'
+            else if ( vecr64 % size() /= int(4 * numel, kind=int64) ) then
+                print *, 'FAIL'
+            else if ( vofvec % size() /= int(4 * numel, kind=int64) ) then
+                print *, 'FAIL'
+            else if (diff(1) /= 0 .or. diff(2) /= 0) then
+                print *, 'FAIL'
+            else if (diffs(1) /= 0_int64 .or. diffs(2) /= 0_int64) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            deallocate (vector, veci64, vecr64, vofvec, aryvec)
+
+
+            return
+        end subroutine test_vector_push_back_array
 
 
         subroutine test_vector_array_vector_t ()
@@ -964,6 +1182,8 @@ program test_vector_class
     use vector_class_tests, only: construct => test_vector_fill_constructor
     use vector_class_tests, only: get => test_vector_get
     use vector_class_tests, only: push_back => test_vector_push_back
+    use vector_class_tests, only: push_back_array => &
+                                      & test_vector_push_back_array
     use vector_class_tests, only: copy => test_vector_copy
     use vector_class_tests, only: find => test_vector_find
     use vector_class_tests, only: iter => test_vector_iterator
@@ -979,6 +1199,7 @@ program test_vector_class
 
     call construct ()
     call push_back ()
+    call push_back_array ()
     call copy ()
     call get ()
     call iter ()

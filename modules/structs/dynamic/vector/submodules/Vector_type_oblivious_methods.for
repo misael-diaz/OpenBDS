@@ -29,11 +29,36 @@ contains
 
   module function default_constructor () result(vector)
       ! Synopsis: Returns an empty vector
-      type(vector_t):: vector
+      type(vector_t), allocatable :: vector
+      integer(kind = int32) :: mstat
+      character(*), parameter :: name = 'dynamic::vector():'
+      character(*), parameter :: errmsg = name // ' ' // &
+          & 'allocation error'
 
-      call instantiate (vector)
+      call alloc        !! allocates memory for vector
+      call init         !! initializes vector components
 
       return
+      contains
+
+          subroutine alloc
+
+              allocate (vector, stat=mstat)
+              if (mstat /= 0) then
+                  error stop errmsg
+              end if
+
+              return
+          end subroutine
+
+
+          subroutine init
+
+              call instantiate (vector)
+
+              return
+          end subroutine
+
   end function
 
 

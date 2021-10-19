@@ -37,8 +37,17 @@ contains
   end subroutine
 
 
+  module subroutine vector_vector_t_push_back_array_method (self, array)
+      ! Synopsis: Pushes array unto back of vector.
+      class(vector_t), intent(inout) :: self
+      type(vector_t), intent(in) :: array(:)
+      call back_inserter (self, array)
+      return
+  end subroutine
+
+
   module subroutine vector_vector_t_push_back (vector, value)
-      ! Synopsis: Pushes 32-bit integer unto back of vector.
+      ! Synopsis: Pushes vector unto back of vector.
       type(vector_t), intent(inout) :: vector
       type(vector_t), intent(in) :: value
 
@@ -50,6 +59,25 @@ contains
           call insert_back (vector, value)
       else
           call initializer (vector, value)
+      end if
+
+      return
+  end subroutine
+
+
+  module subroutine vector_vector_t_push_back_array (vector, array)
+      ! Synopsis: Pushes vector array unto back of vector.
+      type(vector_t), intent(inout) :: vector
+      type(vector_t), intent(in) :: array(:)
+
+
+      call is_instantiated (vector)
+
+
+      if ( vector % state % init ) then
+          call insert_back (vector, array)
+      else
+          call initializer (vector, array)
       end if
 
       return
@@ -68,6 +96,26 @@ contains
 
       call push (vector, value)
 
+
+      return
+  end subroutine
+
+
+  module subroutine vector_vector_t_insert_back_array (vector, array)
+      ! Synopsis: Inserts array unto back, grows vector if needed.
+      type(vector_t), intent(inout) :: vector
+      integer(kind = int64) :: numel, avail, limit
+      type(vector_t), intent(in) :: array(:)
+
+      numel = size(array = array, dim = 1, kind = int64)
+      avail = vector % avail % idx
+      limit = vector % limit % idx
+
+      if ( numel > (limit - avail) ) then
+          call grow (vector, array)
+      end if
+
+      call push (vector, array)
 
       return
   end subroutine
@@ -184,6 +232,26 @@ contains
   end subroutine vector_vector_t_grow
 
 
+  module subroutine vector_vector_t_growArray (vector, values)
+      ! Synopsis: Grows vector so that it can store the array `values'.
+      type(vector_t), intent(inout) :: vector
+      integer(kind = int64) :: alloc, avail, numel
+      type(vector_t), intent(in) :: values(:)
+      type(vector_t), allocatable :: array(:)
+      type(vector_t) :: value
+
+      avail = vector % avail % idx
+      numel = size(array = values, dim = 1, kind = int64)
+      alloc = avail + numel
+
+      call backup  (vector, array)
+      call double  (vector, alloc)
+      call restore (vector, array, value)
+
+      return
+  end subroutine
+
+
   subroutine vector_vector_t_backup (vector, array)
       ! Synopsis:
       ! Creates backup of data contained in vector.
@@ -261,6 +329,14 @@ contains
   end subroutine
 
 
+  module subroutine vector_vector_t_initializerArray (vector, array)
+      type(vector_t), intent(inout) :: vector
+      type(vector_t), intent(in) :: array(:)
+      call create (vector, array)
+      return
+  end subroutine
+
+
   module subroutine vector_vector_t_create (vector, value)
       ! Synopsis: Creates the first element in vector.
       type(vector_t), intent(inout), target :: vector
@@ -290,6 +366,34 @@ contains
       return
   end subroutine vector_vector_t_create
 
+
+  module subroutine vector_vector_t_createArray (vector, array)
+      ! Synopsis: Creates vector from array.
+      type(vector_t), intent(inout) :: vector
+      integer(kind = int64) :: numel
+      integer(kind = int64) :: bounds(0:1)
+      type(vector_t), intent(in) :: array(:)
+      type(vector_t) :: value
+      character(len=*), parameter :: errmsg = &
+          & "dynamic::vector.error: container of vectors"
+
+      ! tailors vector for storing array
+      numel = size(array = array, dim = 1, kind = int64)
+      call double (vector, max(VECTOR_MIN_SIZE, numel) )
+
+      ! allocates memory for vector components
+      bounds(0) = 0_int64
+      bounds(1) = vector % limit % idx
+      call allocator (bounds, vector % array % values, value)
+      call allocator (vector, errmsg)
+
+      ! initializes vector components
+      vector % state % errmsg(:) = errMSG
+      call push (vector, array)
+      vector % state % init = .true.
+
+      return
+  end subroutine vector_vector_t_createArray
 
 end submodule
 
