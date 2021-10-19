@@ -225,7 +225,7 @@ contains
       integer(kind = int32), allocatable :: array(:)
 
       call backup  (vector, array)
-      call double  (vector)
+      call increase(vector)
       call restore (vector, array, value)
 
       return
@@ -245,7 +245,7 @@ contains
       alloc = avail + numel
 
       call backup  (vector, array)
-      call double  (vector, alloc)
+      call increase(vector, alloc)
       call restore (vector, array, value)
 
       return
@@ -379,7 +379,7 @@ contains
 
       ! tailors vector for storing array
       numel = size(array = array, dim = 1, kind = int64)
-      call double (vector, max(VECTOR_MIN_SIZE, numel) )
+      call increase(vector, max(VECTOR_MIN_SIZE, numel) )
 
       ! allocates memory for vector components
       bounds(0) = 0_int64
