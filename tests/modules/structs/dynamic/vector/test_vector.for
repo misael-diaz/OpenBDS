@@ -30,6 +30,7 @@ module vector_class_tests
     implicit none
     integer(kind = int64), parameter :: max_vector_size = 1048576_int64
     private
+    public :: test_vector_array_constructor
     public :: test_vector_fill_constructor
     public :: test_vector_get
     public :: test_vector_push_back
@@ -43,6 +44,111 @@ module vector_class_tests
     public :: test_vector_up_array_vector_t
     public :: test_vector_mold_vector_t
     contains
+
+        subroutine test_vector_array_constructor ()
+            ! tests creating vectors from arrays
+            type(vector_t), allocatable :: vector     !! vector of ints
+            type(vector_t), allocatable :: veci64     !! vector of longs
+            type(vector_t), allocatable :: vecr64     !! vector of doubles
+            type(vector_t), allocatable :: vofvec     !! vector of vectors
+            type(vector_t), allocatable :: aryvec(:)  !! array of vectors
+            integer(kind = int64) :: j
+            integer(kind = int32) :: i, mstat
+            integer(kind = int64) :: diff(4)
+            integer(kind = int64), parameter :: b = 0_int64, e = 63_int64
+            integer(kind = int64), parameter :: ary64(*) = [(j, j = b, e)]
+            integer(kind = int32), parameter :: array(*) = [(i, i = 0, 63)]
+            integer(kind = int32), parameter :: numel = &
+                  & size(array = array, dim = 1, kind = int32)
+
+
+            allocate (vector, veci64, vecr64, aryvec(numel), vofvec, &
+                    & stat=mstat)
+            if (mstat /= 0) error stop 'test-push-back: allocation error'
+
+
+            ! creates vectors from arrays
+            vector = vector_t (array)
+            veci64 = vector_t (ary64)
+            vecr64 = vector_t ( real(ary64, kind = real64) )
+
+            do i = 1, numel
+                aryvec(i) = veci64
+            end do
+
+            vofvec = vector_t (aryvec)
+
+
+            ! checks for differences between stored and input values
+            associate (it => vector % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        diff(1) = int( sum(it - array), kind = int64)
+                    class default
+                        error stop 'test-array-constructor: unexpected err'
+                end select
+            end associate
+
+
+            associate (it => veci64 % deref % it)
+                select type (it)
+                    type is ( integer(kind = int64) )
+                        diff(2) = sum(it - ary64)
+                    class default
+                        error stop 'test-array-constructor: unexpected err'
+                end select
+            end associate
+
+
+            associate (it => vecr64 % deref % it)
+                select type (it)
+                    type is ( real(kind = real64) )
+                        diff(3) = sum( nint(it, kind = int64) - ary64)
+                    class default
+                        error stop 'test-array-constructor: unexpected err'
+                end select
+            end associate
+
+
+            diff(4) = 0_int64
+            associate (iter => vofvec % deref % it)
+                select type (iter)
+                    type is (vector_t)
+                        do i = 1, numel
+                            associate (it => iter(i) % deref % it)
+                                select type (it)
+                                    type is ( integer(kind = int64) )
+                                        diff(4) = diff(4) + sum(it - ary64)
+                                    class default
+                                        error stop 'test: unexpected error'
+                                    end select
+                            end associate
+                        end do
+                    class default
+                        error stop 'test-array-constructor: unexpected err'
+                end select
+            end associate
+
+
+            write (*, '(A)', advance='no') &
+                & '[00] test-vector-array-constructor(): '
+            if ( vector % size() /= int(numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if (diff(1) /= 0_int64 .or. diff(2) /= 0_int64) then
+                print *, 'FAIL'
+            else if (diff(3) /= 0_int64 .or. diff(4) /= 0_int64) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            deallocate (vector, veci64, vecr64, aryvec, vofvec)
+
+
+            return
+        end subroutine test_vector_array_constructor
+
 
         subroutine test_vector_fill_constructor ()
             type(vector_t), allocatable :: vector  !! `empty' vector
@@ -1178,6 +1284,8 @@ end module
 
 
 program test_vector_class
+    use vector_class_tests, only: array_constructor =>&
+                                      & test_vector_array_constructor
     use vector_class_tests, only: construct => test_vector_fill_constructor
     use vector_class_tests, only: get => test_vector_get
     use vector_class_tests, only: push_back => test_vector_push_back
@@ -1196,6 +1304,7 @@ program test_vector_class
     implicit none
 
 
+    call array_constructor ()
     call construct ()
     call push_back ()
     call push_back_array ()
