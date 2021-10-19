@@ -54,7 +54,7 @@ module vector_class_tests
             type(vector_t), allocatable :: aryvec(:)
             integer(kind = int64) :: k
             integer(kind = int32) :: i, j
-            integer(kind = int32) :: diff(2)
+            integer(kind = int64) :: diff(2)
             integer(kind = int64) :: diffs(2)
             integer(kind = int64), parameter :: b = 0_int64, e = 63_int64
             integer(kind = int64), parameter :: ary64(*) = [(k, k = b, e)]
@@ -70,14 +70,24 @@ module vector_class_tests
 
 
             vector = vector_t (array)   !! creates vector from array
+            veci64 = vector_t (ary64)
 
 
-            diff(:) = 0
             ! checks for differences between stored and input values
             associate (it => vector % deref % it)
                 select type (it)
                     type is ( integer(kind = int32) )
-                        diff(1) = sum(it - array)
+                        diff(1) = int( sum(it - array), kind = int64)
+                    class default
+                        error stop 'test-array-constructor: unexpected err'
+                end select
+            end associate
+
+
+            associate (it => veci64 % deref % it)
+                select type (it)
+                    type is ( integer(kind = int64) )
+                        diff(2) = sum(it - ary64)
                     class default
                         error stop 'test-array-constructor: unexpected err'
                 end select
@@ -88,7 +98,7 @@ module vector_class_tests
                 & '[00] test-vector-array-constructor(): '
             if ( vector % size() /= int(numel, kind = int64) ) then
                 print *, 'FAIL'
-            else if (diff(1) /= 0 .or. diff(2) /= 0) then
+            else if (diff(1) /= 0_int64 .or. diff(2) /= 0_int64) then
                 print *, 'FAIL'
             else
                 print *, 'pass'
