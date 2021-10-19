@@ -393,9 +393,11 @@ module vector_class_tests
             type(vector_t), allocatable :: vector
             type(vector_t), allocatable :: veci64
             type(vector_t), allocatable :: vecr64
+            type(vector_t), allocatable :: vofvec
+            type(vector_t), allocatable :: aryvec(:)
             integer(kind = int64) :: k
             integer(kind = int32) :: i, j
-            integer(kind = int32) :: diff
+            integer(kind = int32) :: diff(2)
             integer(kind = int64) :: diffs(2)
             integer(kind = int64), parameter :: b = 0_int64, e = 63_int64
             integer(kind = int64), parameter :: ary64(*) = [(k, k = b, e)]
@@ -405,7 +407,8 @@ module vector_class_tests
                   & size(array = array, dim = 1, kind = int32)
 
 
-            allocate (vector, veci64, vecr64, stat=mstat)
+            allocate (vector, veci64, vecr64, aryvec(numel), vofvec, &
+                    & stat=mstat)
             if (mstat /= 0) error stop 'test-push-back: allocation error'
 
 
@@ -414,12 +417,17 @@ module vector_class_tests
             call veci64 % push_back (ary64)
             call vecr64 % push_back ( real(ary64, kind = real64) )
 
+            do i = 1, numel
+                aryvec(i) = vector
+            end do
+
+            call vofvec % push_back (aryvec)
 
             ! checks for differences between stored and input values
             associate (it => vector % deref % it)
                 select type (it)
                     type is ( integer(kind = int32) )
-                        diff = sum(it - array)
+                        diff(1) = sum(it - array)
                     class default
                         error stop 'test-push-back: unexpected error'
                 end select
@@ -446,6 +454,26 @@ module vector_class_tests
             end associate
 
 
+            diff(2) = 0
+            associate (iter => vofvec % deref % it)
+                select type (iter)
+                    type is (vector_t)
+                        do i = 1, numel
+                            associate ( it => iter(i) % deref % it )
+                                select type (it)
+                                    type is ( integer(kind = int32) )
+                                        diff(2) = diff(2) + sum(it - array)
+                                    class default
+                                        error stop 'unexpected error'
+                                end select
+                            end associate
+                        end do
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
             write (*, '(A)', advance='no') '[00] test-push-back-array(): '
             if ( vector % size() /= int(numel, kind = int64) ) then
                 print *, 'FAIL'
@@ -453,7 +481,9 @@ module vector_class_tests
                 print *, 'FAIL'
             else if ( vecr64 % size() /= int(numel, kind = int64) ) then
                 print *, 'FAIL'
-            else if (diff /= 0) then
+            else if ( vofvec % size() /= int(numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if (diff(1) /= 0 .or. diff(2) /= 0) then
                 print *, 'FAIL'
             else if (diffs(1) /= 0_int64 .or. diffs(2) /= 0_int64) then
                 print *, 'FAIL'
@@ -475,15 +505,20 @@ module vector_class_tests
             call vecr64 % push_back ( real(ary64, kind=real64) )
             call vecr64 % push_back ( real(ary64, kind=real64) )
 
+            call vofvec % push_back (aryvec)
+            call vofvec % push_back (aryvec)
+            call vofvec % push_back (aryvec)
 
-            diff = 0
+
+            diff(1) = 0
             ! checks for differences between stored and input values
             associate (it => vector % deref % it)
                 select type (it)
                     type is ( integer(kind = int32) )
                         do i = 0, 3
                             do j = 1, numel
-                                diff = diff + it(j + i * numel) - array(j)
+                                diff(1) = diff(1) + it(j + i * numel) - &
+                                    & array(j)
                             end do
                         end do
                     class default
@@ -524,6 +559,26 @@ module vector_class_tests
             end associate
 
 
+            diff(2) = 0
+            associate (iter => vofvec % deref % it)
+                select type (iter)
+                    type is (vector_t)
+                        do i = 1, 4 * numel
+                            associate ( it => iter(i) % deref % it )
+                                select type (it)
+                                    type is ( integer(kind = int32) )
+                                        diff(2) = diff(2) + sum(it - array)
+                                    class default
+                                        error stop 'unexpected error'
+                                end select
+                            end associate
+                        end do
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
             write (*, '(A)', advance='no') '[01] test-push-back-array(): '
             if ( vector % size() /= int(4 * numel, kind = int64) ) then
                 print *, 'FAIL'
@@ -531,7 +586,9 @@ module vector_class_tests
                 print *, 'FAIL'
             else if ( vecr64 % size() /= int(4 * numel, kind=int64) ) then
                 print *, 'FAIL'
-            else if (diff /= 0) then
+            else if ( vofvec % size() /= int(4 * numel, kind=int64) ) then
+                print *, 'FAIL'
+            else if (diff(1) /= 0 .or. diff(2) /= 0) then
                 print *, 'FAIL'
             else if (diffs(1) /= 0_int64 .or. diffs(2) /= 0_int64) then
                 print *, 'FAIL'
@@ -540,7 +597,7 @@ module vector_class_tests
             end if
 
 
-            deallocate (vector, veci64, vecr64)
+            deallocate (vector, veci64, vecr64, vofvec, aryvec)
 
 
             return
