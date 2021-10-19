@@ -92,7 +92,7 @@ contains
               ! tailors the vector size based on the number of copies
 
               vec % limit % idx = n     !! sets the vector `limit' to fit
-              call double (vec)         !! and doubles it for convenience
+              call increase (vec)       !! and doubles it for convenience
 
               bounds(0) = 0_int64
               bounds(1) = vec % limit % idx

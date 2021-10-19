@@ -521,7 +521,7 @@ contains
   end subroutine
 
 
-  pure subroutine double_vector_size (vector, alloc)
+  pure subroutine increase_container_size (vector, alloc)
       ! Synopsis:
       ! Doubles the vector-size at most, complains if doing so would yield
       ! an ill-formed object.
@@ -558,7 +558,7 @@ contains
               return
           end subroutine
 
-  end subroutine double_vector_size
+  end subroutine increase_container_size
 
 
 !       module function to_string_int32 (i) result(str)
