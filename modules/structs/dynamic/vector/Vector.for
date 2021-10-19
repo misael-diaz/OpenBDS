@@ -183,6 +183,7 @@ module VectorClass
         procedure, public :: size => size_method
         procedure, public :: clear => clear_method
         procedure, public :: addr => vector_print_container_address_method
+        procedure, public :: valid => vector_validate_iterator_method
         final :: finalizer
   end type
 
@@ -847,6 +848,11 @@ module VectorClass
     module subroutine vector_vector_t_copy_method (self, vector)
         class(vector_t), intent(inout) :: self
         class(vector_t), intent(in) :: vector
+    end subroutine
+
+
+    module subroutine vector_validate_iterator_method (self)
+        class(vector_t), intent(inout) :: self
     end subroutine
 
 

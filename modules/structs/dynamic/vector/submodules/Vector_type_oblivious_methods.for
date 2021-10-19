@@ -137,6 +137,13 @@ contains
   end subroutine
 
 
+  module subroutine vector_validate_iterator_method (self)
+      class(vector_t), intent(inout) :: self
+      call vector_validate_iterator (self)
+      return
+  end subroutine
+
+
   module subroutine vector_vector_t_copy (to, from)
       ! implements copying a vector into another
       type(vector_t), intent(out), target :: to

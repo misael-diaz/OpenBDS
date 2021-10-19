@@ -618,10 +618,9 @@ module vector_class_tests
                 error stop "test::vector.array: allocation error"
             end if
 
-!! BUG      vector[(:)] = create ()     !! iterators point to invalid obj
-            do i = 1_int64, 2_int64
-                ! instantiates array of vectors the right way
-                vector(i) = create ()   !! invokes ``assignment'' method
+            vector(:) = create ()
+            do i = 1_int64, size(vector, dim=1, kind=int64)
+                call vector(i) % valid()        !! validates iterators
             end do
 
 
