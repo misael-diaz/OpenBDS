@@ -193,6 +193,7 @@ module VectorClass
       module procedure vector_int32_t_arrayConstructor
       module procedure vector_int64_t_arrayConstructor
       module procedure vector_real64_t_arrayConstructor
+      module procedure vector_vector_t_arrayConstructor
       module procedure vector_int32_t_fillConstructor
       module procedure vector_int64_t_fillConstructor
       module procedure vector_real64_t_fillConstructor
@@ -386,6 +387,12 @@ module VectorClass
     module function vector_real64_t_arrayConstructor (array) result(vec)
         type(vector_t), allocatable :: vec
         real(kind = real64), intent(in) :: array(:)
+    end function
+
+
+    module function vector_vector_t_arrayConstructor (array) result(vec)
+        type(vector_t), allocatable :: vec
+        type(vector_t), intent(in) :: array(:)
     end function
 
 
