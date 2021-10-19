@@ -46,12 +46,12 @@ module vector_class_tests
 
         subroutine test_vector_fill_constructor ()
             type(vector_t), allocatable :: vector  !! `empty' vector
-            type(vector_t), allocatable :: v_i32   !! vector <int32_t>
-            type(vector_t), allocatable :: v_i64   !! vector <int64_t>
-            type(vector_t), allocatable :: v_r64   !! vector <real64_t>
+            type(vector_t), allocatable :: veci32  !! vector <int32_t>
+            type(vector_t), allocatable :: veci64  !! vector <int64_t>
+            type(vector_t), allocatable :: vecr64  !! vector <real64_t>
             type(vector_t), allocatable :: vofvec  !! vector of vectors
             type(vector_t), allocatable :: avofvec !! another vec of vecs
-            type(vector_t), allocatable :: yavofv  !! yet another v of vecs
+            type(vector_t), allocatable :: yavofvec!! yet another v of vecs
             class(*), pointer, contiguous :: it(:) => null()
             class(*), pointer, contiguous :: iter(:) => null()
             integer(kind = int64), parameter :: numel = 64_int64
@@ -60,19 +60,19 @@ module vector_class_tests
             integer(kind = int32):: mstat
 
 
-            allocate (vector, v_i32, v_i64, v_r64, vofvec, avofvec, &
-                    & yavofv, stat=mstat)
+            allocate (vector, veci32, veci64, vecr64, vofvec, avofvec, &
+                    & yavofvec, stat=mstat)
             if (mstat /= 0) error stop 'test.vector(): allocation error'
 
 
             ! constructs vectors having `numel' copies of `value'
-            v_i32 = vector_t (numel, value)
-            v_i64 = vector_t (numel, int (value, kind = int64) )
-            v_r64 = vector_t (numel, real(value, kind = real64) )
+            veci32 = vector_t (numel, value)
+            veci64 = vector_t (numel, int (value, kind = int64) )
+            vecr64 = vector_t (numel, real(value, kind = real64) )
 
 
             ! checks the stored values for consistency
-            it => v_i32 % deref % it
+            it => veci32 % deref % it
             select type (it)
                 type is ( integer(kind = int32) )
                     diff(1) = int(sum(it), kind = int64) - numel * value
@@ -81,7 +81,7 @@ module vector_class_tests
             end select
 
 
-            it => v_i64 % deref % it
+            it => veci64 % deref % it
             select type (it)
                 type is ( integer(kind = int64) )
                     diff(2) = sum(it) - numel * value
@@ -90,7 +90,7 @@ module vector_class_tests
             end select
 
 
-            it => v_r64 % deref % it
+            it => vecr64 % deref % it
             select type (it)
                 type is ( real(kind = real64) )
                     diff(3) = nint( sum(it), kind=int64 ) - numel * value
@@ -100,9 +100,9 @@ module vector_class_tests
 
 
             write (*, '(A)', advance='no') '[00] test-vector.construct(): '
-            if (v_i32 % size() /= numel .or. v_i64 % size() /= numel) then
+            if (veci32 % size() /= numel .or. veci64 % size() /= numel) then
                 print *, 'FAIL'
-            else if (v_r64 % size() /= numel) then
+            else if (vecr64 % size() /= numel) then
                 print *, 'FAIL'
             else if (diff(1) /= 0_int64 .or. diff(2) /= 0_int64) then
                 print *, 'FAIL'
@@ -114,7 +114,7 @@ module vector_class_tests
 
 
             ! creates vectors of vectors
-            vofvec  = vector_t (numel, v_i32)   !! vec < vec<T> >
+            vofvec  = vector_t (numel, veci32)   !! vec < vec<T> >
             avofvec = vector_t (numel, vofvec)  !! vec < vec < vec<T> > >
 
             ! checks that the iterators point to distintc `internal' arrays
@@ -218,11 +218,11 @@ module vector_class_tests
             end if
 
             vector = vector_t ()                !! `empty' vector <T>
-            yavofv = vector_t (numel, vector)   !! vector < vector<T> >
+            yavofvec = vector_t (numel, vector) !! vector < vector<T> >
 
             ! checks that the iterator of the `empty' vectors point to NULL
             diffs(3) = 0_int64
-            iter => yavofv % deref % it
+            iter => yavofvec % deref % it
             select type (iter)
                 type is (vector_t)
                     do i = 1_int64, (numel - 1_int64)
@@ -248,7 +248,7 @@ module vector_class_tests
 
 
             write (*, '(A)', advance='no') '[02] test-vector.construct(): '
-            if ( yavofv % size () /= numel ) then
+            if ( yavofvec % size () /= numel ) then
                 print *, 'FAIL'
             else if (diffs(3) /= 0_int64) then
                 print *, 'FAIL'
@@ -257,8 +257,8 @@ module vector_class_tests
             end if
 
 
-            deallocate (vector, v_i32, v_i64, v_r64, vofvec, avofvec, &
-                      & yavofv)
+            deallocate (vector, veci32, veci64, vecr64, vofvec, avofvec, &
+                      & yavofvec)
 
             return
         end subroutine
@@ -266,19 +266,19 @@ module vector_class_tests
 
         subroutine test_vector_push_back ()
             ! Synopsis: Tests pushing values unto back of vector.
-            type(vector_t), allocatable :: vector !<int64_t> !
-            type(vector_t), allocatable :: vecR64 !<real64_t>!
-            type(vector_t), allocatable :: vector2!<vector_t>!
-            type(vector_t), allocatable :: veccopy!<vector_t>!
-            type(vector_t), allocatable :: vector3!<vector_t>!
-            type(vector_t), allocatable :: vc3copy!<vector_t>!
+            type(vector_t), allocatable :: vector    !! vector of int64
+            type(vector_t), allocatable :: vecr64    !! vector of real64
+            type(vector_t), allocatable :: vofvec    !! vector of vectors
+            type(vector_t), allocatable :: avofvec   !! another vec of v...
+            type(vector_t), allocatable :: yavofvec  !! yet another vec ...
+            type(vector_t), allocatable :: ysavofvec !! yet still anoth ...
             type(chronom) :: stopwatch
             integer(kind = int64):: i
             integer(kind = int64), parameter :: n = 65536_int64
             integer(kind = int32):: mstat
 
-            allocate (vector, vector2, vector3, veccopy, vc3copy,&
-                    & vecR64, stat = mstat)
+            allocate (vector, vofvec, yavofvec, avofvec, ysavofvec,&
+                    & vecr64, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.push_back: allocation error"
             end if
@@ -315,12 +315,12 @@ module vector_class_tests
             print *, "elapsed-time (millis): ", stopwatch % etime ()
 
 
-            vecR64 = vector_t ()
+            vecr64 = vector_t ()
 
             i = 0_int64
             call stopwatch % tic ()
             do while (i /= n)
-                call vecR64 % push_back ( real(i, kind = real64) )
+                call vecr64 % push_back ( real(i, kind = real64) )
                 i = i + 1_int64
             end do
             call stopwatch % toc ()
@@ -328,9 +328,9 @@ module vector_class_tests
 
             print *, "done"
             print *, new_line('n')//new_line('n')
-            print *, "size: ", vecR64 % size()
+            print *, "size: ", vecr64 % size()
             write (*, '(1X,A)', advance='no') "push-back test real64:"
-            if ( n == vecR64 % size() ) then
+            if ( n == vecr64 % size() ) then
                 print *, "pass"
             else
                 print *, "FAIL"
@@ -340,21 +340,21 @@ module vector_class_tests
             print *, "elapsed-time (millis): ", stopwatch % etime ()
 
 
-            vector2 = vector_t ()
+            vofvec = vector_t ()
 
 
             i = 0_int64
             do while (i /= 64_int64)
-                call vector2 % push_back (vector)
+                call vofvec % push_back (vector)
                 i = i + 1_int64
             end do
 
 
-            veccopy = vector2   ! copies vector of vectors vector<vector_t>
+            avofvec = vofvec   ! copies vector of vectors vector<vector_t>
 
 
             write (*, '(1X,A)', advance='no') "push-back test 2:"
-            if ( veccopy % size() == vector2 % size() ) then
+            if ( avofvec % size() == vofvec % size() ) then
                 print *, "pass"
             else
                 print *, "FAIL"
@@ -362,13 +362,13 @@ module vector_class_tests
 
 
             ! creates a vector of (vector of vectors)
-            vector3 = vector_t ()
-            call vector3 % push_back (veccopy)
-            vc3copy = vector3
+            yavofvec = vector_t ()
+            call yavofvec % push_back (avofvec)
+            ysavofvec = yavofvec
 
 
             write (*, '(1X,A)', advance='no') "push-back test 3:"
-            if ( vc3copy % size() == vector3 % size() ) then
+            if ( ysavofvec % size() == yavofvec % size() ) then
                 print *, "pass"
             else
                 print *, "FAIL"
@@ -378,8 +378,8 @@ module vector_class_tests
             print *, new_line('n')//new_line('n')
 
 
-            deallocate (vector, vector2, vector3, veccopy,&
-                      & vecR64, stat = mstat)
+            deallocate (vector, vofvec, yavofvec, avofvec,&
+                      & vecr64, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.push_back: deallocation error"
             end if
@@ -888,12 +888,12 @@ module vector_class_tests
         subroutine test_vector_iterator ()
             ! Synopsis: Tests the iterator of the vector class.
             type(vector_t), allocatable :: vector
-            type(vector_t), allocatable :: vector2
+            type(vector_t), allocatable :: vofvec
             class(*), pointer, contiguous :: it(:) => null()
             integer(kind = int64):: n, t
             integer(kind = int32):: mstat
 
-            allocate (vector, vector2, stat = mstat)
+            allocate (vector, vofvec, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.iterator: allocation error"
             end if
@@ -924,9 +924,9 @@ module vector_class_tests
             end select
 
 
-            vector2 = vector_t ()
-            call vector2 % push_back (vector)
-            it => vector2 % deref % it
+            vofvec = vector_t ()
+            call vofvec % push_back (vector)
+            it => vofvec % deref % it
 
 
             write (*, '(1X,A)', advance='no') "[1] test::vector.iter(): "
@@ -947,7 +947,7 @@ module vector_class_tests
 
             print *, new_line('n')//new_line('n')
 
-            deallocate (vector, vector2, stat = mstat)
+            deallocate (vector, vofvec, stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.iterator: deallocation error"
             end if
@@ -958,14 +958,14 @@ module vector_class_tests
 
         subroutine test_vector_public_iterator ()
             type(vector_t), allocatable, target :: vector
-            type(vector_t), allocatable, target :: vecR64
-            type(vector_t), allocatable :: vecopy
+            type(vector_t), allocatable, target :: vecr64
+            type(vector_t), allocatable :: avector !! another vector
             class(*), pointer, contiguous :: iter(:)
             integer(kind = int32), allocatable :: values(:)
             integer(kind = int32):: i, v(1), value
             integer(kind = int32):: mstat
 
-            allocate (vector, vecopy, vecR64, values(256), stat = mstat)
+            allocate (vector, avector, vecr64, values(256), stat = mstat)
             if (mstat /= 0) then
                 error stop "test::vector.iterator: allocation error"
             end if
@@ -978,7 +978,7 @@ module vector_class_tests
                 value = i
                 values(i) = value
                 call vector % push_back (value)
-                call vecR64 % push_back ( real(value, kind=real64) )
+                call vecr64 % push_back ( real(value, kind=real64) )
             end do
 
 
@@ -1047,12 +1047,12 @@ module vector_class_tests
             end if
 
 
-            vecopy = vector
+            avector = vector
 
 
-            iter => vecopy % deref % it
+            iter => avector % deref % it
             write (*, '(1X,A)', advance='no') "[5] test::v.iter: "
-            if ( size(iter, kind = int64) /= vecopy % size() ) then
+            if ( size(iter, kind = int64) /= avector % size() ) then
                 print *, "FAIL"
             else
                 print *, "pass"
@@ -1060,7 +1060,7 @@ module vector_class_tests
 
 
             write (*, '(1X,A)', advance='no') "[6] test::v.iter: "
-            if (loc(vecopy % deref % it) == loc(vector % deref % it) ) then
+            if (loc(avector % deref % it) == loc(vector % deref % it) ) then
                 print *, "FAIL"
             else
                 print *, "pass"
@@ -1068,7 +1068,7 @@ module vector_class_tests
 
 
             ! uses iterator to process values contained in vector<real64_t>
-            associate (it => vecR64 % deref % it)
+            associate (it => vecr64 % deref % it)
                 select type (it)
                     type is ( real(kind = real64) )
                         print *, 'total: ', sum  (it)
