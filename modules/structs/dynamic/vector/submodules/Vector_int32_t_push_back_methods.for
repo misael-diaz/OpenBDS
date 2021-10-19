@@ -252,7 +252,7 @@ contains
   end subroutine
 
 
-  subroutine vector_int32_t_backup (vector, array)
+  module subroutine vector_int32_t_backup (vector, array)
       ! Synopsis:
       ! Creates backup of data contained in vector.
       type(vector_t), intent(in) :: vector
@@ -285,7 +285,7 @@ contains
   end subroutine vector_int32_t_backup
 
 
-  subroutine vector_int32_t_restore (vector, array, value)
+  module subroutine vector_int32_t_restore (vector, array, value)
       ! Synopsis:
       ! Restores vector with data in placeholder array.
       type(vector_t), intent(inout) :: vector
@@ -339,7 +339,7 @@ contains
 
   module subroutine vector_int32_t_create (vector, value)
       ! Synopsis: Creates the first element in vector.
-      type(vector_t), intent(inout), target :: vector
+      type(vector_t), intent(inout) :: vector
       integer(kind = int64), parameter :: lb = 0_int64
       integer(kind = int64), parameter :: ub = VECTOR_MIN_SIZE
       integer(kind = int64), parameter :: bounds(0:1) = [lb, ub]
