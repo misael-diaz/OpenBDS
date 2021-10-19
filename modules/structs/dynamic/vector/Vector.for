@@ -912,25 +912,25 @@ module VectorClass
 
     module subroutine vector_int32_t_create (vector, value)
         ! Synopsis: Creates the first element in vector.
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         integer(kind = int32), intent(in) :: value
     end subroutine
 
 
     module subroutine vector_int64_t_create (vector, value)
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         integer(kind = int64), intent(in) :: value
     end subroutine
 
 
     module subroutine vector_real64_t_create (vector, value)
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         real(kind = real64), intent(in) :: value
     end subroutine
 
 
     module subroutine vector_vector_t_create (vector, value)
-        type(vector_t), intent(inout), target :: vector
+        type(vector_t), intent(inout) :: vector
         type(vector_t), intent(in) :: value
     end subroutine
 
