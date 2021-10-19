@@ -190,6 +190,7 @@ module VectorClass
 
   interface vector_t
       module procedure default_constructor
+      module procedure vector_int32_t_arrayConstructor
       module procedure vector_int32_t_fillConstructor
       module procedure vector_int64_t_fillConstructor
       module procedure vector_real64_t_fillConstructor
@@ -365,6 +366,12 @@ module VectorClass
     module function default_constructor () result(vector)
         ! Synopsis: Returns an empty vector
         type(vector_t), allocatable :: vector
+    end function
+
+
+    module function vector_int32_t_arrayConstructor (array) result(vec)
+        type(vector_t), allocatable :: vec
+        integer(kind = int32), intent(in) :: array(:)
     end function
 
 
