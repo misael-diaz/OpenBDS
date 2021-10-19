@@ -392,10 +392,11 @@ module vector_class_tests
             ! tests pushing an array unto the back of a vector
             type(vector_t), allocatable :: vector
             type(vector_t), allocatable :: veci64
+            type(vector_t), allocatable :: vecr64
             integer(kind = int64) :: k
             integer(kind = int32) :: i, j
             integer(kind = int32) :: diff
-            integer(kind = int64) :: diffs
+            integer(kind = int64) :: diffs(2)
             integer(kind = int64), parameter :: b = 0_int64, e = 63_int64
             integer(kind = int64), parameter :: ary64(*) = [(k, k = b, e)]
             integer(kind = int32), parameter :: array(*) = [(i, i = 0, 63)]
@@ -404,13 +405,14 @@ module vector_class_tests
                   & size(array = array, dim = 1, kind = int32)
 
 
-            allocate (vector, veci64, stat=mstat)
+            allocate (vector, veci64, vecr64, stat=mstat)
             if (mstat /= 0) error stop 'test-push-back: allocation error'
 
 
             vector = vector_t ()                !! instantiates vector
             call vector % push_back (array)     !! pushes array unto back
             call veci64 % push_back (ary64)
+            call vecr64 % push_back ( real(ary64, kind = real64) )
 
 
             ! checks for differences between stored and input values
@@ -427,7 +429,17 @@ module vector_class_tests
             associate (it => veci64 % deref % it)
                 select type (it)
                     type is ( integer(kind = int64) )
-                        diffs = sum(it - ary64)
+                        diffs(1) = sum(it - ary64)
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            associate (it => vecr64 % deref % it)
+                select type (it)
+                    type is ( real(kind = real64) )
+                        diffs(2) = sum( nint(it, kind = int64) - ary64)
                     class default
                         error stop 'test-push-back: unexpected error'
                 end select
@@ -439,7 +451,11 @@ module vector_class_tests
                 print *, 'FAIL'
             else if ( veci64 % size() /= int(numel, kind = int64) ) then
                 print *, 'FAIL'
-            else if (diff /= 0 .or. diffs /= 0_int64) then
+            else if ( vecr64 % size() /= int(numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if (diff /= 0) then
+                print *, 'FAIL'
+            else if (diffs(1) /= 0_int64 .or. diffs(2) /= 0_int64) then
                 print *, 'FAIL'
             else
                 print *, 'pass'
@@ -454,6 +470,10 @@ module vector_class_tests
             call veci64 % push_back (ary64)
             call veci64 % push_back (ary64)
             call veci64 % push_back (ary64)
+
+            call vecr64 % push_back ( real(ary64, kind=real64) )
+            call vecr64 % push_back ( real(ary64, kind=real64) )
+            call vecr64 % push_back ( real(ary64, kind=real64) )
 
 
             diff = 0
@@ -471,14 +491,31 @@ module vector_class_tests
                 end select
             end associate
 
-            diffs = 0_int64
-            ! checks for differences between stored and input values
+
+            diffs(1) = 0_int64
             associate (it => veci64 % deref % it)
                 select type (it)
                     type is ( integer(kind = int64) )
                         do i = 0, 3
                             do j = 1, numel
-                                diffs = diffs + it(j + i * numel) - ary64(j)
+                                diffs(1) = diffs(1) + it(j + i * numel) - ary64(j)
+                            end do
+                        end do
+                    class default
+                        error stop 'test-push-back: unexpected error'
+                end select
+            end associate
+
+
+            diffs(2) = 0_int64
+            associate (it => vecr64 % deref % it)
+                select type (it)
+                    type is ( real(kind = real64) )
+                        do i = 0, 3
+                            do j = 1, numel
+                                diffs(2) = diffs(2) + &
+                                  & nint(it(j + i * numel), kind=int64) - &
+                                  & ary64(j)
                             end do
                         end do
                     class default
@@ -490,16 +527,20 @@ module vector_class_tests
             write (*, '(A)', advance='no') '[01] test-push-back-array(): '
             if ( vector % size() /= int(4 * numel, kind = int64) ) then
                 print *, 'FAIL'
-            else if ( veci64 % size() /= int(4 * numel, kind = int64) ) then
+            else if ( veci64 % size() /= int(4 * numel, kind=int64) ) then
                 print *, 'FAIL'
-            else if (diff /= 0 .or. diffs /= 0_int64) then
+            else if ( vecr64 % size() /= int(4 * numel, kind=int64) ) then
+                print *, 'FAIL'
+            else if (diff /= 0) then
+                print *, 'FAIL'
+            else if (diffs(1) /= 0_int64 .or. diffs(2) /= 0_int64) then
                 print *, 'FAIL'
             else
                 print *, 'pass'
             end if
 
 
-            deallocate (vector, veci64)
+            deallocate (vector, veci64, vecr64)
 
 
             return
