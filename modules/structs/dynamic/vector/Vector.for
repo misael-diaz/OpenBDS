@@ -348,8 +348,8 @@ module VectorClass
   end interface
 
 
-  interface double
-      module procedure double_vector_size
+  interface increase
+      module procedure increase_container_size
   end interface
 
 
@@ -1182,7 +1182,7 @@ module VectorClass
     end subroutine
 
 
-    module pure subroutine double_vector_size (vector, alloc)
+    module pure subroutine increase_container_size (vector, alloc)
         type(vector_t), intent(inout) :: vector
         integer(kind = int64), intent(in), optional :: alloc
     end subroutine
