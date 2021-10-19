@@ -533,7 +533,8 @@ module vector_class_tests
                     type is ( integer(kind = int64) )
                         do i = 0, 3
                             do j = 1, numel
-                                diffs(1) = diffs(1) + it(j + i * numel) - ary64(j)
+                                diffs(1) = diffs(1) + it(j + i * numel) - &
+                                    & ary64(j)
                             end do
                         end do
                     class default
