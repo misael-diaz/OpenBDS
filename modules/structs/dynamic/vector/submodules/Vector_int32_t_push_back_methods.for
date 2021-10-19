@@ -339,7 +339,7 @@ contains
 
   module subroutine vector_int32_t_create (vector, value)
       ! Synopsis: Creates the first element in vector.
-      type(vector_t), intent(inout), target :: vector
+      type(vector_t), intent(inout) :: vector
       integer(kind = int64), parameter :: lb = 0_int64
       integer(kind = int64), parameter :: ub = VECTOR_MIN_SIZE
       integer(kind = int64), parameter :: bounds(0:1) = [lb, ub]
