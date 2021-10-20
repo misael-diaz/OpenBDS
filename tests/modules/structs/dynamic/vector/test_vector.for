@@ -30,6 +30,7 @@ module vector_class_tests
     implicit none
     integer(kind = int64), parameter :: max_vector_size = 1048576_int64
     private
+    public :: test_vector_range_constructor
     public :: test_vector_array_constructor
     public :: test_vector_fill_constructor
     public :: test_vector_get
@@ -44,6 +45,230 @@ module vector_class_tests
     public :: test_vector_up_array_vector_t
     public :: test_vector_mold_vector_t
     contains
+
+        subroutine test_vector_range_constructor ()
+            ! tests creating vectors from asymmetric ranges
+
+            ! TESTS:
+            ! [x] tests empty ranges.
+            ! [x] tests decrementing sequences.
+            ! [x] tests ranges that start at other values other than zero.
+            ! [x] tests ranges that do not `stop' exactly at the `end'.
+            !     (Note: When the difference between `begin' and `end'
+            !      cannot be evenly divided by the `step'.)
+            ! [x] tests the `assignment' of an `empty' vector having memory
+            !     allocated for its internal array. (An empty range yields
+            !     an `empty' vector with a preallocated internal array.)
+            ! [x] tests that the iterators of a vector of empty vectors are
+            !     not associated.
+            ! [x] tests pushing values into an empty vector.
+            ! [x] checks `aliasing' of iterators.
+            ! [x] checks that non-allocatable vector of vectors is totally
+            !     destroyed (no memory leaks)
+
+            type(vector_t), allocatable :: vector
+            type(vector_t), allocatable :: reverse
+            type(vector_t), allocatable :: avector
+            type(vector_t), allocatable :: vec_one
+            type(vector_t), allocatable :: vec_rng
+            type(vector_t), allocatable :: vec_small
+            type(vector_t), allocatable :: vec_empty
+            type(vector_t), allocatable :: empty
+            type(vector_t), allocatable :: vecinv
+            type(vector_t), allocatable :: vofvec
+            type(vector_t), allocatable :: avofvec
+            type(vector_t) :: yavofvec
+            class(*), pointer, contiguous :: iter(:) => null()
+            integer(kind = int64) :: count
+            integer(kind = int64) :: diff(8)
+            integer(kind = int32) :: i, j
+            integer(kind = int32) :: mstat
+            integer(kind = int32), parameter :: array(*) = [(i, i = 0, 63)]
+            integer(kind = int32), parameter :: r(*) = [(i, i = 63, 1, -1)]
+            integer(kind = int32), parameter :: small(*) = [(i, i = 0, 3)]
+            integer(kind = int32), parameter :: rng(*) = [(i, i = 1, 9, 3)]
+            integer(kind = int32), parameter :: one(*) = [(i, i = 0, 0)]
+            integer(kind = int32), parameter :: aryinv(*) = -array(:)
+            integer(kind = int32), parameter :: numel = &
+                  & size(array = array, dim = 1, kind = int32)
+            character(*), parameter :: errmsg = &
+                & 'test-range-constructor: unexpected error'
+
+
+            allocate (vector, vec_one, vec_rng, vec_small, vec_empty, &
+                    & vecinv, avector, vofvec,  avofvec,   empty,     &
+                    & reverse, stat=mstat)
+            if (mstat /= 0) error stop 'test-range: allocation error'
+
+
+            ! creates vectors
+            vector    = vector_t (numel)   !! asymmetric range [0, numel)
+!!          vector    = vector_t (b = 0,  e = numel, s = 1) !! equivalent
+            reverse   = vector_t (b = 63, e = 0,     s = -1)
+            vec_one   = vector_t (1)
+            vec_rng   = vector_t (b = 1, e = 12, s = 3)
+            vec_small = vector_t (4)
+            vec_empty = vector_t (0)
+            empty     = vector_t (0)
+            vecinv    = vector_t (b = 0, e = -numel, s = -1)
+            vofvec    = vector_t (int(numel, kind = int64), vec_empty)
+            avector   = vec_empty
+
+            call empty % push_back (array)
+            avofvec = vector_t (int(numel, kind = int64), empty)
+            call yavofvec % push_back (avofvec)
+
+
+            diff(:) = 1_int64
+            ! tests for differences between stored and pushed values
+            associate (it => vector % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        diff(1) = int( sum(it - array), kind = int64)
+                    class default
+                        error stop errmsg
+                end select
+            end associate
+
+
+            associate (it => vec_one % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        diff(2) = int( sum(it - one), kind = int64)
+                    class default
+                        error stop errmsg
+                end select
+            end associate
+
+
+            associate (it => vec_rng % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        diff(3) = int( sum(it - rng), kind = int64)
+                    class default
+                        error stop errmsg
+                end select
+            end associate
+
+
+            associate (it => vec_small % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        diff(4) = int( sum(it - small), kind = int64)
+                    class default
+                        error stop errmsg
+                end select
+            end associate
+
+
+            associate (it => vecinv % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        diff(5) = int( sum(it - aryinv), kind = int64)
+                    class default
+                        error stop errmsg
+                end select
+            end associate
+
+
+            associate (it => empty % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        diff(6) = int( sum(it - array), kind = int64)
+                    class default
+                        error stop errmsg
+                end select
+            end associate
+
+
+            associate (it => reverse % deref % it)
+                select type (it)
+                    type is ( integer(kind = int32) )
+                        diff(7) = int( sum(it - r), kind = int64)
+                    class default
+                        error stop errmsg
+                end select
+            end associate
+
+
+            count = 0_int64
+            ! checks the association of the iterators of the empty vectors
+            associate (iter => vofvec % deref % it)
+                select type (iter)
+                    type is (vector_t)
+                        do i = 1, numel
+                            associate (it => iter(i) % deref % it)
+                                if ( associated(it) ) then
+                                    count = count + 1_int64
+                                end if
+                            end associate
+                        end do
+                    class default
+                        error stop errmsg
+                end select
+            end associate
+
+
+            diff(8) = 0_int64
+            ! checks aliasing of iterators of a vector of vectors
+            iter => avofvec % deref % it
+            select type (iter)
+                type is (vector_t)
+                    do i = 1, (numel - 1)
+                        do j = i + 1, numel
+
+                            associate (it_1 => iter(i) % deref % it, &
+                                     & it_2 => iter(j) % deref % it)
+
+                                if ( loc(it_1) == loc(it_2) ) then
+                                    diff(8) = diff(8) + 1_int64
+                                end if
+
+                            end associate
+
+                        end do
+                    end do
+                class default
+                        error stop errmsg
+            end select
+
+
+            write (*, '(A)', advance='no') &
+                & '[00] test-vector-range-constructor(): '
+            if ( vector % size() /= int(numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if ( empty % size() /= int(numel, kind = int64) ) then
+                print *, 'FAIL'
+            else if ( vec_empty % size() /= 0_int64 ) then
+                print *, 'FAIL'
+            else if ( avector % size() /= 0_int64 ) then
+                print *, 'FAIL'
+            else if ( associated( vec_empty % deref % it ) ) then
+                print *, 'FAIL'
+            else if ( associated( avector % deref % it ) ) then
+                print *, 'FAIL'
+            else if (diff(1) /= 0_int64 .or. diff(2) /= 0_int64) then
+                print *, 'FAIL'
+            else if (diff(3) /= 0_int64 .or. diff(4) /= 0_int64) then
+                print *, 'FAIL'
+            else if (diff(5) /= 0_int64 .or. diff(6) /= 0_int64) then
+                print *, 'FAIL'
+            else if (diff(7) /= 0_int64 .or. diff(8) /= 0_int64) then
+                print *, 'FAIL'
+            else if (count /= 0_int64) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            deallocate (vector, vec_one, vec_rng, vec_small, vec_empty, &
+                      & vecinv, avector, vofvec,  avofvec,   empty,     &
+                      & reverse)
+
+            return
+        end subroutine test_vector_range_constructor
+
 
         subroutine test_vector_array_constructor ()
             ! tests creating vectors from arrays
@@ -64,7 +289,7 @@ module vector_class_tests
 
             allocate (vector, veci64, vecr64, aryvec(numel), vofvec, &
                     & stat=mstat)
-            if (mstat /= 0) error stop 'test-push-back: allocation error'
+            if (mstat /= 0) error stop 'test-array-const: allocation error'
 
 
             ! creates vectors from arrays
@@ -1284,6 +1509,8 @@ end module
 
 
 program test_vector_class
+    use vector_class_tests, only: range_constructor =>&
+                                      & test_vector_range_constructor
     use vector_class_tests, only: array_constructor =>&
                                       & test_vector_array_constructor
     use vector_class_tests, only: construct => test_vector_fill_constructor
@@ -1304,6 +1531,7 @@ program test_vector_class
     implicit none
 
 
+    call range_constructor ()
     call array_constructor ()
     call construct ()
     call push_back ()

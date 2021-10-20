@@ -190,6 +190,7 @@ module VectorClass
 
   interface vector_t
       module procedure default_constructor
+      module procedure vector_int32_t_rangeConstructor
       module procedure vector_int32_t_arrayConstructor
       module procedure vector_int64_t_arrayConstructor
       module procedure vector_real64_t_arrayConstructor
@@ -369,6 +370,15 @@ module VectorClass
     module function default_constructor () result(vector)
         ! Synopsis: Returns an empty vector
         type(vector_t), allocatable :: vector
+    end function
+
+
+    module function vector_int32_t_rangeConstructor (e, b, s) result(vec)
+        ! Synopsis: Creates vector from asymmetric range.
+        type(vector_t), allocatable :: vec
+        integer(kind = int32), intent(in) :: e                  !! end
+        integer(kind = int32), intent(in), optional :: b        !! begin
+        integer(kind = int32), intent(in), optional :: s        !! step
     end function
 
 

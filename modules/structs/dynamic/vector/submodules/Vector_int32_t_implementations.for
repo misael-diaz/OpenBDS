@@ -28,6 +28,175 @@ implicit none
 contains
 
 
+  module function vector_int32_t_rangeConstructor (e, b, s) result(vec)
+      ! Synopsis: Creates a vector from asymmetric range.
+      type(vector_t), allocatable :: vec
+      integer(kind = int64) :: numel, count
+      integer(kind = int64) :: bounds(0:1)
+      integer(kind = int32), intent(in), optional :: b  !! begin
+      integer(kind = int32), intent(in)           :: e  !! end
+      integer(kind = int32), intent(in), optional :: s  !! step
+      integer(kind = int32) :: begin, final, step
+      integer(kind = int32) :: diff, delta
+      integer(kind = int32) :: value, last
+      integer(kind = int32) :: mstat
+      character(len=*), parameter :: name = 'dynamic::vector.error:'
+      character(len=*), parameter :: errmsg_i32 = name // ' ' // &
+          & 'container of 32-bit integers'
+      character(len=*), parameter :: unimplmntd = name // ' ' // &
+          & 'unimplemented vector<T>'
+      character(len=*), parameter :: unexpected = name // ' ' // &
+          & 'unimplemented vector<T>'
+
+      call defaults             !! uses defaults for optional args
+      call counter              !! counters invalid input
+      call alloc                !! allocates memory for vector
+      call init                 !! initializes the vector components
+      call tailor               !! tailors the vector to store array
+      call error                !! sets the internal error message
+      call insert               !! pushes array unto back of vector
+      call valid                !! validates iterator(s)
+
+      vec % state % init = .true.
+
+      return
+      contains
+
+          subroutine defaults
+              ! sets the `defaults' for the asymmetric range
+
+              if ( present(b) ) then
+                  begin = b
+              else
+                  begin = 0
+              end if
+
+              if ( present(s) ) then
+                  step = s
+              else
+                  step = 1
+              end if
+
+              final = e
+
+              return
+          end subroutine defaults
+
+
+          subroutine counter
+
+              diff = final - begin
+              if (diff * step <= 0) then
+                  ! caters infinite loops
+                  begin = final
+              end if
+
+              if (step == 0) then
+                  ! caters division by zero
+                  step = 1
+              end if
+
+              return
+          end subroutine
+
+
+          subroutine alloc
+              ! allocates memory for a vector
+
+              allocate (vec, stat=mstat)
+              if (mstat /= 0) then
+                  error stop 'vector(): memory allocation error'
+              end if
+
+              return
+          end subroutine
+
+
+          subroutine init
+              ! provides initial values to the vector components
+
+              call instantiate (vec)
+
+              return
+          end subroutine
+
+
+          subroutine tailor
+              ! tailors the vector to `fit' the range
+
+              value = final
+              diff  = final - begin
+              delta = diff - mod(diff, step)
+              last  = begin + delta
+              numel = int( delta / step, kind=int64 )
+              vec % limit % idx = max(VECTOR_MIN_SIZE, numel)
+
+              bounds(0) = 0_int64
+              bounds(1) = vec % limit % idx
+              call allocator (bounds, vec % array % values, value)
+
+              return
+          end subroutine
+
+
+          subroutine error
+              ! defines the internal error message of vector
+
+              associate (values => vec % array % values)
+                  select type (values)
+                      type is ( integer(kind = int32) )
+                          call allocator      (vec, errmsg_i32)
+                          vec % state % errmsg(:) = errmsg_i32
+                      class default
+                          error stop unimplmntd
+                  end select
+              end associate
+
+              return
+          end subroutine error
+
+
+          subroutine insert
+              ! inserts values unto the back of vector
+
+              associate (avail  => vec % avail % idx, &
+                       & values => vec % array % values)
+
+                  select type (values)
+                      type is ( integer(kind = int32) )
+
+                          value = begin
+                          count = 0_int64
+                          do while (value /= last)
+
+                              values(count) = value
+
+                              count = count + 1_int64
+                              value = value + step
+                          end do
+
+                      class default
+                          error stop unexpected
+                  end select
+
+                  avail = avail + count
+              end associate
+
+              return
+          end subroutine insert
+
+
+          subroutine valid
+              ! validates iterators by re-associating them
+
+              call vector_validate_iterator (vec)
+
+              return
+          end subroutine
+
+  end function vector_int32_t_rangeConstructor
+
+
   module function vector_int32_t_arrayConstructor (array) result(vec)
       ! Synopsis: Creates a vector from array.
       type(vector_t), allocatable :: vec
