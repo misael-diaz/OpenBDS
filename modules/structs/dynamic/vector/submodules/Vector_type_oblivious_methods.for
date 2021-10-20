@@ -411,19 +411,33 @@ contains
 
                   b = vector % begin % idx
                   e = vector % avail % idx - 1_int64
-                  vector % deref % it => vector % array % values(b:e)
+                  if (e >= b) then
+                      vector % deref % it => vector % array % values(b:e)
+                  else
+                      vector % deref % it => null()
+                  end if
 
               type is ( integer(kind = int64) ) !! vector<int64_t>
 
                   b = vector % begin % idx
                   e = vector % avail % idx - 1_int64
-                  vector % deref % it => vector % array % values(b:e)
+                  if (e >= b) then
+                      vector % deref % it => vector % array % values(b:e)
+                  else
+                      vector % deref % it => null()
+                  end if
+
 
               type is ( real(kind = real64) )   !! vector<real64_t>
 
                   b = vector % begin % idx
                   e = vector % avail % idx - 1_int64
-                  vector % deref % it => vector % array % values(b:e)
+                  if (e >= b) then
+                      vector % deref % it => vector % array % values(b:e)
+                  else
+                      vector % deref % it => null()
+                  end if
+
 
               class default
                   error stop 'validate iterators: unexpected error'
