@@ -137,6 +137,17 @@ module VectorClass
   end type
 
 
+  type, public :: arange_t
+      private
+      class(*), allocatable :: b
+      class(*), allocatable :: e
+      class(*), allocatable :: s
+      contains
+        private
+        final :: destructor_arange_t
+  end type
+
+
   type, public :: vector_t
       private
       type(iter_t), allocatable, public :: deref
@@ -188,9 +199,16 @@ module VectorClass
   end type
 
 
+  interface arange_t
+      module procedure arange_int32_t_constructor
+      module procedure arange_int64_t_constructor
+  end interface
+
+
   interface vector_t
       module procedure default_constructor
       module procedure vector_int32_t_rangeConstructor
+      module procedure vector_rangeConstructor
       module procedure vector_int32_t_arrayConstructor
       module procedure vector_int64_t_arrayConstructor
       module procedure vector_real64_t_arrayConstructor
@@ -207,6 +225,8 @@ module VectorClass
       module procedure allocate_data_t
       module procedure allocate_stat_t
       module procedure allocate_vector_t
+      module procedure arange_int32_t_allocate_dynamic
+      module procedure arange_int64_t_allocate_dynamic
       module procedure vector_allocate_errmsg
       module procedure vector_allocate_array_vector_t
       module procedure vector_int32_t_allocate_dynamic
@@ -373,6 +393,12 @@ module VectorClass
     end function
 
 
+    module function vector_rangeConstructor (arange) result(vec)
+        type(vector_t), allocatable :: vec
+        type(arange_t), intent(in), target :: arange
+    end function
+
+
     module function vector_int32_t_rangeConstructor (e, b, s) result(vec)
         ! Synopsis: Creates vector from asymmetric range.
         type(vector_t), allocatable :: vec
@@ -380,6 +406,19 @@ module VectorClass
         integer(kind = int32), intent(in), optional :: b        !! begin
         integer(kind = int32), intent(in), optional :: s        !! step
     end function
+
+
+    module subroutine vector_int32_t_range_constructor (vec, arange)
+      ! Synopsis: Creates a vector from asymmetric range.
+      type(vector_t), intent(inout), allocatable :: vec
+      type(arange_t), intent(in), target :: arange
+    end subroutine
+
+
+    module subroutine vector_int64_t_range_constructor (vec, arange)
+      type(vector_t), intent(inout), allocatable :: vec
+      type(arange_t), intent(in), target :: arange
+    end subroutine
 
 
     module function vector_int32_t_arrayConstructor (array) result(vec)
@@ -1111,6 +1150,34 @@ module VectorClass
     end subroutine
 
 
+    module function arange_int32_t_constructor (e, b, s) result(arange)
+        type(arange_t), target :: arange
+        integer(kind = int32), intent(in), optional :: b
+        integer(kind = int32), intent(in) :: e
+        integer(kind = int32), intent(in), optional :: s
+    end function
+
+
+    module function arange_int64_t_constructor (e, b, s) result(arange)
+        type(arange_t), target :: arange
+        integer(kind = int64), intent(in), optional :: b
+        integer(kind = int64), intent(in) :: e
+        integer(kind = int64), intent(in), optional :: s
+    end function
+
+
+    module subroutine arange_int32_t_allocate_dynamic (p, value)
+        class(*), intent(inout), allocatable :: p
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+
+    module subroutine arange_int64_t_allocate_dynamic (p, value)
+        class(*), intent(inout), allocatable :: p
+        integer(kind = int64), intent(in) :: value
+    end subroutine
+
+
     module subroutine allocate_vector_t (v)
         type(vector_t), intent(inout) :: v
     end subroutine
@@ -1236,6 +1303,11 @@ module VectorClass
 !       integer(kind = int64), intent(in) :: i
 !       character(len = 64) :: str
 !   end function
+
+
+    module subroutine destructor_arange_t (arange)
+        type(arange_t), intent(inout) :: arange
+    end subroutine
 
 
     module subroutine destructor_iter_t (i)

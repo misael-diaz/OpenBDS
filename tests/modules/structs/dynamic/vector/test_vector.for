@@ -25,7 +25,7 @@
 
 module vector_class_tests
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
-    use VectorClass, only: vector_t
+    use VectorClass, only: vector_t, arange_t
     use chronos, only: chronom
     implicit none
     integer(kind = int64), parameter :: max_vector_size = 1048576_int64
@@ -66,7 +66,9 @@ module vector_class_tests
             ! [x] checks that non-allocatable vector of vectors is totally
             !     destroyed (no memory leaks)
 
+            type(arange_t) :: arange
             type(vector_t), allocatable :: vector
+            type(vector_t), allocatable :: veci64
             type(vector_t), allocatable :: reverse
             type(vector_t), allocatable :: avector
             type(vector_t), allocatable :: vec_one
@@ -79,8 +81,9 @@ module vector_class_tests
             type(vector_t), allocatable :: avofvec
             type(vector_t) :: yavofvec
             class(*), pointer, contiguous :: iter(:) => null()
+            class(*), pointer, contiguous :: it(:) => null()
             integer(kind = int64) :: count
-            integer(kind = int64) :: diff(8)
+            integer(kind = int64) :: diff(9)
             integer(kind = int32) :: i, j
             integer(kind = int32) :: mstat
             integer(kind = int32), parameter :: array(*) = [(i, i = 0, 63)]
@@ -97,20 +100,24 @@ module vector_class_tests
 
             allocate (vector, vec_one, vec_rng, vec_small, vec_empty, &
                     & vecinv, avector, vofvec,  avofvec,   empty,     &
-                    & reverse, stat=mstat)
+                    & reverse, veci64, stat=mstat)
             if (mstat /= 0) error stop 'test-range: allocation error'
 
+
+            ! creates an asymmetric range
+            arange = arange_t ( int(numel, kind = int64) )
 
             ! creates vectors
             vector    = vector_t (numel)   !! asymmetric range [0, numel)
 !!          vector    = vector_t (b = 0,  e = numel, s = 1) !! equivalent
-            reverse   = vector_t (b = 63, e = 0,     s = -1)
-            vec_one   = vector_t (1)
-            vec_rng   = vector_t (b = 1, e = 12, s = 3)
-            vec_small = vector_t (4)
-            vec_empty = vector_t (0)
-            empty     = vector_t (0)
-            vecinv    = vector_t (b = 0, e = -numel, s = -1)
+            veci64    = vector_t (arange)
+            reverse   = vector_t ( arange_t(b = 63, e = 0, s = -1) )
+            vec_one   = vector_t ( arange_t(1) )
+            vec_rng   = vector_t ( arange_t(b = 1, e = 12, s = 3) )
+            vec_small = vector_t ( arange_t(4) )
+            vec_empty = vector_t ( arange_t(0) )
+            empty     = vector_t ( arange_t(b=0, e=8, s=-1) )
+            vecinv    = vector_t ( arange_t(b = 0, e = -numel, s = -1) )
             vofvec    = vector_t (int(numel, kind = int64), vec_empty)
             avector   = vec_empty
 
@@ -197,11 +204,10 @@ module vector_class_tests
                 select type (iter)
                     type is (vector_t)
                         do i = 1, numel
-                            associate (it => iter(i) % deref % it)
-                                if ( associated(it) ) then
-                                    count = count + 1_int64
-                                end if
-                            end associate
+                            it => iter(i) % deref % it
+                            if ( associated(it) ) then
+                                count = count + 1_int64
+                            end if
                         end do
                     class default
                         error stop errmsg
@@ -233,6 +239,16 @@ module vector_class_tests
             end select
 
 
+            associate (it => veci64 % deref % it)
+                select type (it)
+                    type is ( integer(kind = int64) )
+                        diff(9) = sum( it - int(array, kind = int64) )
+                    class default
+                        error stop errmsg
+                end select
+            end associate
+
+
             write (*, '(A)', advance='no') &
                 & '[00] test-vector-range-constructor(): '
             if ( vector % size() /= int(numel, kind = int64) ) then
@@ -255,6 +271,8 @@ module vector_class_tests
                 print *, 'FAIL'
             else if (diff(7) /= 0_int64 .or. diff(8) /= 0_int64) then
                 print *, 'FAIL'
+            else if (diff(9) /= 0_int64) then
+                print *, 'FAIL'
             else if (count /= 0_int64) then
                 print *, 'FAIL'
             else
@@ -264,7 +282,7 @@ module vector_class_tests
 
             deallocate (vector, vec_one, vec_rng, vec_small, vec_empty, &
                       & vecinv, avector, vofvec,  avofvec,   empty,     &
-                      & reverse)
+                      & reverse, veci64)
 
             return
         end subroutine test_vector_range_constructor
