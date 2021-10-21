@@ -28,6 +28,154 @@ implicit none
 contains
 
 
+  module function arange_int32_t_constructor (e, b, s) result(arange)
+      ! Synopsis: Creates an asymmetric range of 32-bit integers.
+      type(arange_t), target :: arange
+      class(*), pointer :: p_begin => null()
+      class(*), pointer :: p_end   => null()
+      class(*), pointer :: p_step  => null()
+      integer(kind = int32), intent(in) :: e            !! end
+      integer(kind = int32), intent(in), optional :: b  !! begin
+      integer(kind = int32), intent(in), optional :: s  !! step
+      integer(kind = int32) :: begin, final, step
+
+      call allocator (arange % b, e)
+      call allocator (arange % e, e)
+      call allocator (arange % s, e)
+
+      ! uses the defaults for the optional arguments
+      if ( present(b) ) then
+          begin = b
+      else
+          begin = 0
+      end if
+
+      final = e
+
+      if ( present(s) ) then
+          step = s
+      else
+          step = 1
+      end if
+
+      ! sets the arange components
+      p_begin => arange % b
+      select type (p_begin)
+          type is ( integer(kind = int32) )
+              p_begin = begin
+          class default
+              error stop 'arange: unexpected error'
+      end select
+
+      p_end => arange % e
+      select type (p_end)
+          type is ( integer(kind = int32) )
+              p_end = final
+          class default
+              error stop 'arange: unexpected error'
+      end select
+
+      p_step => arange % s
+      select type (p_step)
+          type is ( integer(kind = int32) )
+              p_step = step
+          class default
+              error stop 'arange: unexpected error'
+      end select
+
+      return
+  end function arange_int32_t_constructor
+
+
+  module function arange_int64_t_constructor (e, b, s) result(arange)
+      ! Synopsis: Creates an asymmetric range of 64-bit integers.
+      type(arange_t), target :: arange
+      class(*), pointer :: p_begin => null()
+      class(*), pointer :: p_end   => null()
+      class(*), pointer :: p_step  => null()
+      integer(kind = int64), intent(in) :: e            !! end
+      integer(kind = int64), intent(in), optional :: b  !! begin
+      integer(kind = int64), intent(in), optional :: s  !! step
+      integer(kind = int64) :: begin, final, step
+
+      call allocator (arange % b, e)
+      call allocator (arange % e, e)
+      call allocator (arange % s, e)
+
+      ! uses the defaults for the optional arguments
+      if ( present(b) ) then
+          begin = b
+      else
+          begin = 0_int64
+      end if
+
+      final = e
+
+      if ( present(s) ) then
+          step = s
+      else
+          step = 1_int64
+      end if
+
+      ! sets the arange components
+      p_begin => arange % b
+      select type (p_begin)
+          type is ( integer(kind = int64) )
+              p_begin = begin
+          class default
+              error stop 'arange: unexpected error'
+      end select
+
+      p_end => arange % e
+      select type (p_end)
+          type is ( integer(kind = int64) )
+              p_end = final
+          class default
+              error stop 'arange: unexpected error'
+      end select
+
+      p_step => arange % s
+      select type (p_step)
+          type is ( integer(kind = int64) )
+              p_step = step
+          class default
+              error stop 'arange: unexpected error'
+      end select
+
+      return
+  end function arange_int64_t_constructor
+
+
+  module subroutine arange_int32_t_allocate_dynamic (p, value)
+      class(*), intent(inout), allocatable :: p
+      integer(kind = int32), intent(in) :: value
+      integer(kind = int32) :: mstat
+
+      allocate (p, mold = value, stat = mstat)
+
+      if (mstat /= 0) then
+          error stop 'allocator: allocation error'
+      end if
+
+      return
+  end subroutine
+
+
+  module subroutine arange_int64_t_allocate_dynamic (p, value)
+      class(*), intent(inout), allocatable :: p
+      integer(kind = int64), intent(in) :: value
+      integer(kind = int32) :: mstat
+
+      allocate (p, mold = value, stat = mstat)
+
+      if (mstat /= 0) then
+          error stop 'allocator: allocation error'
+      end if
+
+      return
+  end subroutine
+
+
   module subroutine allocate_vector_t (v)
       ! Synopsis: Allocates memory for the vector components.
       type(vector_t), intent(inout) :: v
@@ -521,7 +669,7 @@ contains
   end subroutine
 
 
-  pure subroutine increase_container_size (vector, alloc)
+  module pure subroutine increase_container_size (vector, alloc)
       ! Synopsis:
       ! Doubles the vector-size at most, complains if doing so would yield
       ! an ill-formed object.
@@ -581,6 +729,31 @@ contains
 !
 !           return
 !       end function
+
+
+  module subroutine destructor_arange_t (arange)
+      type(arange_t), intent(inout) :: arange
+      integer(kind = int32) :: mstat
+      character(*), parameter :: errmsg = &
+          & "arange.destructor(): unexpected deallocation error"
+
+      if ( allocated(arange % b) ) then
+          deallocate (arange % b, stat=mstat)
+          if (mstat /= 0) error stop errmsg
+      end if
+
+      if ( allocated(arange % e) ) then
+          deallocate (arange % e, stat=mstat)
+          if (mstat /= 0) error stop errmsg
+      end if
+
+      if ( allocated(arange % s) ) then
+          deallocate (arange % s, stat=mstat)
+          if (mstat /= 0) error stop errmsg
+      end if
+
+      return
+  end subroutine
 
 
   module subroutine destructor_iter_t (i)

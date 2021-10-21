@@ -350,7 +350,7 @@ contains
   end subroutine vector_vector_t_copy
 
 
-  subroutine vector_print_container_address_method (self)
+  module subroutine vector_print_container_address_method (self)
       class(vector_t), intent(in) :: self
 
 
