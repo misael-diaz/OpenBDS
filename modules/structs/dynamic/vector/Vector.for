@@ -121,6 +121,12 @@ module VectorClass
 
   integer(kind = int64), parameter :: VECTOR_MIN_SIZE = 8_int64
 
+
+  type, public :: pointer_t
+      class(*), pointer :: p => null()
+  end type
+
+
   type :: iter_t
       class(*), pointer, contiguous :: it(:) => null()
       integer(kind = int64) :: idx = 0_int64
@@ -169,10 +175,12 @@ module VectorClass
         procedure :: vector_int64_t_push_back_method
         procedure :: vector_real64_t_push_back_method
         procedure :: vector_vector_t_push_back_method
+        procedure :: vector_pointer_t_push_back_method
         procedure :: vector_int32_t_push_back_array_method
         procedure :: vector_int64_t_push_back_array_method
         procedure :: vector_real64_t_push_back_array_method
         procedure :: vector_vector_t_push_back_array_method
+        procedure :: vector_pointer_t_push_back_array_method
 !       procedure :: vector_int32_t_erase_method
         generic, public :: assignment(=) => vector_vector_t_copy_method
         generic, public :: get  => vector_int32_t_indexing_method, &
@@ -187,10 +195,12 @@ module VectorClass
                               & vector_int64_t_push_back_method, &
                               & vector_real64_t_push_back_method,&
                               & vector_vector_t_push_back_method,&
+                              & vector_pointer_t_push_back_method,&
                               & vector_int32_t_push_back_array_method, &
                               & vector_int64_t_push_back_array_method, &
                               & vector_real64_t_push_back_array_method,&
-                              & vector_vector_t_push_back_array_method
+                              & vector_vector_t_push_back_array_method,&
+                              & vector_pointer_t_push_back_array_method
         procedure, public :: size => size_method
         procedure, public :: clear => clear_method
         procedure, public :: addr => vector_print_container_address_method
@@ -229,10 +239,12 @@ module VectorClass
       module procedure arange_int64_t_allocate_dynamic
       module procedure vector_allocate_errmsg
       module procedure vector_allocate_array_vector_t
+      module procedure vector_allocate_array_pointer_t
       module procedure vector_int32_t_allocate_dynamic
       module procedure vector_int64_t_allocate_dynamic
       module procedure vector_real64_t_allocate_dynamic
       module procedure vector_vector_t_allocate_dynamic
+      module procedure vector_pointer_t_allocate_dynamic
       module procedure util_allocate_array_int32_by_bounds
       module procedure util_allocate_array_int64_by_bounds
       module procedure util_allocate_array_real64_by_bounds
@@ -241,10 +253,12 @@ module VectorClass
 
   interface reallocator
       module procedure vector_allocate_array_vector_t
+      module procedure vector_allocate_array_pointer_t
       module procedure vector_int32_t_allocate_dynamic
       module procedure vector_int64_t_allocate_dynamic
       module procedure vector_real64_t_allocate_dynamic
       module procedure vector_vector_t_allocate_dynamic
+      module procedure vector_pointer_t_allocate_dynamic
       module procedure util_reallocate_array_int32_by_bounds
   end interface
 
@@ -256,6 +270,7 @@ module VectorClass
       module procedure vector_int32_t_deallocate_dynamic
       module procedure vector_int64_t_deallocate_dynamic
       module procedure vector_vector_t_deallocate_dynamic
+      module procedure vector_pointer_t_deallocate_dynamic
       module procedure util_deallocate_array_int32
       module procedure util_deallocate_array_int64
   end interface
@@ -266,10 +281,12 @@ module VectorClass
       module procedure vector_int64_t_initializer
       module procedure vector_real64_t_initializer
       module procedure vector_vector_t_initializer
+      module procedure vector_pointer_t_initializer
       module procedure vector_int32_t_initializerArray
       module procedure vector_int64_t_initializerArray
       module procedure vector_real64_t_initializerArray
       module procedure vector_vector_t_initializerArray
+      module procedure vector_pointer_t_initializerArray
   end interface
 
 
@@ -278,10 +295,12 @@ module VectorClass
       module procedure vector_int64_t_create
       module procedure vector_real64_t_create
       module procedure vector_vector_t_create
+      module procedure vector_pointer_t_create
       module procedure vector_int32_t_createArray
       module procedure vector_int64_t_createArray
       module procedure vector_real64_t_createArray
       module procedure vector_vector_t_createArray
+      module procedure vector_pointer_t_createArray
   end interface
 
 
@@ -290,10 +309,12 @@ module VectorClass
       module procedure vector_int64_t_push_back
       module procedure vector_real64_t_push_back
       module procedure vector_vector_t_push_back
+      module procedure vector_pointer_t_push_back
       module procedure vector_int32_t_push_back_array
       module procedure vector_int64_t_push_back_array
       module procedure vector_real64_t_push_back_array
       module procedure vector_vector_t_push_back_array
+      module procedure vector_pointer_t_push_back_array
   end interface
 
 
@@ -302,10 +323,12 @@ module VectorClass
       module procedure vector_int64_t_insert_back
       module procedure vector_real64_t_insert_back
       module procedure vector_vector_t_insert_back
+      module procedure vector_pointer_t_insert_back
       module procedure vector_int32_t_insert_back_array
       module procedure vector_int64_t_insert_back_array
       module procedure vector_real64_t_insert_back_array
       module procedure vector_vector_t_insert_back_array
+      module procedure vector_pointer_t_insert_back_array
   end interface
 
 
@@ -328,10 +351,12 @@ module VectorClass
       module procedure vector_int64_t_grow
       module procedure vector_real64_t_grow
       module procedure vector_vector_t_grow
+      module procedure vector_pointer_t_grow
       module procedure vector_int32_t_growArray
       module procedure vector_int64_t_growArray
       module procedure vector_real64_t_growArray
       module procedure vector_vector_t_growArray
+      module procedure vector_pointer_t_growArray
   end interface
 
 
@@ -340,14 +365,17 @@ module VectorClass
       module procedure vector_int64_t_push
       module procedure vector_real64_t_push
       module procedure vector_vector_t_push
+      module procedure vector_pointer_t_push
       module procedure vector_int32_t_push_n_copies
       module procedure vector_int64_t_push_n_copies
       module procedure vector_real64_t_push_n_copies
       module procedure vector_vector_t_push_n_copies
+      module procedure vector_pointer_t_push_n_copies
       module procedure vector_int32_t_push_array
       module procedure vector_int64_t_push_array
       module procedure vector_real64_t_push_array
       module procedure vector_vector_t_push_array
+      module procedure vector_pointer_t_push_array
   end interface
 
 
@@ -362,6 +390,7 @@ module VectorClass
       module procedure vector_int64_t_backup
       module procedure vector_real64_t_backup
       module procedure vector_vector_t_backup
+      module procedure vector_pointer_t_backup
   end interface
 
 
@@ -370,6 +399,7 @@ module VectorClass
       module procedure vector_int64_t_restore
       module procedure vector_real64_t_restore
       module procedure vector_vector_t_restore
+      module procedure vector_pointer_t_restore
   end interface
 
 
@@ -608,6 +638,12 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_pointer_t_push_back_method (self, value)
+        class(vector_t), intent(inout) :: self
+        type(pointer_t), intent(in) :: value
+    end subroutine
+
+
     module subroutine vector_int32_t_push_back_array_method (self, array)
         class(vector_t), intent(inout) :: self
         integer(kind = int32), intent(in) :: array(:)
@@ -629,6 +665,12 @@ module VectorClass
     module subroutine vector_vector_t_push_back_array_method (self, array)
         class(vector_t), intent(inout) :: self
         type(vector_t), intent(in) :: array(:)
+    end subroutine
+
+
+    module subroutine vector_pointer_t_push_back_array_method (self, array)
+        class(vector_t), intent(inout) :: self
+        type(pointer_t), intent(in) :: array(:)
     end subroutine
 
 
@@ -656,6 +698,12 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_pointer_t_push_back (vector, value)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: value
+    end subroutine
+
+
     module subroutine vector_int32_t_push_back_array (vector, array)
         type(vector_t), intent(inout) :: vector
         integer(kind = int32), intent(in) :: array(:)
@@ -677,6 +725,12 @@ module VectorClass
     module subroutine vector_vector_t_push_back_array (vector, array)
         type(vector_t), intent(inout) :: vector
         type(vector_t), intent(in) :: array(:)
+    end subroutine
+
+
+    module subroutine vector_pointer_t_push_back_array (vector, array)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: array(:)
     end subroutine
 
 
@@ -707,6 +761,12 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_pointer_t_insert_back (vector, value)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: value
+    end subroutine
+
+
     module subroutine vector_int32_t_insert_back_array (vector, array)
         ! Synopsis: Inserts array unto back, grows vector if needed.
         type(vector_t), intent(inout) :: vector
@@ -729,6 +789,12 @@ module VectorClass
     module subroutine vector_vector_t_insert_back_array (vector, array)
         type(vector_t), intent(inout) :: vector
         type(vector_t), intent(in) :: array(:)
+    end subroutine
+
+
+    module subroutine vector_pointer_t_insert_back_array (vector, array)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: array(:)
     end subroutine
 
 
@@ -757,6 +823,12 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_pointer_t_grow (vector, value)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: value
+    end subroutine
+
+
     module subroutine vector_int32_t_growArray (vector, values)
         ! Synopsis: Grows vector so that it can store the array `values'.
         type(vector_t), intent(inout) :: vector
@@ -782,6 +854,12 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_pointer_t_growArray (vector, values)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: values(:)
+    end subroutine
+
+
     module subroutine vector_int32_t_backup (vector, array)
         type(vector_t), intent(in) :: vector
         integer(kind = int32), intent(inout), allocatable :: array(:)
@@ -803,6 +881,12 @@ module VectorClass
     module subroutine vector_vector_t_backup (vector, array)
         type(vector_t), intent(in) :: vector
         type(vector_t), intent(inout), allocatable :: array(:)
+    end subroutine
+
+
+    module subroutine vector_pointer_t_backup (vector, array)
+        type(vector_t), intent(in) :: vector
+        type(pointer_t), intent(inout), allocatable :: array(:)
     end subroutine
 
 
@@ -834,6 +918,13 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_pointer_t_restore (vector, array, value)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: array(:)
+        type(pointer_t), intent(in) :: value
+    end subroutine
+
+
     module pure subroutine vector_int32_t_push (vector, value)
         type(vector_t), intent(inout), target :: vector
         integer(kind = int32), intent(in) :: value
@@ -855,6 +946,12 @@ module VectorClass
     module subroutine vector_vector_t_push (vector, value)
         type(vector_t), intent(inout), target :: vector
         type(vector_t), intent(in) :: value
+    end subroutine
+
+
+    module subroutine vector_pointer_t_push (vector, value)
+        type(vector_t), intent(inout), target :: vector
+        type(pointer_t), intent(in) :: value
     end subroutine
 
 
@@ -886,6 +983,13 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_pointer_t_push_n_copies (vector, n, value)
+        type(vector_t), intent(inout), target :: vector
+        type(pointer_t), intent(in) :: value
+        integer(kind = int64), intent(in) :: n
+    end subroutine
+
+
     module pure subroutine vector_int32_t_push_array (vector, array)
         type(vector_t), intent(inout), target :: vector
         integer(kind = int32), intent(in) :: array(:)
@@ -907,6 +1011,12 @@ module VectorClass
     module subroutine vector_vector_t_push_array (vector, array)
         type(vector_t), intent(inout), target :: vector
         type(vector_t), intent(in) :: array(:)
+    end subroutine
+
+
+    module subroutine vector_pointer_t_push_array (vector, array)
+        type(vector_t), intent(inout), target :: vector
+        type(pointer_t), intent(in) :: array(:)
     end subroutine
 
 
@@ -968,6 +1078,12 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_pointer_t_initializer (vector, value)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: value
+    end subroutine
+
+
     module subroutine vector_int32_t_initializerArray (vector, array)
         ! Synopsis: Initializes a vector from array.
         type(vector_t), intent(inout) :: vector
@@ -990,6 +1106,12 @@ module VectorClass
     module subroutine vector_vector_t_initializerArray (vector, array)
         type(vector_t), intent(inout) :: vector
         type(vector_t), intent(in) :: array(:)
+    end subroutine
+
+
+    module subroutine vector_pointer_t_initializerArray (vector, array)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: array(:)
     end subroutine
 
 
@@ -1018,6 +1140,12 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_pointer_t_create (vector, value)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: value
+    end subroutine
+
+
     module subroutine vector_int32_t_createArray (vector, array)
         ! Synopsis: Creates vector from array.
         type(vector_t), intent(inout) :: vector
@@ -1040,6 +1168,12 @@ module VectorClass
     module subroutine vector_vector_t_createArray (vector, array)
         type(vector_t), intent(inout) :: vector
         type(vector_t), intent(in) :: array(:)
+    end subroutine
+
+
+    module subroutine vector_pointer_t_createArray (vector, array)
+        type(vector_t), intent(inout) :: vector
+        type(pointer_t), intent(in) :: array(:)
     end subroutine
 
 
@@ -1237,8 +1371,21 @@ module VectorClass
     end subroutine
 
 
+    module subroutine vector_pointer_t_allocate_dynamic (b, ary, value)
+        type(pointer_t), intent(in) :: value
+        class(*), intent(inout), allocatable :: ary(:)
+        integer(kind = int64), intent(in) :: b(0:1)
+    end subroutine
+
+
     module subroutine vector_allocate_array_vector_t (b, array)
         type(vector_t), intent(inout), allocatable :: array(:)
+        integer(kind = int64), intent(in) :: b(0:1)
+    end subroutine
+
+
+    module subroutine vector_allocate_array_pointer_t (b, array)
+        type(pointer_t), intent(inout), allocatable :: array(:)
         integer(kind = int64), intent(in) :: b(0:1)
     end subroutine
 
@@ -1267,6 +1414,12 @@ module VectorClass
 
     module subroutine vector_vector_t_deallocate_dynamic (array, value)
         type(vector_t), intent(in) :: value
+        class(*), intent(inout), allocatable :: array(:)
+    end subroutine
+
+
+    module subroutine vector_pointer_t_deallocate_dynamic (array, value)
+        type(pointer_t), intent(in) :: value
         class(*), intent(inout), allocatable :: array(:)
     end subroutine
 

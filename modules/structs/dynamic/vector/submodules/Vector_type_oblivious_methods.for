@@ -149,7 +149,9 @@ contains
       type(vector_t), intent(out), target :: to
       type(vector_t), intent(in) :: from
       type(vector_t), allocatable :: aryvec(:)
+      type(pointer_t), allocatable :: aryptr(:)
       type(vector_t) :: vec
+      type(pointer_t) :: ptr
       integer(kind = int64), allocatable :: aryi64(:)
       integer(kind = int32), allocatable :: aryi32(:)
       real(kind = real64), allocatable :: aryr64(:)
@@ -172,6 +174,8 @@ contains
           & 'container of 64-bit reals'
       character(len=*), parameter :: errmsg_vec = name // ' ' // &
           & 'container of vectors'
+      character(len=*), parameter :: errmsg_ptr = name // ' ' // &
+          & 'container of pointers'
 
       call limit        !! defines vector limits
       call init         !! initializes (destination) vector
@@ -230,6 +234,8 @@ contains
                           call backup (from, aryr64)
                       type is (vector_t)
                           call backup (from, aryvec)
+                      type is (pointer_t)
+                          call backup (from, aryptr)
                       class default
                           error stop errmsg
                       end select
@@ -252,6 +258,8 @@ contains
                           call allocator (bounds, to % array % values, r64)
                       type is (vector_t)
                           call allocator (bounds, to % array % values, vec)
+                      type is (pointer_t)
+                          call allocator (bounds, to % array % values, ptr)
                       class default
                           error stop errmsg
                       end select
@@ -287,6 +295,11 @@ contains
                           call allocator      (to, errmsg_vec)
                           to % state % errmsg(:) = errmsg_vec
 
+                      type is (pointer_t)
+
+                          call allocator      (to, errmsg_ptr)
+                          to % state % errmsg(:) = errmsg_ptr
+
                       class default
                           error stop errmsg
 
@@ -310,6 +323,8 @@ contains
                           call push (to, aryr64)
                       type is (vector_t)
                           call push (to, aryvec)
+                      type is (pointer_t)
+                          call push (to, aryptr)
                       class default
                           error stop unexpected
                   end select
@@ -429,6 +444,17 @@ contains
 
 
               type is ( real(kind = real64) )   !! vector<real64_t>
+
+                  b = vector % begin % idx
+                  e = vector % avail % idx - 1_int64
+                  if (e >= b) then
+                      vector % deref % it => vector % array % values(b:e)
+                  else
+                      vector % deref % it => null()
+                  end if
+
+
+              type is (pointer_t)               !! vector<pointer_t>
 
                   b = vector % begin % idx
                   e = vector % avail % idx - 1_int64

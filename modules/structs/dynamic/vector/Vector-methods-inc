@@ -37,6 +37,7 @@ VECTOR_INT32_PUSH_BACK_FOR  = Vector_int32_t_push_back_methods.for
 VECTOR_INT64_PUSH_BACK_FOR  = Vector_int64_t_push_back_methods.for
 VECTOR_REAL64_PUSH_BACK_FOR = Vector_real64_t_push_back_methods.for
 VECTOR_VECTOR_PUSH_BACK_FOR = Vector_vector_t_push_back_methods.for
+VECTOR_POINTER_PUSH_BACK_FOR = Vector_pointer_t_push_back_methods.for
 
 # objects
 VECTOR_MINT32_O             = Vector_int32_t_methods.o
@@ -49,6 +50,7 @@ VECTOR_INT32_PUSH_BACK_O    = Vector_int32_t_push_back_methods.o
 VECTOR_INT64_PUSH_BACK_O    = Vector_int64_t_push_back_methods.o
 VECTOR_REAL64_PUSH_BACK_O   = Vector_real64_t_push_back_methods.o
 VECTOR_VECTOR_PUSH_BACK_O   = Vector_vector_t_push_back_methods.o
+VECTOR_POINTER_PUSH_BACK_O  = Vector_pointer_t_push_back_methods.o
 
 
 ## names relative to makefile
@@ -64,6 +66,7 @@ VECTOR_INT32_PUSH_BACK_SRC  = submodules/$(VECTOR_INT32_PUSH_BACK_FOR)
 VECTOR_INT64_PUSH_BACK_SRC  = submodules/$(VECTOR_INT64_PUSH_BACK_FOR)
 VECTOR_REAL64_PUSH_BACK_SRC = submodules/$(VECTOR_REAL64_PUSH_BACK_FOR)
 VECTOR_VECTOR_PUSH_BACK_SRC = submodules/$(VECTOR_VECTOR_PUSH_BACK_FOR)
+VECTOR_POINTER_PUSH_BACK_SRC = submodules/$(VECTOR_POINTER_PUSH_BACK_FOR)
 
 # objects
 VECTOR_MINT32_OBJ           = submodules/$(VECTOR_MINT32_O)
@@ -76,3 +79,4 @@ VECTOR_INT32_PUSH_BACK_OBJ  = submodules/$(VECTOR_INT32_PUSH_BACK_O)
 VECTOR_INT64_PUSH_BACK_OBJ  = submodules/$(VECTOR_INT64_PUSH_BACK_O)
 VECTOR_REAL64_PUSH_BACK_OBJ = submodules/$(VECTOR_REAL64_PUSH_BACK_O)
 VECTOR_VECTOR_PUSH_BACK_OBJ = submodules/$(VECTOR_VECTOR_PUSH_BACK_O)
+VECTOR_POINTER_PUSH_BACK_OBJ = submodules/$(VECTOR_POINTER_PUSH_BACK_O)

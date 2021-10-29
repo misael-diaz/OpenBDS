@@ -480,8 +480,68 @@ contains
   end subroutine
 
 
+  module subroutine vector_pointer_t_allocate_dynamic (b, ary, value)
+      type(pointer_t), intent(in) :: value
+      integer(kind = int64), intent(in) :: b(0:1)
+      class(*), intent(inout), allocatable :: ary(:)
+      integer(kind = int64):: lb
+      integer(kind = int64):: ub
+      integer(kind = int32):: mstat
+
+
+      if ( allocated(ary) ) then
+
+          deallocate (ary, stat = mstat)
+
+          if (mstat /= 0) then
+              error stop "dynamic::vector.allocate: unexpected error"
+          end if
+
+      end if
+
+
+      lb = b(0)
+      ub = b(1)
+      allocate (ary(lb:ub), mold = value, stat = mstat)
+
+      if (mstat /= 0) then
+          error stop "dynamic::vector.allocate: allocation error"
+      end if
+
+
+      return
+  end subroutine vector_pointer_t_allocate_dynamic
+
+
   module subroutine vector_allocate_array_vector_t (b, array)
       type(vector_t), intent(inout), allocatable :: array(:)
+      integer(kind = int64), intent(in) :: b(0:1)
+      integer(kind = int64):: lb
+      integer(kind = int64):: ub
+      integer(kind = int32):: mstat
+
+
+      if ( allocated(array) ) then
+          deallocate(array, stat = mstat)
+          if (mstat /= 0) then
+              error stop "error allocating array of vectors"
+          end if
+      end if
+
+
+      lb = b(0)
+      ub = b(1)
+      allocate (array(lb:ub), stat = mstat)
+      if (mstat /= 0) then
+          error stop "error allocating array of vectors"
+      end if
+
+      return
+  end subroutine
+
+
+  module subroutine vector_allocate_array_pointer_t (b, array)
+      type(pointer_t), intent(inout), allocatable :: array(:)
       integer(kind = int64), intent(in) :: b(0:1)
       integer(kind = int64):: lb
       integer(kind = int64):: ub
@@ -624,6 +684,28 @@ contains
 
       if (mstat /= 0) then
           print *, value % size ()
+          error stop errmsg
+      end if
+
+      return
+  end subroutine
+
+
+  module subroutine vector_pointer_t_deallocate_dynamic (array, value)
+      type(pointer_t), intent(in) :: value
+      class(*), intent(inout), allocatable :: array(:)
+      integer(kind = int32) :: mstat
+      character(len=*), parameter :: errmsg = &
+          & "dynamic::vector.deallocate_polymorphic: " // &
+          & "deallocation error"
+
+      mstat = 0
+      if ( allocated(array) ) then
+          deallocate (array, stat = mstat)
+      end if
+
+      if (mstat /= 0) then
+          print *, associated(value % p)
           error stop errmsg
       end if
 

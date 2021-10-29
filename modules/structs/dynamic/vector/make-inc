@@ -37,5 +37,6 @@ VECTOR_SUBMOD_OBJ = $(VECTOR_UTILIT_OBJ) $(VECTOR_OBLIVI_OBJ)\
                     $(VECTOR_INT32_PUSH_BACK_OBJ)\
                     $(VECTOR_INT64_PUSH_BACK_OBJ)\
                     $(VECTOR_REAL64_PUSH_BACK_OBJ)\
-                    $(VECTOR_VECTOR_PUSH_BACK_OBJ)
+                    $(VECTOR_VECTOR_PUSH_BACK_OBJ)\
+                    $(VECTOR_POINTER_PUSH_BACK_OBJ)
 #                   $(VECTOR_ERASE_OBJ)

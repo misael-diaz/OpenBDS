@@ -25,7 +25,7 @@
 
 module vector_class_tests
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
-    use VectorClass, only: vector_t, arange_t
+    use VectorClass, only: vector_t, arange_t, pointer_t
     use chronos, only: chronom
     implicit none
     integer(kind = int64), parameter :: max_vector_size = 1048576_int64
@@ -36,6 +36,7 @@ module vector_class_tests
     public :: test_vector_get
     public :: test_vector_push_back
     public :: test_vector_push_back_array
+    public :: test_vector_push_back_pointer
     public :: test_vector_copy
     public :: test_vector_find
     public :: test_vector_clear
@@ -44,6 +45,11 @@ module vector_class_tests
     public :: test_vector_array_vector_t
     public :: test_vector_up_array_vector_t
     public :: test_vector_mold_vector_t
+
+    interface check_diffs
+        module procedure :: vector_pointer_t_check_diffs
+    end interface
+
     contains
 
         subroutine test_vector_range_constructor ()
@@ -384,6 +390,9 @@ module vector_class_tests
             else
                 print *, 'pass'
             end if
+
+            call vofvec % clear ()
+            call vofvec % push_back( veci64 )
 
 
             deallocate (vector, veci64, vecr64, aryvec, vofvec)
@@ -952,6 +961,280 @@ module vector_class_tests
 
             return
         end subroutine test_vector_push_back_array
+
+
+        subroutine test_vector_push_back_pointer ()
+            ! tests pushing a pointer unto the back of a vector
+            type(vector_t) :: vector
+            type(vector_t) :: avector
+            type(vector_t) :: vofvec
+            type(vector_t) :: avofvec
+            type(pointer_t), allocatable :: pointer
+            class(*), pointer :: p => null()
+            class(*), pointer, contiguous :: iter(:) => null()
+            class(*), allocatable, target :: up_x, up_y, up_z
+            integer(kind = int64), parameter :: x = 16_int64
+            integer(kind = int64), parameter :: y = 32_int64
+            integer(kind = int64), parameter :: z = 64_int64
+            integer(kind = int64) :: idx, diff, diffs(2)
+            integer(kind = int32) :: mstat
+            character(*), parameter :: name = &
+                & 'test-vector-push-back-pointer():'
+            character(*), parameter :: unexpected = name // ' ' // &
+                & 'unexpected error'
+            character(*), parameter :: malloc_err = name // ' ' // &
+                & 'memory (de)allocation error'
+
+
+            allocate (pointer, stat=mstat)
+            if (mstat /= 0) then
+                error stop malloc_err
+            end if
+
+            allocate (up_x, source = x, stat=mstat)
+            if (mstat /= 0) then
+                error stop malloc_err
+            end if
+
+            allocate (up_y, source = y, stat=mstat)
+            if (mstat /= 0) then
+                error stop malloc_err
+            end if
+
+            allocate (up_z, source = z, stat=mstat)
+            if (mstat /= 0) then
+                error stop malloc_err
+            end if
+
+
+            pointer % p => up_x
+            print *, loc (pointer % p), loc(up_x)
+            p => pointer % p
+            select type (p)
+                type is ( integer(kind = int64) )
+                    print *, 'value: ', p
+                class default
+                    error stop unexpected
+            end select
+
+            p => up_x
+            select type (p)
+                type is ( integer(kind = int64) )
+                    print *, 'value: ', p
+                class default
+                    error stop unexpected
+            end select
+
+            call vector % push_back (pointer)
+
+            pointer % p => up_y
+            call vector % push_back (pointer)
+
+            pointer % p => up_z
+            call vector % push_back (pointer)
+
+
+            diffs(:) = 0_int64
+            ! checks for data and memory address differences
+            diff = check_diffs (vector, up_x, up_y, up_z, x, y, z, diffs)
+
+
+            write (*, '(A)', advance='no') &
+                & '[00] test-vector-push-back-pointer(): '
+            if ( diff /= 0_int64 ) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            avector = vector    !! copies vector <pointer_t>
+
+            diffs(:) = 0_int64
+            ! checks for differences in the copied vector
+            diff = check_diffs (vector, up_x, up_y, up_z, x, y, z, diffs)
+
+            write (*, '(A)', advance='no') &
+                & '[01] test-vector-push-back-pointer(): '
+            if ( diff /= 0_int64 ) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            do idx = 1_int64, 64_int64
+                call vofvec % push_back (avector)
+            end do
+
+
+            diffs = 0_int64
+            iter => vofvec % deref % it
+            do idx = 1_int64, vofvec % size ()
+
+                select type (iter)
+                    type is (vector_t)
+                        diff = check_diffs (vector, up_x, up_y, up_z, &
+                                              & x, y, z, diffs)
+                    class default
+                        error stop unexpected
+                end select
+
+            end do
+
+
+
+            write (*, '(A)', advance='no') &
+                & '[02] test-vector-push-back-pointer(): '
+            if ( diff /= 0_int64 ) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            avofvec = vofvec
+
+            diffs = 0_int64
+            iter => avofvec % deref % it
+            do idx = 1_int64, avofvec % size ()
+
+                select type (iter)
+                    type is (vector_t)
+                        diff = check_diffs (vector, up_x, up_y, up_z, &
+                                              & x, y, z, diffs)
+                    class default
+                        error stop unexpected
+                end select
+
+            end do
+
+
+            write (*, '(A)', advance='no') &
+                & '[03] test-vector-push-back-pointer(): '
+            if ( diff /= 0_int64 ) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            deallocate (pointer, stat=mstat)
+            if (mstat /= 0) then
+                error stop 'test-push-back-pointer: deallocation error'
+            end if
+
+
+            return
+        end subroutine test_vector_push_back_pointer
+
+
+        function vector_pointer_t_check_diffs (vector, up_x, up_y, up_z, &
+                                             & x, y, z, idiff) result(diff)
+            type(vector_t), intent(in) :: vector
+            class(*), intent(in) :: up_x, up_y, up_z
+            integer(kind = int64), intent(in) :: x, y, z
+            integer(kind = int64), intent(in) :: idiff(:)
+            integer(kind = int64) :: diffs( size(idiff) )
+            integer(kind = int64) :: diff
+            class(*), pointer :: p => null()
+            class(*), pointer, contiguous :: it(:) => null()
+            integer(kind = int64) :: i
+            character(*), parameter :: name = &
+                & 'test-vector-push-back-pointer():'
+            character(*), parameter :: unexpected = name // ' ' // &
+                & 'unexpected error'
+
+            diffs = idiff
+            it => vector % deref % it
+            select type (it)
+                type is (pointer_t)
+
+                    do i = 1_int64, size(array=it, dim=1, kind=int64)
+
+                        select case (i)
+
+
+                            case (1_int64)
+
+                                if ( loc(up_x) /= loc(it(i) % p) ) then
+                                    diffs(1) = diffs(1) + 1_int64
+                                end if
+
+                                p => it(i) % p
+                                select type (p)
+
+                                    type is ( integer(kind = int64) )
+
+                                        if (x /= p) then
+                                            diffs(2) = diffs(2) + 1_int64
+                                        end if
+
+                                    class default
+                                        error stop unexpected
+
+                                end select
+
+
+                            case (2_int64)
+
+                                if ( loc(up_y) /= loc(it(i) % p) ) then
+                                    diffs(1) = diffs(1) + 1_int64
+                                end if
+
+                                p => it(i) % p
+                                select type (p)
+
+                                    type is ( integer(kind = int64) )
+
+                                        if (y /= p) then
+                                            diffs(2) = diffs(2) + 1_int64
+                                        end if
+
+                                    class default
+                                        error stop unexpected
+
+                                end select
+
+
+                            case (3_int64)
+
+                                if ( loc(up_z) /= loc(it(i) % p) ) then
+                                    diffs(1) = diffs(1) + 1_int64
+                                end if
+
+                                p => it(i) % p
+                                select type (p)
+
+                                    type is ( integer(kind = int64) )
+
+                                        if (z /= p) then
+                                            diffs(2) = diffs(2) + 1_int64
+                                        end if
+
+                                    class default
+                                        error stop unexpected
+
+                                end select
+
+
+                            case default
+                                error stop unexpected
+
+
+                        end select
+
+                    end do
+
+                class default
+                    error stop unexpected
+            end select
+
+            diff = sum(diffs)
+
+            return
+        end function vector_pointer_t_check_diffs
+
 
 
         subroutine test_vector_array_vector_t ()
@@ -1536,6 +1819,8 @@ program test_vector_class
     use vector_class_tests, only: push_back => test_vector_push_back
     use vector_class_tests, only: push_back_array => &
                                       & test_vector_push_back_array
+    use vector_class_tests, only: push_back_pointer => &
+                                      & test_vector_push_back_pointer
     use vector_class_tests, only: copy => test_vector_copy
     use vector_class_tests, only: find => test_vector_find
     use vector_class_tests, only: iter => test_vector_iterator
@@ -1554,6 +1839,7 @@ program test_vector_class
     call construct ()
     call push_back ()
     call push_back_array ()
+    call push_back_pointer ()
     call copy ()
     call get ()
     call iter ()
