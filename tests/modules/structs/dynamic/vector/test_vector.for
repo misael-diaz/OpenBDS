@@ -1076,7 +1076,6 @@ module vector_class_tests
             type(vector_t) :: vofvec
             type(vector_t) :: avofvec
             type(pointer_t), allocatable :: pointer
-            class(*), pointer :: p => null()
             class(*), pointer, contiguous :: iter(:) => null()
             class(*), allocatable, target :: up_x, up_y, up_z
             integer(kind = int64), parameter :: x = 16_int64
@@ -1114,23 +1113,6 @@ module vector_class_tests
 
 
             pointer % p => up_x
-            print *, loc (pointer % p), loc(up_x)
-            p => pointer % p
-            select type (p)
-                type is ( integer(kind = int64) )
-                    print *, 'value: ', p
-                class default
-                    error stop unexpected
-            end select
-
-            p => up_x
-            select type (p)
-                type is ( integer(kind = int64) )
-                    print *, 'value: ', p
-                class default
-                    error stop unexpected
-            end select
-
             call vector % push_back (pointer)
 
             pointer % p => up_y
