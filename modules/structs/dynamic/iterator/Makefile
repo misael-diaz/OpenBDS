@@ -2,7 +2,7 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-10-28
 #
 # Synopsis:
 # Builds the OpenBDS modules
@@ -24,19 +24,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include make-inc
 
-all: Vectors LinkedLists Iterators
+all: $(ITER_MODULE_OBJ) $(ITER_SUBMOD_OBJ)
 
-Vectors:
-	@$(MAKE) -C vector
+$(ITER_MODULE_OBJ): $(ITER_MODULE_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(ITER_MODULE_SRC) -o\
+	                                  $(ITER_MODULE_OBJ)
 
-LinkedLists:
-	@$(MAKE) -C linked-list
+$(ITER_IMPLEMENTS_OBJ): $(ITER_MODULE_OBJ) $(ITER_IMPLEMENTS_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c  $(ITER_IMPLEMENTS_SRC) -o\
+	                                   $(ITER_IMPLEMENTS_OBJ)
 
-Iterators:
-	@$(MAKE) -C iterator
+$(ITER_METHODS_OBJ): $(ITER_MODULE_OBJ) $(ITER_METHODS_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(ITER_METHODS_SRC) -o\
+	                                  $(ITER_METHODS_OBJ)
 
 clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C iterator    clean
+	rm -f *.mod *.smod *.o submodules/*.mod \
+	 submodules/*.smod     submodules/*.o

@@ -28,14 +28,19 @@ include ../../../../../modules/chronos/chronos-inc
 include ../../../../../modules/structs/dynamic/vector/Vector-inc
 include ../../../../../modules/structs/dynamic/vector/Vector-methods-inc
 include ../../../../../modules/structs/dynamic/vector/Vector-implements-inc
+include ../../../../../modules/structs/dynamic/iterator/Iterator-inc
+include ../../../../../modules/structs/dynamic/iterator/Iterator-methods-inc
+include ../../../../../modules/structs/dynamic/iterator/Iterator-implements-inc
+
 
 # modules directory
 # modules include
 UTILS_MOD_DIR       = ../../../../../modules/utils
 CHRONOS_MOD_DIR     = ../../../../../modules/chronos
 VECTOR_MOD_DIR      = ../../../../../modules/structs/dynamic/vector
+ITER_MOD_DIR        = ../../../../../modules/structs/dynamic/iterator
 MODULES_INC         = -I$(UTILS_MOD_DIR) -I$(CHRONOS_MOD_DIR)\
-                      -I$(VECTOR_MOD_DIR)
+                      -I$(VECTOR_MOD_DIR) -I$(ITER_MOD_DIR)
 
 # defines relative path for needed (sub)modules
 UTILS_MOD_OBJ       = $(UTILS_MOD_DIR)/$(UTILS_MODULE_OBJ)
@@ -60,6 +65,9 @@ VECTOR_SUB_OBJ      = $(VECTOR_MOD_DIR)/$(VECTOR_UTILIT_OBJ)\
                       $(VECTOR_MOD_DIR)/$(VECTOR_POINTER_PUSH_BACK_OBJ)
 #                     $(VECTOR_MOD_DIR)/$(VECTOR_ERASE_OBJ)
 
+ITER_MOD_OBJ        = $(ITER_MOD_DIR)/$(ITER_MODULE_OBJ)
+ITER_SUB_OBJ        = $(ITER_MOD_DIR)/$(ITER_METHODS_OBJ)\
+                      $(ITER_MOD_DIR)/$(ITER_IMPLEMENTS_OBJ)
 
 # src
 TEST_VECTOR_SRC = test_vector.for
@@ -74,6 +82,8 @@ TEST_VECTOR_EXE = test-vector
 
 
 # bundles (submodules, modules, and executables)
-SUBM  = $(UTILS_SUB_OBJ) $(CHRONOS_SUB_OBJ) $(VECTOR_SUB_OBJ)
-MODS  = $(UTILS_MOD_OBJ) $(CHRONOS_MOD_OBJ) $(VECTOR_MOD_OBJ)
+SUBM  = $(UTILS_SUB_OBJ) $(CHRONOS_SUB_OBJ) $(VECTOR_SUB_OBJ)\
+        $(ITER_SUB_OBJ)
+MODS  = $(UTILS_MOD_OBJ) $(CHRONOS_MOD_OBJ) $(VECTOR_MOD_OBJ)\
+        $(ITER_MOD_OBJ)
 TESTS = $(TEST_VECTOR_EXE)

@@ -26,10 +26,12 @@
 module vector_class_tests
     use, intrinsic :: iso_fortran_env, only: int32, int64, real64
     use VectorClass, only: vector_t, arange_t, pointer_t
+    use RandomAccessIteratorClass, only: iter_t
     use chronos, only: chronom
     implicit none
     integer(kind = int64), parameter :: max_vector_size = 1048576_int64
     private
+    public :: test_vector_based_iterator
     public :: test_vector_range_constructor
     public :: test_vector_array_constructor
     public :: test_vector_fill_constructor
@@ -51,6 +53,110 @@ module vector_class_tests
     end interface
 
     contains
+
+        subroutine test_vector_based_iterator ()
+            type(iter_t) :: iter
+            type(pointer_t) :: p_x, p_y, p_z
+            type(pointer_t), target :: up_x, up_y, up_z
+            class(*), pointer, contiguous :: it(:) => null()
+            integer(kind = int64), parameter :: x = 16_int64
+            integer(kind = int64), parameter :: y = 32_int64
+            integer(kind = int64), parameter :: z = 64_int64
+            integer(kind = int64) :: idx, diffs
+            integer(kind = int32) :: mstat
+            character(*), parameter :: name = 'test-iterator:'
+            character(*), parameter :: malloc_err = name // ' ' // &
+                & 'memory (de)allocation error'
+            character(*), parameter :: unexpected = name // ' ' // &
+                & 'unexpected error'
+
+
+            ! clones unlimited polymorphic object from source
+            allocate (up_x % p, source=x, stat=mstat)
+            if (mstat /= 0) error stop malloc_err
+
+            allocate (up_y % p, source=y, stat=mstat)
+            if (mstat /= 0) error stop malloc_err
+
+            allocate (up_z % p, source=z, stat=mstat)
+            if (mstat /= 0) error stop malloc_err
+
+
+            ! pointer associations
+            p_x % p => up_x % p
+            p_y % p => up_y % p
+            p_z % p => up_z % p
+
+
+            iter = iter_t ()            !! instantiates iterator
+
+
+            ! creates a dynamic array of pointers by insertions
+            call iter % insert (p_x)
+            call iter % insert (p_y)
+            call iter % insert (p_z)
+
+
+            diffs = 0_int64
+            it => iter % deref
+            ! checks for memory address differences
+            select type (it)
+
+                type is (pointer_t)
+
+                    do idx = 1_int64, size(array=it, dim=1, kind=int64)
+                        select case (idx)
+
+                            case (1_int64)
+
+                                if ( loc(up_x % p) /= loc(it(idx)%p) ) then
+                                    diffs = diffs + 1_int64
+                                end if
+
+
+                            case (2_int64)
+
+                                if ( loc(up_y % p) /= loc(it(idx)%p) ) then
+                                    diffs = diffs + 1_int64
+                                end if
+
+
+                            case (3_int64)
+
+                                if ( loc(up_z % p) /= loc(it(idx)%p) ) then
+                                    diffs = diffs + 1_int64
+                                end if
+
+
+                            case default
+                                error stop unexpected
+
+                        end select
+
+                    end do
+
+                class default
+                    error stop unexpected
+
+            end select
+
+
+            write (*, '(A)', advance='no') &
+                & '[00] test-vector-based-iterator(): '
+            if ( diffs /= 0_int64 ) then
+                print *, 'FAIL'
+            else
+                print *, 'pass'
+            end if
+
+
+            deallocate (up_x % p, up_y % p, up_z % p, stat=mstat)
+            if (mstat /= 0) error stop malloc_err
+
+
+            return
+        end subroutine
+
 
         subroutine test_vector_range_constructor ()
             ! tests creating vectors from asymmetric ranges
@@ -1810,6 +1916,8 @@ end module
 
 
 program test_vector_class
+    use vector_class_tests, only: iterator =>&
+                                      & test_vector_based_iterator
     use vector_class_tests, only: range_constructor =>&
                                       & test_vector_range_constructor
     use vector_class_tests, only: array_constructor =>&
@@ -1834,6 +1942,7 @@ program test_vector_class
     implicit none
 
 
+    call iterator ()
     call range_constructor ()
     call array_constructor ()
     call construct ()

@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: Iterator-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-10-28
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +24,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# modules directory
+VECTOR_MOD_DIR = ../vector
+MODULES_INC    = -I$(VECTOR_MOD_DIR)
 
-all: Vectors LinkedLists Iterators
+## names
 
-Vectors:
-	@$(MAKE) -C vector
+# interface
+ITER_MODULE_FOR = Iterator.for
 
-LinkedLists:
-	@$(MAKE) -C linked-list
+# objects
+ITER_MODULE_O   = Iterator.o
 
-Iterators:
-	@$(MAKE) -C iterator
+## names relative to makefile
 
-clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C iterator    clean
+# interface
+ITER_MODULE_SRC = Iterator.for
+
+# objects
+ITER_MODULE_OBJ = $(ITER_MODULE_O)

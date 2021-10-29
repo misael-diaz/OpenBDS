@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: Iterator-implements-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-10-10
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,19 +24,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+## names
 
-all: Vectors LinkedLists Iterators
+# implementations
+ITER_IMPLEMENTS_FOR = Iterator_implementations.for
 
-Vectors:
-	@$(MAKE) -C vector
+# objects
+ITER_IMPLEMENTS_O   = Iterator_implementations.o
 
-LinkedLists:
-	@$(MAKE) -C linked-list
+## names relative to makefile
 
-Iterators:
-	@$(MAKE) -C iterator
+# implementations
+ITER_IMPLEMENTS_SRC = submodules/$(ITER_IMPLEMENTS_FOR)
 
-clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C iterator    clean
+# objects
+ITER_IMPLEMENTS_OBJ = submodules/$(ITER_IMPLEMENTS_O)
