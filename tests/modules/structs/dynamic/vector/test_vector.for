@@ -58,11 +58,12 @@ module vector_class_tests
             type(iter_t) :: iter
             type(pointer_t) :: p_x, p_y, p_z
             type(pointer_t), target :: up_x, up_y, up_z
+            class(*), pointer :: p => null()
             class(*), pointer, contiguous :: it(:) => null()
             integer(kind = int64), parameter :: x = 16_int64
             integer(kind = int64), parameter :: y = 32_int64
             integer(kind = int64), parameter :: z = 64_int64
-            integer(kind = int64) :: idx, diffs
+            integer(kind = int64) :: idx, diffs, count
             integer(kind = int32) :: mstat
             character(*), parameter :: name = 'test-iterator:'
             character(*), parameter :: malloc_err = name // ' ' // &
@@ -98,6 +99,7 @@ module vector_class_tests
 
 
             diffs = 0_int64
+            count = 0_int64
             it => iter % deref
             ! checks for memory address differences
             select type (it)
@@ -133,6 +135,15 @@ module vector_class_tests
 
                         end select
 
+                        p => it(idx) % p
+                        ! accumulates values pointed to by the iterator
+                        select type (p)
+                            type is ( integer(kind = int64) )
+                                count = count + p
+                            class default
+                                error stop unexpected
+                        end select
+
                     end do
 
                 class default
@@ -144,6 +155,8 @@ module vector_class_tests
             write (*, '(A)', advance='no') &
                 & '[00] test-vector-based-iterator(): '
             if ( diffs /= 0_int64 ) then
+                print *, 'FAIL'
+            else if ( count /= sum([x, y, z]) ) then
                 print *, 'FAIL'
             else
                 print *, 'pass'
