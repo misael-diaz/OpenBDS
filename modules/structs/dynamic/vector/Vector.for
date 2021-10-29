@@ -124,6 +124,10 @@ module VectorClass
 
   type, public :: pointer_t
       class(*), pointer :: p => null()
+      contains
+        private
+        procedure :: pointer_associate_method
+        generic, public :: assignment(=) => pointer_associate_method
   end type
 
 
@@ -412,6 +416,16 @@ module VectorClass
 !     module procedure to_string_int32
 !     module procedure to_string_int64
 ! end interface
+
+
+  interface
+
+    module subroutine pointer_associate_method (self, target)
+        class(pointer_t), intent(inout) :: self
+        class(pointer_t), intent(in), target :: target
+    end subroutine
+
+  end interface
 
 
   interface

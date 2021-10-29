@@ -27,6 +27,15 @@ submodule (VectorClass) vector_utils
 implicit none
 contains
 
+  module subroutine pointer_associate_method (self, target)
+      class(pointer_t), intent(inout) :: self
+      class(pointer_t), intent(in), target :: target
+
+      self % p => target % p
+
+      return
+  end subroutine
+
 
   module function arange_int32_t_constructor (e, b, s) result(arange)
       ! Synopsis: Creates an asymmetric range of 32-bit integers.

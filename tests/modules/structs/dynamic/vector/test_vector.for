@@ -83,9 +83,9 @@ module vector_class_tests
 
 
             ! pointer associations
-            p_x % p => up_x % p
-            p_y % p => up_y % p
-            p_z % p => up_z % p
+            p_x = up_x
+            p_y = up_y
+            p_z = up_z
 
 
             iter = iter_t ()            !! instantiates iterator
