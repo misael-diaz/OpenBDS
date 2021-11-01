@@ -59,7 +59,11 @@ contains
        list = list_t ()
        timer = timer_t ()
 
+       write (*, '(A)', advance='no') 'generating vector from range ... '
+
+       call timer % tic ()
        vector = vector_t ( arange_t(numel) )
+       call timer % toc ()
        it => vector % deref % it
 
        select type (it)
@@ -68,6 +72,11 @@ contains
            class default
                error stop 'test-append: unexpected type error'
        end select
+
+
+       print *, 'done'
+       print '(A,F8.2)', "elapsed-time (millis): ", timer % etime ()
+       print *, new_line('n')
 
 
        print *, new_line('n')
