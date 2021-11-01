@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: List-utils-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-10-30
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,23 +24,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+## names
 
-all: Vectors LinkedLists Iterators Lists
+# methods
+LIST_UTILS_FOR = List_utils.for
 
-Vectors:
-	@$(MAKE) -C vector
+# objects
+LIST_UTILS_O   = List_utils.o
 
-LinkedLists:
-	@$(MAKE) -C linked-list
+## names relative to makefile
 
-Iterators: Vectors
-	@$(MAKE) -C iterator
+# methods
+LIST_UTILS_SRC = submodules/$(LIST_UTILS_FOR)
 
-Lists: Iterators
-	@$(MAKE) -C list
-
-clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C iterator    clean
-	@$(MAKE) -C list        clean
+# objects
+LIST_UTILS_OBJ = submodules/$(LIST_UTILS_O)

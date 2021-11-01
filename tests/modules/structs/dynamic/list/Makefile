@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-10-30
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Builds the programs for testing the linked-list class.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,23 +24,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include List-test-inc
 
-all: Vectors LinkedLists Iterators Lists
+all: $(TESTS)
 
-Vectors:
-	@$(MAKE) -C vector
+$(TEST_LIST_EXE): $(SUBM) $(TEST_LIST_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(MODS) $(SUBM)\
+	    $(TEST_LIST_OBJ) -o $(TEST_LIST_EXE)
 
-LinkedLists:
-	@$(MAKE) -C linked-list
+$(TEST_LIST_OBJ): $(MODS) $(TEST_LIST_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_LIST_SRC) -o\
+	        $(TEST_LIST_OBJ)
 
-Iterators: Vectors
-	@$(MAKE) -C iterator
-
-Lists: Iterators
-	@$(MAKE) -C list
 
 clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C iterator    clean
-	@$(MAKE) -C list        clean
+	rm -f *.mod *.smod *.o $(TESTS)
