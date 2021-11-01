@@ -25,6 +25,26 @@
 
 submodule (ListClass) list_methods
 implicit none
+contains
+
+  module function list_random_access_iterator_method (self) result(iter)
+      type(iter_t) :: iter
+      class(list_t), intent(in) :: self
+
+      call iterator (self % head, iter)
+
+      return
+  end function
+
+
+  module subroutine list_int32_t_append_method (self, value)
+      class(list_t), intent(inout) :: self
+      integer(kind = int32), intent(in) :: value
+
+      call append (self, value)
+
+      return
+  end subroutine
 
 end submodule
 

@@ -26,26 +26,28 @@
 module ListClass
   use, intrinsic :: iso_fortran_env, only: int32, int64
   use VectorClass, only: pointer_t
+  use RandomAccessIteratorClass, only: iter_t
   implicit none
   private
-  public :: link_conservative_destructor
-  public :: link_aggressive_destructor
 
-  type, public :: link_t        !! link<*node_t>: pointer to node object
+  type :: link_t        !! link<*node_t>: pointer to node object
+    private
     type(pointer_t) :: node
     contains
       private
       final :: link_finalizer
   end type
 
-  type, public :: data_t
+  type :: data_t
+    private
     type(pointer_t) :: data
     contains
       private
       final :: data_destructor
   end type
 
-  type, public :: node_t        !! node<*data_t>: pointer to data object
+  type :: node_t        !! node<*data_t>: pointer to data object
+    private
     type(data_t) :: item
     type(link_t) :: next
     contains
@@ -56,10 +58,14 @@ module ListClass
   end type
 
   type, public :: list_t
+    private
     type(link_t) :: head
     type(link_t) :: tail
     contains
       private
+      procedure :: list_int32_t_append_method
+      procedure, public :: iterator => list_random_access_iterator_method
+      generic, public :: append => list_int32_t_append_method
       final :: list_finalizer
   end type
 
@@ -75,6 +81,22 @@ module ListClass
   end interface
 
 
+
+  interface iterator
+      module procedure :: list_genIterator
+  end interface
+
+
+  interface append
+      module procedure :: list_int32_t_append
+  end interface
+
+
+  interface create
+      module procedure :: node_int32_t_create
+  end interface
+
+
   interface
 
     module function list_default_constructor () result(list)
@@ -84,6 +106,38 @@ module ListClass
 
     module subroutine list_finalizer (list)
         type(list_t), intent(inout) :: list
+    end subroutine
+
+  end interface
+
+
+  interface
+
+    module function list_random_access_iterator_method (self) result(iter)
+        type(iter_t) :: iter
+        class(list_t), intent(in) :: self
+    end function
+
+
+    module subroutine list_int32_t_append_method (self, value)
+        class(list_t), intent(inout) :: self
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
+  end interface
+
+
+  interface
+
+    module recursive subroutine list_genIterator (link, iter)
+        type(link_t), intent(in), target :: link
+        type(iter_t), intent(inout) :: iter
+    end subroutine
+
+
+    module subroutine list_int32_t_append (list, value)
+        type(list_t), intent(inout) :: list
+        integer(kind = int32), intent(in) :: value
     end subroutine
 
   end interface
@@ -114,6 +168,12 @@ module ListClass
 
 
   interface
+
+    module subroutine node_int32_t_create (link, value)
+        type(link_t), intent(inout) :: link
+        integer(kind = int32), intent(in) :: value
+    end subroutine
+
 
     module subroutine node_assign_method (self, node)
         class(node_t), intent(inout) :: self

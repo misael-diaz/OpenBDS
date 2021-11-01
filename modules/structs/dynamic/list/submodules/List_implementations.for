@@ -27,6 +27,58 @@ submodule (ListClass) list_implements
 implicit none
 contains
 
+  module recursive subroutine list_genIterator (link, iter)
+      ! generates the random-access iterator of the list recursively
+      type(link_t), intent(in), target :: link
+      type(iter_t), intent(inout) :: iter
+      class(*), pointer :: h_node => null()
+      type(node_t), pointer :: node => null()
+
+      h_node => link % node % p
+      select type (h_node)
+          type is (node_t)
+              node => h_node
+          class default
+              error stop 'list<*data_t>.iterator(): unexpected type err'
+      end select
+
+      call iter % insert (node % item % data)
+
+      if ( associated(node % next % node % p) ) then
+          call iterator (node % next, iter)
+      end if
+
+      return
+  end subroutine
+
+  module subroutine list_int32_t_append (list, value)
+      type(list_t), intent(inout) :: list
+      class(*), pointer :: h_node => null()
+      type(node_t), pointer :: node => null()
+      integer(kind = int32), intent(in) :: value
+
+      if ( associated(list % tail % node % p) ) then
+
+          h_node => list % tail % node % p
+          select type (h_node)
+              type is (node_t)
+                  node => h_node
+              class default
+                  error stop 'list<*int32_t>.append(): unexpected type err'
+          end select
+
+          call create (node % next, value)
+          list % tail % node % p => node % next % node % p
+
+      else
+          call create (list % head, value)
+          list % tail % node % p => list % head % node % p
+      end if
+
+      return
+  end subroutine
+
+
   module function list_default_constructor () result(list)
       type(list_t) :: list
 
@@ -35,6 +87,35 @@ contains
 
       return
   end function
+
+
+  module subroutine node_int32_t_create (link, value)
+      ! creates a node<*int32_t>
+      type(link_t), intent(inout) :: link
+      class(*), pointer :: p => null()          !! general purpose pointer
+      class(*), pointer :: h_node => null()     !! node handle
+      type(node_t), pointer :: node => null()   !! node pointer
+      integer(kind = int32), intent(in) :: value
+      integer(kind = int32) :: mstat
+
+      allocate (link % node % p, mold = node_t(), stat = mstat)
+      if (mstat /= 0) error stop 'node<*int32_t>: alloc error'
+
+      h_node => link % node % p
+      select type (h_node)
+          type is (node_t)
+              node => h_node
+          class default
+              error stop 'node<*int32_t>: unexpected type error'
+      end select
+
+      allocate (node % item % data % p, source=value, stat=mstat)
+      if (mstat /= 0) error stop 'node<*int32_t>: alloc error'
+
+      node % next % node % p => null()
+
+      return
+  end subroutine node_int32_t_create
 
 
   module subroutine node_assign_method (self, node)
