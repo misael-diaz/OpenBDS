@@ -25,6 +25,25 @@
 
 submodule (ListClass) list_utils
 implicit none
+contains
+
+  module subroutine associate (node, link)
+      type(link_t), intent(in), target :: link
+      type(node_t), intent(inout), pointer :: node
+      class(*), pointer :: h_node => null()
+
+      h_node => link % node % p
+      select type (h_node)
+          type is (node_t)
+              node => h_node
+          class default
+              error stop 'node<*data_t>.associate(): unexpected type error'
+      end select
+
+      h_node => null()
+
+      return
+  end subroutine
 
 end submodule
 

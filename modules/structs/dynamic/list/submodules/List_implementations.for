@@ -31,16 +31,9 @@ contains
       ! generates the random-access iterator of the list recursively
       type(link_t), intent(in), target :: link
       type(iter_t), intent(inout) :: iter
-      class(*), pointer :: h_node => null()
       type(node_t), pointer :: node => null()
 
-      h_node => link % node % p
-      select type (h_node)
-          type is (node_t)
-              node => h_node
-          class default
-              error stop 'list<*data_t>.iterator(): unexpected type err'
-      end select
+      call associate (node, link)
 
       call iter % insert (node % item % data)
 
@@ -53,20 +46,12 @@ contains
 
   module subroutine list_int32_t_append (list, value)
       type(list_t), intent(inout) :: list
-      class(*), pointer :: h_node => null()
       type(node_t), pointer :: node => null()
       integer(kind = int32), intent(in) :: value
 
       if ( associated(list % tail % node % p) ) then
 
-          h_node => list % tail % node % p
-          select type (h_node)
-              type is (node_t)
-                  node => h_node
-              class default
-                  error stop 'list<*int32_t>.append(): unexpected type err'
-          end select
-
+          call associate (node, list % tail)
           call create (node % next, value)
           list % tail % node % p => node % next % node % p
 
@@ -93,7 +78,6 @@ contains
       ! creates a node<*int32_t>
       type(link_t), intent(inout) :: link
       class(*), pointer :: p => null()          !! general purpose pointer
-      class(*), pointer :: h_node => null()     !! node handle
       type(node_t), pointer :: node => null()   !! node pointer
       integer(kind = int32), intent(in) :: value
       integer(kind = int32) :: mstat
@@ -101,13 +85,7 @@ contains
       allocate (link % node % p, mold = node_t(), stat = mstat)
       if (mstat /= 0) error stop 'node<*int32_t>: alloc error'
 
-      h_node => link % node % p
-      select type (h_node)
-          type is (node_t)
-              node => h_node
-          class default
-              error stop 'node<*int32_t>: unexpected type error'
-      end select
+      call associate (node, link)
 
       allocate (node % item % data % p, source=value, stat=mstat)
       if (mstat /= 0) error stop 'node<*int32_t>: alloc error'
@@ -263,38 +241,25 @@ contains
   module recursive subroutine link_destructor (link)
       ! destroys links to nodes recursively from back to front
       type(link_t), intent(inout) :: link
-      class(*), pointer :: h_node => null()
       class(*), pointer :: h_next => null()
       type(node_t), pointer :: node => null()
       integer(kind = int32) :: mstat
 
 
-      h_node => link % node % p
-      select type (h_node)
-          type is (node_t)
-              node => h_node
-          class default
-              error stop '1 destructor unexpected error'
-      end select
+      call associate (node, link)
 
       h_next => node % next % node % p
       if ( associated(h_next) ) then
 
+
           call link_destructor (node % next)
 
-          h_node => link % node % p
-          select type (h_node)
-              type is (node_t)
-                  node => h_node        !! validates pointer to current
-              class default
-                  error stop '3 destructor unexpected error'
-          end select
+          call associate (node, link)   !! validates pointer to current
 
           deallocate (node, stat=mstat)
           if (mstat /= 0) error stop 'deallocation error'
 
           node => null()
-          h_node => null()
           link % node % p => null()
 
 
@@ -315,18 +280,11 @@ contains
   module recursive subroutine link_aggressive_destructor (link)
       ! destroys links to nodes recursively from back to front
       type(link_t), intent(inout) :: link
-      class(*), pointer :: h_node => null()
       class(*), pointer :: h_next => null()
       type(node_t), pointer :: node => null()
       integer(kind = int32) :: mstat
 
-      h_node => link % node % p
-      select type (h_node)
-          type is (node_t)
-              node => h_node
-          class default
-              error stop '1 destructor unexpected error'
-      end select
+      call associate (node, link)
 
       h_next => node % next % node % p
       if ( associated(h_next) ) then
@@ -335,13 +293,7 @@ contains
           call link_aggressive_destructor (node % next)
 
 
-          h_node => link % node % p
-          select type (h_node)
-              type is (node_t)
-                  node => h_node        !! validates pointer to current
-              class default
-                  error stop '3 destructor unexpected error'
-          end select
+          call associate (node, link)   !! validates pointer to current
 
 
           if ( associated(node % item % data % p) ) then
@@ -359,7 +311,6 @@ contains
 
 
           node => null()
-          h_node => null()
           link % node % p => null()
 
 
@@ -388,18 +339,11 @@ contains
   module recursive subroutine link_conservative_destructor (link)
       ! destroys data in the last node only
       type(link_t), intent(inout) :: link
-      class(*), pointer :: h_node => null()
       class(*), pointer :: h_next => null()
       type(node_t), pointer :: node => null()
       integer(kind = int32) :: mstat
 
-      h_node => link % node % p
-      select type (h_node)
-          type is (node_t)
-              node => h_node
-          class default
-              error stop '1 destructor unexpected error'
-      end select
+      call associate (node, link)
 
       h_next => node % next % node % p
       if ( associated(h_next) ) then

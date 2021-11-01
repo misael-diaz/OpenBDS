@@ -207,4 +207,14 @@ module ListClass
 
   end interface
 
+
+  interface
+
+    module subroutine associate (node, link)
+        type(link_t), intent(in), target :: link
+        type(node_t), intent(inout), pointer :: node
+    end subroutine
+
+  end interface
+
 end module
