@@ -27,6 +27,15 @@ submodule (RandomAccessIteratorClass) iterator_methods
 implicit none
 contains
 
+  module subroutine it_clear_method (iter)
+      class(iter_t), intent(inout) :: iter
+
+      call iter % vector % clear ()
+
+      return
+  end subroutine
+
+
   module subroutine it_insert_method (iter, p)
       class(iter_t), intent(inout) :: iter
       type(pointer_t), intent(in) :: p

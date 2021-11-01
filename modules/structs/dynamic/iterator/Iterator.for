@@ -36,6 +36,7 @@ module RandomAccessIteratorClass
     class(*), pointer, contiguous, public :: deref(:) => null()
     contains
       private
+      procedure, public :: clear  => it_clear_method
       procedure, public :: insert => it_insert_method
       procedure, public :: remove => it_remove_method
       final :: it_destructor
@@ -62,6 +63,11 @@ module RandomAccessIteratorClass
     module function it_default_constructor () result(iter)
         type(iter_t) :: iter
     end function
+
+
+    module subroutine it_clear_method (iter)
+        class(iter_t), intent(inout) :: iter
+    end subroutine
 
 
     module subroutine it_insert_method (iter, p)
