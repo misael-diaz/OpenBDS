@@ -33,6 +33,7 @@ use RandomAccessIteratorClass, only: iterator_t => iter_t
 use chronos, only: timer_t => chronom
 implicit none
 private
+public :: test_list_destructor
 public :: test_list_append_method
 !public :: test_list
 !public :: test_node_contructors
@@ -43,18 +44,25 @@ public :: test_list_append_method
 contains
 
    subroutine test_list_append_method ()
-       type(list_t) :: list
+       type(list_t), allocatable :: list
        type(vector_t) :: vector
        type(iterator_t) :: iterator
        type(timer_t) :: timer
        class(*), pointer :: p => null()
        class(*), pointer, contiguous :: it(:) => null()
+       class(*), pointer, contiguous :: iter(:) => null()
        integer(kind = int32), pointer, contiguous :: array(:) => null()
-       integer(kind = int64) :: idx
-       integer(kind = int32) :: diff
+       integer(kind = int64) :: rep, idx, jdx, n
+       integer(kind = int32) :: diff, mstat
+       integer(kind = int64), parameter :: reps = 4_int64
        integer(kind = int32), parameter :: value = 0
-       integer(kind = int32), parameter :: numel = 65536
+!      integer(kind = int32), parameter :: numel = 65536
+       integer(kind = int32), parameter :: numel = 16384
+       character(*), parameter :: fformat = '(A,F16.2)'
 
+
+       allocate (list, stat=mstat)
+       if (mstat /= 0) error stop 'test-append: allocation error'
 
        list = list_t ()
        timer = timer_t ()
@@ -75,7 +83,7 @@ contains
 
 
        print *, 'done'
-       print '(A,F8.2)', "elapsed-time (millis): ", timer % etime ()
+       print fformat, "elapsed-time (millis): ", timer % etime ()
        print *, new_line('n')
 
 
@@ -89,7 +97,7 @@ contains
        call timer % toc ()
 
        print *, 'done'
-       print '(A,F8.2)', "elapsed-time (millis): ", timer % etime ()
+       print fformat, "elapsed-time (millis): ", timer % etime ()
        print *, new_line('n')
 
 
@@ -102,7 +110,7 @@ contains
        call timer % toc ()
 
        print *, 'done'
-       print '(A,F8.2)', "elapsed-time (millis): ", timer % etime ()
+       print fformat, "elapsed-time (millis): ", timer % etime ()
        print *, new_line('n')
 
 
@@ -112,11 +120,11 @@ contains
 
        call timer % tic ()
        diff = 0
-       it => iterator % deref
-       select type (it)
+       iter => iterator % deref
+       select type (iter)
            type is (pointer_t)
-               do idx = 1_int64, size(array=it, dim=1, kind=int64)
-                   associate (p => it(idx) % p)
+               do idx = 1_int64, size(array=iter, dim=1, kind=int64)
+                   associate (p => iter(idx) % p)
                        select type (p)
                            type is ( integer (kind = int32) )
                                diff = diff + (array(idx) - p)
@@ -131,9 +139,8 @@ contains
        call timer % toc ()
 
        print *, 'done'
-       print '(A,F8.2)', "elapsed-time (millis): ", timer % etime ()
+       print fformat, "elapsed-time (millis): ", timer % etime ()
        print *, new_line('n')
-
 
 
        write (*, '(A)', advance='no') '[00] test-list-append(): '
@@ -143,6 +150,120 @@ contains
            print *, 'pass'
        end if
 
+
+
+       print *, new_line('n')
+       write (*, '(A)', advance='no') &
+           & 'appending more data to list ... '
+
+
+       call timer % tic ()
+       do n = 1_int64, reps
+           do idx = 1_int64, size(array=array, dim=1, kind=int64)
+               call list % append ( array(idx) )
+           end do
+       end do
+       call timer % toc ()
+
+       print *, 'done'
+       print fformat, "elapsed-time (millis): ", timer % etime ()
+       print *, new_line('n')
+
+
+       print *, new_line('n')
+       write (*, '(A)', advance='no') &
+           & 'validating random-access iterator ... '
+
+
+       call timer % tic ()
+       call list % validate (iterator)
+       call timer % toc ()
+
+       print *, 'done'
+       print fformat, "elapsed-time (millis): ", timer % etime ()
+       print *, new_line('n')
+
+
+       print *, new_line('n')
+       write (*, '(A)', advance='no') &
+           & 'traversing random-access iterator ... '
+
+
+       call timer % tic ()
+       iter => iterator % deref
+       select type (iter)
+           type is (pointer_t)
+               do rep = 0_int64, reps
+                   jdx = 1_int64
+                   do idx = 1_int64, size(array=iter, dim=1, kind=int64)
+                       associate (p => iter(idx) % p)
+                           select type (p)
+                               type is ( integer (kind = int32) )
+
+                                   diff = diff + (array(jdx) - p)
+
+                                   if ( jdx == numel ) then
+                                        jdx = 1_int64
+                                   else
+                                        jdx = jdx + 1_int64
+                                   end if
+
+                               class default
+                                   error stop 'unxpctd type error'
+                           end select
+                       end associate
+                   end do
+               end do
+           class default
+               error stop 'test-append: unexpected type error'
+       end select
+       call timer % toc ()
+
+
+       print *, 'done'
+       print fformat, "elapsed-time (millis): ", timer % etime ()
+       print *, new_line('n')
+
+
+       write (*, '(A)', advance='no') '[01] test-list-append(): '
+       if (diff /= 0) then
+           print *, 'FAIL'
+       else
+           print *, 'pass'
+       end if
+
+
+       print *, new_line('n')
+       write (*, '(A)', advance='no') &
+           & 'destroying list (migth take a while) ... '
+
+
+       call timer % tic ()
+       deallocate (list, stat=mstat)
+       if (mstat /= 0) error stop 'test-append: deallocation error'
+       call timer % toc ()
+
+       print *, 'done'
+       print fformat, "elapsed-time (millis): ", timer % etime ()
+       print *, new_line('n')
+
+       return
+   end subroutine
+
+
+   subroutine test_list_destructor ()
+       type(list_t) :: list
+       integer(kind = int32), parameter :: value = 0
+
+       call list % append (value)
+       call list % append (value)
+       call list % append (value)
+       call list % append (value)
+       call list % append (value)
+       call list % append (value)
+       call list % append (value)
+       call list % append (value)
+       call list % append (value)
 
        return
    end subroutine
@@ -447,7 +568,8 @@ end module list_class_tests
 
 
 program test
-  use list_class_tests, only: append => test_list_append_method
+  use list_class_tests, only: destructor => test_list_destructor
+ use list_class_tests, only: append => test_list_append_method
 ! use list_class_tests, only: list => test_list
 ! use list_class_tests, only: node_constructors => &
 !                           & test_node_contructors
@@ -465,5 +587,6 @@ program test
 ! call node_constructors ()
 ! call list ()
   call append ()
+  call destructor ()
 
 end program
