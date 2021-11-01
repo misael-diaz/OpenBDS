@@ -63,6 +63,16 @@ contains
   end subroutine
 
 
+  module subroutine it_remove (iter)
+      type(iter_t), intent(inout), target :: iter
+
+      call iter % vector % remove_back ()
+      iter % deref => iter % vector % deref % it
+
+      return
+  end subroutine
+
+
   module subroutine it_is_instantiated (iter)
       type(iter_t), intent(inout) :: iter
 

@@ -111,6 +111,28 @@ contains
   end subroutine
 
 
+  module subroutine vector_remove_last_method (self)
+      class(vector_t), intent(inout), target :: self
+      integer(kind = int64) :: final
+
+      associate (begin => self % begin % idx, &
+               & avail => self % avail % idx)
+
+          avail = max(avail - 1_int64, 0_int64) !! caters empty vectors
+          final = avail - 1_int64
+
+          if (final >= begin) then
+              self % deref % it => self % array % values (begin:final)
+          else
+              self % deref % it => null()
+          end if
+
+      end associate
+
+      return
+  end subroutine
+
+
   module subroutine vector_vector_t_copy_method (self, vector)
       class(vector_t), intent(inout) :: self
       class(vector_t), intent(in) :: vector

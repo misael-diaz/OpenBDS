@@ -36,6 +36,15 @@ contains
       return
   end subroutine
 
+
+  module subroutine it_remove_method (iter)
+      class(iter_t), intent(inout) :: iter
+
+      call it_remove (iter)
+
+      return
+  end subroutine
+
 end submodule
 
 ! References:

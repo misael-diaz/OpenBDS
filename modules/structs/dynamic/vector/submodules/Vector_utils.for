@@ -31,7 +31,9 @@ contains
       class(pointer_t), intent(inout) :: self
       class(pointer_t), intent(in), target :: target
 
-      self % p => target % p
+      if ( loc(self) /= loc(target) ) then
+          self % p => target % p
+      end if
 
       return
   end subroutine
@@ -890,6 +892,20 @@ contains
       return
   end subroutine
 
+
+  module subroutine pointer_finalizer (pointer)
+      type(pointer_t), intent(inout) :: pointer
+      integer(kind = int32) :: mstat
+
+      if ( associated(pointer % p) ) then
+
+          deallocate (pointer % p, stat=mstat)
+          if (mstat /= 0) error stop 'pointer.destructor(): dealloc error'
+
+      end if
+
+      return
+  end subroutine
 
 end submodule
 

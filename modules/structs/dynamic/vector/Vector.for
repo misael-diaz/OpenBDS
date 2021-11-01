@@ -128,6 +128,7 @@ module VectorClass
         private
         procedure :: pointer_associate_method
         generic, public :: assignment(=) => pointer_associate_method
+        final :: pointer_finalizer
   end type
 
 
@@ -207,6 +208,7 @@ module VectorClass
                               & vector_pointer_t_push_back_array_method
         procedure, public :: size => size_method
         procedure, public :: clear => clear_method
+        procedure, public :: remove_back => vector_remove_last_method
         procedure, public :: addr => vector_print_container_address_method
         procedure, public :: valid => vector_validate_iterator_method
         final :: finalizer
@@ -619,6 +621,12 @@ module VectorClass
     module subroutine clear_method (self)
         ! Synopsis: Clears the vector elements.
         class(vector_t), intent(inout) :: self
+    end subroutine
+
+
+    module subroutine vector_remove_last_method (self)
+        ! Synopsis: Removes last element contained in vector.
+        class(vector_t), intent(inout), target :: self
     end subroutine
 
 
@@ -1494,6 +1502,14 @@ module VectorClass
 
   end interface
 
+
+  interface
+
+    module subroutine pointer_finalizer (pointer)
+        type(pointer_t), intent(inout) :: pointer
+    end subroutine
+
+  end interface
 
 end module
 

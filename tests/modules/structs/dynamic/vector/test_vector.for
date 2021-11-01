@@ -163,6 +163,9 @@ module vector_class_tests
             end if
 
 
+            p_x % p => null()
+            p_y % p => null()
+            p_z % p => null()
             deallocate (up_x % p, up_y % p, up_z % p, stat=mstat)
             if (mstat /= 0) error stop malloc_err
 
@@ -1219,7 +1222,12 @@ module vector_class_tests
                 print *, 'pass'
             end if
 
+            deallocate (up_x, up_y, up_z, stat=mstat)
+            if (mstat /= 0) then
+                error stop 'test-push-back-pointer: deallocation error'
+            end if
 
+            pointer % p => null()
             deallocate (pointer, stat=mstat)
             if (mstat /= 0) then
                 error stop 'test-push-back-pointer: deallocation error'

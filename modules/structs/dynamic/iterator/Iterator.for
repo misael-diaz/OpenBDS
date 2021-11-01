@@ -37,6 +37,7 @@ module RandomAccessIteratorClass
     contains
       private
       procedure, public :: insert => it_insert_method
+      procedure, public :: remove => it_remove_method
       final :: it_destructor
   end type
 
@@ -69,9 +70,19 @@ module RandomAccessIteratorClass
     end subroutine
 
 
+    module subroutine it_remove_method (iter)
+        class(iter_t), intent(inout) :: iter
+    end subroutine
+
+
     module subroutine it_insert (iter, p)
         type(iter_t), intent(inout), target :: iter
         type(pointer_t), intent(in) :: p
+    end subroutine
+
+
+    module subroutine it_remove (iter)
+        type(iter_t), intent(inout), target :: iter
     end subroutine
 
 
