@@ -32,13 +32,19 @@ contains
       type(node_t), intent(inout), pointer :: node
       class(*), pointer :: h_node => null()
 
-      h_node => link % node % p
-      select type (h_node)
-          type is (node_t)
-              node => h_node
-          class default
-              error stop 'node<*data_t>.associate(): unexpected type error'
-      end select
+      if ( associated(link % node % p) ) then
+
+          h_node => link % node % p
+          select type (h_node)
+              type is (node_t)
+                  node => h_node
+              class default
+                  error stop 'node<*data_t>.associate(): unexpected type error'
+          end select
+
+      else
+          node => null()
+      end if
 
       h_node => null()
 
