@@ -65,6 +65,7 @@ module ListClass
       private
       procedure :: list_int32_t_append_method
       procedure, public :: iterator => list_random_access_iterator_method
+      procedure, public :: validate => list_validate_iterator_method
       generic, public :: append => list_int32_t_append_method
       final :: list_finalizer
   end type
@@ -113,6 +114,12 @@ module ListClass
 
   interface
 
+    module subroutine list_validate_iterator_method (self, iter)
+        class(list_t), intent(in) :: self
+        type(iter_t), intent(inout) :: iter
+    end subroutine
+
+
     module function list_random_access_iterator_method (self) result(iter)
         type(iter_t) :: iter
         class(list_t), intent(in) :: self
@@ -129,10 +136,16 @@ module ListClass
 
   interface
 
-    module recursive subroutine list_genIterator (link, iter)
+    module subroutine list_genIterator (link, iter)
         type(link_t), intent(in), target :: link
         type(iter_t), intent(inout) :: iter
     end subroutine
+
+
+    module recursive subroutine list_recursive_genIterator (link, iter)
+        type(link_t), intent(in), target :: link
+        type(iter_t), intent(inout) :: iter
+    end subroutine !! unused
 
 
     module subroutine list_int32_t_append (list, value)

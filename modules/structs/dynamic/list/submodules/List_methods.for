@@ -27,6 +27,17 @@ submodule (ListClass) list_methods
 implicit none
 contains
 
+  module subroutine list_validate_iterator_method (self, iter)
+      type(iter_t), intent(inout) :: iter
+      class(list_t), intent(in) :: self
+
+      call iter % clear ()
+      call iterator (self % head, iter)
+
+      return
+  end subroutine
+
+
   module function list_random_access_iterator_method (self) result(iter)
       type(iter_t) :: iter
       class(list_t), intent(in) :: self

@@ -27,7 +27,30 @@ submodule (ListClass) list_implements
 implicit none
 contains
 
-  module recursive subroutine list_genIterator (link, iter)
+  module subroutine list_genIterator (link, iter)
+      ! generates the random-access iterator
+      type(link_t), intent(in), target :: link
+      type(iter_t), intent(inout) :: iter
+      type(node_t), pointer :: node => null()
+      type(node_t), pointer :: next => null()
+
+      call associate (node, link)
+      call iter % insert (node % item % data)
+      call associate (next, node % next)
+
+      do while ( associated(next) )
+
+          call associate (node, node % next)
+          call iter % insert (node % item % data)
+          call associate (next, next % next)
+
+      end do
+
+      return
+  end subroutine
+
+
+  module recursive subroutine list_recursive_genIterator (link, iter)
       ! generates the random-access iterator of the list recursively
       type(link_t), intent(in), target :: link
       type(iter_t), intent(inout) :: iter
@@ -38,11 +61,12 @@ contains
       call iter % insert (node % item % data)
 
       if ( associated(node % next % node % p) ) then
-          call iterator (node % next, iter)
+          call list_recursive_genIterator (node % next, iter)
       end if
 
       return
   end subroutine
+
 
   module subroutine list_int32_t_append (list, value)
       type(list_t), intent(inout) :: list
@@ -239,6 +263,66 @@ contains
 
 
   module recursive subroutine link_destructor (link)
+      ! destroys links via forward iterators
+      type(link_t), intent(inout) :: link
+      type(node_t), pointer :: head => null()
+      type(node_t), pointer :: node => null()
+      type(node_t), pointer :: next => null()
+      type(node_t), pointer :: prev => null()
+      integer(kind = int32) :: mstat
+
+
+      call associate (head, link)
+      call associate (prev, link)
+      call associate (node, head % next)
+      if ( associated (node) ) then
+          call associate (next, node % next)
+      else
+          next => null()
+      end if
+
+
+      do while ( associated(node) )
+
+
+          do while ( associated(next) ) !! traverses list
+              call associate (prev, prev % next)
+              call associate (node, node % next)
+              call associate (next, next % next)
+          end do
+
+
+          deallocate (node, stat=mstat)
+          if (mstat /= 0) error stop 'deallocation error'
+
+          node => null()
+          prev % next % node % p => null()
+
+
+          call associate (prev, link)
+          call associate (node, head % next)
+          if ( associated(node) ) then
+              call associate (next, node % next)
+          else
+              next => null()
+          end if
+
+
+      end do
+
+
+      deallocate (head, stat=mstat)
+      if (mstat /= 0) error stop 'deallocation error'
+
+      head => null()
+      link % node % p => null()
+
+
+      return
+  end subroutine link_destructor
+
+
+  module recursive subroutine link_recursive_destructor (link)
       ! destroys links to nodes recursively from back to front
       type(link_t), intent(inout) :: link
       class(*), pointer :: next => null()
@@ -252,7 +336,7 @@ contains
       if ( associated(next) ) then
 
 
-          call link_destructor (node % next)
+          call link_recursive_destructor (node % next)
 
           call associate (node, link)   !! validates pointer to current
 
@@ -274,7 +358,7 @@ contains
       end if
 
       return
-  end subroutine link_destructor
+  end subroutine link_recursive_destructor
 
 
   module recursive subroutine link_aggressive_destructor (link)
@@ -401,3 +485,13 @@ end submodule
 ! of all the linked nodes. Complains if the link of the source node is
 ! associated. At the moment the assignment method is being used to support
 ! the node constructors.
+!
+!
+! WARNINGS
+! Recursive methods are fast but might overflow the stack for long lists.
+! For this reason destructors that use a recursive scheme have been
+! replaced by memory inexpensive methods, though these tend to be slower
+! because one has to traverse the list several times on account of the
+! forward iterators that these use. (A doubly-linked list should perform
+! better.) I prefer to use a slower but reliable linked-list than a fast
+! list prone to stack overflows.
