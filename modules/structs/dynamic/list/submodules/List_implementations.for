@@ -241,15 +241,15 @@ contains
   module recursive subroutine link_destructor (link)
       ! destroys links to nodes recursively from back to front
       type(link_t), intent(inout) :: link
-      class(*), pointer :: h_next => null()
+      class(*), pointer :: next => null()
       type(node_t), pointer :: node => null()
       integer(kind = int32) :: mstat
 
 
       call associate (node, link)
 
-      h_next => node % next % node % p
-      if ( associated(h_next) ) then
+      next => node % next % node % p
+      if ( associated(next) ) then
 
 
           call link_destructor (node % next)
@@ -280,14 +280,14 @@ contains
   module recursive subroutine link_aggressive_destructor (link)
       ! destroys links to nodes recursively from back to front
       type(link_t), intent(inout) :: link
-      class(*), pointer :: h_next => null()
+      class(*), pointer :: next => null()
       type(node_t), pointer :: node => null()
       integer(kind = int32) :: mstat
 
       call associate (node, link)
 
-      h_next => node % next % node % p
-      if ( associated(h_next) ) then
+      next => node % next % node % p
+      if ( associated(next) ) then
 
 
           call link_aggressive_destructor (node % next)
@@ -339,14 +339,14 @@ contains
   module recursive subroutine link_conservative_destructor (link)
       ! destroys data in the last node only
       type(link_t), intent(inout) :: link
-      class(*), pointer :: h_next => null()
+      class(*), pointer :: next => null()
       type(node_t), pointer :: node => null()
       integer(kind = int32) :: mstat
 
       call associate (node, link)
 
-      h_next => node % next % node % p
-      if ( associated(h_next) ) then
+      next => node % next % node % p
+      if ( associated(next) ) then
 
           call link_conservative_destructor (node % next)
 
