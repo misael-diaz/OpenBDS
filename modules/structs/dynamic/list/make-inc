@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: make-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-10-28
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,23 +24,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include List-inc
+include List-utils-inc
+include List-methods-inc
+include List-implements-inc
 
-all: test_vector test_linked_list test_flist test_list
-
-test_vector:
-	@$(MAKE) -C vector
-
-test_linked_list:
-	@$(MAKE) -C linked-list
-
-test_flist:
-	@$(MAKE) -C flist
-
-test_list:
-	@$(MAKE) -C list
-
-clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C flist       clean
-	@$(MAKE) -C list        clean
+# submodules
+LIST_SUBMOD_OBJ = $(LIST_UTILS_OBJ) $(LIST_IMPLEMENTS_OBJ)\
+                  $(LIST_METHODS_OBJ)

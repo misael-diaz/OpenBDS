@@ -1,11 +1,11 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: List-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-10-29
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Include for GNU make, defines source and object files for compilation
+# of the modules which lay the foundation of the project.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,23 +24,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# modules directory
+VECTOR_MOD_DIR = ../vector
+ITER_MOD_DIR   = ../iterator
+MODULES_INC    = -I$(VECTOR_MOD_DIR) -I$(ITER_MOD_DIR)
 
-all: test_vector test_linked_list test_flist test_list
+## names
 
-test_vector:
-	@$(MAKE) -C vector
+# interface
+LIST_MODULE_FOR = List.for
 
-test_linked_list:
-	@$(MAKE) -C linked-list
+# objects
+LIST_MODULE_O   = List.o
 
-test_flist:
-	@$(MAKE) -C flist
+## names relative to makefile
 
-test_list:
-	@$(MAKE) -C list
+# interface
+LIST_MODULE_SRC = List.for
 
-clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C flist       clean
-	@$(MAKE) -C list        clean
+# objects
+LIST_MODULE_OBJ = $(LIST_MODULE_O)

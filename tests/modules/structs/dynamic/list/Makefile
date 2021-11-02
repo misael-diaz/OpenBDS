@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-11-01
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Builds the programs for testing the doubly linked-list class.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,23 +24,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include List-test-inc
 
-all: test_vector test_linked_list test_flist test_list
+all: $(TESTS)
 
-test_vector:
-	@$(MAKE) -C vector
+$(TEST_LIST_EXE): $(SUBM) $(TEST_LIST_OBJ)
+	$(FC) $(FC_OPT) $(MODULES_INC) $(MODS) $(SUBM)\
+	    $(TEST_LIST_OBJ) -o $(TEST_LIST_EXE)
 
-test_linked_list:
-	@$(MAKE) -C linked-list
+$(TEST_LIST_OBJ): $(MODS) $(TEST_LIST_SRC)
+	$(FC) $(FC_OPT) $(MODULES_INC) -c $(TEST_LIST_SRC) -o\
+	        $(TEST_LIST_OBJ)
 
-test_flist:
-	@$(MAKE) -C flist
-
-test_list:
-	@$(MAKE) -C list
 
 clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C flist       clean
-	@$(MAKE) -C list        clean
+	rm -f *.mod *.smod *.o $(TESTS)
