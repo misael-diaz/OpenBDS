@@ -64,22 +64,30 @@ module RandomAccessIteratorClass
         type(iter_t) :: iter
     end function
 
+  end interface
 
-    module subroutine it_clear_method (iter)
-        class(iter_t), intent(inout) :: iter
+
+  interface
+
+    module subroutine it_clear_method (self)
+        class(iter_t), intent(inout) :: self
     end subroutine
 
 
-    module subroutine it_insert_method (iter, p)
-        class(iter_t), intent(inout) :: iter
+    module subroutine it_insert_method (self, p)
+        class(iter_t), intent(inout) :: self
         type(pointer_t), intent(in) :: p
     end subroutine
 
 
-    module subroutine it_remove_method (iter)
-        class(iter_t), intent(inout) :: iter
+    module subroutine it_remove_method (self)
+        class(iter_t), intent(inout) :: self
     end subroutine
 
+  end interface
+
+
+  interface
 
     module subroutine it_insert (iter, p)
         type(iter_t), intent(inout), target :: iter
@@ -91,6 +99,10 @@ module RandomAccessIteratorClass
         type(iter_t), intent(inout), target :: iter
     end subroutine
 
+  end interface
+
+
+  interface
 
     module subroutine it_is_instantiated (iter)
         type(iter_t), intent(inout) :: iter
@@ -101,6 +113,10 @@ module RandomAccessIteratorClass
         type(iter_t), intent(inout), target :: iter
     end subroutine
 
+  end interface
+
+
+  interface
 
     module subroutine it_destructor (iter)
         type(iter_t), intent(inout) :: iter

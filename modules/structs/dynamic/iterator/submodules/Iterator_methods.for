@@ -27,29 +27,29 @@ submodule (RandomAccessIteratorClass) iterator_methods
 implicit none
 contains
 
-  module subroutine it_clear_method (iter)
-      class(iter_t), intent(inout) :: iter
+  module subroutine it_clear_method (self)
+      class(iter_t), intent(inout) :: self
 
-      call iter % vector % clear ()
+      call self % vector % clear ()
 
       return
   end subroutine
 
 
-  module subroutine it_insert_method (iter, p)
-      class(iter_t), intent(inout) :: iter
+  module subroutine it_insert_method (self, p)
+      class(iter_t), intent(inout) :: self
       type(pointer_t), intent(in) :: p
 
-      call it_insert (iter, p)
+      call it_insert (self, p)
 
       return
   end subroutine
 
 
-  module subroutine it_remove_method (iter)
-      class(iter_t), intent(inout) :: iter
+  module subroutine it_remove_method (self)
+      class(iter_t), intent(inout) :: self
 
-      call it_remove (iter)
+      call it_remove (self)
 
       return
   end subroutine
