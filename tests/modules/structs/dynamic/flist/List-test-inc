@@ -31,10 +31,10 @@ include ../../../../../modules/structs/dynamic/vector/Vector-implements-inc
 include ../../../../../modules/structs/dynamic/iterator/Iterator-inc
 include ../../../../../modules/structs/dynamic/iterator/Iterator-methods-inc
 include ../../../../../modules/structs/dynamic/iterator/Iterator-implements-inc
-include ../../../../../modules/structs/dynamic/list/List-inc
-include ../../../../../modules/structs/dynamic/list/List-utils-inc
-include ../../../../../modules/structs/dynamic/list/List-methods-inc
-include ../../../../../modules/structs/dynamic/list/List-implements-inc
+include ../../../../../modules/structs/dynamic/flist/List-inc
+include ../../../../../modules/structs/dynamic/flist/List-utils-inc
+include ../../../../../modules/structs/dynamic/flist/List-methods-inc
+include ../../../../../modules/structs/dynamic/flist/List-implements-inc
 
 
 
@@ -44,7 +44,7 @@ UTILS_MOD_DIR       = ../../../../../modules/utils
 CHRONOS_MOD_DIR     = ../../../../../modules/chronos
 VECTOR_MOD_DIR      = ../../../../../modules/structs/dynamic/vector
 ITER_MOD_DIR        = ../../../../../modules/structs/dynamic/iterator
-LIST_MOD_DIR        = ../../../../../modules/structs/dynamic/list
+LIST_MOD_DIR        = ../../../../../modules/structs/dynamic/flist
 MODULES_INC         = -I$(UTILS_MOD_DIR) -I$(CHRONOS_MOD_DIR)\
                       -I$(VECTOR_MOD_DIR) -I$(ITER_MOD_DIR)\
                       -I$(LIST_MOD_DIR)

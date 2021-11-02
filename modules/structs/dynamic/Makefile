@@ -25,7 +25,7 @@
 #
 
 
-all: Vectors LinkedLists Iterators Lists
+all: Vectors LinkedLists Iterators fLists
 
 Vectors:
 	@$(MAKE) -C vector
@@ -36,11 +36,11 @@ LinkedLists:
 Iterators: Vectors
 	@$(MAKE) -C iterator
 
-Lists: Iterators
-	@$(MAKE) -C list
+fLists: Iterators
+	@$(MAKE) -C flist
 
 clean:
 	@$(MAKE) -C vector      clean
 	@$(MAKE) -C linked-list clean
 	@$(MAKE) -C iterator    clean
-	@$(MAKE) -C list        clean
+	@$(MAKE) -C flist       clean

@@ -25,7 +25,7 @@
 #
 
 
-all: test_vector test_linked_list test_list
+all: test_vector test_linked_list test_flist
 
 test_vector:
 	@$(MAKE) -C vector
@@ -33,10 +33,10 @@ test_vector:
 test_linked_list:
 	@$(MAKE) -C linked-list
 
-test_list:
-	@$(MAKE) -C list
+test_flist:
+	@$(MAKE) -C flist
 
 clean:
 	@$(MAKE) -C vector      clean
 	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C list        clean
+	@$(MAKE) -C flist       clean
