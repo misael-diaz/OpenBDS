@@ -19,18 +19,18 @@
 
 #include "flist_methods.h"
 
-static void flist_append_ii32_t (void *vlist, int value)  // append method
+static void flist_append_int32_t (void *vlist, int value)  // append method
 {
 	list_t *list = vlist;
 	if (list -> head -> node == NULL) {
 
-		list -> head -> node = flist_create_node_ii32_t (value);
+		list -> head -> node = flist_create_node_int32_t (value);
 		list -> tail -> node = list -> head -> node;
 
 	} else {
 
 		list -> tail -> node -> next =
-			flist_create_node_ii32_t (value);
+			flist_create_node_int32_t (value);
 
 		list -> tail -> node = list -> tail -> node -> next;
 
@@ -50,19 +50,20 @@ list_t* flist_create_list_t ()			// creates empty list<>
 
 	list -> head = flist_create_link_t ();
 	list -> tail = flist_create_link_t ();
-	list -> append = flist_append_ii32_t;
+	list -> append = flist_append_int32_t;
 	return list;
 }
 
 
-node_t* flist_create_node_ii32_t (int value)	// creates node<*int32_t>
+node_t* flist_create_node_int32_t (int value)	// creates node<*int32_t>
 {
 
 	node_t *node = util_alloc_node_t ();
 	node -> item = util_alloc_data_t ();
-	node -> item -> data = util_alloc_ii32_t ();
+	node -> item -> data = util_alloc_void_t ( sizeof(int) );
 
-	*(node -> item -> data) = value;
+	int* i = node -> item -> data;
+	*i = value;
 
 	return node ;
 }

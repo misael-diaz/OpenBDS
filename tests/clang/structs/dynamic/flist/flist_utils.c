@@ -19,10 +19,10 @@
 
 #include "flist_utils.h"
 
-int* util_alloc_ii32_t ()	// allocates memory for a 32-bit integer
+void* util_alloc_void_t (size_t sz)  // generic memory allocator utility
 {
 
-	int *data = (int*) malloc ( sizeof(int) );
+	void *data = malloc (sz);
 
 	if (data == NULL) {
 		fprintf (stderr, "memory allocation error: %s\n",

@@ -36,8 +36,10 @@ int main () {
 	}
 
 	// prints the first and last values in the list
-	printf("head: %d\n",  *(list -> head -> node -> item -> data) );
-	printf("tail: %d\n",  *(list -> tail -> node -> item -> data) );
+	int *head = list -> head -> node -> item -> data;
+	int *tail = list -> tail -> node -> item -> data;
+	printf("head: %d\n", *head);
+	printf("tail: %d\n", *tail);
 
 	/* frees allocated resources */
 	list -> head = flist_link_destructor (list -> head);

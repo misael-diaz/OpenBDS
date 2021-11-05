@@ -20,7 +20,7 @@
  */
 
 typedef struct {
-	int*    data;
+	void* data;
 } data_t;
 
 #endif

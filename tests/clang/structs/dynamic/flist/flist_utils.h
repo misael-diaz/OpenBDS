@@ -26,7 +26,8 @@
 #include <errno.h>
 #include "flist.h"
 
-int*    util_alloc_ii32_t ();	// allocates memory for a 32-bit integer
+void* util_alloc_void_t (size_t);  // generic memory allocator
+
 data_t* util_alloc_data_t (); 	// allocates memory for a data_t object
 node_t* util_alloc_node_t ();	// allocates memory for a node object
 link_t* util_alloc_link_t ();	// allocates memory for a link object
