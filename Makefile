@@ -29,6 +29,9 @@ include make-inc
 # exports:
 # FORTRAN Compiler
 # FORTRAN Compiler Options
+export CC
+export CC_OPT
+
 export FC
 export FC_OPT
 

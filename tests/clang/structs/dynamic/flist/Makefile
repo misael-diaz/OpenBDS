@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-11-02
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Builds the programs for testing the forward linked-list [flist].
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,15 +24,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include make-inc
 
-all: test_modules test_clang
+all: $(TESTS)
 
-test_modules:
-	@$(MAKE) -C modules
+$(TEST_FLIST_EXE): $(TEST_FLIST_O)
+	$(CC) $(CC_OPT) $(OBJS) -o $(TEST_FLIST_EXE)
 
-test_clang:
-	@$(MAKE) -C clang
+$(TEST_FLIST_O): $(FLIST_METHODS_O) $(TEST_FLIST_C)
+	$(CC) $(CC_OPT) -c $(TEST_FLIST_C) -o $(TEST_FLIST_O)
+
+$(FLIST_METHODS_O): $(FLIST_UTILS_O) $(FLIST_METHODS_H) $(FLIST_METHODS_C)
+	$(CC) $(CC_OPT) -c $(FLIST_METHODS_C) -o $(FLIST_METHODS_O)
+
+$(FLIST_UTILS_O): $(HFS) $(FLIST_UTILS_H) $(FLIST_UTILS_C)
+	$(CC) $(CC_OPT) -c $(FLIST_UTILS_C) -o $(FLIST_UTILS_O)
 
 clean:
-	@$(MAKE) -C modules clean
-	@$(MAKE) -C clang   clean
+	rm -f *.o $(TESTS)

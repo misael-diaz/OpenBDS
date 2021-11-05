@@ -24,15 +24,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+all: test_clang_dynamic
 
-all: test_modules test_clang
-
-test_modules:
-	@$(MAKE) -C modules
-
-test_clang:
-	@$(MAKE) -C clang
+test_clang_dynamic:
+	@$(MAKE) -C dynamic
 
 clean:
-	@$(MAKE) -C modules clean
-	@$(MAKE) -C clang   clean
+	@$(MAKE) -C dynamic clean

@@ -23,6 +23,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# GNU C Compiler
+CC = gcc-10
+
+# GNU C Compiler Options
+CC_OPT = -std=iso9899:2018 -Wall -Wpedantic -Wextra -O0 -g
 
 # GNU FORTRAN Compiler
 FC = /opt/gcc/gcc-11.1.0/bin/gfortran
