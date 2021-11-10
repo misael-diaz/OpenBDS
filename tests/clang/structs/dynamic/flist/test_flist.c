@@ -21,7 +21,7 @@
 
 // defines OOP-like interfaces
 #define list_t() flist_create_list_t()
-#define append_method(i) append(self, i)
+#define append_method(i) append(list->self, i)
 
 #define NUMEL 65536
 
@@ -29,7 +29,6 @@ int main () {
 	// shows how to generate a linked-list
 
 	list_t* list = list_t ();		// creates list object
-	void *self = list;
 
 	for (int i = 0; i != NUMEL; ++i) {
 		list -> append_method (i);	// appends values to list
@@ -42,10 +41,7 @@ int main () {
 	printf("tail: %d\n", *tail);
 
 	/* frees allocated resources */
-	list -> head = flist_link_destructor (list -> head);
-	list -> tail -> node = NULL;
-	list = util_ffree_list_t (list);
-	self = NULL;
+	list = flist_list_destructor (list);
 
 	return 0 ;
 }

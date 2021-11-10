@@ -85,7 +85,7 @@ link_t* util_alloc_link_t ()	// allocates memory for a link object
 
 }
 
-int*    util_ffree_ii32_t (int *data)	  // frees 32-bit int from memory
+void*   util_ffree_void_t (void *data)	  // generic deallocator
 {
 
 	if (data != NULL) {
@@ -102,7 +102,7 @@ data_t* util_ffree_data_t (data_t *item)  // frees data object from memory
 {
 
 	if (item != NULL) {
-		item -> data = util_ffree_ii32_t (item -> data);
+		item -> data = util_ffree_void_t (item -> data);
 		free (item);
 	}
 
@@ -160,6 +160,7 @@ list_t* util_ffree_list_t (list_t *list)  // frees list object from memory
 {
 
 	if (list != NULL) {
+		list -> self = NULL;
 		list -> head = util_ffree_link_t (list -> head);
 		list -> tail = util_ffree_link_t (list -> tail);
 	}

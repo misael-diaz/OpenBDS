@@ -32,7 +32,7 @@ data_t* util_alloc_data_t (); 	// allocates memory for a data_t object
 node_t* util_alloc_node_t ();	// allocates memory for a node object
 link_t* util_alloc_link_t ();	// allocates memory for a link object
 
-int*    util_ffree_ii32_t (int*);	// frees 32-bit int  from memory
+void*   util_ffree_void_t (void*);	// frees <..> object from memory
 data_t* util_ffree_data_t (data_t*);	// frees data object from memory
 node_t* util_ffree_node_t (node_t*);	// frees node object from memory
 link_t* util_ffree_link_t (link_t*);	// frees link object from memory

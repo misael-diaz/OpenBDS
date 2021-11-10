@@ -48,6 +48,7 @@ list_t* flist_create_list_t ()			// creates empty list<>
                 exit(EXIT_FAILURE);
 	}
 
+	list -> self = list;
 	list -> head = flist_create_link_t ();
 	list -> tail = flist_create_link_t ();
 	list -> append = flist_append_int32_t;
@@ -61,6 +62,7 @@ node_t* flist_create_node_int32_t (int value)	// creates node<*int32_t>
 	node_t *node = util_alloc_node_t ();
 	node -> item = util_alloc_data_t ();
 	node -> item -> data = util_alloc_void_t ( sizeof(int) );
+	node -> next = NULL;
 
 	int* i = node -> item -> data;
 	*i = value;
@@ -73,6 +75,22 @@ link_t* flist_create_link_t ()			// creates link<>
 {
         link_t *link = util_alloc_link_t ();
 	return link;
+}
+
+
+list_t* flist_list_destructor (list_t* list)	// destroys linked-list obj
+{
+	link_t *head = (list && list -> head)? (list -> head): NULL;
+	node_t *node = (head && head -> node)? (head -> node): NULL;
+
+	if (head != NULL && node != NULL)
+	{
+		list -> head = flist_link_destructor (list -> head);
+		list -> tail -> node = NULL;
+		list -> tail = util_ffree_link_t (list -> tail);
+	}
+
+	return util_ffree_list_t (list);
 }
 
 

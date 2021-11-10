@@ -22,6 +22,7 @@
 #include "link_t.h"
 
 typedef struct {
+	void*   self;
 	link_t* head;
 	link_t* tail;
 	void (*append) (void *list, int value);
