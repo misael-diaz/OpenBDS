@@ -1,11 +1,10 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: flist-utils-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-11-04
 #
 # Synopsis:
-# Builds OpenBDS tests.
+# Include for GNU make, defines source and object files to build tests.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,15 +23,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-all: test_clang_flist test_flang_flist
+# src
+FLIST_UTILS_H = flist_utils.h
+FLIST_UTILS_C = flist_utils.c
 
-test_clang_flist:
-	@$(MAKE) -C flist
-
-test_flang_flist:
-	@$(MAKE) -C c-f-interoperable-flist
-
-
-clean:
-	@$(MAKE) -C flist clean
-	@$(MAKE) -C c-f-interoperable-flist clean
+# objects
+FLIST_UTILS_O = flist_utils.o
