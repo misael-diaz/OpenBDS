@@ -40,8 +40,39 @@ int main () {
 	printf("head: %d\n", *head);
 	printf("tail: %d\n", *tail);
 
+
+	/* creates random-access iterator */
+	void** iter = (void**) malloc ( NUMEL * sizeof(void*) );
+	for (int i = 0; i != NUMEL; ++i)
+		iter[i] = NULL;
+
+
+	int i = 0;
+	node_t* node = NULL;
+	node = list -> head -> node;
+	while (node)
+	{	// populates random-access iterator
+		iter[i++] = node -> item -> data;
+		node = node -> next;
+	}
+
+
+	int diff = 0;
+	for (int i = 0; i != NUMEL; ++i)
+		// computes differences between input and contained data
+		diff += ( *( (int*) iter[i] ) - i );
+
+
+	printf("[00] test-list-iterator: ");
+	if (diff != 0)
+		printf("FAIL\n");
+	else
+		printf("pass\n");
+
+
 	/* frees allocated resources */
 	list = flist_list_destructor (list);
+	free (iter);
 
 	return 0 ;
 }
