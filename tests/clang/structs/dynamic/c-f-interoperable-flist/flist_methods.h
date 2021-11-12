@@ -21,6 +21,8 @@
 
 #include "flist_utils.h"
 
+void** flist_random_access_iterator (list_t*);	// creates iterator
+
 node_t* flist_create_node_int32_t (int);// creates node<*int32_t>
 link_t* flist_create_link_t ();		// creates `empty' link<>
 list_t* flist_create_list_t ();		// creates `empty' list<>

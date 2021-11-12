@@ -28,12 +28,14 @@
 
 int util_is_next_associated_node_t (node_t *node);  // checks association
 
+void** util_alloc_iter_t (size_t); // allocates random-access iterator
 void* util_alloc_void_t (size_t);  // generic memory allocator
 
 data_t* util_alloc_data_t (); 	// allocates memory for a data_t object
 node_t* util_alloc_node_t ();	// allocates memory for a node object
 link_t* util_alloc_link_t ();	// allocates memory for a link object
 
+void**  util_ffree_iter_t (void**);	// frees random-access iterator
 void*   util_ffree_void_t (void*);	// frees <..> object from memory
 data_t* util_ffree_data_t (data_t*);	// frees data object from memory
 node_t* util_ffree_node_t (node_t*);	// frees node object from memory

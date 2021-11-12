@@ -28,7 +28,8 @@
 int main () {
 	// shows how to generate a linked-list
 
-	list_t* list = list_t ();		// creates list object
+	list_t* list  = list_t ();		// creates list object
+	list_t* alist = list_t ();		// creates an empty list
 
 	for (int i = 0; i != NUMEL; ++i) {
 		list -> append_method (i);	// appends values to list
@@ -42,20 +43,8 @@ int main () {
 
 
 	/* creates random-access iterator */
-	void** iter = (void**) malloc ( NUMEL * sizeof(void*) );
-	for (int i = 0; i != NUMEL; ++i)
-		iter[i] = NULL;
-
-
-	int i = 0;
-	node_t* node = NULL;
-	node = list -> head -> node;
-	while (node)
-	{	// populates random-access iterator
-		iter[i++] = node -> item -> data;
-		node = node -> next;
-	}
-
+	void** iter  = flist_random_access_iterator (list);
+	void** aiter = flist_random_access_iterator (alist);
 
 	int diff = 0;
 	for (int i = 0; i != NUMEL; ++i)
@@ -71,8 +60,10 @@ int main () {
 
 
 	/* frees allocated resources */
-	list = flist_list_destructor (list);
-	free (iter);
+	list  = flist_list_destructor (list);
+	alist = flist_list_destructor (alist);
+	iter  = util_ffree_iter_t (iter);
+	aiter = util_ffree_iter_t (aiter);
 
 	return 0 ;
 }
@@ -81,5 +72,11 @@ int main () {
  * TODO:
  * [x] implement memory management utils
  * [x] implement the append method
+ * [ ] define a type for the random-access iterator:
+ *
+ *     typedef struct {
+ *       void** p;
+ *       size_t numel;
+ *     } iter_t;
  *
  */

@@ -19,6 +19,39 @@
 
 #include "flist_methods.h"
 
+void** flist_random_access_iterator (list_t* list)
+{	// creates a random-access iterator
+
+	// initializes forward iterator
+	link_t *head = (list && list -> head)? list -> head: NULL;
+	node_t *node = (head && head -> node)? head -> node: NULL;
+
+
+	size_t numel = 0;
+	while (node)
+	{	// obtains the number of elements in the list
+		node = node -> next;
+		++numel;
+	}
+
+
+	size_t sz = numel * sizeof(void*);
+	// allocates memory for random-access iterator
+	void** iter = (sz)? util_alloc_iter_t (sz): NULL;
+
+
+	// initializes random-access iterator
+	node = (head && head -> node)? head -> node: NULL;
+	for (size_t i = 0; i != numel; ++i)
+	{
+		iter[i] = node -> item -> data;
+		node = node -> next;
+	}
+
+	return iter;
+}
+
+
 static void flist_append_int32_t (void *vlist, int value)  // append method
 {
 	list_t *list = vlist;

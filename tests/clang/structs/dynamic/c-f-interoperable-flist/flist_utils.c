@@ -36,6 +36,20 @@ int util_is_next_associated_node_t (node_t *node)
 }
 
 
+void** util_alloc_iter_t (size_t sz)	// allocates random-access iterator
+{
+	void** iter = (void**) malloc (sz);
+
+	if (iter == NULL) {
+		fprintf (stderr, "memory allocation error: %s\n",
+			 strerror (errno) );
+		exit(EXIT_FAILURE);
+	}
+
+	return iter;
+}
+
+
 void* util_alloc_void_t (size_t sz)  // generic memory allocator utility
 {
 
@@ -101,6 +115,15 @@ link_t* util_alloc_link_t ()	// allocates memory for a link object
 	return link;
 
 }
+
+void**  util_ffree_iter_t (void **iter)	  // frees iterator
+{
+	if (iter != NULL)
+		free (iter);
+
+	return iter;
+}
+
 
 void*   util_ffree_void_t (void *data)	  // generic deallocator
 {
