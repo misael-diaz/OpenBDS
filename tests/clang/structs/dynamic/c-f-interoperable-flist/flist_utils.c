@@ -118,7 +118,7 @@ link_t* util_alloc_link_t ()	// allocates memory for a link object
 
 void**  util_ffree_iter_t (void **iter)	  // frees iterator
 {
-	if (iter != NULL)
+	if (iter)
 		free (iter);
 
 	return iter;
@@ -128,11 +128,11 @@ void**  util_ffree_iter_t (void **iter)	  // frees iterator
 void*   util_ffree_void_t (void *data)	  // generic deallocator
 {
 
-	if (data != NULL) {
+	if (data) {
 		free (data);
+		data = NULL;
 	}
 
-	data = NULL;
 	return data;
 
 }
@@ -141,12 +141,12 @@ void*   util_ffree_void_t (void *data)	  // generic deallocator
 data_t* util_ffree_data_t (data_t *item)  // frees data object from memory
 {
 
-	if (item != NULL) {
+	if (item) {
 		item -> data = util_ffree_void_t (item -> data);
 		free (item);
+		item = NULL;
 	}
 
-	item = NULL;
 	return item;
 
 }
@@ -155,24 +155,17 @@ data_t* util_ffree_data_t (data_t *item)  // frees data object from memory
 node_t* util_ffree_node_t (node_t *node)  // frees node object from memory
 {
 
-	if (node != NULL) {
-
-		if (node -> item != NULL)
+	if (node)
+	{
+		if (node -> item)
 			node -> item = util_ffree_data_t (node -> item);
 
-
-		if (node -> next != NULL) {
-			fprintf (stderr, "node: internal implement err\n");
-			exit(EXIT_FAILURE);
-		} else
-			node -> next = NULL;
-
-
+		node -> next = NULL;
+		node -> item = NULL;
 		free (node);
-
+		node = NULL;
 	}
 
-	node = NULL;
 	return node;
 
 }
@@ -180,9 +173,9 @@ node_t* util_ffree_node_t (node_t *node)  // frees node object from memory
 
 link_t* util_ffree_link_t (link_t *link)  // frees link object from memory
 {
-	if (link != NULL) {
+	if (link) {
 
-		if (link -> node != NULL) {
+		if (link -> node) {
 			fprintf (stderr, "link: internal implement err\n");
 			exit(EXIT_FAILURE);
 		} else
@@ -199,7 +192,7 @@ link_t* util_ffree_link_t (link_t *link)  // frees link object from memory
 list_t* util_ffree_list_t (list_t *list)  // frees list object from memory
 {
 
-	if (list != NULL) {
+	if (list) {
 		list -> self = NULL;
 		list -> head = util_ffree_link_t (list -> head);
 		list -> tail = util_ffree_link_t (list -> tail);
