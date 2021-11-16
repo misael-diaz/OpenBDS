@@ -25,7 +25,7 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module ListClass
-  use, intrinsic :: iso_c_binding, only: c_int
+  use, intrinsic :: iso_c_binding, only: c_int, c_size_t
   use, intrinsic :: iso_c_binding, only: c_ptr, c_funptr
   use, intrinsic :: iso_c_binding, only: c_f_pointer, c_f_procpointer
   use, intrinsic :: iso_fortran_env, only: int32, int64, real64
@@ -53,6 +53,7 @@ module ListClass
 
 
   type, bind(c) :: list_t       !! list<*link_t>: C linked-list
+    integer(kind = c_size_t) :: numel
     type(c_ptr) :: self
     type(c_ptr) :: head
     type(c_ptr) :: tail
@@ -174,15 +175,49 @@ contains
 
   subroutine test_f_flist ()
       ! tests appending values to the FORTRAN forward linked-list class
-      type(f_flist_t) :: list
-      integer(kind = int32), parameter :: numel = 256
+      type(f_flist_t), allocatable :: list
+      integer(kind = int64) :: t_start, t_end, clock_rate
+!     integer(kind = int32), parameter :: numel = 256
+      integer(kind = int32), parameter :: numel = 65536
+      integer(kind = int32) :: mstat
       integer(kind = int32) :: i
+
+      call system_clock (count_rate=clock_rate)
+
+      allocate (list, stat=mstat)
+      if (mstat /= 0) error stop 'allocation error'
 
       list = f_flist_t ()
 
+      write (*, '(1X,A)', advance='no') 'appending to list ... '
+
+
+      call system_clock (t_start)
       do i = 1, numel
           call list % append (i)
       end do
+      call system_clock (t_end)
+
+
+      print *, 'done'
+      print *, 'elapsed time (millis): ', 1.0e3_real64 * &
+          & real(t_end - t_start, kind=real64) /         &
+          & real(clock_rate, kind=real64)
+
+
+      write (*, '(1X,A)', advance='no') 'destroying list ... '
+
+
+      call system_clock (t_start)
+      deallocate (list)
+      call system_clock (t_end)
+
+
+      print *, 'done'
+      print *, 'elapsed time (millis): ', 1.0e3_real64 * &
+          & real(t_end - t_start, kind=real64) /         &
+          & real(clock_rate, kind=real64)
+
 
       return
   end subroutine
@@ -199,13 +234,13 @@ contains
       integer(kind = c_int), pointer :: p_data => null()
       procedure(i_append), pointer :: append => null()
       integer(kind = int64) :: t_start, t_end, clock_rate
-!     integer(kind = c_int), parameter :: numel = 65536
-      integer(kind = c_int), parameter :: numel = 256
+      integer(kind = c_int), parameter :: numel = 65536
+!     integer(kind = c_int), parameter :: numel = 256
       integer(kind = c_int) :: i, diff
 
 
       call system_clock (count_rate=clock_rate)
-      call system_clock (t_start)
+
 
       write (*, '(1X,A)', advance='no') 'creating list ... '
       list = flist_create_list_t ()
@@ -215,9 +250,20 @@ contains
       call c_f_pointer (list, p_list)
       call c_f_procpointer (p_list % append, append)
 
+      write (*, '(1X,A)', advance='no') 'appending to list ... '
+
+
+      call system_clock (t_start)
       do i = 1, numel
           call append (p_list % self, i)        !! appends values to list
       end do
+      call system_clock (t_end)
+
+
+      print *, 'done'
+      print *, 'elapsed time (millis): ', 1.0e3_real64 * &
+          & real(t_end - t_start, kind=real64) /         &
+          & real(clock_rate, kind=real64)
 
 
       i = 1
@@ -243,10 +289,14 @@ contains
 
 
       write (*, '(1X,A)', advance='no') 'destroying list ... '
-      list = flist_list_destructor (list)
-      print *, 'done'
 
+
+      call system_clock (t_start)
+      list = flist_list_destructor (list)
       call system_clock (t_end)
+
+
+      print *, 'done'
       print *, 'elapsed time (millis): ', 1.0e3_real64 * &
           & real(t_end - t_start, kind=real64) /         &
           & real(clock_rate, kind=real64)
@@ -305,7 +355,7 @@ program test_flist
   use ListClass, only: test_append_method
   implicit none
 
-  call test_create_node ()
+! call test_create_node ()
   call test_append_method ()
   call test_f_flist ()
 
