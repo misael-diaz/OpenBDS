@@ -23,6 +23,7 @@
 
 typedef struct {
 	void*   self;
+	size_t  numel;
 	link_t* head;
 	link_t* tail;
 	void (*append) (void *list, int value);

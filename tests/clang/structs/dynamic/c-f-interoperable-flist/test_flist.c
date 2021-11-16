@@ -46,10 +46,10 @@ int main () {
 	void** iter  = flist_random_access_iterator (list);
 	void** aiter = flist_random_access_iterator (alist);
 
-	int diff = 0;
-	for (int i = 0; i != NUMEL; ++i)
+	size_t diff = 0;
+	for (size_t i = 0; i != (list -> numel); ++i)
 		// computes differences between input and contained data
-		diff += ( *( (int*) iter[i] ) - i );
+		diff += ( ( (size_t) *( (int*) iter[i] ) ) - i );
 
 
 	printf("[00] test-list-iterator: ");

@@ -59,6 +59,7 @@ static void flist_append_int32_t (void *vlist, int value)  // append method
 
 		list -> head -> node = flist_create_node_int32_t (value);
 		list -> tail -> node = list -> head -> node;
+		list -> numel = 0;
 
 	} else {
 
@@ -69,6 +70,7 @@ static void flist_append_int32_t (void *vlist, int value)  // append method
 
 	}
 
+		++(list -> numel);
 }
 
 
@@ -116,14 +118,39 @@ list_t* flist_list_destructor (list_t* list)	// destroys linked-list obj
 	link_t *head = (list && list -> head)? (list -> head): NULL;
 	node_t *node = (head && head -> node)? (head -> node): NULL;
 
-	if (head != NULL && node != NULL)
+	if (head && node)
 	{
 		list -> head = flist_link_destructor (list -> head);
+//		flist_alist_destructor (list);
+//		list -> head -> node = NULL;
 		list -> tail -> node = NULL;
 		list -> tail = util_ffree_link_t (list -> tail);
 	}
 
 	return util_ffree_list_t (list);
+}
+
+
+void    flist_alist_destructor (list_t* list)	// destroys linked-nodes
+{
+	link_t* link = (list && list -> head)? list -> head: NULL;
+	node_t* node = (link -> node)? link -> node: NULL;
+	node_t* next = (node && node -> next)? node -> next: NULL;
+	data_t* item = NULL;
+
+	for (size_t i = 0; i != (list -> numel); ++i)
+	{
+		item = node -> item;
+		free (item -> data);
+		item -> data = NULL;
+		free (item);
+		node -> item = NULL;
+		node -> next = NULL;
+		free(node);
+
+		node = next;
+		next = (next && next -> next)? next -> next: NULL;
+	}
 }
 
 
