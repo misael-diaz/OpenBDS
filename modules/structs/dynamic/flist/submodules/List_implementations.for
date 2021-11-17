@@ -73,15 +73,15 @@ contains
       type(node_t), pointer :: node => null()
       integer(kind = int32), intent(in) :: value
 
-      if ( associated(list % tail % node % p) ) then
+      if ( associated(list % tail) ) then
 
           call associate (node, list % tail)
           call create (node % next, value)
-          list % tail % node % p => node % next % node % p
+          list % tail => node % next
 
       else
           call create (list % head, value)
-          list % tail % node % p => list % head % node % p
+          list % tail => list % head
       end if
 
       return
@@ -91,8 +91,8 @@ contains
   module function list_default_constructor () result(list)
       type(list_t) :: list
 
-      list % head % node % p => null()
-      list % tail % node % p => null()
+      list % head => null()
+      list % tail => null()
 
       return
   end function
@@ -100,21 +100,27 @@ contains
 
   module subroutine node_int32_t_create (link, value)
       ! creates a node<*int32_t>
-      type(link_t), intent(inout) :: link
+      type(link_t), intent(inout), pointer :: link
       class(*), pointer :: p => null()          !! general purpose pointer
       type(node_t), pointer :: node => null()   !! node pointer
       integer(kind = int32), intent(in) :: value
       integer(kind = int32) :: mstat
+
+      allocate (link, stat = mstat)
+      if (mstat /= 0) error stop 'node<*int32_t>: alloc error'
 
       allocate (link % node % p, mold = node_t(), stat = mstat)
       if (mstat /= 0) error stop 'node<*int32_t>: alloc error'
 
       call associate (node, link)
 
+      allocate (node % item, stat=mstat)
+      if (mstat /= 0) error stop 'node<*int32_t>: alloc error'
+
       allocate (node % item % data % p, source=value, stat=mstat)
       if (mstat /= 0) error stop 'node<*int32_t>: alloc error'
 
-      node % next % node % p => null()
+      node % next => null()
 
       return
   end subroutine node_int32_t_create
@@ -189,8 +195,8 @@ contains
   module function node_default_constructor () result(node)!! returns node<>
       type(node_t) :: node
 
-      node % item % data % p => null()
-      node % next % node % p => null()
+      node % item => null()
+      node % next => null()
 
       return
   end function
@@ -202,11 +208,13 @@ contains
       integer(kind = int32), intent(in) :: value
       integer(kind = int32) :: mstat
 
-      node % item % data % p => null()
-      node % next % node % p => null()
+      allocate (node % item, stat=mstat)
+      if (mstat /= 0) error stop 'node<*int32_t>: alloc error'
 
       allocate (node % item % data % p, source=value, stat=mstat)
       if (mstat /= 0) error stop 'node<*int32_t>: alloc error'
+
+      node % next => null()
 
       return
   end function
@@ -214,11 +222,12 @@ contains
 
   module subroutine list_finalizer (list)
       type(list_t), intent(inout) :: list
+      integer(kind = int32) :: mstat
 
-      if ( associated(list % head % node % p) ) then
+      if ( associated(list % head) ) then
           call link_destructor (list % head)
-          list % head % node % p => null()
-          list % tail % node % p => null()
+          list % head => null()
+          list % tail => null()
       end if
 
       return
@@ -229,20 +238,17 @@ contains
       type(node_t), intent(inout) :: node
       integer(kind = int32) :: mstat
 
-      if ( associated(node % next % node % p) ) then
-
-          call link_destructor (node % next)
-          node % next % node % p => null()
-
-      end if
-
-
-      if ( associated(node % item % data % p) ) then
+      if ( associated(node % item) ) then
 
           deallocate (node % item % data % p, stat=mstat)
           if (mstat /= 0) error stop 'node.final: dealloc error'
 
           node % item % data % p => null()
+          deallocate (node % item, stat=mstat)
+          if (mstat /= 0) error stop 'node.final: dealloc error'
+
+          node % item => null()
+          node % next => null()
 
       end if
 
@@ -253,29 +259,28 @@ contains
   module recursive subroutine link_finalizer (link)
       type(link_t), intent(inout) :: link
 
-      if ( associated(link % node % p) ) then
-          call link_destructor (link)
-          link % node % p => null()
-      end if
+      link % node % p => null()
 
       return
   end subroutine
 
 
-  module recursive subroutine link_destructor (link)
-      ! destroys links via forward iterators
-      type(link_t), intent(inout) :: link
-      type(node_t), pointer :: head => null()
+  module subroutine link_destructor (head)
+      type(link_t), intent(inout), pointer :: head
+      type(link_t), pointer :: link => null()
       type(node_t), pointer :: node => null()
       type(node_t), pointer :: next => null()
-      type(node_t), pointer :: prev => null()
       integer(kind = int32) :: mstat
 
 
-      call associate (head, link)
-      call associate (prev, link)
-      call associate (node, head % next)
-      if ( associated (node) ) then
+      if ( associated(head) ) then
+          call associate (node, head)
+      else
+          node => null()
+      end if
+
+
+      if ( associated(node) ) then
           call associate (next, node % next)
       else
           next => null()
@@ -285,22 +290,21 @@ contains
       do while ( associated(node) )
 
 
-          do while ( associated(next) ) !! traverses list
-              call associate (prev, prev % next)
-              call associate (node, node % next)
-              call associate (next, next % next)
-          end do
+          if ( associated(node) ) then
+              if ( associated(node % next) ) then
+                  link => node % next
+              else
+                  link => null()
+              end if
+
+              deallocate (node, stat=mstat)
+              if (mstat /= 0) error stop 'alloc err'
+          else
+              link => null()
+          end if
 
 
-          deallocate (node, stat=mstat)
-          if (mstat /= 0) error stop 'deallocation error'
-
-          node => null()
-          prev % next % node % p => null()
-
-
-          call associate (prev, link)
-          call associate (node, head % next)
+          node => next
           if ( associated(node) ) then
               call associate (next, node % next)
           else
@@ -308,152 +312,25 @@ contains
           end if
 
 
+          if ( associated(link) ) then
+              link % node % p => null()
+              deallocate (link, stat=mstat)
+              if (mstat /= 0) error stop 'alloc err'
+              link => null()
+          end if
+
       end do
 
 
-      deallocate (head, stat=mstat)
-      if (mstat /= 0) error stop 'deallocation error'
-
-      head => null()
-      link % node % p => null()
+      if ( associated(head) ) then
+          head % node % p => null()
+          deallocate(head, stat=mstat)
+          head => null()
+      end if
 
 
       return
   end subroutine link_destructor
-
-
-  module recursive subroutine link_recursive_destructor (link)
-      ! destroys links to nodes recursively from back to front
-      type(link_t), intent(inout) :: link
-      class(*), pointer :: next => null()
-      type(node_t), pointer :: node => null()
-      integer(kind = int32) :: mstat
-
-
-      call associate (node, link)
-
-      next => node % next % node % p
-      if ( associated(next) ) then
-
-
-          call link_recursive_destructor (node % next)
-
-          call associate (node, link)   !! validates pointer to current
-
-          deallocate (node, stat=mstat)
-          if (mstat /= 0) error stop 'deallocation error'
-
-          node => null()
-          link % node % p => null()
-
-
-      else
-
-          deallocate (node, stat=mstat)
-          if (mstat /= 0) error stop 'deallocation error'
-
-          node => null()
-          link % node % p => null()
-
-      end if
-
-      return
-  end subroutine link_recursive_destructor
-
-
-  module recursive subroutine link_aggressive_destructor (link)
-      ! destroys links to nodes recursively from back to front
-      type(link_t), intent(inout) :: link
-      class(*), pointer :: next => null()
-      type(node_t), pointer :: node => null()
-      integer(kind = int32) :: mstat
-
-      call associate (node, link)
-
-      next => node % next % node % p
-      if ( associated(next) ) then
-
-
-          call link_aggressive_destructor (node % next)
-
-
-          call associate (node, link)   !! validates pointer to current
-
-
-          if ( associated(node % item % data % p) ) then
-              deallocate (node % item % data % p, stat=mstat)
-              if (mstat /= 0) error stop 'deallocation error'
-          end if
-
-
-          node % item % data % p => null()
-          node % next % node % p => null()
-
-
-          deallocate (node, stat=mstat)
-          if (mstat /= 0) error stop 'deallocation error'
-
-
-          node => null()
-          link % node % p => null()
-
-
-      else
-
-          if ( associated(node % item % data % p) ) then
-              deallocate (node % item % data % p, stat=mstat)
-              if (mstat /= 0) error stop 'deallocation error'
-          end if
-
-          node % item % data % p => null()
-          node % next % node % p => null()
-
-          deallocate (node, stat=mstat)
-          if (mstat /= 0) error stop 'deallocation error'
-
-          node => null()
-          link % node % p => null()
-
-      end if
-
-      return
-  end subroutine link_aggressive_destructor
-
-
-  module recursive subroutine link_conservative_destructor (link)
-      ! destroys data in the last node only
-      type(link_t), intent(inout) :: link
-      class(*), pointer :: next => null()
-      type(node_t), pointer :: node => null()
-      integer(kind = int32) :: mstat
-
-      call associate (node, link)
-
-      next => node % next % node % p
-      if ( associated(next) ) then
-
-          call link_conservative_destructor (node % next)
-
-      else
-
-          if ( associated(node % item % data % p) ) then
-              deallocate (node % item % data % p, stat=mstat)
-              if (mstat /= 0) error stop 'deallocation error'
-          end if
-
-          node % item % data % p => null()
-          node % next % node % p => null()
-
-          deallocate (node, stat=mstat)
-          if (mstat /= 0) error stop 'deallocation error'
-
-          node => null()
-          link % node % p => null()
-
-      end if
-
-      return
-  end subroutine link_conservative_destructor
 
 
   module recursive subroutine data_destructor (data)
@@ -464,6 +341,7 @@ contains
 
           deallocate (data % data % p, stat=mstat)
           if (mstat /= 0) error stop 'data.destructor: dealloc error'
+          data % data % p => null()
 
       end if
 

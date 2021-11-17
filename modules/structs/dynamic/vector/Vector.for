@@ -1505,7 +1505,7 @@ module VectorClass
 
   interface
 
-    module subroutine pointer_finalizer (pointer)
+    module recursive subroutine pointer_finalizer (pointer)
         type(pointer_t), intent(inout) :: pointer
     end subroutine
 

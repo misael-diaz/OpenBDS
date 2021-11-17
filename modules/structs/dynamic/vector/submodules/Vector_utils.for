@@ -893,15 +893,11 @@ contains
   end subroutine
 
 
-  module subroutine pointer_finalizer (pointer)
+  module recursive subroutine pointer_finalizer (pointer)
       type(pointer_t), intent(inout) :: pointer
-      integer(kind = int32) :: mstat
 
       if ( associated(pointer % p) ) then
-
-          deallocate (pointer % p, stat=mstat)
-          if (mstat /= 0) error stop 'pointer.destructor(): dealloc error'
-
+          pointer % p => null()
       end if
 
       return

@@ -48,8 +48,8 @@ module ListClass
 
   type :: node_t        !! node<*data_t>: pointer to data object
     private
-    type(data_t) :: item
-    type(link_t) :: next
+    type(data_t), pointer :: item => null()
+    type(link_t), pointer :: next => null()
     contains
       private
       procedure :: node_assign_method
@@ -59,8 +59,8 @@ module ListClass
 
   type, public :: list_t
     private
-    type(link_t) :: head
-    type(link_t) :: tail
+    type(link_t), pointer :: head => null()
+    type(link_t), pointer :: tail => null()
     contains
       private
       procedure :: list_int32_t_append_method
@@ -158,18 +158,8 @@ module ListClass
 
   interface
 
-    module recursive subroutine link_conservative_destructor (link)
-        type(link_t), intent(inout) :: link
-    end subroutine
-
-
-    module recursive subroutine link_aggressive_destructor (link)
-        type(link_t), intent(inout) :: link
-    end subroutine
-
-
-    module recursive subroutine link_destructor (link)
-        type(link_t), intent(inout) :: link
+    module subroutine link_destructor (head)
+        type(link_t), intent(inout), pointer :: head
     end subroutine
 
 
@@ -183,7 +173,7 @@ module ListClass
   interface
 
     module subroutine node_int32_t_create (link, value)
-        type(link_t), intent(inout) :: link
+        type(link_t), intent(inout), pointer :: link
         integer(kind = int32), intent(in) :: value
     end subroutine
 
@@ -224,7 +214,7 @@ module ListClass
   interface
 
     module subroutine associate (node, link)
-        type(link_t), intent(in), target :: link
+        type(link_t), intent(in), pointer :: link
         type(node_t), intent(inout), pointer :: node
     end subroutine
 

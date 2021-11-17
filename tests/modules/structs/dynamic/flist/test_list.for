@@ -56,8 +56,7 @@ contains
        integer(kind = int32) :: diff, mstat
        integer(kind = int64), parameter :: reps = 4_int64
        integer(kind = int32), parameter :: value = 0
-!      integer(kind = int32), parameter :: numel = 65536
-       integer(kind = int32), parameter :: numel = 16384
+       integer(kind = int32), parameter :: numel = 65536
        character(*), parameter :: fformat = '(A,F16.2)'
 
 
@@ -235,7 +234,7 @@ contains
 
        print *, new_line('n')
        write (*, '(A)', advance='no') &
-           & 'destroying list (migth take a while) ... '
+           & 'destroying list ... '
 
 
        call timer % tic ()
@@ -252,18 +251,30 @@ contains
 
 
    subroutine test_list_destructor ()
-       type(list_t) :: list
+       type(list_t), allocatable :: list
+       type(timer_t) :: timer
        integer(kind = int32), parameter :: value = 0
+       integer(kind = int32) :: mstat
+       integer(kind = int32) :: i
+       character(*), parameter :: fformat = '(A,F16.2)'
 
-       call list % append (value)
-       call list % append (value)
-       call list % append (value)
-       call list % append (value)
-       call list % append (value)
-       call list % append (value)
-       call list % append (value)
-       call list % append (value)
-       call list % append (value)
+       allocate (list, stat=mstat)
+       if (mstat /= 0) error stop 'allocation error ... '
+
+       timer = timer_t ()
+       call timer % tic ()
+       do i = 1, 65536
+           call list % append (i)
+       end do
+       call timer % toc ()
+
+       print fformat, "elapsed-time (millis): ", timer % etime ()
+
+       call timer % tic ()
+       deallocate (list, stat=mstat)
+       call timer % toc ()
+
+       print fformat, "elapsed-time (millis): ", timer % etime ()
 
        return
    end subroutine
@@ -569,7 +580,7 @@ end module list_class_tests
 
 program test
   use list_class_tests, only: destructor => test_list_destructor
- use list_class_tests, only: append => test_list_append_method
+  use list_class_tests, only: append => test_list_append_method
 ! use list_class_tests, only: list => test_list
 ! use list_class_tests, only: node_constructors => &
 !                           & test_node_contructors
