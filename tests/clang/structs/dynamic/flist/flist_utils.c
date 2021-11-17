@@ -56,7 +56,8 @@ node_t* util_alloc_node_t ()	// allocates memory for a node object
 
 	node_t *node = (node_t*) malloc ( sizeof(node_t) );
 
-	if (node == NULL) {
+	if (node == NULL)
+	{
 		fprintf (stderr, "memory allocation error: %s\n",
 			 strerror (errno) );
 		exit(EXIT_FAILURE);
@@ -88,11 +89,12 @@ link_t* util_alloc_link_t ()	// allocates memory for a link object
 void*   util_ffree_void_t (void *data)	  // generic deallocator
 {
 
-	if (data != NULL) {
+	if (data)
+	{
 		free (data);
+		data = NULL;
 	}
 
-	data = NULL;
 	return data;
 
 }
@@ -101,12 +103,13 @@ void*   util_ffree_void_t (void *data)	  // generic deallocator
 data_t* util_ffree_data_t (data_t *item)  // frees data object from memory
 {
 
-	if (item != NULL) {
+	if (item)
+	{
 		item -> data = util_ffree_void_t (item -> data);
 		free (item);
+		item = NULL;
 	}
 
-	item = NULL;
 	return item;
 
 }
@@ -115,24 +118,14 @@ data_t* util_ffree_data_t (data_t *item)  // frees data object from memory
 node_t* util_ffree_node_t (node_t *node)  // frees node object from memory
 {
 
-	if (node != NULL) {
-
-		if (node -> item != NULL)
-			node -> item = util_ffree_data_t (node -> item);
-
-
-		if (node -> next != NULL) {
-			fprintf (stderr, "node: internal implement err\n");
-			exit(EXIT_FAILURE);
-		} else
-			node -> next = NULL;
-
-
+	if (node)
+	{
+		node -> item = util_ffree_data_t (node -> item);
+		node -> next = NULL;
 		free (node);
-
+		node = NULL;
 	}
 
-	node = NULL;
 	return node;
 
 }
@@ -140,18 +133,13 @@ node_t* util_ffree_node_t (node_t *node)  // frees node object from memory
 
 link_t* util_ffree_link_t (link_t *link)  // frees link object from memory
 {
-	if (link != NULL) {
-
-		if (link -> node != NULL) {
-			fprintf (stderr, "link: internal implement err\n");
-			exit(EXIT_FAILURE);
-		} else
-			link -> node = NULL;
-
+	if (link)
+	{
+		link -> node = NULL;
 		free (link);
+		link = NULL;
 	}
 
-	link = NULL;
 	return link;
 }
 
@@ -159,13 +147,14 @@ link_t* util_ffree_link_t (link_t *link)  // frees link object from memory
 list_t* util_ffree_list_t (list_t *list)  // frees list object from memory
 {
 
-	if (list != NULL) {
+	if (list)
+	{
 		list -> self = NULL;
 		list -> head = util_ffree_link_t (list -> head);
 		list -> tail = util_ffree_link_t (list -> tail);
+		free(list);
+		list = NULL;
 	}
 
-	free(list);
-	list = NULL;
 	return list;
 }
