@@ -96,65 +96,15 @@ list_t* flist_list_destructor (list_t* list)	// destroys linked-list obj
 
 link_t* flist_link_destructor (link_t* link)	// destroys linked-nodes
 {
-	node_t* head = NULL;
-	node_t* node = NULL;
-	node_t* next = NULL;
-	node_t* prev = NULL;
+	node_t* node = (link && link -> node)? link -> node: NULL;
+	node_t* next = (node && node -> next)? node -> next: NULL;
 
-	// initializes forward iterators
-	head = link -> node;
-	prev = head;
-
-	if (head -> next != NULL)
-		node = head -> next;
-	else
-		node = NULL;
-
-
-	if (node != NULL) {
-
-		if (node -> next != NULL)
-			next = node -> next;
-		else
-			next = NULL;
-
-	} else {
-		next = NULL;
-	}
-
-
-	while (node != NULL) {
-		// destroys last node `node'
-		while (next != NULL) {
-			// traverses list
-			prev = prev -> next;
-			node = node -> next;
-			next = next -> next;
-		}
-
+	while (node)
+	{
 		node = util_ffree_node_t (node);
-		prev -> next = NULL;
-
-		// updates iterators
-		prev = head;
-		node = head -> next;
-		if (node != NULL) {
-
-			if (node -> next != NULL)
-				next = node -> next;
-			else
-				next = NULL;
-
-		} else {
-			next = NULL;
-		}
-
+		node = next;
+		next = (next && next -> next)? next -> next: NULL;
 	}
 
-	head = util_ffree_node_t (head);
-
-	link -> node = NULL;
-	link = util_ffree_link_t (link);
-	return link;
-
+	return util_ffree_link_t (link);
 }
