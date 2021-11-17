@@ -119,7 +119,10 @@ link_t* util_alloc_link_t ()	// allocates memory for a link object
 void**  util_ffree_iter_t (void **iter)	  // frees iterator
 {
 	if (iter)
+	{
 		free (iter);
+		iter = NULL;
+	}
 
 	return iter;
 }
@@ -128,7 +131,8 @@ void**  util_ffree_iter_t (void **iter)	  // frees iterator
 void*   util_ffree_void_t (void *data)	  // generic deallocator
 {
 
-	if (data) {
+	if (data)
+	{
 		free (data);
 		data = NULL;
 	}
@@ -141,7 +145,8 @@ void*   util_ffree_void_t (void *data)	  // generic deallocator
 data_t* util_ffree_data_t (data_t *item)  // frees data object from memory
 {
 
-	if (item) {
+	if (item)
+	{
 		item -> data = util_ffree_void_t (item -> data);
 		free (item);
 		item = NULL;
@@ -157,11 +162,8 @@ node_t* util_ffree_node_t (node_t *node)  // frees node object from memory
 
 	if (node)
 	{
-		if (node -> item)
-			node -> item = util_ffree_data_t (node -> item);
-
+		node -> item = util_ffree_data_t (node -> item);
 		node -> next = NULL;
-		node -> item = NULL;
 		free (node);
 		node = NULL;
 	}
@@ -173,18 +175,13 @@ node_t* util_ffree_node_t (node_t *node)  // frees node object from memory
 
 link_t* util_ffree_link_t (link_t *link)  // frees link object from memory
 {
-	if (link) {
-
-		if (link -> node) {
-			fprintf (stderr, "link: internal implement err\n");
-			exit(EXIT_FAILURE);
-		} else
-			link -> node = NULL;
-
+	if (link)
+	{
+		link -> node = NULL;
 		free (link);
+		link = NULL;
 	}
 
-	link = NULL;
 	return link;
 }
 
@@ -192,13 +189,14 @@ link_t* util_ffree_link_t (link_t *link)  // frees link object from memory
 list_t* util_ffree_list_t (list_t *list)  // frees list object from memory
 {
 
-	if (list) {
+	if (list)
+	{
 		list -> self = NULL;
 		list -> head = util_ffree_link_t (list -> head);
 		list -> tail = util_ffree_link_t (list -> tail);
+		free (list);
+		list = NULL;
 	}
 
-	free(list);
-	list = NULL;
 	return list;
 }
