@@ -32,7 +32,7 @@ int main () {
 	list_t* alist = list_t ();		// creates an empty list
 
 	for (int i = 0; i != NUMEL; ++i) {
-		list -> append_method (i);	// appends values to list
+		list -> append_method (&i);	// appends values to list
 	}
 
 	// prints the first and last values in the list

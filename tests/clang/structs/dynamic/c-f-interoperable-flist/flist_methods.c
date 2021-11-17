@@ -52,7 +52,9 @@ void** flist_random_access_iterator (list_t* list)
 }
 
 
-static void flist_append_int32_t (void *vlist, int value)  // append method
+__attribute__ ((access (read_only, 2)))
+static void flist_append_int32_t (void *vlist, const int* value)
+// append method
 {
 	list_t *list = vlist;
 	if (list -> head -> node == NULL) {
@@ -91,8 +93,10 @@ list_t* flist_create_list_t ()			// creates empty list<>
 }
 
 
-node_t* flist_create_node_int32_t (int value)	// creates node<*int32_t>
+__attribute__ ((access (read_only, 1)))
+node_t* flist_create_node_int32_t (const int* value)
 {
+	// creates node<*int32_t>
 
 	node_t *node = util_alloc_node_t ();
 	node -> item = util_alloc_data_t ();
@@ -100,7 +104,7 @@ node_t* flist_create_node_int32_t (int value)	// creates node<*int32_t>
 	node -> next = NULL;
 
 	int* i = node -> item -> data;
-	*i = value;
+	*i = *value;
 
 	return node ;
 }

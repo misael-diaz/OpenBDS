@@ -81,7 +81,7 @@ module ListClass
         use, intrinsic :: iso_c_binding, only: c_ptr, c_int
         implicit none
         type(c_ptr), intent(in), value :: self
-        integer(kind = c_int), intent(in), value :: value
+        integer(kind = c_int), intent(in) :: value
     end subroutine
   end interface
 
@@ -111,7 +111,7 @@ module ListClass
         use, intrinsic :: iso_c_binding, only: c_ptr, c_int
         implicit none
         type(c_ptr) :: node
-        integer(kind = c_int), intent(in), value :: value
+        integer(kind = c_int), intent(in) :: value
     end function
 
 
@@ -178,9 +178,9 @@ contains
       type(f_flist_t), allocatable :: list
       integer(kind = int64) :: t_start, t_end, clock_rate
 !     integer(kind = int32), parameter :: numel = 256
-      integer(kind = int32), parameter :: numel = 65536
+      integer(kind = c_int), parameter :: numel = 65536
       integer(kind = int32) :: mstat
-      integer(kind = int32) :: i
+      integer(kind = c_int) :: i
 
       call system_clock (count_rate=clock_rate)
 
@@ -235,7 +235,6 @@ contains
       procedure(i_append), pointer :: append => null()
       integer(kind = int64) :: t_start, t_end, clock_rate
       integer(kind = c_int), parameter :: numel = 65536
-!     integer(kind = c_int), parameter :: numel = 256
       integer(kind = c_int) :: i, diff
 
 

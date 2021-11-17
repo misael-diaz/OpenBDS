@@ -23,7 +23,8 @@
 
 void** flist_random_access_iterator (list_t*);	// creates iterator
 
-node_t* flist_create_node_int32_t (int);// creates node<*int32_t>
+__attribute__ ((access (read_only, 1)))
+node_t* flist_create_node_int32_t (const int*);// creates node<*int32_t>
 link_t* flist_create_link_t ();		// creates `empty' link<>
 list_t* flist_create_list_t ();		// creates `empty' list<>
 link_t* flist_link_destructor (link_t*);// destroys linked-nodes
