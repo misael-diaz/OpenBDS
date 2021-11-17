@@ -25,7 +25,7 @@ typedef struct {
 	void*   self;
 	link_t* head;
 	link_t* tail;
-	void (*append) (void *list, int value);
+	void (*append) (void* list, const int* value);
 } list_t;
 
 #endif

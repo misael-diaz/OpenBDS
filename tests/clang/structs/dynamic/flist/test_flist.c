@@ -31,7 +31,7 @@ int main () {
 	list_t* list = list_t ();		// creates list object
 
 	for (int i = 0; i != NUMEL; ++i) {
-		list -> append_method (i);	// appends values to list
+		list -> append_method (&i);	// appends values to list
 	}
 
 	// prints the first and last values in the list
