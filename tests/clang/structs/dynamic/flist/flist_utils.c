@@ -17,7 +17,14 @@
  *
  */
 
+
+#include <stdio.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
 #include "flist_utils.h"
+
 
 static void* flist_util_alloc_void_t (size_t sz)
 {

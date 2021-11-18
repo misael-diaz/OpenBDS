@@ -17,6 +17,7 @@
  *
  */
 
+#include <stdio.h>
 #include "flist_methods.h"
 
 // defines OOP-like interfaces
@@ -45,10 +46,3 @@ int main () {
 
 	return 0 ;
 }
-
-/*
- * TODO:
- * [x] implement memory management utils
- * [x] implement the append method
- *
- */

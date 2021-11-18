@@ -17,6 +17,7 @@
  *
  */
 
+#include <stddef.h>
 #include "flist_methods.h"
 
 extern flist_util_namespace const util;	// imports util namespace
