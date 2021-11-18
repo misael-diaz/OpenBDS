@@ -21,19 +21,23 @@
 #include "flist_methods.h"
 
 // defines OOP-like interfaces
-#define list_t() flist_create_list_t()
-#define append_method(i) append(list->self, i)
+#define list_t(i) flist_create_list_t()
+#define append_method(i) append_int32_t(list->self, i)
 
 #define NUMEL 65536
 
 int main () {
 	// shows how to generate a linked-list
 
-	list_t* list = list_t ();		// creates list object
+	list_t* list = list_t ();		// creates list<*>
 
 	for (int i = 0; i != NUMEL; ++i) {
 		list -> append_method (&i);	// appends values to list
 	}
+
+//	Complains:
+//	long int ii = 0;
+//	list -> append_int64_t (list->self, &ii);
 
 	// prints the first and last values in the list
 	int *head = list -> head -> node -> item -> data;
@@ -46,3 +50,10 @@ int main () {
 
 	return 0 ;
 }
+
+/*
+ *
+ * TODO:
+ * [x] cater appending mixed-type objects to linked-list
+ *
+ */

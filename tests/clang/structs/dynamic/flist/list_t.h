@@ -19,13 +19,17 @@
  *
  */
 
+#include <stdint.h>
 #include "link_t.h"
 
 typedef struct {
 	void*   self;
 	link_t* head;
 	link_t* tail;
-	void (*append) (void* list, const int* value);
+	void (*append_int32_t) (void* list, const int32_t* value);
+	void (*append_int64_t) (void* list, const int64_t* value);
+	char* errmsg;
+	size_t id;
 } list_t;
 
 #endif
