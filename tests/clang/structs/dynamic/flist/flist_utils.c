@@ -160,7 +160,8 @@ static list_t* util_ffree_list_t (list_t *list)  // frees list object from memor
 }
 
 
-util_namespace const util = {	/* creates namespace instance */
+/* creates util namespace instance */
+util_namespace const util = {
 	util_alloc_void_t,
 	util_alloc_data_t,
 	util_alloc_node_t,

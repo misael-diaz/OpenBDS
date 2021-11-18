@@ -18,6 +18,7 @@
  */
 
 #include "flist_methods.h"
+extern util_namespace const util;
 
 __attribute__ ((access (read_only, 2)))
 static void flist_append_int32_t (void* vlist, const int* value)
