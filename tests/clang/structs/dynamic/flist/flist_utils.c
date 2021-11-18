@@ -204,8 +204,6 @@ flist_util_namespace const util = {
 	flist_util_alloc_node_t,
 	flist_util_alloc_link_t,
 	flist_util_alloc_list_t,
-	flist_util_ffree_void_t,
-	flist_util_ffree_data_t,
 	flist_util_ffree_node_t,
 	flist_util_ffree_link_t,
 	flist_util_ffree_list_t
