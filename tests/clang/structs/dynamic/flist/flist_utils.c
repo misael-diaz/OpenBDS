@@ -19,27 +19,31 @@
 
 #include "flist_utils.h"
 
-static void* util_alloc_void_t (size_t sz)  // generic memory allocator utility
+static void* flist_util_alloc_void_t (size_t sz)
 {
+	// generic memory allocator utility
 
 	void *data = malloc (sz);
 
-	if (data == NULL) {
+	if (data == NULL)
+	{
 		fprintf (stderr, "memory allocation error: %s\n",
 			 strerror (errno) );
 		exit(EXIT_FAILURE);
 	}
 
 	return data;
-
 }
 
 
-static data_t* util_alloc_data_t () 	// allocates memory for data_t object
+static data_t* flist_util_alloc_data_t ()
 {
+	// allocates memory for data_t object
+
 	data_t *item = (data_t*) malloc ( sizeof(data_t) );
 
-	if (item == NULL) {
+	if (item == NULL)
+	{
 		fprintf (stderr, "memory allocation error: %s\n",
 			 strerror (errno) );
 		exit(EXIT_FAILURE);
@@ -47,12 +51,12 @@ static data_t* util_alloc_data_t () 	// allocates memory for data_t object
 
 	item -> data = NULL;
 	return item;
-
 }
 
 
-static node_t* util_alloc_node_t ()	// allocates memory for a node object
+static node_t* flist_util_alloc_node_t ()
 {
+	// allocates memory for a node object
 
 	node_t *node = (node_t*) malloc ( sizeof(node_t) );
 
@@ -66,16 +70,17 @@ static node_t* util_alloc_node_t ()	// allocates memory for a node object
 	node -> item = NULL;
 	node -> next = NULL;
 	return node;
-
 }
 
 
-static link_t* util_alloc_link_t ()	// allocates memory for a link object
+static link_t* flist_util_alloc_link_t ()
 {
+	// allocates memory for a link object
 
 	link_t *link = (link_t*) malloc ( sizeof(link_t) );
 
-	if (link == NULL) {
+	if (link == NULL)
+	{
 		fprintf (stderr, "memory allocation error: %s\n",
 			 strerror (errno) );
 		exit(EXIT_FAILURE);
@@ -83,11 +88,34 @@ static link_t* util_alloc_link_t ()	// allocates memory for a link object
 
 	link -> node = NULL;
 	return link;
-
 }
 
-static void*   util_ffree_void_t (void *data)	  // generic deallocator
+
+static list_t* flist_util_alloc_list_t ()
 {
+	// allocates memory for a link object
+
+	list_t *list = (list_t*) malloc ( sizeof(list_t) );
+
+	if (list == NULL)
+	{
+		fprintf (stderr, "memory allocation error: %s\n",
+			 strerror (errno) );
+		exit(EXIT_FAILURE);
+	}
+
+	list -> self = NULL;
+	list -> head = NULL;
+	list -> tail = NULL;
+	list -> append = NULL;
+
+	return list;
+}
+
+
+static void*   flist_util_ffree_void_t (void *data)
+{
+	// generic deallocator
 
 	if (data)
 	{
@@ -96,43 +124,44 @@ static void*   util_ffree_void_t (void *data)	  // generic deallocator
 	}
 
 	return data;
-
 }
 
 
-static data_t* util_ffree_data_t (data_t *item)  // frees data object from memory
+static data_t* flist_util_ffree_data_t (data_t *item)
 {
+	// frees data object from memory
 
 	if (item)
 	{
-		item -> data = util_ffree_void_t (item -> data);
+		item -> data = flist_util_ffree_void_t (item -> data);
 		free (item);
 		item = NULL;
 	}
 
 	return item;
-
 }
 
 
-static node_t* util_ffree_node_t (node_t *node)  // frees node object from memory
+static node_t* flist_util_ffree_node_t (node_t *node)
 {
+	// frees node object from memory
 
 	if (node)
 	{
-		node -> item = util_ffree_data_t (node -> item);
+		node -> item = flist_util_ffree_data_t (node -> item);
 		node -> next = NULL;
 		free (node);
 		node = NULL;
 	}
 
 	return node;
-
 }
 
 
-static link_t* util_ffree_link_t (link_t *link)  // frees link object from memory
+static link_t* flist_util_ffree_link_t (link_t *link)
 {
+	// frees link object from memory
+
 	if (link)
 	{
 		link -> node = NULL;
@@ -144,14 +173,15 @@ static link_t* util_ffree_link_t (link_t *link)  // frees link object from memor
 }
 
 
-static list_t* util_ffree_list_t (list_t *list)  // frees list object from memory
+static list_t* flist_util_ffree_list_t (list_t *list)
 {
+	// frees list object from memory
 
 	if (list)
 	{
 		list -> self = NULL;
-		list -> head = util_ffree_link_t (list -> head);
-		list -> tail = util_ffree_link_t (list -> tail);
+		list -> head = flist_util_ffree_link_t (list -> head);
+		list -> tail = flist_util_ffree_link_t (list -> tail);
 		free(list);
 		list = NULL;
 	}
@@ -161,14 +191,15 @@ static list_t* util_ffree_list_t (list_t *list)  // frees list object from memor
 
 
 /* creates util namespace instance */
-util_namespace const util = {
-	util_alloc_void_t,
-	util_alloc_data_t,
-	util_alloc_node_t,
-	util_alloc_link_t,
-	util_ffree_void_t,
-	util_ffree_data_t,
-	util_ffree_node_t,
-	util_ffree_link_t,
-	util_ffree_list_t
+flist_util_namespace const util = {
+	flist_util_alloc_void_t,
+	flist_util_alloc_data_t,
+	flist_util_alloc_node_t,
+	flist_util_alloc_link_t,
+	flist_util_alloc_list_t,
+	flist_util_ffree_void_t,
+	flist_util_ffree_data_t,
+	flist_util_ffree_node_t,
+	flist_util_ffree_link_t,
+	flist_util_ffree_list_t
 };
