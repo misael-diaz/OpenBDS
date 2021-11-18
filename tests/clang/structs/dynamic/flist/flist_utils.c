@@ -151,6 +151,20 @@ static data_t* flist_util_ffree_data_t (data_t *item)
 }
 
 
+static char* flist_util_ffree_string (char *str)
+{
+	// frees string from memory
+
+	if (str)
+	{
+		free (str);
+		str = NULL;
+	}
+
+	return str;
+}
+
+
 static node_t* flist_util_ffree_node_t (node_t *node)
 {
 	// frees node object from memory
@@ -188,14 +202,10 @@ static list_t* flist_util_ffree_list_t (list_t *list)
 
 	if (list)
 	{
-		list -> self = NULL;
-		list -> head = flist_util_ffree_link_t (list -> head);
-		list -> tail = flist_util_ffree_link_t (list -> tail);
-
-		if (list -> errmsg)
-			free (list -> errmsg);
-
-		list -> errmsg = NULL;
+		list -> self   = NULL;
+		list -> head   = flist_util_ffree_link_t (list -> head);
+		list -> tail   = flist_util_ffree_link_t (list -> tail);
+		list -> errmsg = flist_util_ffree_string (list -> errmsg);
 		free (list);
 		list = NULL;
 	}
