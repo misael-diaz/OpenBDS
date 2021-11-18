@@ -19,7 +19,7 @@
 
 #include "flist_utils.h"
 
-void* util_alloc_void_t (size_t sz)  // generic memory allocator utility
+static void* util_alloc_void_t (size_t sz)  // generic memory allocator utility
 {
 
 	void *data = malloc (sz);
@@ -35,7 +35,7 @@ void* util_alloc_void_t (size_t sz)  // generic memory allocator utility
 }
 
 
-data_t* util_alloc_data_t () 	// allocates memory for data_t object
+static data_t* util_alloc_data_t () 	// allocates memory for data_t object
 {
 	data_t *item = (data_t*) malloc ( sizeof(data_t) );
 
@@ -51,7 +51,7 @@ data_t* util_alloc_data_t () 	// allocates memory for data_t object
 }
 
 
-node_t* util_alloc_node_t ()	// allocates memory for a node object
+static node_t* util_alloc_node_t ()	// allocates memory for a node object
 {
 
 	node_t *node = (node_t*) malloc ( sizeof(node_t) );
@@ -70,7 +70,7 @@ node_t* util_alloc_node_t ()	// allocates memory for a node object
 }
 
 
-link_t* util_alloc_link_t ()	// allocates memory for a link object
+static link_t* util_alloc_link_t ()	// allocates memory for a link object
 {
 
 	link_t *link = (link_t*) malloc ( sizeof(link_t) );
@@ -86,7 +86,7 @@ link_t* util_alloc_link_t ()	// allocates memory for a link object
 
 }
 
-void*   util_ffree_void_t (void *data)	  // generic deallocator
+static void*   util_ffree_void_t (void *data)	  // generic deallocator
 {
 
 	if (data)
@@ -100,7 +100,7 @@ void*   util_ffree_void_t (void *data)	  // generic deallocator
 }
 
 
-data_t* util_ffree_data_t (data_t *item)  // frees data object from memory
+static data_t* util_ffree_data_t (data_t *item)  // frees data object from memory
 {
 
 	if (item)
@@ -115,7 +115,7 @@ data_t* util_ffree_data_t (data_t *item)  // frees data object from memory
 }
 
 
-node_t* util_ffree_node_t (node_t *node)  // frees node object from memory
+static node_t* util_ffree_node_t (node_t *node)  // frees node object from memory
 {
 
 	if (node)
@@ -131,7 +131,7 @@ node_t* util_ffree_node_t (node_t *node)  // frees node object from memory
 }
 
 
-link_t* util_ffree_link_t (link_t *link)  // frees link object from memory
+static link_t* util_ffree_link_t (link_t *link)  // frees link object from memory
 {
 	if (link)
 	{
@@ -144,7 +144,7 @@ link_t* util_ffree_link_t (link_t *link)  // frees link object from memory
 }
 
 
-list_t* util_ffree_list_t (list_t *list)  // frees list object from memory
+static list_t* util_ffree_list_t (list_t *list)  // frees list object from memory
 {
 
 	if (list)
@@ -158,3 +158,16 @@ list_t* util_ffree_list_t (list_t *list)  // frees list object from memory
 
 	return list;
 }
+
+
+util_namespace const util = {	/* creates namespace instance */
+	util_alloc_void_t,
+	util_alloc_data_t,
+	util_alloc_node_t,
+	util_alloc_link_t,
+	util_ffree_void_t,
+	util_ffree_data_t,
+	util_ffree_node_t,
+	util_ffree_link_t,
+	util_ffree_list_t
+};

@@ -62,9 +62,12 @@ node_t* flist_create_node_int32_t (const int* value)
 // creates node<*int32_t>
 {
 
-	node_t *node = util_alloc_node_t ();
-	node -> item = util_alloc_data_t ();
-	node -> item -> data = util_alloc_void_t ( sizeof(int) );
+//	node_t *node = util_alloc_node_t ();
+//	node -> item = util_alloc_data_t ();
+	node_t *node = util.alloc_node_t ();
+	node -> item = util.alloc_data_t ();
+//	node -> item -> data = util_alloc_void_t ( sizeof(int) );
+	node -> item -> data = util.alloc_void_t ( sizeof(int) );
 	node -> next = NULL;
 
 	int* i = node -> item -> data;
@@ -76,7 +79,8 @@ node_t* flist_create_node_int32_t (const int* value)
 
 link_t* flist_create_link_t ()			// creates link<>
 {
-        link_t *link = util_alloc_link_t ();
+//      link_t *link = util_alloc_link_t ();
+        link_t *link = util.alloc_link_t ();
 	return link;
 }
 
@@ -90,10 +94,12 @@ list_t* flist_list_destructor (list_t* list)	// destroys linked-list obj
 	{
 		list -> head = flist_link_destructor (list -> head);
 		list -> tail -> node = NULL;
-		list -> tail = util_ffree_link_t (list -> tail);
+//		list -> tail = util_ffree_link_t (list -> tail);
+		list -> tail = util.ffree_link_t (list -> tail);
 	}
 
-	return util_ffree_list_t (list);
+//	return util_ffree_list_t (list);
+	return util.ffree_list_t (list);
 }
 
 
@@ -104,10 +110,12 @@ link_t* flist_link_destructor (link_t* link)	// destroys linked-nodes
 
 	while (node)
 	{
-		node = util_ffree_node_t (node);
+//		node = util_ffree_node_t (node);
+		node = util.ffree_node_t (node);
 		node = next;
 		next = (next && next -> next)? next -> next: NULL;
 	}
 
-	return util_ffree_link_t (link);
+//	return util_ffree_link_t (link);
+	return util.ffree_link_t (link);
 }
