@@ -1,11 +1,10 @@
-#!/usr/bin/make
 #
-# source: Makefile
+# source: make-inc
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-11-04
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Include for GNU make, defines source and object files to build tests.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,31 +23,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include flist-inc
+include flist-utils-inc
+include flist-methods-inc
 
-all: Vectors LinkedLists Iterators fLists Lists interoperable
-
-Vectors:
-	@$(MAKE) -C vector
-
-LinkedLists:
-	@$(MAKE) -C linked-list
-
-Iterators: Vectors
-	@$(MAKE) -C iterator
-
-fLists: Iterators
-	@$(MAKE) -C flist
-
-Lists:  Iterators
-	@$(MAKE) -C list
-
-interoperable:
-	@$(MAKE) -C c-fortran-interoperable
-
-clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C iterator    clean
-	@$(MAKE) -C flist       clean
-	@$(MAKE) -C list        clean
-	@$(MAKE) -C c-fortran-interoperable clean
+# objects
+OBJS = $(FLIST_UTILS_O) $(FLIST_METHODS_O)

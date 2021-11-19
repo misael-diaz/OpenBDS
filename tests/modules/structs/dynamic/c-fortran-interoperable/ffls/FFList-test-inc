@@ -1,0 +1,73 @@
+#
+# source: FFList-test-inc
+# author: misael-diaz
+# date:   2021-06-10
+#
+# Synopsis:
+# Include for GNU make, defines source and object files to build tests.
+#
+#
+# Copyright (C) 2021 Misael Diaz-Maldonado
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+MODULES = ../../../../../../modules
+CHRONOS = $(MODULES)/chronos
+FFLS    = $(MODULES)/structs/dynamic/c-fortran-interoperable/ffls
+LIST    = $(MODULES)/structs/dynamic/c-fortran-interoperable/flist
+
+
+include $(CHRONOS)/chronos-inc
+
+include $(FFLS)/ffls-inc
+include $(FFLS)/ffls-utils-inc
+include $(FFLS)/ffls-methods-inc
+
+include $(LIST)/flist-utils-inc
+include $(LIST)/flist-methods-inc
+
+
+# modules directory
+# modules include
+INCS = -I$(CHRONOS) -I$(FFLS)
+
+# defines relative path for needed (sub)modules
+CHRONOS_MOD_OBJ = $(CHRONOS)/$(CHRONOS_MODULE_OBJ)
+CHRONOS_SUB_OBJ = $(CHRONOS)/$(CHRONOS_SUBMOD_OBJ)
+
+FFLS_MOD_OBJ    = $(FFLS)/$(FFLS_MODULE_OBJ)
+FFLS_SUB_OBJ    = $(FFLS)/$(FFLS_FCTORS_OBJ)\
+                  $(FFLS)/$(FFLS_FDTORS_OBJ)\
+                  $(FFLS)/$(FFLS_METHODS_OBJ)
+
+LIST_OBJ        = $(LIST)/$(FLIST_UTILS_OBJ)\
+                  $(LIST)/$(FLIST_METHODS_OBJ)
+
+# src
+TEST_LIST_C = test_list.c
+TEST_FFLS_SRC = test_ffls.for
+
+# objects
+TEST_LIST_O   = test_list.o
+TEST_FFLS_OBJ = test_ffls.o
+
+# excutables
+TEST_LIST_EXE = test-list
+TEST_FFLS_EXE = test-fortran-forward-list
+
+# bundles (submodules, modules, and executables)
+SUBM  = $(CHRONOS_SUB_OBJ) $(FFLS_SUB_OBJ)
+MODS  = $(CHRONOS_MOD_OBJ) $(FFLS_MOD_OBJ)
+TESTS = $(TEST_LIST_EXE) $(TEST_FFLS_EXE)

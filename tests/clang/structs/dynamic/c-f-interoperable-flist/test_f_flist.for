@@ -189,7 +189,7 @@ contains
 
       list = f_flist_t ()
 
-      write (*, '(1X,A)', advance='no') 'appending to list ... '
+      write (*, '(1X,A)', advance='no') 'appending to forward list ... '
 
 
       call system_clock (t_start)

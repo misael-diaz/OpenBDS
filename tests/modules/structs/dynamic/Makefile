@@ -25,7 +25,7 @@
 #
 
 
-all: test_vector test_linked_list test_flist test_list
+all: test_vector test_linked_list test_flist test_list test_interoperable
 
 test_vector:
 	@$(MAKE) -C vector
@@ -39,8 +39,12 @@ test_flist:
 test_list:
 	@$(MAKE) -C list
 
+test_interoperable:
+	@$(MAKE) -C c-fortran-interoperable
+
 clean:
 	@$(MAKE) -C vector      clean
 	@$(MAKE) -C linked-list clean
 	@$(MAKE) -C flist       clean
 	@$(MAKE) -C list        clean
+	@$(MAKE) -C c-fortran-interoperable clean

@@ -597,7 +597,7 @@ program test
 ! call destructor ()
 ! call node_constructors ()
 ! call list ()
-  call append ()
+! call append ()
   call destructor ()
 
 end program

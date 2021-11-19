@@ -5,7 +5,7 @@
 # date:   2021-06-02
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Builds OpenBDS tests.
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -25,30 +25,10 @@
 #
 
 
-all: Vectors LinkedLists Iterators fLists Lists interoperable
+all: test_ffls
 
-Vectors:
-	@$(MAKE) -C vector
-
-LinkedLists:
-	@$(MAKE) -C linked-list
-
-Iterators: Vectors
-	@$(MAKE) -C iterator
-
-fLists: Iterators
-	@$(MAKE) -C flist
-
-Lists:  Iterators
-	@$(MAKE) -C list
-
-interoperable:
-	@$(MAKE) -C c-fortran-interoperable
+test_ffls:
+	@$(MAKE) -C ffls
 
 clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C iterator    clean
-	@$(MAKE) -C flist       clean
-	@$(MAKE) -C list        clean
-	@$(MAKE) -C c-fortran-interoperable clean
+	@$(MAKE) -C ffls clean

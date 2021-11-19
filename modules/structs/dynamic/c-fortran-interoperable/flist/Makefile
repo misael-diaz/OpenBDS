@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-11-02
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Builds the programs for testing the forward linked-list [flist].
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,31 +24,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include make-inc
 
-all: Vectors LinkedLists Iterators fLists Lists interoperable
+all: $(OBJS)
 
-Vectors:
-	@$(MAKE) -C vector
+$(FLIST_METHODS_O): $(FLIST_UTILS_O) $(FLIST_METHODS_H) $(FLIST_METHODS_C)
+	$(CC) $(CC_OPT) -Iinc -c $(FLIST_METHODS_C) -o $(FLIST_METHODS_O)
 
-LinkedLists:
-	@$(MAKE) -C linked-list
-
-Iterators: Vectors
-	@$(MAKE) -C iterator
-
-fLists: Iterators
-	@$(MAKE) -C flist
-
-Lists:  Iterators
-	@$(MAKE) -C list
-
-interoperable:
-	@$(MAKE) -C c-fortran-interoperable
+$(FLIST_UTILS_O): $(TYPES_H) $(FLIST_UTILS_H) $(FLIST_UTILS_C)
+	$(CC) $(CC_OPT) -Iinc -c $(FLIST_UTILS_C) -o $(FLIST_UTILS_O)
 
 clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C iterator    clean
-	@$(MAKE) -C flist       clean
-	@$(MAKE) -C list        clean
-	@$(MAKE) -C c-fortran-interoperable clean
+	rm -f obj/*.o

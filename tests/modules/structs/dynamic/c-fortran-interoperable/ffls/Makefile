@@ -2,10 +2,10 @@
 #
 # source: Makefile
 # author: misael-diaz
-# date:   2021-06-02
+# date:   2021-11-02
 #
 # Synopsis:
-# Builds the OpenBDS modules
+# Builds the programs for testing the forward linked-list [flist].
 #
 #
 # Copyright (C) 2021 Misael Diaz-Maldonado
@@ -24,31 +24,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+include FFList-test-inc
 
-all: Vectors LinkedLists Iterators fLists Lists interoperable
+all: $(TESTS)
 
-Vectors:
-	@$(MAKE) -C vector
+$(TEST_LIST_EXE): $(TEST_LIST_O)
+	$(CC) $(CC_OPT) $(LIST_OBJ) $(TEST_LIST_O) -o $(TEST_LIST_EXE)
 
-LinkedLists:
-	@$(MAKE) -C linked-list
+$(TEST_LIST_O): $(LIST_OBJ) $(TEST_LIST_C)
+	$(CC) $(CC_OPT) -I$(LIST)/inc -c $(TEST_LIST_C) -o $(TEST_LIST_O)
 
-Iterators: Vectors
-	@$(MAKE) -C iterator
+$(TEST_FFLS_EXE): $(LIST_OBJ) $(SUBM) $(TEST_FFLS_OBJ)
+	$(FC) $(FC_OPT) $(MODS) $(SUBM) $(LIST_OBJ) $(TEST_FFLS_OBJ)\
+                                                 -o $(TEST_FFLS_EXE)
 
-fLists: Iterators
-	@$(MAKE) -C flist
-
-Lists:  Iterators
-	@$(MAKE) -C list
-
-interoperable:
-	@$(MAKE) -C c-fortran-interoperable
+$(TEST_FFLS_OBJ): $(MODS) $(TEST_FFLS_SRC)
+	$(FC) $(FC_OPT) $(INCS) -c $(TEST_FFLS_SRC) -o $(TEST_FFLS_OBJ)
 
 clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C iterator    clean
-	@$(MAKE) -C flist       clean
-	@$(MAKE) -C list        clean
-	@$(MAKE) -C c-fortran-interoperable clean
+	rm -f *.mod *.smod *.o $(TESTS)

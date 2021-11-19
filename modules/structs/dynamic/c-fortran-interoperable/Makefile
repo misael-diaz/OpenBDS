@@ -24,31 +24,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+all: Flist FFlist
 
-all: Vectors LinkedLists Iterators fLists Lists interoperable
-
-Vectors:
-	@$(MAKE) -C vector
-
-LinkedLists:
-	@$(MAKE) -C linked-list
-
-Iterators: Vectors
-	@$(MAKE) -C iterator
-
-fLists: Iterators
+Flist:
 	@$(MAKE) -C flist
 
-Lists:  Iterators
-	@$(MAKE) -C list
-
-interoperable:
-	@$(MAKE) -C c-fortran-interoperable
+FFlist: Flist
+	@$(MAKE) -C ffls
 
 clean:
-	@$(MAKE) -C vector      clean
-	@$(MAKE) -C linked-list clean
-	@$(MAKE) -C iterator    clean
-	@$(MAKE) -C flist       clean
-	@$(MAKE) -C list        clean
-	@$(MAKE) -C c-fortran-interoperable clean
+	@$(MAKE) -C flist clean
+	@$(MAKE) -C ffls  clean
