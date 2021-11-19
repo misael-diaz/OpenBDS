@@ -23,7 +23,7 @@
 
 list_t* flist_create_list_t ();			// creates list<*>
 list_t* flist_create_list_int32_t (int32_t*);	// creates list<int32_t>
-list_t* flist_create_list_int64_t (int64_t*);	// creates list<int32_t>
+list_t* flist_create_list_int64_t (int64_t*);	// creates list<int64_t>
 list_t* flist_list_destructor (list_t*);	// destroys linked-list
 
 #endif

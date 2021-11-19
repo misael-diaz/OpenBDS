@@ -28,7 +28,7 @@
 
 static void* flist_util_alloc_void_t (size_t sz)
 {
-	// generic memory allocator utility
+	/* generic memory allocator utility */
 
 	void *data = malloc (sz);
 
@@ -45,7 +45,7 @@ static void* flist_util_alloc_void_t (size_t sz)
 
 static data_t* flist_util_alloc_data_t ()
 {
-	// allocates memory for data_t object
+	/* allocates memory for data object */
 
 	data_t *item = (data_t*) malloc ( sizeof(data_t) );
 
@@ -63,7 +63,7 @@ static data_t* flist_util_alloc_data_t ()
 
 static node_t* flist_util_alloc_node_t ()
 {
-	// allocates memory for a node object
+	/* allocates memory for a node object */
 
 	node_t *node = (node_t*) malloc ( sizeof(node_t) );
 
@@ -82,7 +82,7 @@ static node_t* flist_util_alloc_node_t ()
 
 static link_t* flist_util_alloc_link_t ()
 {
-	// allocates memory for a link object
+	/* allocates memory for a link object */
 
 	link_t *link = (link_t*) malloc ( sizeof(link_t) );
 
@@ -100,7 +100,7 @@ static link_t* flist_util_alloc_link_t ()
 
 static list_t* flist_util_alloc_list_t ()
 {
-	// allocates memory for a link object
+	/* allocates memory for a list object */
 
 	list_t *list = (list_t*) malloc ( sizeof(list_t) );
 
@@ -124,7 +124,7 @@ static list_t* flist_util_alloc_list_t ()
 
 static void*   flist_util_ffree_void_t (void *data)
 {
-	// generic deallocator
+	/* generic deallocator utility */
 
 	if (data)
 	{
@@ -138,7 +138,7 @@ static void*   flist_util_ffree_void_t (void *data)
 
 static data_t* flist_util_ffree_data_t (data_t *item)
 {
-	// frees data object from memory
+	/* frees data object from memory */
 
 	if (item)
 	{
@@ -153,7 +153,7 @@ static data_t* flist_util_ffree_data_t (data_t *item)
 
 static char* flist_util_ffree_string (char *str)
 {
-	// frees string from memory
+	/* frees string from memory */
 
 	if (str)
 	{
@@ -167,7 +167,7 @@ static char* flist_util_ffree_string (char *str)
 
 static node_t* flist_util_ffree_node_t (node_t *node)
 {
-	// frees node object from memory
+	/* frees node object from memory */
 
 	if (node)
 	{
@@ -183,7 +183,7 @@ static node_t* flist_util_ffree_node_t (node_t *node)
 
 static link_t* flist_util_ffree_link_t (link_t *link)
 {
-	// frees link object from memory
+	/* frees link object from memory */
 
 	if (link)
 	{
@@ -198,7 +198,7 @@ static link_t* flist_util_ffree_link_t (link_t *link)
 
 static list_t* flist_util_ffree_list_t (list_t *list)
 {
-	// frees list object from memory
+	/* frees list object from memory */
 
 	if (list)
 	{
@@ -214,7 +214,7 @@ static list_t* flist_util_ffree_list_t (list_t *list)
 }
 
 
-/* creates util namespace instance */
+/* creates instance of flist util namespace */
 flist_util_namespace const util = {
 	flist_util_alloc_void_t,
 	flist_util_alloc_data_t,

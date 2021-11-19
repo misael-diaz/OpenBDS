@@ -31,7 +31,7 @@ extern flist_util_namespace const util;	// imports util namespace
 
 static void is_empty (list_t* list, size_t id)
 {
-	// defines error message field of an empty list<*>
+	/* sets error message field of an empty list<*> */
 
 	char e1[] = "list<int32_t>::type-error: "
 		"container of 32-bit integers";
@@ -70,6 +70,8 @@ static void is_empty (list_t* list, size_t id)
 
 static void is_list_int32_t (list_t *list)
 {
+	/* checks if list is list<int32_t> */
+
 	if (list -> id != 1)
 	{
 		fprintf(stderr, "%s\n", list -> errmsg);
@@ -81,6 +83,8 @@ static void is_list_int32_t (list_t *list)
 
 static void is_list_int64_t (list_t *list)
 {
+	/* checks if list is list<int64_t> */
+
 	if (list -> id != 2)
 	{
 		fprintf(stderr, "%s\n", list -> errmsg);
@@ -100,7 +104,7 @@ static link_t* create_link_t ()		// creates link<*node_t>
 __attribute__ ((access (read_only, 1)))
 static node_t* create_node_int32_t (const int32_t* value)
 {
-	/* creates node<*int32_t> */
+	/* creates node<int32_t> */
 
 	node_t *node = util.alloc_node_t ();
 	node -> item = util.alloc_data_t ();
@@ -117,7 +121,7 @@ static node_t* create_node_int32_t (const int32_t* value)
 __attribute__ ((access (read_only, 1)))
 static node_t* create_node_int64_t (const int64_t* value)
 {
-	/* creates node<*int64_t> */
+	/* creates node<int64_t> */
 
 	node_t *node = util.alloc_node_t ();
 	node -> item = util.alloc_data_t ();
@@ -137,6 +141,8 @@ static node_t* create_node_int64_t (const int64_t* value)
 __attribute__ ((access (read_only, 2)))
 static void append_int32_t_method (void* vlist, const int32_t* i)
 {
+	/* appends to list<int32_t> */
+
 	list_t *list = vlist;
 	size_t id = 1;
 	is_empty (list, id);
@@ -157,6 +163,8 @@ static void append_int32_t_method (void* vlist, const int32_t* i)
 __attribute__ ((access (read_only, 2)))
 static void append_int64_t_method (void* vlist, const int64_t* i)
 {
+	/* appends to list<int64_t> */
+
 	list_t *list = vlist;
 	size_t id = 2;
 	is_empty (list, id);
