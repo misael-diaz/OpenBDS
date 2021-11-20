@@ -38,6 +38,7 @@ module FFLinkedListClass
     type(c_ptr) :: head
     type(c_ptr) :: tail
     type(c_ptr) :: errmsg
+    integer(kind = c_size_t) :: size
     integer(kind = c_size_t) :: id
   end type
 

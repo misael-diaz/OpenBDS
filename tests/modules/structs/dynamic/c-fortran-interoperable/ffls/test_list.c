@@ -31,15 +31,15 @@ int main () {
 
 	list_t* list = list_t ();		// creates list<*>
 
-	for (int i = 0; i != NUMEL; ++i)
+	for (int32_t i = 0; i != NUMEL; ++i)
 		append_method (&i);		// appends values to list
 
-	int diff = 0;
+	int32_t diff = 0;
 	printf("[00] test-list-iterator: ");
 	// checks for differences between the input and stored data
 	iter_t* iter = flist_create_iter_t (list);
-	for (int i = 0; i != (iter -> size); ++i)
-		diff += ( *( (int*) (iter -> data)[i] ) - i );
+	for (int32_t i = 0; i != (iter -> size); ++i)
+		diff += ( *( (int32_t*) (iter -> data)[i] ) - i );
 
 	if (diff)
 		printf("FAIL\n");
