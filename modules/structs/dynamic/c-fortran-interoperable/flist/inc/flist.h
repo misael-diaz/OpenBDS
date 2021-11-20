@@ -19,6 +19,7 @@
  *
  */
 
+#include "iter_t.h"
 #include "list_t.h"
 
 #endif

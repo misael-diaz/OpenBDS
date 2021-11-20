@@ -29,6 +29,32 @@ extern flist_util_namespace const util;	// imports util namespace
 /* implementation */
 
 
+__attribute__ ((access (read_only, 1)))
+iter_t* flist_create_iter_t (const list_t* list)
+{
+	iter_t *iter = util.alloc_iter_t (list -> size);
+	link_t* head = (list && list -> head)? list -> head: NULL;
+	node_t* node = (head && head -> node)? head -> node: NULL;
+	data_t* item = NULL;
+
+	size_t i = 0;
+	while (node)
+	{
+		item = node -> item;
+		(iter -> data)[i++] = item -> data;
+		node = (node -> next)? node -> next: NULL;
+	}
+
+	return iter;
+}
+
+
+iter_t* flist_destroy_iter_t (iter_t* iter)
+{
+	return util.ffree_iter_t (iter);
+}
+
+
 static void is_empty (list_t* list, size_t id)
 {
 	/* sets error message field of an empty list<*> */
@@ -156,6 +182,7 @@ void flist_append_int32_t_method (list_t *list, const int32_t* i)
 		list -> tail -> node -> next = create_node_int32_t (i);
 		list -> tail -> node = list -> tail -> node -> next;
 	}
+	++(list -> size);
 }
 
 
@@ -177,6 +204,7 @@ void flist_append_int64_t_method (list_t *list, const int64_t* i)
 		list -> tail -> node -> next = create_node_int64_t (i);
 		list -> tail -> node = list -> tail -> node -> next;
 	}
+	++(list -> size);
 }
 
 
@@ -205,6 +233,7 @@ list_t* flist_create_list_t ()	// default constructor: creates list<*>
 	list -> head = create_link_t ();
 	list -> tail = create_link_t ();
 	list -> errmsg = NULL;
+	list -> size = 0;
 	list -> id = 0;
 
 	return list;
@@ -222,6 +251,7 @@ list_t* flist_create_list_int32_t (int32_t* id)	// creates list<int32_t>
 	list -> errmsg = (char*) util.alloc_void_t ( sizeof(errmsg) );
 	strcpy (list -> errmsg, errmsg);
 
+	list -> size = 0;
 	list -> id = (id)? 1: 1;
 
 	return list;
@@ -239,6 +269,7 @@ list_t* flist_create_list_int64_t (int64_t* id)	// creates list<int64_t>
 	list -> errmsg = (char*) util.alloc_void_t ( sizeof(errmsg) );
 	strcpy (list -> errmsg, errmsg);
 
+	list -> size = 0;
 	list -> id = (id)? 2: 2;
 
 	return list;

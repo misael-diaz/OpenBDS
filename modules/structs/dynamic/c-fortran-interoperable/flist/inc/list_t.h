@@ -26,6 +26,7 @@ typedef struct {
 	link_t* head;
 	link_t* tail;
 	char* errmsg;
+	size_t size;
 	size_t id;
 } list_t;
 

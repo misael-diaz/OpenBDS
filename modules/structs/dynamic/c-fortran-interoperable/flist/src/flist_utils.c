@@ -114,8 +114,39 @@ static list_t* flist_util_alloc_list_t ()
 	list -> head = NULL;
 	list -> tail = NULL;
 	list -> errmsg = NULL;
+	list -> size = 0;
 	list -> id = 0;
 	return list;
+}
+
+
+static iter_t* flist_util_alloc_iter_t (size_t numel)
+{
+	/* allocates memory for iterator object */
+
+	iter_t *iter = (iter_t*) malloc ( sizeof(iter_t) );
+
+	if (iter == NULL)
+	{
+		fprintf (stderr, "memory allocation error: %s\n",
+			 strerror (errno) );
+		exit(EXIT_FAILURE);
+	}
+
+	iter -> data = (void**) malloc ( numel * sizeof(void*) );
+
+	if (iter -> data == NULL)
+	{
+		fprintf (stderr, "memory allocation error: %s\n",
+			 strerror (errno) );
+		exit(EXIT_FAILURE);
+	}
+
+	iter -> size = numel;
+	for (size_t i = 0; i != numel; ++i)
+		(iter -> data)[i] = NULL;
+
+	return iter;
 }
 
 
@@ -210,6 +241,26 @@ static list_t* flist_util_ffree_list_t (list_t *list)
 }
 
 
+static iter_t* flist_util_ffree_iter_t (iter_t* iter)
+{
+	/* allocates memory for iterator object */
+
+	if (iter)
+	{
+		for (size_t i = 0; i != (iter -> size); ++i)
+			(iter -> data)[i] = NULL;
+
+		free (iter -> data);
+		iter -> data = NULL;
+
+		free (iter);
+		iter = NULL;
+	}
+
+	return iter;
+}
+
+
 /* creates instance of flist util namespace */
 flist_util_namespace const util = {
 	flist_util_alloc_void_t,
@@ -217,7 +268,9 @@ flist_util_namespace const util = {
 	flist_util_alloc_node_t,
 	flist_util_alloc_link_t,
 	flist_util_alloc_list_t,
+	flist_util_alloc_iter_t,
 	flist_util_ffree_node_t,
 	flist_util_ffree_link_t,
-	flist_util_ffree_list_t
+	flist_util_ffree_list_t,
+	flist_util_ffree_iter_t
 };

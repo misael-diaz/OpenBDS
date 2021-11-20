@@ -34,6 +34,18 @@ int main () {
 	for (int i = 0; i != NUMEL; ++i)
 		append_method (&i);		// appends values to list
 
+	int diff = 0;
+	printf("[00] test-list-iterator: ");
+	// checks for differences between the input and stored data
+	iter_t* iter = flist_create_iter_t (list);
+	for (int i = 0; i != (iter -> size); ++i)
+		diff += ( *( (int*) (iter -> data)[i] ) - i );
+
+	if (diff)
+		printf("FAIL\n");
+	else
+		printf("pass\n");
+
 	// prints the first and last values in the list
 	int *head = list -> head -> node -> item -> data;
 	int *tail = list -> tail -> node -> item -> data;
@@ -41,6 +53,7 @@ int main () {
 	printf("tail: %d\n", *tail);
 
 	/* frees allocated resources */
+	iter = flist_destroy_iter_t  (iter);
 	list = flist_list_destructor (list);
 
 	return 0 ;

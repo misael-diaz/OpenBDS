@@ -27,9 +27,11 @@ typedef struct {
 	node_t* (*const alloc_node_t) (void);	// allocates node object
 	link_t* (*const alloc_link_t) (void);	// allocates link object
 	list_t* (*const alloc_list_t) (void);	// allocates list object
+	iter_t* (*const alloc_iter_t) (size_t);	// allocates iter object
 	node_t* (*const ffree_node_t) (node_t*);// frees node object
 	link_t* (*const ffree_link_t) (link_t*);// frees link object
 	list_t* (*const ffree_list_t) (list_t*);// frees list object
+	iter_t* (*const ffree_iter_t) (iter_t*);// frees iter object
 } flist_util_namespace;
 
 #endif
