@@ -28,8 +28,8 @@
 module FFLinkedListClass
   use, intrinsic :: iso_c_binding, only: c_size_t
   use, intrinsic :: iso_c_binding, only: c_int32_t, c_int64_t
-  use, intrinsic :: iso_c_binding, only: c_ptr, c_funptr
-  use, intrinsic :: iso_c_binding, only: c_f_pointer, c_f_procpointer
+  use, intrinsic :: iso_c_binding, only: c_ptr
+  use, intrinsic :: iso_c_binding, only: c_f_pointer
   implicit none
   private
 
@@ -45,6 +45,7 @@ module FFLinkedListClass
   type, public :: ffls_t     !! FORTRAN Forward List Type
     private
     type(c_ptr) :: list
+    type(list_t), pointer :: self => null()
     contains
       private
       procedure :: ffls_append_int32_t_method
@@ -100,17 +101,19 @@ module FFLinkedListClass
   interface
 
     subroutine flist_append_int32_t_method (list, value) bind(c)
-        use, intrinsic :: iso_c_binding, only: c_ptr, c_int32_t
+        use, intrinsic :: iso_c_binding, only: c_int32_t
+        import list_t
         implicit none
-        type(c_ptr), value :: list
+        type(list_t), intent(inout) :: list
         integer(kind = c_int32_t), intent(in) :: value
     end subroutine
 
 
     subroutine flist_append_int64_t_method (list, value) bind(c)
-        use, intrinsic :: iso_c_binding, only: c_ptr, c_int64_t
+        use, intrinsic :: iso_c_binding, only: c_int64_t
+        import list_t
         implicit none
-        type(c_ptr), value :: list
+        type(list_t), intent(inout) :: list
         integer(kind = c_int64_t), intent(in) :: value
     end subroutine
 

@@ -29,8 +29,11 @@ contains
 
   module function ffls_default_constructor () result(ffls)
       type(ffls_t) :: ffls
+      type(list_t), pointer :: list => null()
 
       ffls % list = flist_create_list_t ()
+      call c_f_pointer (ffls % list, list)
+      ffls % self => list
 
       return
   end function
@@ -38,9 +41,12 @@ contains
 
   module function ffls_int32_t_constructor (value) result(ffls)
       type(ffls_t) :: ffls
+      type(list_t), pointer :: list => null()
       integer(kind = c_int32_t), intent(in) :: value
 
       ffls % list = flist_create_list_int32_t (value)
+      call c_f_pointer (ffls % list, list)
+      ffls % self => list
 
       return
   end function
@@ -48,9 +54,12 @@ contains
 
   module function ffls_int64_t_constructor (value) result(ffls)
       type(ffls_t) :: ffls
+      type(list_t), pointer :: list => null()
       integer(kind = c_int64_t), intent(in) :: value
 
       ffls % list = flist_create_list_int64_t (value)
+      call c_f_pointer (ffls % list, list)
+      ffls % self => list
 
       return
   end function

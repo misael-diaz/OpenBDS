@@ -32,7 +32,7 @@ contains
       class(ffls_t), intent(inout) :: self
       integer(kind = c_int32_t), intent(in) :: value
 
-      call flist_append_int32_t_method (self % list, value)
+      call flist_append_int32_t_method (self % self, value)
 
       return
   end subroutine
@@ -43,7 +43,7 @@ contains
       class(ffls_t), intent(inout) :: self
       integer(kind = c_int64_t), intent(in) :: value
 
-      call flist_append_int64_t_method (self % list, value)
+      call flist_append_int64_t_method (self % self, value)
 
       return
   end subroutine
