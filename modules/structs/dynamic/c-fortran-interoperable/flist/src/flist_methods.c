@@ -42,7 +42,7 @@ iter_t* flist_create_iter_t (const list_t* list)
 	{
 		item = node -> item;
 		(iter -> data)[i++] = item -> data;
-		node = (node -> next)? node -> next: NULL;
+		node = node -> next;
 	}
 
 	return iter;
