@@ -24,6 +24,13 @@
 list_t* flist_create_list_t ();			// creates list<*>
 list_t* flist_create_list_int32_t (int32_t*);	// creates list<int32_t>
 list_t* flist_create_list_int64_t (int64_t*);	// creates list<int64_t>
+
+/* append methods */
+__attribute__ ((access (read_only, 2)))
+void flist_append_int32_t_method (list_t*, const int32_t*);
+__attribute__ ((access (read_only, 2)))
+void flist_append_int64_t_method (list_t*, const int64_t*);
+
 list_t* flist_list_destructor (list_t*);	// destroys linked-list
 
 #endif

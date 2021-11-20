@@ -111,11 +111,8 @@ static list_t* flist_util_alloc_list_t ()
 		exit(EXIT_FAILURE);
 	}
 
-	list -> self = NULL;
 	list -> head = NULL;
 	list -> tail = NULL;
-	list -> append_int32_t = NULL;
-	list -> append_int64_t = NULL;
 	list -> errmsg = NULL;
 	list -> id = 0;
 	return list;
@@ -202,7 +199,6 @@ static list_t* flist_util_ffree_list_t (list_t *list)
 
 	if (list)
 	{
-		list -> self   = NULL;
 		list -> head   = flist_util_ffree_link_t (list -> head);
 		list -> tail   = flist_util_ffree_link_t (list -> tail);
 		list -> errmsg = flist_util_ffree_string (list -> errmsg);

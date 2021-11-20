@@ -21,8 +21,8 @@
 #include "flist_methods.h"
 
 // defines OOP-like interfaces
-#define list_t(i) flist_create_list_t()
-#define append_method(i) append_int32_t(list->self, i)
+#define list_t() flist_create_list_t()
+#define append_method(i) flist_append_int32_t_method(list, i)
 
 #define NUMEL 65536
 
@@ -31,13 +31,8 @@ int main () {
 
 	list_t* list = list_t ();		// creates list<*>
 
-	for (int i = 0; i != NUMEL; ++i) {
-		list -> append_method (&i);	// appends values to list
-	}
-
-//	Complains:
-//	long int ii = 0;
-//	list -> append_int64_t (list->self, &ii);
+	for (int i = 0; i != NUMEL; ++i)
+		append_method (&i);		// appends values to list
 
 	// prints the first and last values in the list
 	int *head = list -> head -> node -> item -> data;

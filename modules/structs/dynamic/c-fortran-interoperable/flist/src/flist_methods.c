@@ -139,11 +139,10 @@ static node_t* create_node_int64_t (const int64_t* value)
 
 
 __attribute__ ((access (read_only, 2)))
-static void append_int32_t_method (void* vlist, const int32_t* i)
+void flist_append_int32_t_method (list_t *list, const int32_t* i)
 {
 	/* appends to list<int32_t> */
 
-	list_t *list = vlist;
 	size_t id = 1;
 	is_empty (list, id);
 	is_list_int32_t (list);
@@ -161,11 +160,10 @@ static void append_int32_t_method (void* vlist, const int32_t* i)
 
 
 __attribute__ ((access (read_only, 2)))
-static void append_int64_t_method (void* vlist, const int64_t* i)
+void flist_append_int64_t_method (list_t *list, const int64_t* i)
 {
 	/* appends to list<int64_t> */
 
-	list_t *list = vlist;
 	size_t id = 2;
 	is_empty (list, id);
 	is_list_int64_t (list);
@@ -204,11 +202,8 @@ static link_t* link_destructor (link_t* link)	// destroys linked nodes
 list_t* flist_create_list_t ()	// default constructor: creates list<*>
 {
 	list_t *list = util.alloc_list_t ();
-	list -> self = list;
 	list -> head = create_link_t ();
 	list -> tail = create_link_t ();
-	list -> append_int32_t = append_int32_t_method;
-	list -> append_int64_t = append_int64_t_method;
 	list -> errmsg = NULL;
 	list -> id = 0;
 
@@ -219,11 +214,8 @@ list_t* flist_create_list_t ()	// default constructor: creates list<*>
 list_t* flist_create_list_int32_t (int32_t* id)	// creates list<int32_t>
 {
 	list_t *list = util.alloc_list_t ();
-	list -> self = list;
 	list -> head = create_link_t ();
 	list -> tail = create_link_t ();
-	list -> append_int32_t = append_int32_t_method;
-	list -> append_int64_t = append_int64_t_method;
 
 	char errmsg[] = "list<int32_t>::type-error: "
 		"container of 32-bit integers";
@@ -239,11 +231,8 @@ list_t* flist_create_list_int32_t (int32_t* id)	// creates list<int32_t>
 list_t* flist_create_list_int64_t (int64_t* id)	// creates list<int64_t>
 {
 	list_t *list = util.alloc_list_t ();
-	list -> self = list;
 	list -> head = create_link_t ();
 	list -> tail = create_link_t ();
-	list -> append_int32_t = append_int32_t_method;
-	list -> append_int64_t = append_int64_t_method;
 
 	char errmsg[] = "list<int64_t>::type-error: "
 		"container of 64-bit integers";
