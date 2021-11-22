@@ -27,6 +27,27 @@ submodule (FFLinkedListClass) ffls_methods
 implicit none
 contains
 
+  module function ffls_create_iter_t (self) result(iter)
+      class(ffls_t), intent(in) :: self
+      type(c_ptr) :: iter
+
+      iter = flist_create_iter_t (self % self)
+
+      return
+  end function
+
+
+  module subroutine ffls_destroy_iter_t (self, iter)
+      class(ffls_t), intent(in) :: self
+      type(iter_t), intent(inout) :: iter
+      type(c_ptr) :: ret
+
+      ret = flist_destroy_iter_t (iter)
+
+      return
+  end subroutine
+
+
   module subroutine ffls_append_int32_t_method (self, value)
       ! Synopsis: Method for appending (signed) 32-bit integers.
       class(ffls_t), intent(inout) :: self

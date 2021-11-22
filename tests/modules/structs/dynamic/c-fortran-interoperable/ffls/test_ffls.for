@@ -24,10 +24,12 @@
 !   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 module test_forward_linked_list
-! use, intrinsic :: iso_c_binding, only: c_int32_t
+  use, intrinsic :: iso_c_binding, only: c_ptr, c_f_pointer
   use, intrinsic :: iso_fortran_env, only: int32
   use chronos, only: timer_t => chronom
   use FFLinkedListClass, only: list_t => ffls_t
+  use FFLinkedListClass, only: iter_t
+  use FFLinkedListClass, only: data_t
   implicit none
   private
   public :: test_fforward_linked_list
@@ -38,9 +40,14 @@ contains
   subroutine test_fforward_linked_list ()
       ! tests appending values to the FORTRAN Forward Linked-list class
       type(list_t), allocatable :: list
+      type(iter_t), pointer :: it => null()
       type(timer_t) :: timer
+      type(c_ptr) :: iter
+      type(c_ptr), pointer, contiguous :: array(:) => null()
+      integer(kind = int32), pointer :: data => null()
       integer(kind = int32), parameter :: numel = 65536
       integer(kind = int32) :: mstat
+      integer(kind = int32) :: diff
       integer(kind = int32) :: i
 
 
@@ -65,6 +72,34 @@ contains
       print *, 'done'
       print *, 'elapsed time (millis): ', timer % etime ()
 
+
+      write (*, '(1X,A)', advance='no') 'creating list iterator ... '
+
+      call timer % tic ()
+      iter = list % iter ()
+      call c_f_pointer (iter, it)
+      call c_f_pointer (it % data, array, [it % size])
+
+      diff = 0
+      ! checks for differences in the stored and input values
+      do i = 1, numel
+          call c_f_pointer (array(i), data)
+          diff = diff + (i - data)
+      end do
+      call timer % toc ()
+
+      print *, 'done'
+      print *, 'elapsed time (millis): ', timer % etime ()
+
+      write (*, '(1X,A)', advance='no') '[00] test-list-iterator: '
+      if (diff /= 0) then
+          print *, 'FAIL'
+      else
+          print *, 'pass'
+      end if
+
+
+      call list % free (it)     !! destroys iterator
 
       write (*, '(1X,A)', advance='no') 'destroying list ... '
 

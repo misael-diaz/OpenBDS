@@ -32,6 +32,13 @@ module FFLinkedListClass
   use, intrinsic :: iso_c_binding, only: c_f_pointer
   implicit none
   private
+  public :: iter_t
+
+
+  type, bind(c) :: iter_t
+    type(c_ptr) :: data
+    integer(kind = c_size_t) :: size
+  end type
 
 
   type, bind(c) :: list_t
@@ -53,6 +60,8 @@ module FFLinkedListClass
       procedure :: ffls_append_int64_t_method
       generic, public :: append => ffls_append_int32_t_method, &
                                  & ffls_append_int64_t_method
+      procedure, public :: iter => ffls_create_iter_t
+      procedure, public :: free => ffls_destroy_iter_t
       final :: ffls_finalizer
   end type
 
@@ -61,6 +70,28 @@ module FFLinkedListClass
     module procedure :: ffls_default_constructor
     module procedure :: ffls_int32_t_constructor
     module procedure :: ffls_int64_t_constructor
+  end interface
+
+
+  interface
+
+    function flist_create_iter_t (list) result(iter) bind(c)
+        use, intrinsic :: iso_c_binding, only: c_ptr
+        import list_t
+        implicit none
+        type(list_t), intent(in) :: list
+        type(c_ptr) :: iter
+    end function
+
+
+    function flist_destroy_iter_t (iter) result(ret) bind(c)
+        use, intrinsic :: iso_c_binding, only: c_ptr
+        import iter_t
+        implicit none
+        type(iter_t), intent(inout) :: iter
+        type(c_ptr) :: ret
+    end function
+
   end interface
 
 
@@ -158,6 +189,22 @@ module FFLinkedListClass
     module subroutine ffls_append_int64_t_method (self, value)
         class(ffls_t), intent(inout) :: self
         integer(kind = c_int64_t), intent(in) :: value
+    end subroutine
+
+  end interface
+
+
+  interface
+
+    module function ffls_create_iter_t (self) result(iter)
+        class(ffls_t), intent(in) :: self
+        type(c_ptr) :: iter
+    end function
+
+
+    module subroutine ffls_destroy_iter_t (self, iter)
+        class(ffls_t), intent(in) :: self
+        type(iter_t), intent(inout) :: iter
     end subroutine
 
   end interface
