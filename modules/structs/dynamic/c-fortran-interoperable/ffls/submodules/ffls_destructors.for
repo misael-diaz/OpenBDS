@@ -29,6 +29,11 @@ contains
 
   module subroutine ffls_finalizer (ffls)
       type(ffls_t), intent(inout) :: ffls
+      type(c_ptr) :: ret
+
+      if ( associated(ffls % it) ) then
+          ret = flist_destroy_iter_t (ffls % it)
+      end if
 
       ffls % list = flist_list_destructor (ffls % list)
 

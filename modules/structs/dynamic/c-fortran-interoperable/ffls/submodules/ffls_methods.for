@@ -28,21 +28,28 @@ implicit none
 contains
 
   module function ffls_create_iter_t (self) result(iter)
-      class(ffls_t), intent(in) :: self
+      class(ffls_t), intent(inout) :: self
+      type(iter_t), pointer :: it => null()
       type(c_ptr) :: iter
 
       iter = flist_create_iter_t (self % self)
+      call c_f_pointer (iter, it)
+      self % it => it
 
       return
   end function
 
 
   module subroutine ffls_destroy_iter_t (self, iter)
-      class(ffls_t), intent(in) :: self
-      type(iter_t), intent(inout) :: iter
+      class(ffls_t), intent(inout) :: self
+      type(iter_t), intent(inout), pointer :: iter
       type(c_ptr) :: ret
 
-      ret = flist_destroy_iter_t (iter)
+      if ( associated(iter) ) then
+          ret = flist_destroy_iter_t (iter)
+      end if
+
+      self % it => null()
 
       return
   end subroutine

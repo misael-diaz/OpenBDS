@@ -29,7 +29,6 @@ module test_forward_linked_list
   use chronos, only: timer_t => chronom
   use FFLinkedListClass, only: list_t => ffls_t
   use FFLinkedListClass, only: iter_t
-  use FFLinkedListClass, only: data_t
   implicit none
   private
   public :: test_fforward_linked_list

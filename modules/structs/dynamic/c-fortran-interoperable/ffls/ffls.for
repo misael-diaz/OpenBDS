@@ -54,6 +54,7 @@ module FFLinkedListClass
     private
     type(c_ptr) :: list
     type(list_t), pointer :: self => null()
+    type(iter_t), pointer :: it => null()
     contains
       private
       procedure :: ffls_append_int32_t_method
@@ -197,14 +198,14 @@ module FFLinkedListClass
   interface
 
     module function ffls_create_iter_t (self) result(iter)
-        class(ffls_t), intent(in) :: self
+        class(ffls_t), intent(inout) :: self
         type(c_ptr) :: iter
     end function
 
 
     module subroutine ffls_destroy_iter_t (self, iter)
-        class(ffls_t), intent(in) :: self
-        type(iter_t), intent(inout) :: iter
+        class(ffls_t), intent(inout) :: self
+        type(iter_t), intent(inout), pointer :: iter
     end subroutine
 
   end interface
