@@ -69,22 +69,27 @@ int main () {
 __attribute__ ((access (read_only, 1)))
 int32_t** create_iter_t (const list_t* list)	// creates iterator
 {
-	iter_t* iter = flist_create_iter_t (list);
-	int32_t** it = (int32_t**) malloc ( iter -> size * sizeof(int*) );
+	int32_t** it = (int32_t**) malloc ( list -> size * sizeof(int*) );
 
 	if (it == NULL)
 	{
-		iter = flist_destroy_iter_t  (iter);
 		list = flist_list_destructor (list);
                 fprintf (stderr, "memory allocation error: %s\n",
                          strerror (errno) );
                 exit(EXIT_FAILURE);
 	}
 
-	for (size_t i = 0; i != (iter -> size); ++i)
-		it[i] = (iter -> data)[i];
+	node_t* node = list -> head -> node;
+	data_t* item = NULL;
 
-	iter = flist_destroy_iter_t  (iter);
+	size_t i = 0;
+	while (node)
+	{
+		item = node -> item;
+		it[i++] = item -> data;
+		node = node -> next;
+	}
+
 
 	return it;
 }
