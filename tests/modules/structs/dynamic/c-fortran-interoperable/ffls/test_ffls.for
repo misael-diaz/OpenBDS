@@ -42,7 +42,7 @@ contains
       type(iter_t), pointer :: it => null()
       type(timer_t) :: timer
       type(c_ptr) :: iter
-      type(c_ptr), pointer, contiguous :: array(:) => null()
+      type(c_ptr), pointer, contiguous :: p_ary(:) => null()
       integer(kind = int32), pointer :: data => null()
       integer(kind = int32), parameter :: numel = 65536
       integer(kind = int32) :: mstat
@@ -77,12 +77,12 @@ contains
       call timer % tic ()
       iter = list % iter ()
       call c_f_pointer (iter, it)
-      call c_f_pointer (it % data, array, [it % size])
+      call c_f_pointer (it % data, p_ary, [it % size])
 
       diff = 0
       ! checks for differences in the stored and input values
       do i = 1, numel
-          call c_f_pointer (array(i), data)
+          call c_f_pointer (p_ary(i), data)
           diff = diff + (i - data)
       end do
       call timer % toc ()
