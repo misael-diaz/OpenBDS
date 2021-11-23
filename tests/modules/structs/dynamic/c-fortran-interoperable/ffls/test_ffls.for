@@ -43,11 +43,39 @@ contains
       type(timer_t) :: timer
       type(c_ptr) :: iter
       type(c_ptr), pointer, contiguous :: p_ary(:) => null()
+      integer(kind = int32), allocatable :: array(:)
       integer(kind = int32), pointer :: data => null()
       integer(kind = int32), parameter :: numel = 65536
       integer(kind = int32) :: mstat
       integer(kind = int32) :: diff
       integer(kind = int32) :: i
+
+      timer = timer_t ()
+
+      write (*, '(1X,A)', advance='no') 'generating array ... '
+      call timer % tic ()
+      allocate (array(numel), stat=mstat)
+      if (mstat /= 0) error stop 'allocation error'
+
+      do i = 1, numel
+          array(i) = i
+      end do
+      call timer % toc ()
+
+      print *, 'done'
+      print *, 'elapsed time (millis): ', timer % etime ()
+
+      write (*, '(1X,A)', advance='no') 'destroying array ... '
+
+
+      call timer % tic ()
+      deallocate (array)
+      call timer % toc ()
+
+
+      print *, 'done'
+      print *, 'elapsed time (millis): ', timer % etime ()
+
 
 
       allocate (list, stat=mstat)
@@ -55,7 +83,6 @@ contains
 
 
       list = list_t ()
-      timer = timer_t ()
 
 
       write (*, '(1X,A)', advance='no') 'appending to list ... '
