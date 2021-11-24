@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <time.h>
 #include "flist_methods.h"
 
 // defines OOP-like interfaces
@@ -35,22 +36,42 @@ int32_t** destroy_iter_t (int32_t* it, size_t size);
 int main () {
 	// shows how to generate a linked-list
 
+	clock_t tic, toc;
 	list_t* list = list_t ();		// creates list<*>
 
+
+	printf("\n\nappending values to list ... ");
+
+	tic = clock ();
 	for (int32_t i = 0; i != NUMEL; ++i)
 		append_method (&i);		// appends values to list
+	toc = clock ();
 
+	printf("done\n");
+        printf("CPU time (millis): %f\n\n\n", 1000.0 *
+                ( (double) (toc - tic) ) / CLOCKS_PER_SEC);
+
+
+	printf("generating random-access iterator ... ");
+
+	tic = clock ();
 	int32_t diff = 0;
 	int32_t** it = create_iter_t (list);
-	printf("[00] test-list-iterator: ");
 	// checks for differences between the input and stored data
 	for (int32_t i = 0; i != (list -> size); ++i)
 		diff += ( *(it[i]) - i );
+	toc = clock ();
 
+	printf("done\n");
+        printf("CPU time (millis): %f\n\n\n", 1000.0 *
+                ( (double) (toc - tic) ) / CLOCKS_PER_SEC);
+
+
+	printf("[00] test-list-iterator: ");
 	if (diff)
-		printf("FAIL\n");
+		printf("FAIL\n\n\n");
 	else
-		printf("pass\n");
+		printf("pass\n\n\n");
 
 	// prints the first and last values in the list
 	int *head = list -> head -> node -> item -> data;
@@ -59,8 +80,16 @@ int main () {
 	printf("tail: %d\n", *tail);
 
 	/* frees allocated resources */
+	printf("\n\nfreeing allocated resources ... ");
+
+	tic = clock ();
 	it = destroy_iter_t (it, list -> size);
 	list = flist_list_destructor (list);
+	toc = clock ();
+
+	printf("done\n");
+        printf("CPU time (millis): %f\n\n\n", 1000.0 *
+                ( (double) (toc - tic) ) / CLOCKS_PER_SEC);
 
 	return 0 ;
 }
