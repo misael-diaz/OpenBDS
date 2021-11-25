@@ -52,6 +52,7 @@ contains
 
       timer = timer_t ()
 
+      print *, new_line('n')
       write (*, '(1X,A)', advance='no') 'generating array ... '
       call timer % tic ()
       allocate (array(numel), stat=mstat)
@@ -64,7 +65,10 @@ contains
 
       print *, 'done'
       print *, 'elapsed time (millis): ', timer % etime ()
+      print *, new_line('n')
 
+
+      print *, new_line('n')
       write (*, '(1X,A)', advance='no') 'destroying array ... '
 
 
@@ -75,6 +79,7 @@ contains
 
       print *, 'done'
       print *, 'elapsed time (millis): ', timer % etime ()
+      print *, new_line('n')
 
 
 
@@ -85,6 +90,7 @@ contains
       list = list_t ()
 
 
+      print *, new_line('n')
       write (*, '(1X,A)', advance='no') 'appending to list ... '
 
 
@@ -97,8 +103,10 @@ contains
 
       print *, 'done'
       print *, 'elapsed time (millis): ', timer % etime ()
+      print *, new_line('n')
 
 
+      print *, new_line('n')
       write (*, '(1X,A)', advance='no') 'creating list iterator ... '
 
       call timer % tic ()
@@ -116,17 +124,22 @@ contains
 
       print *, 'done'
       print *, 'elapsed time (millis): ', timer % etime ()
+      print *, new_line('n')
 
+
+      print *, new_line('n')
       write (*, '(1X,A)', advance='no') '[00] test-list-iterator: '
       if (diff /= 0) then
           print *, 'FAIL'
       else
           print *, 'pass'
       end if
+      print *, new_line('n')
 
 
       call list % free (it)     !! destroys iterator
 
+      print *, new_line('n')
       write (*, '(1X,A)', advance='no') 'destroying list ... '
 
 
@@ -137,6 +150,7 @@ contains
 
       print *, 'done'
       print *, 'elapsed time (millis): ', timer % etime ()
+      print *, new_line('n')
 
 
       return
