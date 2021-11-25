@@ -19,11 +19,9 @@
  *
  */
 
-#include "data_t.h"
-
 typedef struct {
-	data_t* item;
-	void*   next;
+	void* data;
+	void* next;
 } node_t;
 
 #endif

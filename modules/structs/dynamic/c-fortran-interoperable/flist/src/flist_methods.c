@@ -35,13 +35,11 @@ iter_t* flist_create_iter_t (const list_t* list)
 	iter_t *iter = util.alloc_iter_t (list -> size);
 	link_t* head = (list && list -> head)? list -> head: NULL;
 	node_t* node = (head && head -> node)? head -> node: NULL;
-	data_t* item = NULL;
 
 	size_t i = 0;
 	while (node)
 	{
-		item = node -> item;
-		(iter -> data)[i++] = item -> data;
+		(iter -> data)[i++] = node -> data;
 		node = node -> next;
 	}
 
@@ -133,11 +131,10 @@ static node_t* create_node_int32_t (const int32_t* value)
 	/* creates node<int32_t> */
 
 	node_t *node = util.alloc_node_t ();
-	node -> item = util.alloc_data_t ();
-	node -> item -> data = util.alloc_void_t ( sizeof(int32_t) );
+	node -> data = util.alloc_void_t ( sizeof(int32_t) );
 	node -> next = NULL;
 
-	int32_t* i = node -> item -> data;
+	int32_t* i = node -> data;
 	*i = *value;
 
 	return node ;
@@ -150,11 +147,10 @@ static node_t* create_node_int64_t (const int64_t* value)
 	/* creates node<int64_t> */
 
 	node_t *node = util.alloc_node_t ();
-	node -> item = util.alloc_data_t ();
-	node -> item -> data = util.alloc_void_t ( sizeof(int64_t) );
+	node -> data = util.alloc_void_t ( sizeof(int64_t) );
 	node -> next = NULL;
 
-	int64_t* i = node -> item -> data;
+	int64_t* i = node -> data;
 	*i = *value;
 
 	return node ;

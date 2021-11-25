@@ -23,7 +23,6 @@
 
 typedef struct {
 	void*   (*const alloc_void_t) (size_t);	// allocates <::> object
-	data_t* (*const alloc_data_t) (void);	// allocates data object
 	node_t* (*const alloc_node_t) (void);	// allocates node object
 	link_t* (*const alloc_link_t) (void);	// allocates link object
 	list_t* (*const alloc_list_t) (void);	// allocates list object

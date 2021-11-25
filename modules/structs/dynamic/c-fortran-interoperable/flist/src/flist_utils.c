@@ -43,24 +43,6 @@ static void* flist_util_alloc_void_t (size_t sz)
 }
 
 
-static data_t* flist_util_alloc_data_t ()
-{
-	/* allocates memory for data object */
-
-	data_t *item = (data_t*) malloc ( sizeof(data_t) );
-
-	if (item == NULL)
-	{
-		fprintf (stderr, "memory allocation error: %s\n",
-			 strerror (errno) );
-		exit(EXIT_FAILURE);
-	}
-
-	item -> data = NULL;
-	return item;
-}
-
-
 static node_t* flist_util_alloc_node_t ()
 {
 	/* allocates memory for a node object */
@@ -74,7 +56,7 @@ static node_t* flist_util_alloc_node_t ()
 		exit(EXIT_FAILURE);
 	}
 
-	node -> item = NULL;
+	node -> data = NULL;
 	node -> next = NULL;
 	return node;
 }
@@ -164,21 +146,6 @@ static void*   flist_util_ffree_void_t (void *data)
 }
 
 
-static data_t* flist_util_ffree_data_t (data_t *item)
-{
-	/* frees data object from memory */
-
-	if (item)
-	{
-		item -> data = flist_util_ffree_void_t (item -> data);
-		free (item);
-		item = NULL;
-	}
-
-	return item;
-}
-
-
 static char* flist_util_ffree_string (char *str)
 {
 	/* frees string from memory */
@@ -199,7 +166,7 @@ static node_t* flist_util_ffree_node_t (node_t *node)
 
 	if (node)
 	{
-		node -> item = flist_util_ffree_data_t (node -> item);
+		node -> data = flist_util_ffree_void_t (node -> data);
 		node -> next = NULL;
 		free (node);
 		node = NULL;
@@ -264,7 +231,6 @@ static iter_t* flist_util_ffree_iter_t (iter_t* iter)
 /* creates instance of flist util namespace */
 flist_util_namespace const util = {
 	flist_util_alloc_void_t,
-	flist_util_alloc_data_t,
 	flist_util_alloc_node_t,
 	flist_util_alloc_link_t,
 	flist_util_alloc_list_t,

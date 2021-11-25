@@ -74,8 +74,8 @@ int main () {
 		printf("pass\n\n\n");
 
 	// prints the first and last values in the list
-	int *head = list -> head -> node -> item -> data;
-	int *tail = list -> tail -> node -> item -> data;
+	int *head = list -> head -> node -> data;
+	int *tail = list -> tail -> node -> data;
 	printf("head: %d\n", *head);
 	printf("tail: %d\n", *tail);
 
@@ -109,13 +109,11 @@ int32_t** create_iter_t (const list_t* list)	// creates iterator
 	}
 
 	node_t* node = list -> head -> node;
-	data_t* item = NULL;
 
 	size_t i = 0;
 	while (node)
 	{
-		item = node -> item;
-		it[i++] = item -> data;
+		it[i++] = node -> data;
 		node = node -> next;
 	}
 

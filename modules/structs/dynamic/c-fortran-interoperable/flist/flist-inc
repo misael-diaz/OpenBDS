@@ -24,4 +24,4 @@
 #
 
 # headers files for the types
-TYPES_H = inc/data_t.h inc/node_t.h inc/link_t.h inc/list_t.h inc/iter_t.h
+TYPES_H = inc/node_t.h inc/link_t.h inc/list_t.h inc/iter_t.h
