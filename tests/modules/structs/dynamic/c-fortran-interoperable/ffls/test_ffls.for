@@ -108,6 +108,10 @@ contains
       print *, new_line('n')
 
 
+      print *, new_line('n')
+      write (*, '(1X,A)', advance='no') 'creating list iterator ... '
+
+
       diffs = 0
       flit => list % ffit (0)
       do i = 1, numel
@@ -120,6 +124,11 @@ contains
               end select
           end associate
       end do
+
+
+      print *, 'done'
+      print *, 'elapsed time (millis): ', timer % etime ()
+      print *, new_line('n')
 
 
       print *, new_line('n')
