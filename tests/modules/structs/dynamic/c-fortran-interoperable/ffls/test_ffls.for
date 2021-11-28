@@ -120,7 +120,7 @@ contains
                   type is ( integer(kind = int32) )
                       diffs = diffs + (i - data)
                   class default
-                      error stop 'unexepected error'
+                      error stop 'unexpected error'
               end select
           end associate
       end do
