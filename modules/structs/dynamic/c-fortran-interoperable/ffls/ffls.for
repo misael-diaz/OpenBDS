@@ -33,6 +33,28 @@ module FFLinkedListClass
   implicit none
   private
   public :: iter_t
+  public :: flit_t
+
+
+  type :: fptr_t                        !! FORTRAN pointer type
+    class(*), pointer :: data => null()
+  end type
+
+
+  type :: flit_t                        !! FORTRAN list iterator type
+    type(fptr_t), allocatable :: p(:)
+  end type
+
+
+  type, bind(c) :: node_t
+    type(c_ptr) :: data
+    type(c_ptr) :: next
+  end type
+
+
+  type, bind(c) :: link_t
+    type(c_ptr) :: node
+  end type
 
 
   type, bind(c) :: iter_t
@@ -54,6 +76,7 @@ module FFLinkedListClass
     private
     type(c_ptr) :: list
     type(list_t), pointer :: self => null()
+    type(flit_t), pointer :: flit => null()
     type(iter_t), pointer :: it => null()
     contains
       private
@@ -62,6 +85,7 @@ module FFLinkedListClass
       generic, public :: append => ffls_append_int32_t_method, &
                                  & ffls_append_int64_t_method
       procedure, public :: iter => ffls_create_iter_t
+      procedure, public :: ffit => ffls_create_flit_t
       procedure, public :: free => ffls_destroy_iter_t
       final :: ffls_finalizer
   end type
@@ -71,6 +95,15 @@ module FFLinkedListClass
     module procedure :: ffls_default_constructor
     module procedure :: ffls_int32_t_constructor
     module procedure :: ffls_int64_t_constructor
+  end interface
+
+
+  interface
+    module function ffls_create_flit_t (self, type) result(iter)
+        class(ffls_t), intent(inout) :: self
+        type(flit_t), pointer :: iter
+        integer(kind = c_int32_t), intent(in) :: type
+    end function
   end interface
 
 

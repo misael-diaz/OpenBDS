@@ -29,6 +29,7 @@ module test_forward_linked_list
   use chronos, only: timer_t => chronom
   use FFLinkedListClass, only: list_t => ffls_t
   use FFLinkedListClass, only: iter_t
+  use FFLinkedListClass, only: flit_t
   implicit none
   private
   public :: test_fforward_linked_list
@@ -40,6 +41,7 @@ contains
       ! tests appending values to the FORTRAN Forward Linked-list class
       type(list_t), allocatable :: list
       type(iter_t), pointer :: it => null()
+      type(flit_t), pointer :: flit => null()
       type(timer_t) :: timer
       type(c_ptr) :: iter
       type(c_ptr), pointer, contiguous :: p_ary(:) => null()
@@ -47,7 +49,7 @@ contains
       integer(kind = int32), pointer :: data => null()
       integer(kind = int32), parameter :: numel = 65536
       integer(kind = int32) :: mstat
-      integer(kind = int32) :: diff
+      integer(kind = int32) :: diff, diffs
       integer(kind = int32) :: i
 
       timer = timer_t ()
@@ -106,6 +108,20 @@ contains
       print *, new_line('n')
 
 
+      diffs = 0
+      flit => list % ffit (0)
+      do i = 1, numel
+          associate (data => flit % p(i) % data)
+              select type (data)
+                  type is ( integer(kind = int32) )
+                      diffs = diffs + (i - data)
+                  class default
+                      error stop 'unexepected error'
+              end select
+          end associate
+      end do
+
+
       print *, new_line('n')
       write (*, '(1X,A)', advance='no') 'creating list iterator ... '
 
@@ -129,7 +145,7 @@ contains
 
       print *, new_line('n')
       write (*, '(1X,A)', advance='no') '[00] test-list-iterator: '
-      if (diff /= 0) then
+      if (diff /= 0 .or. diffs /= 0) then
           print *, 'FAIL'
       else
           print *, 'pass'

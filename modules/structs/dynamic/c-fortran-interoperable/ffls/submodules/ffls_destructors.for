@@ -30,10 +30,34 @@ contains
   module subroutine ffls_finalizer (ffls)
       type(ffls_t), intent(inout) :: ffls
       type(c_ptr) :: ret
+      integer(kind = c_size_t) :: mstat
+      integer(kind = c_size_t) :: i
 
       if ( associated(ffls % it) ) then
           ret = flist_destroy_iter_t (ffls % it)
       end if
+
+
+      if ( associated(ffls % flit) ) then
+
+          if ( allocated(ffls % flit % p) ) then
+
+              do i = 1, ffls % self % size
+                  ffls % flit % p(i) % data => null()
+              end do
+
+              deallocate (ffls % flit % p, stat=mstat)
+              if (mstat /= 0) error stop 'dealloc err'
+
+          end if
+
+          deallocate (ffls % flit, stat=mstat)
+          if (mstat /= 0) error stop 'dealloc err'
+
+          ffls % flit => null()
+
+      end if
+
 
       ffls % list = flist_list_destructor (ffls % list)
 
