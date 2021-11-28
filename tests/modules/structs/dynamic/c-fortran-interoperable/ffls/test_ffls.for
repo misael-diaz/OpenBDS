@@ -112,6 +112,7 @@ contains
       write (*, '(1X,A)', advance='no') 'creating list iterator ... '
 
 
+      call timer % tic ()
       diffs = 0
       flit => list % ffit (0)
       do i = 1, numel
@@ -124,6 +125,8 @@ contains
               end select
           end associate
       end do
+      call timer % toc ()
+
 
 
       print *, 'done'
