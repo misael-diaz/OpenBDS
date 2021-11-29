@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 #include <time.h>
 #include "flist_methods.h"
@@ -29,9 +30,8 @@
 
 #define NUMEL 65536
 
-__attribute__ ((access (read_only, 1)))
-int32_t** create_iter_t (const list_t* list);
-int32_t** destroy_iter_t (int32_t* it, size_t size);
+int32_t** create_iter_t (list_t* list);
+int32_t** destroy_iter_t (int32_t** it, size_t size);
 
 int main () {
 	// shows how to generate a linked-list
@@ -58,7 +58,7 @@ int main () {
 	int32_t diff = 0;
 	int32_t** it = create_iter_t (list);
 	// checks for differences between the input and stored data
-	for (int32_t i = 0; i != (list -> size); ++i)
+	for (int32_t i = 0; i != NUMEL; ++i)
 		diff += ( *(it[i]) - i );
 	toc = clock ();
 
@@ -95,8 +95,7 @@ int main () {
 }
 
 
-__attribute__ ((access (read_only, 1)))
-int32_t** create_iter_t (const list_t* list)	// creates iterator
+int32_t** create_iter_t (list_t* list)	// creates iterator
 {
 	int32_t** it = (int32_t**) malloc ( list -> size * sizeof(int*) );
 
@@ -122,7 +121,7 @@ int32_t** create_iter_t (const list_t* list)	// creates iterator
 }
 
 
-int32_t** destroy_iter_t (int32_t* it, size_t size)  // destroys iterator
+int32_t** destroy_iter_t (int32_t** it, size_t size)  // destroys iterator
 {
 	if (it)
 	{
