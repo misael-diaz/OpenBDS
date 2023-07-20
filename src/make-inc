@@ -25,10 +25,14 @@ LIBS = -lm
 
 # sources
 TEST_SRC = test.c
+UTIL_SRC = util.c
+SPHERE_SRC = sphere.c
 
 # objects
 TEST_OBJ = test.o
-OBJECTS = $(TEST_OBJ)
+UTIL_OBJ = util.o
+SPHERE_OBJ = sphere.o
+OBJECTS = $(TEST_OBJ) $(UTIL_OBJ) $(SPHERE_OBJ)
 
 # binaries
 TEST_BIN = test.bin
