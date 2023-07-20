@@ -30,6 +30,47 @@
 
 #include "system.h"
 
+module random
+  use, intrinsic :: iso_fortran_env, only: real64
+  implicit none
+  private
+
+  public :: rand
+
+  contains
+
+    subroutine rand (x)
+      ! Implements Box-Muller's method, yields a Gaussian pseudo-random number.
+      real(kind = real64), intent(out) :: x
+      real(kind = real64) :: x1
+      real(kind = real64) :: x2
+      real(kind = real64) :: dist
+
+      dist = 2.0_real64
+      do while (dist > 1.0_real64)
+
+        call random_number(x1)
+        call random_number(x2)
+
+        x1 = 2.0_real64 * x1 - 1.0_real64
+        x2 = 2.0_real64 * x2 - 1.0_real64
+
+        dist = x1**2 + x2**2
+
+      end do
+
+      dist = dsqrt( ( -2.0_real64 * dlog(dist) ) / dist )
+
+      x1 = dist * x1
+      x2 = dist * x2
+
+      x = x1
+
+      return
+    end subroutine rand
+
+end module random
+
 module bds
   use, intrinsic :: iso_c_binding, only: c_ptr
   use, intrinsic :: iso_fortran_env, only: real64
@@ -94,6 +135,7 @@ module tests
   use, intrinsic :: iso_c_binding, only: c_f_pointer
   use, intrinsic :: iso_fortran_env, only: real64
   use, intrinsic :: iso_fortran_env, only: int64
+  use :: random, only: rand
   use :: bds, only: csphere_t
   use :: bds, only: fsphere_t
   use :: bds, only: destroy
@@ -102,6 +144,7 @@ module tests
   private
 
   public :: test_init
+  public :: test_rand
 
   contains
 
@@ -171,14 +214,42 @@ module tests
 
       sph = destroy(sph)
 
+      return
     end subroutine test_init
+
+    subroutine test_rand ()
+      ! checks the statistics of the Gaussian pseudo-random numbers
+
+      real(kind = real64) :: x
+      real(kind = real64) :: avg
+      real(kind = real64) :: std
+      integer(kind = int64) :: i
+
+      avg = 0.0_real64
+      std = 0.0_real64
+      do i = 1, NUM_SPHERES
+        call rand(x)
+        avg = avg + x
+        std = std + x**2
+      end do
+
+      avg = avg / real(NUM_SPHERES, kind = real64)
+      std = sqrt(std / real(NUM_SPHERES - 1, kind = real64) )
+
+      print *, 'avg (should be close to zero): ', avg
+      print *, 'std (should be close to one):  ', std
+
+      return
+    end subroutine test_rand
 
 end module tests
 
 program main
   use :: tests, only: test_init
+  use :: tests, only: test_rand
   implicit none
 
   call test_init()
+  call test_rand()
 
 end program main
