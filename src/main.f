@@ -176,74 +176,9 @@ module tests
 end module tests
 
 program main
-  use, intrinsic :: iso_c_binding, only: c_ptr
-  use, intrinsic :: iso_c_binding, only: c_f_pointer
-  use, intrinsic :: iso_fortran_env, only: real64
-  use, intrinsic :: iso_fortran_env, only: int64
-  use :: bds, only: csphere_t
-  use :: bds, only: fsphere_t
-  use :: bds, only: destroy
-  use :: bds, only: create
+  use :: tests, only: test_init
   implicit none
 
-  integer(kind = int64), parameter :: numel = NUM_SPHERES
-
-  type(c_ptr) :: sph                    ! C pointer to the data of the spheres
-  type(csphere_t), pointer :: p_spheres ! FORTRAN pointer for binding to the C pointer
-  type(fsphere_t) :: spheres            ! with this we get access to the data from FORTRAN
-
-  real(kind = real64) :: f              ! accumulator for floating-point numbers
-  integer(kind = int64) :: num          ! accumulator for integral numbers
-  integer(kind = int64) :: i            ! counter (or index)
-
-  sph = create()
-
-  call c_f_pointer(sph, p_spheres)
-  call c_f_pointer(p_spheres % x, spheres % x, [NUM_SPHERES])
-  call c_f_pointer(p_spheres % y, spheres % y, [NUM_SPHERES])
-  call c_f_pointer(p_spheres % z, spheres % z, [NUM_SPHERES])
-  call c_f_pointer(p_spheres % f_x, spheres % f_x, [NUM_SPHERES])
-  call c_f_pointer(p_spheres % f_y, spheres % f_y, [NUM_SPHERES])
-  call c_f_pointer(p_spheres % f_z, spheres % f_z, [NUM_SPHERES])
-  call c_f_pointer(p_spheres % id, spheres % id, [NUM_SPHERES])
-
-  ! checks the data (in an aggregate sense) against the expected values:
-
-  num = 0_int64
-  do i = 1, numel
-    num = num + int(spheres % id(i), kind=int64)
-  end do
-
-  write (*, '(A)', advance='no') 'test[0]: '
-  if (num /= NUM_SPHERES * (NUM_SPHERES - 1) / 2) then
-    print '(A)', 'FAIL'
-  else
-    print '(A)', 'PASS'
-  end if
-
-  f = 0.0_real64
-  do i = 1, numel
-    f = f + spheres % f_x(i)**2 + spheres % f_y(i)**2 + spheres % f_z(i)**2
-  end do
-
-  write (*, '(A)', advance='no') 'test[1]: '
-  if (f /= 0.0_real64) then
-    print '(A)', 'FAIL'
-  else
-    print '(A)', 'PASS'
-  end if
-
-  do i = 1, numel
-    f = f + spheres % x(i)**2 + spheres % y(i)**2 + spheres % z(i)**2
-  end do
-
-  write (*, '(A)', advance='no') 'test[2]: '
-  if (f /= 0.0_real64) then
-    print '(A)', 'FAIL'
-  else
-    print '(A)', 'PASS'
-  end if
-
-  sph = destroy(sph)
+  call test_init()
 
 end program main
