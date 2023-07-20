@@ -137,7 +137,7 @@ module bds
 
 end module bds
 
-module tests
+module test
   use, intrinsic :: iso_c_binding, only: c_ptr
   use, intrinsic :: iso_c_binding, only: c_f_pointer
   use, intrinsic :: iso_fortran_env, only: real64
@@ -257,11 +257,11 @@ module tests
       return
     end subroutine prng
 
-end module tests
+end module test
 
 program main
-  use :: tests, only: test_init
-  use :: tests, only: test_rand
+  use :: test, only: test_init
+  use :: test, only: test_rand
   implicit none
 
   call test_init()
