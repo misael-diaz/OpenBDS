@@ -11,6 +11,12 @@ typedef struct
   double* f_x;
   double* f_y;
   double* f_z;
+  // torque:
+  double* t_x;
+  double* t_y;
+  double* t_z;
+  // neighbor-list
+  double* list;
   // identifier:
   double* id;
   // container (this is what we allocate on the heap memory, the rest are just pointers)
