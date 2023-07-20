@@ -1,3 +1,8 @@
+*.swp
+*.mod
+*.bin
+*.o
+# old
 old/TODO.txt
 old/Vector.for-flipped
 old/Vector_int32_t_implementations.for-flipped
