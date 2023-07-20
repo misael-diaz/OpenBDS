@@ -271,11 +271,10 @@ module bds
 
         list = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
 
+        ! on-the-fly computation of the MSD
         msd = msd + ( sum(list) / real(3 * NUM_SPHERES, kind = real64) )
 
         if (mod(step + 1_int64, 16_int64) == 0_int64) then
-          ! on-the-fly computation of the MSD (assumes that all spheres start at 0, 0, 0):
-
           time = real(step + 1_int64, kind = real64) * dt
           write (funit, fmt) time, msd
         end if
