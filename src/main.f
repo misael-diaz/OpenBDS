@@ -36,9 +36,9 @@ module random
   implicit none
   private
 
-  public :: rand
+  public :: random_prng
 
-  interface rand
+  interface random_prng
     module procedure prng
   end interface
 
@@ -142,7 +142,7 @@ module tests
   use, intrinsic :: iso_c_binding, only: c_f_pointer
   use, intrinsic :: iso_fortran_env, only: real64
   use, intrinsic :: iso_fortran_env, only: int64
-  use :: random, only: rand
+  use :: random, only: random_prng
   use :: bds, only: csphere_t
   use :: bds, only: fsphere_t
   use :: bds, only: destroy
@@ -243,7 +243,7 @@ module tests
       avg = 0.0_real64
       std = 0.0_real64
       do i = 1, NUM_SPHERES
-        call rand(x)
+        call random_prng(x)
         avg = avg + x
         std = std + x**2
       end do
