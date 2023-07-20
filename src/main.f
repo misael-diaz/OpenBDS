@@ -30,6 +30,16 @@
 
 #include "system.h"
 
+module param
+  use, intrinsic :: iso_fortran_env, only: real64
+  implicit none
+  public
+  save
+
+  real(kind = real64), parameter :: param_dt = real(TIME_STEP, kind = real64)
+
+end module param
+
 module random
   use :: ieee_arithmetic, only: ieee_value, ieee_positive_inf
   use, intrinsic :: iso_fortran_env, only: real64
@@ -78,9 +88,76 @@ module random
 
 end module random
 
+module dynamic
+  use, intrinsic :: iso_fortran_env, only: real64
+  use, intrinsic :: iso_fortran_env, only: int64
+  use :: param, only: dt => param_dt
+  use :: random, only: random_prng
+  implicit none
+  private
+  save
+
+  public :: dynamic_stochastic_update
+
+  interface dynamic_stochastic_update
+    module procedure stochastic_update
+  end interface
+
+  real(kind = real64), parameter :: mobility_sphere = dsqrt(2.0_real64 * dt)
+
+  contains
+
+    subroutine stochastic_force (f_x)
+      ! gets the stochastic forces
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_x
+      real(kind = real64) :: force
+      integer(kind = int64) :: i
+
+      do i = 1, NUM_SPHERES
+        call random_prng(force)
+        f_x(i) = force
+      end do
+
+      return
+    end subroutine stochastic_force
+
+    subroutine stochastic_displ (x, f_x)
+      ! displaces the spheres (along some axis) due to the (respective) stochastic forces
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
+      real(kind = real64), dimension(NUM_SPHERES), intent(in) :: f_x
+
+      x = x + mobility_sphere * f_x
+
+      return
+    end subroutine stochastic_displ
+
+    subroutine stochastic_update (x, y, z, f_x, f_y, f_z)
+      ! updates the positions of the spheres by the action of to the stochastic forces
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: z
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_y
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_z
+
+      call stochastic_force(f_x)
+      call stochastic_force(f_y)
+      call stochastic_force(f_z)
+
+      call stochastic_displ(x, f_x)
+      call stochastic_displ(y, f_y)
+      call stochastic_displ(z, f_z)
+
+      return
+    end subroutine stochastic_update
+
+end module dynamic
+
 module bds
   use, intrinsic :: iso_c_binding, only: c_ptr
   use, intrinsic :: iso_fortran_env, only: real64
+  use, intrinsic :: iso_fortran_env, only: int64
+  use :: dynamic, only: dynamic_stochastic_update
   implicit none
   private
   save
@@ -94,6 +171,10 @@ module bds
 
   public :: create
   public :: destroy
+
+  ! methods:
+
+  public :: bds_integrator
 
   ! type definitions:
 
@@ -135,6 +216,32 @@ module bds
     end function
   end interface
 
+  interface bds_integrator
+    module procedure integrator
+  end interface
+
+  contains
+
+    subroutine integrator (x, y, z, f_x, f_y, f_z)
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: z
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_y
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_z
+      integer(kind = int64) :: step
+
+      step = 0_int64
+      do while (step /= NUM_STEPS)
+
+        call dynamic_stochastic_update(x, y, z, f_x, f_y, f_z)
+
+        step = step + 1_int64
+      end do
+
+      return
+    end subroutine integrator
+
 end module bds
 
 module test
@@ -147,11 +254,13 @@ module test
   use :: bds, only: fsphere_t
   use :: bds, only: destroy
   use :: bds, only: create
+  use :: bds, only: integrator => bds_integrator
   implicit none
   private
 
   public :: test_init
   public :: test_rand
+  public :: test_msd
 
   interface test_init
     module procedure initialization
@@ -159,6 +268,10 @@ module test
 
   interface test_rand
     module procedure prng
+  end interface
+
+  interface test_msd
+    module procedure msd
   end interface
 
   contains
@@ -257,14 +370,56 @@ module test
       return
     end subroutine prng
 
+    subroutine msd ()
+      ! TODO: check the Mean Squared Displacement MSD
+
+      type(c_ptr) :: sph
+      type(csphere_t), pointer :: p_spheres
+      type(fsphere_t), target :: spheres
+
+      real(kind = real64), pointer, contiguous :: x(:) => null()
+      real(kind = real64), pointer, contiguous :: y(:) => null()
+      real(kind = real64), pointer, contiguous :: z(:) => null()
+      real(kind = real64), pointer, contiguous :: f_x(:) => null()
+      real(kind = real64), pointer, contiguous :: f_y(:) => null()
+      real(kind = real64), pointer, contiguous :: f_z(:) => null()
+
+      sph = create()
+
+      call c_f_pointer(sph, p_spheres)
+      call c_f_pointer(p_spheres % x, spheres % x, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % y, spheres % y, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % z, spheres % z, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % f_x, spheres % f_x, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % f_y, spheres % f_y, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % f_z, spheres % f_z, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % id, spheres % id, [NUM_SPHERES])
+
+      x => spheres % x
+      y => spheres % y
+      z => spheres % z
+
+      f_x => spheres % f_x
+      f_y => spheres % f_y
+      f_z => spheres % f_z
+
+      call integrator(x, y, z, f_x, f_y, f_z)
+
+      sph = destroy(sph)
+
+      return
+    end subroutine msd
+
 end module test
 
 program main
   use :: test, only: test_init
   use :: test, only: test_rand
+  use :: test, only: test_msd
   implicit none
 
   call test_init()
   call test_rand()
+  call test_msd()
 
 end program main
