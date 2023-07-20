@@ -444,7 +444,7 @@ module test
     end subroutine prng
 
     subroutine msd ()
-      ! TODO: check the Mean Squared Displacement MSD
+      ! exports the Mean Squared Displacement MSD as a function of time
 
       type(c_ptr) :: sph
       type(csphere_t), pointer :: p_spheres
