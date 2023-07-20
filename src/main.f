@@ -324,8 +324,6 @@ module test
 
     subroutine initialization ()
       ! tests the initialization (done by the create() method implemented in C)
-      implicit none
-
       integer(kind = int64), parameter :: numel = NUM_SPHERES
 
       ! C pointer to the data of the spheres
