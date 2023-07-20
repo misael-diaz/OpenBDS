@@ -31,6 +31,7 @@
 #include "system.h"
 
 module random
+  use :: ieee_arithmetic, only: ieee_value, ieee_positive_inf
   use, intrinsic :: iso_fortran_env, only: real64
   implicit none
   private
@@ -45,8 +46,10 @@ module random
       real(kind = real64) :: x1
       real(kind = real64) :: x2
       real(kind = real64) :: dist
+      real(kind = real64) :: positive_infinity
 
-      dist = 2.0_real64
+      positive_infinity = ieee_value(0.0_real64, ieee_positive_inf)
+      dist = positive_infinity
       do while (dist > 1.0_real64)
 
         call random_number(x1)
