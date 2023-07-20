@@ -232,6 +232,7 @@ module bds
   contains
 
     subroutine integrator (x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
+      ! implements Euler's forward integration method, updates the position vectors
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: z
@@ -248,7 +249,7 @@ module bds
       integer(kind = int64) :: stat
       integer(kind = int64) :: step
       character(*), parameter :: fname = 'msd.txt'
-      character(*), parameter :: fmt = '(2E32.12)'
+      character(*), parameter :: fmt = '(SP,2E32.15)'
 
       open(newunit = funit, file = fname, action = 'write', iostat = stat)
       if (stat /= 0_int64) then
@@ -271,11 +272,10 @@ module bds
 
         list = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
 
+        ! on-the-fly computation of the MSD
         msd = msd + ( sum(list) / real(3 * NUM_SPHERES, kind = real64) )
 
-        if (mod(step, 16_int64) == 0_int64) then
-          ! on-the-fly computation of the MSD (assumes that all spheres start at 0, 0, 0):
-
+        if (mod(step + 1_int64, 16_int64) == 0_int64) then
           time = real(step + 1_int64, kind = real64) * dt
           write (funit, fmt) time, msd
         end if
@@ -323,8 +323,7 @@ module test
   contains
 
     subroutine initialization ()
-      implicit none
-
+      ! tests the initialization (done by the create() method implemented in C)
       integer(kind = int64), parameter :: numel = NUM_SPHERES
 
       ! C pointer to the data of the spheres
@@ -444,7 +443,7 @@ module test
     end subroutine prng
 
     subroutine msd ()
-      ! TODO: check the Mean Squared Displacement MSD
+      ! exports the Mean Squared Displacement MSD as a function of time
 
       type(c_ptr) :: sph
       type(csphere_t), pointer :: p_spheres
