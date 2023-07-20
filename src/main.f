@@ -38,9 +38,13 @@ module random
 
   public :: rand
 
+  interface rand
+    module procedure prng
+  end interface
+
   contains
 
-    subroutine rand (x)
+    subroutine prng (x)
       ! Implements Box-Muller's method, yields a Gaussian pseudo-random number.
       real(kind = real64), intent(out) :: x
       real(kind = real64) :: x1
@@ -70,7 +74,7 @@ module random
       x = x1
 
       return
-    end subroutine rand
+    end subroutine prng
 
 end module random
 
@@ -149,9 +153,17 @@ module tests
   public :: test_init
   public :: test_rand
 
+  interface test_init
+    module procedure initialization
+  end interface
+
+  interface test_rand
+    module procedure prng
+  end interface
+
   contains
 
-    subroutine test_init ()
+    subroutine initialization ()
       implicit none
 
       integer(kind = int64), parameter :: numel = NUM_SPHERES
@@ -218,9 +230,9 @@ module tests
       sph = destroy(sph)
 
       return
-    end subroutine test_init
+    end subroutine initialization
 
-    subroutine test_rand ()
+    subroutine prng ()
       ! checks the statistics of the Gaussian pseudo-random numbers
 
       real(kind = real64) :: x
@@ -243,7 +255,7 @@ module tests
       print *, 'std (should be close to one):  ', std
 
       return
-    end subroutine test_rand
+    end subroutine prng
 
 end module tests
 
