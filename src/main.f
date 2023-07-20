@@ -36,11 +36,15 @@ module random
   implicit none
   private
 
-  public :: rand
+  public :: random_prng
+
+  interface random_prng
+    module procedure prng
+  end interface
 
   contains
 
-    subroutine rand (x)
+    subroutine prng (x)
       ! Implements Box-Muller's method, yields a Gaussian pseudo-random number.
       real(kind = real64), intent(out) :: x
       real(kind = real64) :: x1
@@ -70,7 +74,7 @@ module random
       x = x1
 
       return
-    end subroutine rand
+    end subroutine prng
 
 end module random
 
@@ -133,12 +137,12 @@ module bds
 
 end module bds
 
-module tests
+module test
   use, intrinsic :: iso_c_binding, only: c_ptr
   use, intrinsic :: iso_c_binding, only: c_f_pointer
   use, intrinsic :: iso_fortran_env, only: real64
   use, intrinsic :: iso_fortran_env, only: int64
-  use :: random, only: rand
+  use :: random, only: random_prng
   use :: bds, only: csphere_t
   use :: bds, only: fsphere_t
   use :: bds, only: destroy
@@ -149,9 +153,17 @@ module tests
   public :: test_init
   public :: test_rand
 
+  interface test_init
+    module procedure initialization
+  end interface
+
+  interface test_rand
+    module procedure prng
+  end interface
+
   contains
 
-    subroutine test_init ()
+    subroutine initialization ()
       implicit none
 
       integer(kind = int64), parameter :: numel = NUM_SPHERES
@@ -218,9 +230,9 @@ module tests
       sph = destroy(sph)
 
       return
-    end subroutine test_init
+    end subroutine initialization
 
-    subroutine test_rand ()
+    subroutine prng ()
       ! checks the statistics of the Gaussian pseudo-random numbers
 
       real(kind = real64) :: x
@@ -231,7 +243,7 @@ module tests
       avg = 0.0_real64
       std = 0.0_real64
       do i = 1, NUM_SPHERES
-        call rand(x)
+        call random_prng(x)
         avg = avg + x
         std = std + x**2
       end do
@@ -243,13 +255,13 @@ module tests
       print *, 'std (should be close to one):  ', std
 
       return
-    end subroutine test_rand
+    end subroutine prng
 
-end module tests
+end module test
 
 program main
-  use :: tests, only: test_init
-  use :: tests, only: test_rand
+  use :: test, only: test_init
+  use :: test, only: test_rand
   implicit none
 
   call test_init()
