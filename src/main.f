@@ -307,6 +307,16 @@ module test
   public :: test_init
   public :: test_rand
   public :: test_msd
+  public :: test_flooring
+
+  interface
+    function c_floor (x) result(res) bind(c, name = 'floor')
+      use, intrinsic :: iso_c_binding, only: c_double
+      implicit none
+      real(kind = c_double), value :: x
+      real(kind = c_double) :: res
+    end function
+  end interface
 
   interface test_init
     module procedure initialization
@@ -318,6 +328,10 @@ module test
 
   interface test_msd
     module procedure msd
+  end interface
+
+  interface test_flooring
+    module procedure flooring
   end interface
 
   contains
@@ -496,15 +510,32 @@ module test
       return
     end subroutine msd
 
+    subroutine flooring ()
+      ! prints 3.0 as expected
+      real(kind = real64) :: x
+      x = c_floor(3.5_real64)
+
+      write (*, '(A)', advance='no') 'floor-test[0]: '
+      if (x /= 3.0_real64) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      return
+    end subroutine flooring
+
 end module test
 
 program main
   use :: test, only: test_init
+  use :: test, only: test_flooring
   use :: test, only: test_rand
   use :: test, only: test_msd
   implicit none
 
   call test_init()
+  call test_flooring()
   call test_rand()
   call test_msd()
 
