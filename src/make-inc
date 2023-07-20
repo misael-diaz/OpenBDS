@@ -13,10 +13,15 @@
 # (at your option) any later version.
 #
 
+# FORTRAN compiler
+FC = gfortran
+
 # clang compiler
 CC = gcc
 
-# options
+FCOPT = -g -Wall -Wextra -O0 -cpp -ffree-form
+
+# clang options
 CCOPT = -O2 -ftree-vectorize -fopt-info-optimized=opts.log
 CCOPT = -g -Wall -Wextra -O0
 
@@ -24,17 +29,19 @@ CCOPT = -g -Wall -Wextra -O0
 LIBS = -lm
 
 # sources
+MAIN_SRC = main.f
 TEST_SRC = test.c
 UTIL_SRC = util.c
 SPHERE_SRC = sphere.c
 
 # objects
+MAIN_OBJ = main.o
 TEST_OBJ = test.o
 UTIL_OBJ = util.o
 SPHERE_OBJ = sphere.o
-OBJECTS = $(TEST_OBJ) $(UTIL_OBJ) $(SPHERE_OBJ)
 
 # binaries
 TEST_BIN = test.bin
+MAIN_BIN = main.bin
 
-TESTS = $(TEST_BIN)
+TESTS = $(MAIN_BIN) $(TEST_BIN)
