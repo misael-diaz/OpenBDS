@@ -232,6 +232,7 @@ module bds
   contains
 
     subroutine integrator (x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
+      ! implements Euler's forward integration method, updates the position vectors
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: z
