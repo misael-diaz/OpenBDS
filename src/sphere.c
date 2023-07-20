@@ -13,6 +13,10 @@ sphere_t* create ()
   size_t const size_f_x = SIZE;
   size_t const size_f_y = SIZE;
   size_t const size_f_z = SIZE;
+  size_t const size_t_x = SIZE;
+  size_t const size_t_y = SIZE;
+  size_t const size_t_z = SIZE;
+  size_t const size_list = SIZE;
   size_t const size_id = SIZE;
   size_t const size_data = size_x +
 			     size_y +
@@ -20,6 +24,10 @@ sphere_t* create ()
 			     size_f_x +
 			     size_f_y +
 			     size_f_z +
+			     size_t_x +
+			     size_t_y +
+			     size_t_z +
+			     size_list +
 			     size_id;
 
   size_t const bytes = size_data * sizeof(double);
@@ -48,7 +56,11 @@ sphere_t* create ()
   spheres -> f_x = spheres -> z + size_z;
   spheres -> f_y = spheres -> f_x + size_f_x;
   spheres -> f_z = spheres -> f_y + size_f_y;
-  spheres -> id = spheres -> f_z + size_f_z;
+  spheres -> t_x = spheres -> f_z + size_f_z;
+  spheres -> t_y = spheres -> t_x + size_t_x;
+  spheres -> t_z = spheres -> t_y + size_t_y;
+  spheres -> list = spheres -> t_z + size_t_z;
+  spheres -> id = spheres -> list + size_list;
 
   double* x = spheres -> x;
   double* y = spheres -> y;
@@ -56,6 +68,10 @@ sphere_t* create ()
   double* f_x = spheres -> f_x;
   double* f_y = spheres -> f_y;
   double* f_z = spheres -> f_z;
+  double* t_x = spheres -> t_x;
+  double* t_y = spheres -> t_y;
+  double* t_z = spheres -> t_z;
+  double* list = spheres -> list;
   double* id = spheres -> id;
 
   zeros(size_x, x);
@@ -64,6 +80,10 @@ sphere_t* create ()
   zeros(size_f_x, f_x);
   zeros(size_f_y, f_y);
   zeros(size_f_z, f_z);
+  zeros(size_t_x, t_x);
+  zeros(size_t_y, t_y);
+  zeros(size_t_z, t_z);
+  zeros(size_list, list);
   iota(size_id, id);
 
   return spheres;

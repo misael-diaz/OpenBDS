@@ -157,6 +157,7 @@ module bds
   use, intrinsic :: iso_c_binding, only: c_ptr
   use, intrinsic :: iso_fortran_env, only: real64
   use, intrinsic :: iso_fortran_env, only: int64
+  use :: param, only: dt => param_dt
   use :: dynamic, only: dynamic_stochastic_update
   implicit none
   private
@@ -185,6 +186,10 @@ module bds
     type(c_ptr) :: f_x
     type(c_ptr) :: f_y
     type(c_ptr) :: f_z
+    type(c_ptr) :: t_x
+    type(c_ptr) :: t_y
+    type(c_ptr) :: t_z
+    type(c_ptr) :: list
     type(c_ptr) :: id
     type(c_ptr) :: data
   end type
@@ -196,6 +201,10 @@ module bds
     real(kind = real64), pointer, contiguous :: f_x(:) => null()
     real(kind = real64), pointer, contiguous :: f_y(:) => null()
     real(kind = real64), pointer, contiguous :: f_z(:) => null()
+    real(kind = real64), pointer, contiguous :: t_x(:) => null()
+    real(kind = real64), pointer, contiguous :: t_y(:) => null()
+    real(kind = real64), pointer, contiguous :: t_z(:) => null()
+    real(kind = real64), pointer, contiguous :: list(:) => null()
     real(kind = real64), pointer, contiguous :: id(:) => null()
   end type
 
@@ -222,22 +231,59 @@ module bds
 
   contains
 
-    subroutine integrator (x, y, z, f_x, f_y, f_z)
+    subroutine integrator (x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: z
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_x
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_y
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_z
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_y
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_z
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: list
+      real(kind = real64) :: msd
+      real(kind = real64) :: time
+      integer(kind = int64) :: funit
+      integer(kind = int64) :: stat
       integer(kind = int64) :: step
+      character(*), parameter :: fname = 'msd.txt'
+      character(*), parameter :: fmt = '(2E32.12)'
+
+      open(newunit = funit, file = fname, action = 'write', iostat = stat)
+      if (stat /= 0_int64) then
+        return
+      end if
 
       step = 0_int64
+      msd = 0.0_real64
       do while (step /= NUM_STEPS)
+
+        t_x = x
+        t_y = y
+        t_z = z
 
         call dynamic_stochastic_update(x, y, z, f_x, f_y, f_z)
 
+        f_x = x
+        f_y = y
+        f_z = z
+
+        list = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
+
+        msd = msd + ( sum(list) / real(3 * NUM_SPHERES, kind = real64) )
+
+        if (mod(step, 16_int64) == 0_int64) then
+          ! on-the-fly computation of the MSD (assumes that all spheres start at 0, 0, 0):
+
+          time = real(step + 1_int64, kind = real64) * dt
+          write (funit, fmt) time, msd
+        end if
+
         step = step + 1_int64
       end do
+
+      close(funit)
 
       return
     end subroutine integrator
@@ -301,6 +347,10 @@ module test
       call c_f_pointer(p_spheres % f_x, spheres % f_x, [NUM_SPHERES])
       call c_f_pointer(p_spheres % f_y, spheres % f_y, [NUM_SPHERES])
       call c_f_pointer(p_spheres % f_z, spheres % f_z, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % t_x, spheres % t_x, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % t_y, spheres % t_y, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % t_z, spheres % t_z, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % list, spheres % list, [NUM_SPHERES])
       call c_f_pointer(p_spheres % id, spheres % id, [NUM_SPHERES])
 
       ! checks the data (in an aggregate sense) against the expected values:
@@ -329,11 +379,34 @@ module test
         print '(A)', 'PASS'
       end if
 
+      f = 0.0_real64
+      do i = 1, numel
+        f = f + spheres % t_x(i)**2 + spheres % t_y(i)**2 + spheres % t_z(i)**2
+      end do
+
+      write (*, '(A)', advance='no') 'test[2]: '
+      if (f /= 0.0_real64) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
       do i = 1, numel
         f = f + spheres % x(i)**2 + spheres % y(i)**2 + spheres % z(i)**2
       end do
 
-      write (*, '(A)', advance='no') 'test[2]: '
+      write (*, '(A)', advance='no') 'test[3]: '
+      if (f /= 0.0_real64) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      do i = 1, numel
+        f = f + spheres % list(i)
+      end do
+
+      write (*, '(A)', advance='no') 'test[4]: '
       if (f /= 0.0_real64) then
         print '(A)', 'FAIL'
       else
@@ -383,6 +456,10 @@ module test
       real(kind = real64), pointer, contiguous :: f_x(:) => null()
       real(kind = real64), pointer, contiguous :: f_y(:) => null()
       real(kind = real64), pointer, contiguous :: f_z(:) => null()
+      real(kind = real64), pointer, contiguous :: t_x(:) => null()
+      real(kind = real64), pointer, contiguous :: t_y(:) => null()
+      real(kind = real64), pointer, contiguous :: t_z(:) => null()
+      real(kind = real64), pointer, contiguous :: list(:) => null()
 
       sph = create()
 
@@ -393,6 +470,10 @@ module test
       call c_f_pointer(p_spheres % f_x, spheres % f_x, [NUM_SPHERES])
       call c_f_pointer(p_spheres % f_y, spheres % f_y, [NUM_SPHERES])
       call c_f_pointer(p_spheres % f_z, spheres % f_z, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % t_x, spheres % t_x, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % t_y, spheres % t_y, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % t_z, spheres % t_z, [NUM_SPHERES])
+      call c_f_pointer(p_spheres % list, spheres % list, [NUM_SPHERES])
       call c_f_pointer(p_spheres % id, spheres % id, [NUM_SPHERES])
 
       x => spheres % x
@@ -403,7 +484,13 @@ module test
       f_y => spheres % f_y
       f_z => spheres % f_z
 
-      call integrator(x, y, z, f_x, f_y, f_z)
+      t_x => spheres % t_x
+      t_y => spheres % t_y
+      t_z => spheres % t_z
+
+      list => spheres % list
+
+      call integrator(x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
 
       sph = destroy(sph)
 
