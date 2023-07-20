@@ -21,7 +21,13 @@ all: $(TESTS)
 $(TEST_BIN): $(OBJECTS)
 	$(CC) $(CCOPT) $(OBJECTS) -o $(TEST_BIN) $(LIBS)
 
-$(TEST_OBJ): $(TEST_SRC)
+$(UTIL_OBJ): $(UTIL_SRC)
+	$(CC) $(CCOPT) -c $(UTIL_SRC) -o $(UTIL_OBJ)
+
+$(SPHERE_OBJ): $(UTIL_OBJ) $(SPHERE_SRC)
+	$(CC) $(CCOPT) -c $(SPHERE_SRC) -o $(SPHERE_OBJ)
+
+$(TEST_OBJ): $(UTIL_OBJ) $(SPHERE_OBJ) $(TEST_SRC)
 	$(CC) $(CCOPT) -c $(TEST_SRC) -o $(TEST_OBJ)
 
 clean:
