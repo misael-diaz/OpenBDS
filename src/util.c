@@ -1,4 +1,12 @@
+#include <math.h>
 #include "util.h"
+
+
+bool sign (double const x)
+{
+  bool const ret = signbit(x);
+  return ret;
+}
 
 
 void zeros (size_t const size, double* x)
