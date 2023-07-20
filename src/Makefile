@@ -18,8 +18,11 @@ include make-inc
 
 all: $(TESTS)
 
-$(TEST_BIN): $(OBJECTS)
-	$(CC) $(CCOPT) $(OBJECTS) -o $(TEST_BIN) $(LIBS)
+$(MAIN_BIN): $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ)
+	$(FC) $(FCOPT) $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ) -o $(MAIN_BIN)
+
+$(TEST_BIN): $(UTIL_OBJ) $(SPHERE_OBJ) $(TEST_OBJ)
+	$(CC) $(CCOPT) $(UTIL_OBJ) $(SPHERE_OBJ) $(TEST_OBJ) -o $(TEST_BIN) $(LIBS)
 
 $(UTIL_OBJ): $(UTIL_SRC)
 	$(CC) $(CCOPT) -c $(UTIL_SRC) -o $(UTIL_OBJ)
@@ -29,6 +32,9 @@ $(SPHERE_OBJ): $(UTIL_OBJ) $(SPHERE_SRC)
 
 $(TEST_OBJ): $(UTIL_OBJ) $(SPHERE_OBJ) $(TEST_SRC)
 	$(CC) $(CCOPT) -c $(TEST_SRC) -o $(TEST_OBJ)
+
+$(MAIN_OBJ): $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_SRC)
+	$(FC) $(FCOPT) -c $(MAIN_SRC) -o $(MAIN_OBJ)
 
 clean:
 	/bin/rm -rf *.o $(TESTS)
