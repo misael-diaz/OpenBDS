@@ -295,6 +295,9 @@ module test
   use, intrinsic :: iso_c_binding, only: c_f_pointer
   use, intrinsic :: iso_fortran_env, only: real64
   use, intrinsic :: iso_fortran_env, only: int64
+  use :: ieee_arithmetic, only: ieee_value
+  use :: ieee_arithmetic, only: ieee_positive_inf
+  use :: ieee_arithmetic, only: ieee_negative_inf
   use :: random, only: random_prng
   use :: bds, only: csphere_t
   use :: bds, only: fsphere_t
@@ -307,6 +310,27 @@ module test
   public :: test_init
   public :: test_rand
   public :: test_msd
+  public :: test_flooring
+  public :: test_signbit
+
+  interface
+    function c_floor (x) result(res) bind(c, name = 'floor')
+      use, intrinsic :: iso_c_binding, only: c_double
+      implicit none
+      real(kind = c_double), value :: x
+      real(kind = c_double) :: res
+    end function
+  end interface
+
+  interface
+    function c_sign (x) result(res) bind(c, name = 'sign')
+      use, intrinsic :: iso_c_binding, only: c_double
+      use, intrinsic :: iso_c_binding, only: c_bool
+      implicit none
+      real(kind = c_double), value :: x
+      logical(kind = c_bool) :: res
+    end function
+  end interface
 
   interface test_init
     module procedure initialization
@@ -318,6 +342,14 @@ module test
 
   interface test_msd
     module procedure msd
+  end interface
+
+  interface test_flooring
+    module procedure flooring
+  end interface
+
+  interface test_signbit
+    module procedure signbit
   end interface
 
   contains
@@ -496,15 +528,82 @@ module test
       return
     end subroutine msd
 
+    subroutine flooring ()
+      ! prints 3.0 as expected
+      real(kind = real64) :: x
+      x = c_floor(3.5_real64)
+
+      write (*, '(A)', advance='no') 'floor-test[0]: '
+      if (x /= 3.0_real64) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      return
+    end subroutine flooring
+
+    subroutine signbit ()
+
+      write (*, '(A)', advance='no') 'signbit-test[0]: '
+      if ( c_sign(+0.0_real64) ) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      write (*, '(A)', advance='no') 'signbit-test[1]: '
+      if ( .not. c_sign(-0.0_real64) ) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      write (*, '(A)', advance='no') 'signbit-test[2]: '
+      if ( c_sign(+1.0_real64) ) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      write (*, '(A)', advance='no') 'signbit-test[3]: '
+      if ( .not. c_sign(-1.0_real64) ) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      write (*, '(A)', advance='no') 'signbit-test[4]: '
+      if ( c_sign(ieee_value(0.0_real64, ieee_positive_inf)) ) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      write (*, '(A)', advance='no') 'signbit-test[5]: '
+      if ( .not. c_sign(ieee_value(0.0_real64, ieee_negative_inf)) ) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      return
+    end subroutine signbit
+
 end module test
 
 program main
+  use, intrinsic :: iso_fortran_env, only: real64
   use :: test, only: test_init
+  use :: test, only: test_flooring
+  use :: test, only: test_signbit
   use :: test, only: test_rand
   use :: test, only: test_msd
   implicit none
 
   call test_init()
+  call test_flooring()
+  call test_signbit()
   call test_rand()
   call test_msd()
 
