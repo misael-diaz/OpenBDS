@@ -248,7 +248,7 @@ module bds
       integer(kind = int64) :: stat
       integer(kind = int64) :: step
       character(*), parameter :: fname = 'msd.txt'
-      character(*), parameter :: fmt = '(2E32.12)'
+      character(*), parameter :: fmt = '(SP,2E32.15)'
 
       open(newunit = funit, file = fname, action = 'write', iostat = stat)
       if (stat /= 0_int64) then
