@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include "sphere.h"
+#include "system.h"
 
 // defines the system size, or equivalently, the number of spheres
-#define SIZE ( (size_t) 256 )
+#define SIZE ( (size_t) NUM_SPHERES )
 
 int main ()
 {
