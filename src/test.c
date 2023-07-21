@@ -5,7 +5,16 @@
 // defines the system size, or equivalently, the number of spheres
 #define SIZE ( (size_t) NUM_SPHERES )
 
+void test_init();
+
 int main ()
+{
+  test_init();
+  return 0;
+}
+
+
+void test_init ()
 {
   sphere_t* spheres = create();
 
@@ -30,7 +39,6 @@ int main ()
   printf("f: %f \n", f);
 
   spheres = destroy(spheres);
-  return 0;
 }
 
 
