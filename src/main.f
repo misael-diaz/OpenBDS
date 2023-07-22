@@ -183,6 +183,9 @@ module bds
     type(c_ptr) :: x
     type(c_ptr) :: y
     type(c_ptr) :: z
+    type(c_ptr) :: r_x
+    type(c_ptr) :: r_y
+    type(c_ptr) :: r_z
     type(c_ptr) :: f_x
     type(c_ptr) :: f_y
     type(c_ptr) :: f_z
@@ -198,6 +201,9 @@ module bds
     real(kind = real64), pointer, contiguous :: x(:) => null()
     real(kind = real64), pointer, contiguous :: y(:) => null()
     real(kind = real64), pointer, contiguous :: z(:) => null()
+    real(kind = real64), pointer, contiguous :: r_x(:) => null()
+    real(kind = real64), pointer, contiguous :: r_y(:) => null()
+    real(kind = real64), pointer, contiguous :: r_z(:) => null()
     real(kind = real64), pointer, contiguous :: f_x(:) => null()
     real(kind = real64), pointer, contiguous :: f_y(:) => null()
     real(kind = real64), pointer, contiguous :: f_z(:) => null()
@@ -375,6 +381,9 @@ module test
       call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_x, spheres % r_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_y, spheres % r_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_z, spheres % r_z, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
@@ -400,7 +409,7 @@ module test
 
       f = 0.0_real64
       do i = 1, numel
-        f = f + spheres % f_x(i)**2 + spheres % f_y(i)**2 + spheres % f_z(i)**2
+        f = f + spheres % r_x(i)**2 + spheres % r_y(i)**2 + spheres % r_z(i)**2
       end do
 
       write (*, '(A)', advance='no') 'test[1]: '
@@ -412,7 +421,7 @@ module test
 
       f = 0.0_real64
       do i = 1, numel
-        f = f + spheres % t_x(i)**2 + spheres % t_y(i)**2 + spheres % t_z(i)**2
+        f = f + spheres % f_x(i)**2 + spheres % f_y(i)**2 + spheres % f_z(i)**2
       end do
 
       write (*, '(A)', advance='no') 'test[2]: '
@@ -422,8 +431,9 @@ module test
         print '(A)', 'PASS'
       end if
 
+      f = 0.0_real64
       do i = 1, numel
-        f = f + spheres % x(i)**2 + spheres % y(i)**2 + spheres % z(i)**2
+        f = f + spheres % t_x(i)**2 + spheres % t_y(i)**2 + spheres % t_z(i)**2
       end do
 
       write (*, '(A)', advance='no') 'test[3]: '
@@ -434,10 +444,21 @@ module test
       end if
 
       do i = 1, numel
-        f = f + spheres % list(i)
+        f = f + spheres % x(i)**2 + spheres % y(i)**2 + spheres % z(i)**2
       end do
 
       write (*, '(A)', advance='no') 'test[4]: '
+      if (f /= 0.0_real64) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      do i = 1, numel
+        f = f + spheres % list(i)
+      end do
+
+      write (*, '(A)', advance='no') 'test[5]: '
       if (f /= 0.0_real64) then
         print '(A)', 'FAIL'
       else
@@ -484,6 +505,9 @@ module test
       real(kind = real64), pointer, contiguous :: x(:) => null()
       real(kind = real64), pointer, contiguous :: y(:) => null()
       real(kind = real64), pointer, contiguous :: z(:) => null()
+      real(kind = real64), pointer, contiguous :: r_x(:) => null()
+      real(kind = real64), pointer, contiguous :: r_y(:) => null()
+      real(kind = real64), pointer, contiguous :: r_z(:) => null()
       real(kind = real64), pointer, contiguous :: f_x(:) => null()
       real(kind = real64), pointer, contiguous :: f_y(:) => null()
       real(kind = real64), pointer, contiguous :: f_z(:) => null()
@@ -498,6 +522,9 @@ module test
       call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_x, spheres % r_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_y, spheres % r_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_z, spheres % r_z, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
@@ -510,6 +537,10 @@ module test
       x => spheres % x
       y => spheres % y
       z => spheres % z
+
+      r_x => spheres % r_x
+      r_y => spheres % r_y
+      r_z => spheres % r_z
 
       f_x => spheres % f_x
       f_y => spheres % f_y
