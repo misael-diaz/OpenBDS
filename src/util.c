@@ -20,10 +20,25 @@ static uint64_t get_msb (uint64_t const x)
 }
 
 
+// gets the 11-bits that comprise the exponent of a double precision floating-point number
+static uint64_t get_exp (uint64_t const x)
+{
+  return ( (x >> 52) & 0x7ff );
+}
+
+
 // possible implementation of the 2's complement
 static uint64_t twos_complement (uint64_t const x)
 {
   return (~x + 1);
+}
+
+
+// returns one if x = [1.0, 2.0), otherwise returns zero (because x < 1); this method
+// assumes that the abs(x) values to be less than two (this is ensured by prescaling)
+static uint64_t get_unlimited (uint64_t const x)
+{
+  return ( ( ( ( ( (get_exp(x) ^ 0x3ff) + 0x3ff ) & 0x400 ) >> 10 ) + 1 ) & 1);
 }
 
 
@@ -80,6 +95,32 @@ void mask_partition(size_t const size,
   for (size_t i = 0; i != size; ++i)
   {
     m[i].bin = twos_complement( get_msb(fp[i].bin) );
+  }
+}
+
+
+// analogous to mask_partition(), vectorizable by gcc
+void mask_unlimited(size_t const size,
+		    const double* restrict x,
+		    const double* restrict mask,
+		    double* restrict temp,
+		    double* restrict bitmask)
+{
+  alias_t* fp = x;
+  alias_t* t = temp;
+  // uses the binary representation of `x' to determine if abs(x) > 1.0
+  for (size_t i = 0; i != size; ++i)
+  {
+    t[i].bin = twos_complement( get_unlimited(fp[i].bin) );
+  }
+
+  alias_t* r = temp;
+  const alias_t* m = mask;
+  alias_t* b = bitmask;
+  // masks unlimited particles whose x < -1.0 (x > +1.0):
+  for (size_t i = 0; i != size; ++i)
+  {
+    b[i].bin = (m[i].bin & t[i].bin);
   }
 }
 
