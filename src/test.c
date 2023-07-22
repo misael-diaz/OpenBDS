@@ -17,11 +17,13 @@ typedef union
 
 void test_init();
 void test_partition_masking();
+void test_unlimited_masking();
 
 int main ()
 {
   test_init();
   test_partition_masking();
+  test_unlimited_masking();
   return 0;
 }
 
@@ -113,6 +115,101 @@ void test_partition_masking ()
   }
 }
 
+
+// tests the application of periodic boundary conditions via bitwise operations
+void test_unlimited_masking ()
+{
+  size_t const numel = SIZE;	// number of elements (also number of particles)
+  double x[numel];		// particles x-axis coordinates
+  double temp[numel];		// array temporary
+  double mask[numel];		// bitmask for partitioning
+  double bitmask[numel];	// bitmask (non-zero for particles beyond system limits)
+  double offset[numel];		// applies offset to bound unlimited particles
+
+  double const x_min = -1.25 * LIMIT;
+  double const x_max = +1.25 * LIMIT;
+  // simulates the presence of (some) particles exceeding the system dimensions
+  for (size_t i = 0; i != numel; ++i)
+  {
+    x[i] = x_min + ( (double) rand() / RAND_MAX ) * (x_max - x_min);
+  }
+
+  // scaling so that abs(x) = [0, 2.0) (note: the masking algorithm expects this scaling)
+  for (size_t i = 0; i != numel; ++i)
+  {
+    x[i] /= (0.5 * LENGTH);
+  }
+
+  // masks particles in the right partition:
+
+  mask_partition(numel, x, mask);
+  mask_unlimited(numel, x, mask, temp, bitmask);
+
+  // applies periodic boundary conditions (for particles whose x < -1.0):
+
+  alias_t* o = offset;
+  const alias_t* b = bitmask;
+  alias_t  l = { .data = 1.0 };
+  for (size_t i = 0; i != numel; ++i)
+  {
+    o[i].bin = (b[i].bin & l.bin);
+  }
+
+  for (size_t i = 0; i != numel; ++i)
+  {
+    x[i] += offset[i];
+  }
+
+  // masks particles in the left partition:
+
+  alias_t* m = mask;
+  for (size_t i = 0; i != numel; ++i)
+  {
+    m[i].bin = ~m[i].bin;
+  }
+
+  mask_unlimited(numel, x, mask, temp, bitmask);
+
+  l.data = -1.0;
+  for (size_t i = 0; i != numel; ++i)
+  {
+    o[i].bin = (b[i].bin & l.bin);
+  }
+
+  // applies periodic boundary conditions (for particles whose x > +1.0):
+
+  for (size_t i = 0; i != numel; ++i)
+  {
+    x[i] += offset[i];
+  }
+
+  // counts the number of remaining unlimited particles (we expect none):
+
+  size_t count = 0;
+  for (size_t i = 0; i != numel; ++i)
+  {
+    if (x[i] < -1.0 || x[i] > 1.0)
+    {
+      ++count;
+    }
+  }
+
+  printf("mask-unlimited-test[0]: ");
+  if (count != 0)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  // scales back so that x = [-LIMIT, +LIMIT] for all particles
+  for (size_t i = 0; i != numel; ++i)
+  {
+    x[i] *= (0.5 * LENGTH);
+  }
+}
 
 /*
 
