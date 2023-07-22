@@ -1,5 +1,30 @@
+#include <stdint.h>
 #include <math.h>
 #include "util.h"
+
+#define MSBMASK 0x8000000000000000
+#define BITMASK 0xffffffffffffffff
+
+// we use this for bitmasking floating-point numbers and for writing vectorizable code
+typedef union
+{
+  uint64_t bin;
+  double data;
+} alias_t;
+
+
+// returns the Most Significant Bit MSB (yields either zero or one)
+static uint64_t get_msb (uint64_t const x)
+{
+  return ( (x & MSBMASK) >> 63 );
+}
+
+
+// possible implementation of the 2's complement
+static uint64_t twos_complement (uint64_t const x)
+{
+  return (~x + 1);
+}
 
 
 bool sign (double const x)
@@ -24,6 +49,37 @@ void iota (size_t const size, double* x)
   {
     double const id = i;
     x[i] = id;
+  }
+}
+
+
+// void mask_partition (size_t size, double* x, double* mask)
+//
+// Synopsis:
+// Vectorizable by GCC.
+// Masks particles in the right partition; that is, the mask is zero for particles
+// whose (any of its) coordinates satisfy the inequality x >= 0, y >= 0, or z >= 0.
+// Note that this method does not care about the dimensionality of the system (1D, 2D,
+// or 3D), for it only acts on one dimension at a time (and that's exactly what we need).
+//
+// Inputs:
+// size		number of elements of the arrays (both `x' and `mask')
+// x		either x, y, or z-axis coordinates of the particles
+//
+// Output:
+// bitmask	zero for particles in the right partition (x >= 0, y >= 0, or z >= 0),
+//		otherwise it is equal to the binary pattern of the BITMASK MACRO.
+
+
+void mask_partition(size_t const size,
+		    const double* restrict x,
+		    double* restrict mask)
+{
+  alias_t* fp = x;	// floating-point number fp
+  alias_t* m = mask;	// bitmasks with respect to the x, y, or z-axis coordinates
+  for (size_t i = 0; i != size; ++i)
+  {
+    m[i].bin = twos_complement( get_msb(fp[i].bin) );
   }
 }
 
