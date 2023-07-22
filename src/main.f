@@ -131,11 +131,14 @@ module dynamic
       return
     end subroutine stochastic_displ
 
-    subroutine stochastic_update (x, y, z, f_x, f_y, f_z)
+    subroutine stochastic_update (x, y, z, r_x, r_y, r_z, f_x, f_y, f_z)
       ! updates the positions of the spheres by the action of to the stochastic forces
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: z
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_y
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_z
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_x
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_y
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_z
@@ -147,6 +150,10 @@ module dynamic
       call stochastic_displ(x, f_x)
       call stochastic_displ(y, f_y)
       call stochastic_displ(z, f_z)
+
+      call stochastic_displ(r_x, f_x)
+      call stochastic_displ(r_y, f_y)
+      call stochastic_displ(r_z, f_z)
 
       return
     end subroutine stochastic_update
@@ -237,11 +244,14 @@ module bds
 
   contains
 
-    subroutine integrator (x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
+    subroutine integrator (x, y, z, r_x, r_y, r_z, f_x, f_y, f_z, t_x, t_y, t_z, list)
       ! implements Euler's forward integration method, updates the position vectors
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: z
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_y
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_z
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_x
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_y
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_z
@@ -266,15 +276,15 @@ module bds
       msd = 0.0_real64
       do while (step /= NUM_STEPS)
 
-        t_x = x
-        t_y = y
-        t_z = z
+        t_x = r_x
+        t_y = r_y
+        t_z = r_z
 
-        call dynamic_stochastic_update(x, y, z, f_x, f_y, f_z)
+        call dynamic_stochastic_update(x, y, z, r_x, r_y, r_z, f_x, f_y, f_z)
 
-        f_x = x
-        f_y = y
-        f_z = z
+        f_x = r_x
+        f_y = r_y
+        f_z = r_z
 
         list = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
 
@@ -552,7 +562,7 @@ module test
 
       list => spheres % list
 
-      call integrator(x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
+      call integrator(x, y, z, r_x, r_y, r_z, f_x, f_y, f_z, t_x, t_y, t_z, list)
 
       c_spheres = c_destroy(c_spheres)
 
