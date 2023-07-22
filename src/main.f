@@ -165,8 +165,8 @@ module bds
 
   ! C and FORTRAN sphere types:
 
-  public :: csphere_t
-  public :: fsphere_t
+  public :: c_sphere_t
+  public :: f_sphere_t
 
   ! memory handling functions:
 
@@ -179,7 +179,7 @@ module bds
 
   ! type definitions:
 
-  type :: csphere_t     ! clang sphere type
+  type :: c_sphere_t    ! clang sphere type
     type(c_ptr) :: x
     type(c_ptr) :: y
     type(c_ptr) :: z
@@ -194,7 +194,7 @@ module bds
     type(c_ptr) :: data
   end type
 
-  type :: fsphere_t     ! flang sphere type
+  type :: f_sphere_t    ! flang sphere type
     real(kind = real64), pointer, contiguous :: x(:) => null()
     real(kind = real64), pointer, contiguous :: y(:) => null()
     real(kind = real64), pointer, contiguous :: z(:) => null()
@@ -299,8 +299,8 @@ module test
   use :: ieee_arithmetic, only: ieee_positive_inf
   use :: ieee_arithmetic, only: ieee_negative_inf
   use :: random, only: random_prng
-  use :: bds, only: csphere_t
-  use :: bds, only: fsphere_t
+  use :: bds, only: c_sphere_t
+  use :: bds, only: f_sphere_t
   use :: bds, only: destroy
   use :: bds, only: create
   use :: bds, only: integrator => bds_integrator
@@ -361,9 +361,9 @@ module test
       ! C pointer to the data of the spheres
       type(c_ptr) :: sph
       ! FORTRAN pointer for binding to the C pointer
-      type(csphere_t), pointer :: p_spheres
+      type(c_sphere_t), pointer :: p_spheres
       ! with this we get access to the data from FORTRAN
-      type(fsphere_t) :: spheres
+      type(f_sphere_t) :: spheres
 
       real(kind = real64) :: f              ! accumulator for floating-point numbers
       integer(kind = int64) :: num          ! accumulator for integral numbers
@@ -478,8 +478,8 @@ module test
       ! exports the Mean Squared Displacement MSD as a function of time
 
       type(c_ptr) :: sph
-      type(csphere_t), pointer :: p_spheres
-      type(fsphere_t), target :: spheres
+      type(c_sphere_t), pointer :: p_spheres
+      type(f_sphere_t), target :: spheres
 
       real(kind = real64), pointer, contiguous :: x(:) => null()
       real(kind = real64), pointer, contiguous :: y(:) => null()
