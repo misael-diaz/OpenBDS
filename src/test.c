@@ -1,15 +1,27 @@
 #include <stdio.h>
+#include <stdint.h>
+#include <math.h>
+
 #include "sphere.h"
 #include "system.h"
+#include "util.h"
 
 // defines the system size, or equivalently, the number of spheres
 #define SIZE ( (size_t) NUM_SPHERES )
 
+typedef union
+{
+  uint64_t bin;
+  double data;
+} alias_t;
+
 void test_init();
+void test_partition_masking();
 
 int main ()
 {
   test_init();
+  test_partition_masking();
   return 0;
 }
 
@@ -42,6 +54,66 @@ void test_init ()
 }
 
 
+void test_partition_masking ()
+{
+  size_t const numel = SIZE;	// number of elements (also number of particles)
+  double x[numel];		// particles x-axis coordinates
+  double mask[numel];		// bitmask (non-zero for particles beyond system limits)
+
+  double const x_min = -1.25 * LIMIT;
+  double const x_max = +1.25 * LIMIT;
+  // simulates the presence of (some) particles exceeding the system dimensions
+  for (size_t i = 0; i != numel; ++i)
+  {
+    x[i] = x_min + ( (double) rand() / RAND_MAX ) * (x_max - x_min);
+  }
+
+  // scaling so that x ~ 1 (it's really not required to do the scaling for this test)
+  for (size_t i = 0; i != numel; ++i)
+  {
+    x[i] /= (0.5 * LENGTH);
+  }
+
+  size_t count = 0;
+  // counts number of particles in left partition via signbit() MACRO
+  for (size_t i = 0; i != numel; ++i)
+  {
+    if ( signbit(x[i]) )
+    {
+      ++count;
+    }
+  }
+
+  // masks particles in the right partition so that we work on those in the left:
+
+  mask_partition(numel, x, mask);
+
+  // counts the number of particles in the left partition to test the masking algorithm:
+
+  alias_t* m = mask;
+  for (size_t i = 0; i != numel; ++i)
+  {
+    m[i].bin &= 1;
+  }
+
+  size_t sum = 0;
+  for (size_t i = 0; i != numel; ++i)
+  {
+    sum += m[i].bin;
+  }
+
+  printf("mask-partition-test[0]: ");
+  if (sum != count)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+}
+
+
 /*
 
 OpenBDS								July 19, 2023
@@ -50,7 +122,7 @@ source: test.c
 author: @misael-diaz
 
 Synopsis:
-Creates a system of non-interacting Brownian spheres and then destroys it.
+Tests the lower-level code that supports the Brownian Dynamics Simulator BDS.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published
