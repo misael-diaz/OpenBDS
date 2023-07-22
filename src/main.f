@@ -170,8 +170,8 @@ module bds
 
   ! memory handling functions:
 
-  public :: create
-  public :: destroy
+  public :: c_create
+  public :: c_destroy
 
   ! methods:
 
@@ -211,14 +211,14 @@ module bds
   ! defines interfaces to memory handling functions:
 
   interface
-    function create () bind(c) result(sph)
+    function c_create () bind(c, name = 'create') result(sph)
       use, intrinsic :: iso_c_binding, only: c_ptr
       type(c_ptr) :: sph
     end function
   end interface
 
   interface
-    function destroy (sph) bind(c) result(res)
+    function c_destroy (sph) bind(c, name = 'destroy') result(res)
       use, intrinsic :: iso_c_binding, only: c_ptr
       type(c_ptr), value :: sph
       type(c_ptr) :: res
@@ -301,8 +301,8 @@ module test
   use :: random, only: random_prng
   use :: bds, only: c_sphere_t
   use :: bds, only: f_sphere_t
-  use :: bds, only: destroy
-  use :: bds, only: create
+  use :: bds, only: c_destroy
+  use :: bds, only: c_create
   use :: bds, only: integrator => bds_integrator
   implicit none
   private
@@ -355,7 +355,7 @@ module test
   contains
 
     subroutine initialization ()
-      ! tests the initialization (done by the create() method implemented in C)
+      ! tests the initialization (done by the c_create() method implemented in C)
       integer(kind = int64), parameter :: numel = NUM_SPHERES
 
       ! C pointer to the data of the spheres
@@ -369,7 +369,7 @@ module test
       integer(kind = int64) :: num          ! accumulator for integral numbers
       integer(kind = int64) :: i            ! counter (or index)
 
-      sph = create()
+      sph = c_create()
 
       call c_f_pointer(sph, p_spheres)
       call c_f_pointer(p_spheres % x, spheres % x, [NUM_SPHERES])
@@ -444,7 +444,7 @@ module test
         print '(A)', 'PASS'
       end if
 
-      sph = destroy(sph)
+      sph = c_destroy(sph)
 
       return
     end subroutine initialization
@@ -492,7 +492,7 @@ module test
       real(kind = real64), pointer, contiguous :: t_z(:) => null()
       real(kind = real64), pointer, contiguous :: list(:) => null()
 
-      sph = create()
+      sph = c_create()
 
       call c_f_pointer(sph, p_spheres)
       call c_f_pointer(p_spheres % x, spheres % x, [NUM_SPHERES])
@@ -523,7 +523,7 @@ module test
 
       call integrator(x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
 
-      sph = destroy(sph)
+      sph = c_destroy(sph)
 
       return
     end subroutine msd
