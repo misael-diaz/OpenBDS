@@ -165,13 +165,13 @@ module bds
 
   ! C and FORTRAN sphere types:
 
-  public :: csphere_t
-  public :: fsphere_t
+  public :: c_sphere_t
+  public :: f_sphere_t
 
   ! memory handling functions:
 
-  public :: create
-  public :: destroy
+  public :: c_create
+  public :: c_destroy
 
   ! methods:
 
@@ -179,7 +179,7 @@ module bds
 
   ! type definitions:
 
-  type :: csphere_t     ! clang sphere type
+  type :: c_sphere_t    ! clang sphere type
     type(c_ptr) :: x
     type(c_ptr) :: y
     type(c_ptr) :: z
@@ -194,7 +194,7 @@ module bds
     type(c_ptr) :: data
   end type
 
-  type :: fsphere_t     ! flang sphere type
+  type :: f_sphere_t    ! flang sphere type
     real(kind = real64), pointer, contiguous :: x(:) => null()
     real(kind = real64), pointer, contiguous :: y(:) => null()
     real(kind = real64), pointer, contiguous :: z(:) => null()
@@ -211,14 +211,14 @@ module bds
   ! defines interfaces to memory handling functions:
 
   interface
-    function create () bind(c) result(sph)
+    function c_create () bind(c, name = 'create') result(sph)
       use, intrinsic :: iso_c_binding, only: c_ptr
       type(c_ptr) :: sph
     end function
   end interface
 
   interface
-    function destroy (sph) bind(c) result(res)
+    function c_destroy (sph) bind(c, name = 'destroy') result(res)
       use, intrinsic :: iso_c_binding, only: c_ptr
       type(c_ptr), value :: sph
       type(c_ptr) :: res
@@ -299,10 +299,10 @@ module test
   use :: ieee_arithmetic, only: ieee_positive_inf
   use :: ieee_arithmetic, only: ieee_negative_inf
   use :: random, only: random_prng
-  use :: bds, only: csphere_t
-  use :: bds, only: fsphere_t
-  use :: bds, only: destroy
-  use :: bds, only: create
+  use :: bds, only: c_sphere_t
+  use :: bds, only: f_sphere_t
+  use :: bds, only: c_destroy
+  use :: bds, only: c_create
   use :: bds, only: integrator => bds_integrator
   implicit none
   private
@@ -355,34 +355,34 @@ module test
   contains
 
     subroutine initialization ()
-      ! tests the initialization (done by the create() method implemented in C)
+      ! tests the initialization (done by the c_create() method implemented in C)
       integer(kind = int64), parameter :: numel = NUM_SPHERES
 
       ! C pointer to the data of the spheres
-      type(c_ptr) :: sph
+      type(c_ptr) :: c_spheres
       ! FORTRAN pointer for binding to the C pointer
-      type(csphere_t), pointer :: p_spheres
+      type(c_sphere_t), pointer :: ptr_c_spheres
       ! with this we get access to the data from FORTRAN
-      type(fsphere_t) :: spheres
+      type(f_sphere_t) :: spheres
 
       real(kind = real64) :: f              ! accumulator for floating-point numbers
       integer(kind = int64) :: num          ! accumulator for integral numbers
       integer(kind = int64) :: i            ! counter (or index)
 
-      sph = create()
+      c_spheres = c_create()
 
-      call c_f_pointer(sph, p_spheres)
-      call c_f_pointer(p_spheres % x, spheres % x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % y, spheres % y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % z, spheres % z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_x, spheres % f_x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_y, spheres % f_y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_z, spheres % f_z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_x, spheres % t_x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_y, spheres % t_y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_z, spheres % t_z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % list, spheres % list, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % id, spheres % id, [NUM_SPHERES])
+      call c_f_pointer(c_spheres, ptr_c_spheres)
+      call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_x, spheres % t_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_y, spheres % t_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_z, spheres % t_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % list, spheres % list, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % id, spheres % id, [NUM_SPHERES])
 
       ! checks the data (in an aggregate sense) against the expected values:
 
@@ -444,7 +444,7 @@ module test
         print '(A)', 'PASS'
       end if
 
-      sph = destroy(sph)
+      c_spheres = c_destroy(c_spheres)
 
       return
     end subroutine initialization
@@ -477,9 +477,9 @@ module test
     subroutine msd ()
       ! exports the Mean Squared Displacement MSD as a function of time
 
-      type(c_ptr) :: sph
-      type(csphere_t), pointer :: p_spheres
-      type(fsphere_t), target :: spheres
+      type(c_ptr) :: c_spheres
+      type(c_sphere_t), pointer :: ptr_c_spheres
+      type(f_sphere_t), target :: spheres
 
       real(kind = real64), pointer, contiguous :: x(:) => null()
       real(kind = real64), pointer, contiguous :: y(:) => null()
@@ -492,20 +492,20 @@ module test
       real(kind = real64), pointer, contiguous :: t_z(:) => null()
       real(kind = real64), pointer, contiguous :: list(:) => null()
 
-      sph = create()
+      c_spheres = c_create()
 
-      call c_f_pointer(sph, p_spheres)
-      call c_f_pointer(p_spheres % x, spheres % x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % y, spheres % y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % z, spheres % z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_x, spheres % f_x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_y, spheres % f_y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_z, spheres % f_z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_x, spheres % t_x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_y, spheres % t_y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_z, spheres % t_z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % list, spheres % list, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % id, spheres % id, [NUM_SPHERES])
+      call c_f_pointer(c_spheres, ptr_c_spheres)
+      call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_x, spheres % t_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_y, spheres % t_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_z, spheres % t_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % list, spheres % list, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % id, spheres % id, [NUM_SPHERES])
 
       x => spheres % x
       y => spheres % y
@@ -523,7 +523,7 @@ module test
 
       call integrator(x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
 
-      sph = destroy(sph)
+      c_spheres = c_destroy(c_spheres)
 
       return
     end subroutine msd
