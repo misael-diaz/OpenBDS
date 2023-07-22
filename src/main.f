@@ -359,7 +359,7 @@ module test
       integer(kind = int64), parameter :: numel = NUM_SPHERES
 
       ! C pointer to the data of the spheres
-      type(c_ptr) :: sph
+      type(c_ptr) :: c_spheres
       ! FORTRAN pointer for binding to the C pointer
       type(c_sphere_t), pointer :: p_spheres
       ! with this we get access to the data from FORTRAN
@@ -369,9 +369,9 @@ module test
       integer(kind = int64) :: num          ! accumulator for integral numbers
       integer(kind = int64) :: i            ! counter (or index)
 
-      sph = c_create()
+      c_spheres = c_create()
 
-      call c_f_pointer(sph, p_spheres)
+      call c_f_pointer(c_spheres, p_spheres)
       call c_f_pointer(p_spheres % x, spheres % x, [NUM_SPHERES])
       call c_f_pointer(p_spheres % y, spheres % y, [NUM_SPHERES])
       call c_f_pointer(p_spheres % z, spheres % z, [NUM_SPHERES])
@@ -444,7 +444,7 @@ module test
         print '(A)', 'PASS'
       end if
 
-      sph = c_destroy(sph)
+      c_spheres = c_destroy(c_spheres)
 
       return
     end subroutine initialization
@@ -477,7 +477,7 @@ module test
     subroutine msd ()
       ! exports the Mean Squared Displacement MSD as a function of time
 
-      type(c_ptr) :: sph
+      type(c_ptr) :: c_spheres
       type(c_sphere_t), pointer :: p_spheres
       type(f_sphere_t), target :: spheres
 
@@ -492,9 +492,9 @@ module test
       real(kind = real64), pointer, contiguous :: t_z(:) => null()
       real(kind = real64), pointer, contiguous :: list(:) => null()
 
-      sph = c_create()
+      c_spheres = c_create()
 
-      call c_f_pointer(sph, p_spheres)
+      call c_f_pointer(c_spheres, p_spheres)
       call c_f_pointer(p_spheres % x, spheres % x, [NUM_SPHERES])
       call c_f_pointer(p_spheres % y, spheres % y, [NUM_SPHERES])
       call c_f_pointer(p_spheres % z, spheres % z, [NUM_SPHERES])
@@ -523,7 +523,7 @@ module test
 
       call integrator(x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
 
-      sph = c_destroy(sph)
+      c_spheres = c_destroy(c_spheres)
 
       return
     end subroutine msd
