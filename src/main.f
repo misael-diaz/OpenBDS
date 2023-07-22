@@ -361,7 +361,7 @@ module test
       ! C pointer to the data of the spheres
       type(c_ptr) :: c_spheres
       ! FORTRAN pointer for binding to the C pointer
-      type(c_sphere_t), pointer :: p_spheres
+      type(c_sphere_t), pointer :: ptr_c_spheres
       ! with this we get access to the data from FORTRAN
       type(f_sphere_t) :: spheres
 
@@ -371,18 +371,18 @@ module test
 
       c_spheres = c_create()
 
-      call c_f_pointer(c_spheres, p_spheres)
-      call c_f_pointer(p_spheres % x, spheres % x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % y, spheres % y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % z, spheres % z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_x, spheres % f_x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_y, spheres % f_y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_z, spheres % f_z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_x, spheres % t_x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_y, spheres % t_y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_z, spheres % t_z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % list, spheres % list, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % id, spheres % id, [NUM_SPHERES])
+      call c_f_pointer(c_spheres, ptr_c_spheres)
+      call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_x, spheres % t_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_y, spheres % t_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_z, spheres % t_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % list, spheres % list, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % id, spheres % id, [NUM_SPHERES])
 
       ! checks the data (in an aggregate sense) against the expected values:
 
@@ -478,7 +478,7 @@ module test
       ! exports the Mean Squared Displacement MSD as a function of time
 
       type(c_ptr) :: c_spheres
-      type(c_sphere_t), pointer :: p_spheres
+      type(c_sphere_t), pointer :: ptr_c_spheres
       type(f_sphere_t), target :: spheres
 
       real(kind = real64), pointer, contiguous :: x(:) => null()
@@ -494,18 +494,18 @@ module test
 
       c_spheres = c_create()
 
-      call c_f_pointer(c_spheres, p_spheres)
-      call c_f_pointer(p_spheres % x, spheres % x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % y, spheres % y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % z, spheres % z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_x, spheres % f_x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_y, spheres % f_y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % f_z, spheres % f_z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_x, spheres % t_x, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_y, spheres % t_y, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % t_z, spheres % t_z, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % list, spheres % list, [NUM_SPHERES])
-      call c_f_pointer(p_spheres % id, spheres % id, [NUM_SPHERES])
+      call c_f_pointer(c_spheres, ptr_c_spheres)
+      call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_x, spheres % t_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_y, spheres % t_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_z, spheres % t_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % list, spheres % list, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % id, spheres % id, [NUM_SPHERES])
 
       x => spheres % x
       y => spheres % y
