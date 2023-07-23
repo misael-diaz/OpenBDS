@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <math.h>
+#include "system.h"
 #include "util.h"
 
 #define MSBMASK 0x8000000000000000
@@ -114,7 +115,6 @@ void mask_unlimited(size_t const size,
     t[i].bin = twos_complement( get_unlimited(fp[i].bin) );
   }
 
-  alias_t* r = temp;
   const alias_t* m = mask;
   alias_t* b = bitmask;
   // masks unlimited particles whose x < -1.0 (x > +1.0):
@@ -122,6 +122,94 @@ void mask_unlimited(size_t const size,
   {
     b[i].bin = (m[i].bin & t[i].bin);
   }
+}
+
+
+// performs the pre-scaling so that x ~ 1 (or x = O(1))
+static void scale (double* x)
+{
+  double const c = 1.0 / (0.5 * LENGTH);
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    x[i] *= c;
+  }
+}
+
+
+// restores the original scaling of x ~ LIMIT
+static void rescale (double* x)
+{
+  double const c = (0.5 * LENGTH);
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    x[i] *= c;
+  }
+}
+
+
+// sets the offset to be applied given the magnitude length and the bitmask
+static void offset (double const len,
+		    double* restrict offset,
+		    const double* restrict mask)
+{
+  alias_t* o = offset;
+  const alias_t* m = mask;
+  alias_t const l = { .data = len };
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    o[i].bin = (m[i].bin & l.bin);
+  }
+}
+
+
+// shifts x, y, or z-axis coordinates by offset
+static void shift (double* restrict x, const double* offset)
+{
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    x[i] += offset[i];
+  }
+}
+
+
+// applies periodic boundary conditions to the particles
+void pbc (double* restrict x,
+	  double* restrict temp,
+	  double* restrict mask,
+	  double* restrict bitmask)
+{
+  // applies required pre-scaling:
+
+  scale(x);
+
+  // applies periodic boundary conditions on the particles in the left partition:
+
+  mask_partition(NUM_SPHERES, x, mask);
+  mask_unlimited(NUM_SPHERES, x, mask, temp, bitmask);
+  offset(+1.0, temp, bitmask);
+  shift(x, temp);
+
+  // applies periodic boundary conditions on the particles in the right partition:
+
+  alias_t* t = temp;
+  alias_t* m = mask;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    t[i].bin = ~m[i].bin;
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    m[i].bin = t[i].bin;
+  }
+
+  mask_unlimited(NUM_SPHERES, x, mask, temp, bitmask);
+  offset(-1.0, temp, bitmask);
+  shift(x, temp);
+
+  // restores the original scaling
+
+  rescale(x);
 }
 
 
