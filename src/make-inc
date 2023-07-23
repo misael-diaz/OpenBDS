@@ -19,6 +19,7 @@ FC = gfortran
 # clang compiler
 CC = gcc
 
+FCOPT = -O2 -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form
 FCOPT = -g -Wall -Wextra -Waliasing -Wsurprising -Warray-bounds -Warray-temporaries\
 	-Wcharacter-truncation -Wconversion-extra -Wimplicit-interface\
 	-Wimplicit-procedure -Wuse-without-only -Wrealloc-lhs -Wrealloc-lhs-all\
