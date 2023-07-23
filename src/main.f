@@ -434,7 +434,7 @@ module test
       ! C pointer to the data of the spheres
       type(c_ptr) :: c_spheres
       ! FORTRAN pointer for binding to the C pointer
-      type(c_sphere_t), pointer :: ptr_c_spheres
+      type(c_sphere_t), pointer :: ptr_c_spheres => null()
       ! with this we get access to the data from FORTRAN
       type(f_sphere_t) :: spheres
 
@@ -566,7 +566,7 @@ module test
       ! exports the Mean Squared Displacement MSD as a function of time
 
       type(c_ptr) :: c_spheres
-      type(c_sphere_t), pointer :: ptr_c_spheres
+      type(c_sphere_t), pointer :: ptr_c_spheres => null()
       type(f_sphere_t), target :: spheres
 
       real(kind = real64), pointer, contiguous :: x(:) => null()
@@ -630,7 +630,7 @@ module test
       ! tests the algorithm that applies the periodic boundary conditions
 
       type(c_ptr) :: c_spheres
-      type(c_sphere_t), pointer :: ptr_c_spheres
+      type(c_sphere_t), pointer :: ptr_c_spheres => null()
       type(f_sphere_t), target :: spheres
 
       real(kind = real64), pointer, contiguous :: x(:) => null()
