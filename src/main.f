@@ -29,6 +29,7 @@
 !
 
 #include "system.h"
+#define DEBUG .true.
 
 module param
   use, intrinsic :: iso_fortran_env, only: real64
@@ -238,6 +239,18 @@ module bds
     end function
   end interface
 
+  ! defines an interface for the method that applies periodic boundary conditions:
+
+  interface
+    subroutine c_pbc (x, temp, mask, bitmask) bind(c, name = 'pbc')
+      use, intrinsic :: iso_c_binding, only: c_double
+      real(kind = c_double), dimension(NUM_SPHERES), intent(inout) :: x
+      real(kind = c_double), dimension(NUM_SPHERES), intent(out) :: temp
+      real(kind = c_double), dimension(NUM_SPHERES), intent(out) :: mask
+      real(kind = c_double), dimension(NUM_SPHERES), intent(out) :: bitmask
+    end subroutine
+  end interface
+
   interface bds_integrator
     module procedure integrator
   end interface
@@ -259,11 +272,14 @@ module bds
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_y
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_z
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: list
+      real(kind = real64), parameter :: lim = real(LIMIT, kind = real64)
       real(kind = real64) :: msd
       real(kind = real64) :: time
+      integer(kind = int64) :: fails
       integer(kind = int64) :: funit
       integer(kind = int64) :: stat
       integer(kind = int64) :: step
+      integer(kind = int64) :: i
       character(*), parameter :: fname = 'msd.txt'
       character(*), parameter :: fmt = '(SP,2E32.15)'
 
@@ -273,6 +289,7 @@ module bds
       end if
 
       step = 0_int64
+      fails = 0_int64
       msd = 0.0_real64
       do while (step /= NUM_STEPS)
 
@@ -296,8 +313,43 @@ module bds
           write (funit, fmt) time, msd
         end if
 
+        ! applies periodic boundary conditions (note: the force is an array temporary):
+
+        call c_pbc(x, f_x, f_y, f_z)
+        call c_pbc(y, f_x, f_y, f_z)
+        call c_pbc(z, f_x, f_y, f_z)
+
+        if (DEBUG) then
+
+          do i = 1, NUM_SPHERES
+            if (x(i) < -lim .or. x(i) > lim) then
+              fails = fails + 1_int64
+            end if
+          end do
+
+          do i = 1, NUM_SPHERES
+            if (y(i) < -lim .or. y(i) > lim) then
+              fails = fails + 1_int64
+            end if
+          end do
+
+          do i = 1, NUM_SPHERES
+            if (z(i) < -lim .or. z(i) > lim) then
+              fails = fails + 1_int64
+            end if
+          end do
+
+        end if
+
         step = step + 1_int64
       end do
+
+      write (*, '(A)', advance='no') 'pbc-test[0]: '
+      if (fails /= 0) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
 
       close(funit)
 
@@ -326,6 +378,7 @@ module test
   public :: test_init
   public :: test_rand
   public :: test_msd
+  public :: test_pbc
   public :: test_flooring
   public :: test_signbit
 
@@ -358,6 +411,10 @@ module test
 
   interface test_msd
     module procedure msd
+  end interface
+
+  interface test_pbc
+    module procedure pbc
   end interface
 
   interface test_flooring
@@ -569,6 +626,80 @@ module test
       return
     end subroutine msd
 
+    subroutine pbc ()
+      ! tests the algorithm that applies the periodic boundary conditions
+
+      type(c_ptr) :: c_spheres
+      type(c_sphere_t), pointer :: ptr_c_spheres
+      type(f_sphere_t), target :: spheres
+
+      real(kind = real64), pointer, contiguous :: x(:) => null()
+      real(kind = real64), pointer, contiguous :: y(:) => null()
+      real(kind = real64), pointer, contiguous :: z(:) => null()
+      real(kind = real64), pointer, contiguous :: r_x(:) => null()
+      real(kind = real64), pointer, contiguous :: r_y(:) => null()
+      real(kind = real64), pointer, contiguous :: r_z(:) => null()
+      real(kind = real64), pointer, contiguous :: f_x(:) => null()
+      real(kind = real64), pointer, contiguous :: f_y(:) => null()
+      real(kind = real64), pointer, contiguous :: f_z(:) => null()
+      real(kind = real64), pointer, contiguous :: t_x(:) => null()
+      real(kind = real64), pointer, contiguous :: t_y(:) => null()
+      real(kind = real64), pointer, contiguous :: t_z(:) => null()
+      real(kind = real64), pointer, contiguous :: list(:) => null()
+
+      c_spheres = c_create()
+
+      call c_f_pointer(c_spheres, ptr_c_spheres)
+      call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_x, spheres % r_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_y, spheres % r_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_z, spheres % r_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_x, spheres % t_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_y, spheres % t_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % t_z, spheres % t_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % list, spheres % list, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % id, spheres % id, [NUM_SPHERES])
+
+      x => spheres % x
+      y => spheres % y
+      z => spheres % z
+
+      r_x => spheres % r_x
+      r_y => spheres % r_y
+      r_z => spheres % r_z
+
+      f_x => spheres % f_x
+      f_y => spheres % f_y
+      f_z => spheres % f_z
+
+      t_x => spheres % t_x
+      t_y => spheres % t_y
+      t_z => spheres % t_z
+
+      list => spheres % list
+
+      ! sets the particles at one of the edges of the system for this test:
+
+      x = real(LIMIT, kind = real64)
+      y = real(LIMIT, kind = real64)
+      z = real(LIMIT, kind = real64)
+
+      r_x = real(LIMIT, kind = real64)
+      r_y = real(LIMIT, kind = real64)
+      r_z = real(LIMIT, kind = real64)
+
+      call integrator(x, y, z, r_x, r_y, r_z, f_x, f_y, f_z, t_x, t_y, t_z, list)
+
+      c_spheres = c_destroy(c_spheres)
+
+      return
+    end subroutine pbc
+
     subroutine flooring ()
       ! prints 3.0 as expected
       real(kind = real64) :: x
@@ -640,6 +771,7 @@ program main
   use :: test, only: test_signbit
   use :: test, only: test_rand
   use :: test, only: test_msd
+  use :: test, only: test_pbc
   implicit none
 
   call test_init()
@@ -647,5 +779,6 @@ program main
   call test_signbit()
   call test_rand()
   call test_msd()
+  call test_pbc()
 
 end program main
