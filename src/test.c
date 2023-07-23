@@ -18,12 +18,14 @@ typedef union
 void test_init();
 void test_partition_masking();
 void test_unlimited_masking();
+void test_pbc();
 
 int main ()
 {
   test_init();
   test_partition_masking();
   test_unlimited_masking();
+  test_pbc();
   return 0;
 }
 
@@ -210,6 +212,48 @@ void test_unlimited_masking ()
     x[i] *= (0.5 * LENGTH);
   }
 }
+
+
+void test_pbc ()
+{
+  size_t const numel = SIZE;	// number of elements (also number of particles)
+  double x[numel];		// particles x-axis coordinates
+  double temp[numel];		// array temporary
+  double mask[numel];		// bitmask for partitioning
+  double bitmask[numel];	// bitmask (non-zero for particles beyond system limits)
+
+  double const x_min = -1.25 * LIMIT;
+  double const x_max = +1.25 * LIMIT;
+  // simulates the presence of (some) particles exceeding the system dimensions
+  for (size_t i = 0; i != numel; ++i)
+  {
+    x[i] = x_min + ( (double) rand() / RAND_MAX ) * (x_max - x_min);
+  }
+
+  pbc(x, temp, mask, bitmask);
+
+  // counts the number of remaining unlimited particles (we expect none):
+
+  size_t count = 0;
+  for (size_t i = 0; i != numel; ++i)
+  {
+    if (x[i] < -LIMIT || x[i] > +LIMIT)
+    {
+      ++count;
+    }
+  }
+
+  printf("pbc-test[0]: ");
+  if (count != 0)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+}
+
 
 /*
 

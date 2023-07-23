@@ -15,4 +15,9 @@ void mask_unlimited (size_t const size,
 		     double* restrict temp,
 		     double* restrict bitmask);
 
+void pbc (double* restrict x,
+	  double* restrict temp,
+	  double* restrict mask,
+	  double* restrict bitmask);
+
 #endif
