@@ -3,10 +3,14 @@
 
 typedef struct
 {
-  // position:
+  // position subject to periodic boundaries:
   double* x;
   double* y;
   double* z;
+  // absolute position:
+  double* r_x;
+  double* r_y;
+  double* r_z;
   // force:
   double* f_x;
   double* f_y;

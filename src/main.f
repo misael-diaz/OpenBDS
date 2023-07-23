@@ -131,11 +131,14 @@ module dynamic
       return
     end subroutine stochastic_displ
 
-    subroutine stochastic_update (x, y, z, f_x, f_y, f_z)
+    subroutine stochastic_update (x, y, z, r_x, r_y, r_z, f_x, f_y, f_z)
       ! updates the positions of the spheres by the action of to the stochastic forces
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: z
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_y
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_z
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_x
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_y
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_z
@@ -147,6 +150,10 @@ module dynamic
       call stochastic_displ(x, f_x)
       call stochastic_displ(y, f_y)
       call stochastic_displ(z, f_z)
+
+      call stochastic_displ(r_x, f_x)
+      call stochastic_displ(r_y, f_y)
+      call stochastic_displ(r_z, f_z)
 
       return
     end subroutine stochastic_update
@@ -183,6 +190,9 @@ module bds
     type(c_ptr) :: x
     type(c_ptr) :: y
     type(c_ptr) :: z
+    type(c_ptr) :: r_x
+    type(c_ptr) :: r_y
+    type(c_ptr) :: r_z
     type(c_ptr) :: f_x
     type(c_ptr) :: f_y
     type(c_ptr) :: f_z
@@ -198,6 +208,9 @@ module bds
     real(kind = real64), pointer, contiguous :: x(:) => null()
     real(kind = real64), pointer, contiguous :: y(:) => null()
     real(kind = real64), pointer, contiguous :: z(:) => null()
+    real(kind = real64), pointer, contiguous :: r_x(:) => null()
+    real(kind = real64), pointer, contiguous :: r_y(:) => null()
+    real(kind = real64), pointer, contiguous :: r_z(:) => null()
     real(kind = real64), pointer, contiguous :: f_x(:) => null()
     real(kind = real64), pointer, contiguous :: f_y(:) => null()
     real(kind = real64), pointer, contiguous :: f_z(:) => null()
@@ -231,11 +244,14 @@ module bds
 
   contains
 
-    subroutine integrator (x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
+    subroutine integrator (x, y, z, r_x, r_y, r_z, f_x, f_y, f_z, t_x, t_y, t_z, list)
       ! implements Euler's forward integration method, updates the position vectors
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: z
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_y
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_z
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_x
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_y
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_z
@@ -260,15 +276,15 @@ module bds
       msd = 0.0_real64
       do while (step /= NUM_STEPS)
 
-        t_x = x
-        t_y = y
-        t_z = z
+        t_x = r_x
+        t_y = r_y
+        t_z = r_z
 
-        call dynamic_stochastic_update(x, y, z, f_x, f_y, f_z)
+        call dynamic_stochastic_update(x, y, z, r_x, r_y, r_z, f_x, f_y, f_z)
 
-        f_x = x
-        f_y = y
-        f_z = z
+        f_x = r_x
+        f_y = r_y
+        f_z = r_z
 
         list = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
 
@@ -375,6 +391,9 @@ module test
       call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_x, spheres % r_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_y, spheres % r_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_z, spheres % r_z, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
@@ -400,7 +419,7 @@ module test
 
       f = 0.0_real64
       do i = 1, numel
-        f = f + spheres % f_x(i)**2 + spheres % f_y(i)**2 + spheres % f_z(i)**2
+        f = f + spheres % r_x(i)**2 + spheres % r_y(i)**2 + spheres % r_z(i)**2
       end do
 
       write (*, '(A)', advance='no') 'test[1]: '
@@ -412,7 +431,7 @@ module test
 
       f = 0.0_real64
       do i = 1, numel
-        f = f + spheres % t_x(i)**2 + spheres % t_y(i)**2 + spheres % t_z(i)**2
+        f = f + spheres % f_x(i)**2 + spheres % f_y(i)**2 + spheres % f_z(i)**2
       end do
 
       write (*, '(A)', advance='no') 'test[2]: '
@@ -422,8 +441,9 @@ module test
         print '(A)', 'PASS'
       end if
 
+      f = 0.0_real64
       do i = 1, numel
-        f = f + spheres % x(i)**2 + spheres % y(i)**2 + spheres % z(i)**2
+        f = f + spheres % t_x(i)**2 + spheres % t_y(i)**2 + spheres % t_z(i)**2
       end do
 
       write (*, '(A)', advance='no') 'test[3]: '
@@ -434,10 +454,21 @@ module test
       end if
 
       do i = 1, numel
-        f = f + spheres % list(i)
+        f = f + spheres % x(i)**2 + spheres % y(i)**2 + spheres % z(i)**2
       end do
 
       write (*, '(A)', advance='no') 'test[4]: '
+      if (f /= 0.0_real64) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      do i = 1, numel
+        f = f + spheres % list(i)
+      end do
+
+      write (*, '(A)', advance='no') 'test[5]: '
       if (f /= 0.0_real64) then
         print '(A)', 'FAIL'
       else
@@ -484,6 +515,9 @@ module test
       real(kind = real64), pointer, contiguous :: x(:) => null()
       real(kind = real64), pointer, contiguous :: y(:) => null()
       real(kind = real64), pointer, contiguous :: z(:) => null()
+      real(kind = real64), pointer, contiguous :: r_x(:) => null()
+      real(kind = real64), pointer, contiguous :: r_y(:) => null()
+      real(kind = real64), pointer, contiguous :: r_z(:) => null()
       real(kind = real64), pointer, contiguous :: f_x(:) => null()
       real(kind = real64), pointer, contiguous :: f_y(:) => null()
       real(kind = real64), pointer, contiguous :: f_z(:) => null()
@@ -498,6 +532,9 @@ module test
       call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_x, spheres % r_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_y, spheres % r_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % r_z, spheres % r_z, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
@@ -511,6 +548,10 @@ module test
       y => spheres % y
       z => spheres % z
 
+      r_x => spheres % r_x
+      r_y => spheres % r_y
+      r_z => spheres % r_z
+
       f_x => spheres % f_x
       f_y => spheres % f_y
       f_z => spheres % f_z
@@ -521,7 +562,7 @@ module test
 
       list => spheres % list
 
-      call integrator(x, y, z, f_x, f_y, f_z, t_x, t_y, t_z, list)
+      call integrator(x, y, z, r_x, r_y, r_z, f_x, f_y, f_z, t_x, t_y, t_z, list)
 
       c_spheres = c_destroy(c_spheres)
 
