@@ -13,6 +13,10 @@ typedef struct
   double* r_x;
   double* r_y;
   double* r_z;
+  // angular position:
+  double* a_x;
+  double* a_y;
+  double* a_z;
   // force:
   double* f_x;
   double* f_y;

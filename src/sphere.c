@@ -13,6 +13,9 @@ sphere_t* create ()
   size_t const size_r_x = SIZE;
   size_t const size_r_y = SIZE;
   size_t const size_r_z = SIZE;
+  size_t const size_a_x = SIZE;
+  size_t const size_a_y = SIZE;
+  size_t const size_a_z = SIZE;
   size_t const size_f_x = SIZE;
   size_t const size_f_y = SIZE;
   size_t const size_f_z = SIZE;
@@ -27,6 +30,9 @@ sphere_t* create ()
 			     size_r_x +
 			     size_r_y +
 			     size_r_z +
+			     size_a_x +
+			     size_a_y +
+			     size_a_z +
 			     size_f_x +
 			     size_f_y +
 			     size_f_z +
@@ -62,7 +68,10 @@ sphere_t* create ()
   spheres -> r_x = spheres -> z + size_z;
   spheres -> r_y = spheres -> r_x + size_r_x;
   spheres -> r_z = spheres -> r_y + size_r_y;
-  spheres -> f_x = spheres -> r_z + size_r_z;
+  spheres -> a_x = spheres -> r_z + size_r_z;
+  spheres -> a_y = spheres -> a_x + size_a_x;
+  spheres -> a_z = spheres -> a_y + size_a_y;
+  spheres -> f_x = spheres -> a_z + size_a_z;
   spheres -> f_y = spheres -> f_x + size_f_x;
   spheres -> f_z = spheres -> f_y + size_f_y;
   spheres -> t_x = spheres -> f_z + size_f_z;
@@ -77,6 +86,9 @@ sphere_t* create ()
   double* r_x = spheres -> r_x;
   double* r_y = spheres -> r_y;
   double* r_z = spheres -> r_z;
+  double* a_x = spheres -> a_x;
+  double* a_y = spheres -> a_y;
+  double* a_z = spheres -> a_z;
   double* f_x = spheres -> f_x;
   double* f_y = spheres -> f_y;
   double* f_z = spheres -> f_z;
@@ -92,6 +104,9 @@ sphere_t* create ()
   zeros(size_r_x, r_x);
   zeros(size_r_y, r_y);
   zeros(size_r_z, r_z);
+  zeros(size_a_x, a_x);
+  zeros(size_a_y, a_y);
+  zeros(size_a_z, a_z);
   zeros(size_f_x, f_x);
   zeros(size_f_y, f_y);
   zeros(size_f_z, f_z);
