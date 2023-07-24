@@ -68,6 +68,233 @@ void iota (size_t const size, int64_t* x)
 }
 
 
+// sets the spheres at grid locations so that they do not overlap with one another
+void grid (double* restrict x, double* restrict y, double* restrict z)
+{
+  size_t const len = LENGTH;
+  // gets the number of spheres (at contact) that fit along any dimension (x, y, or z)
+  size_t const count = (len / 2);
+  size_t const count2 = (count * count);
+
+  // sets particles at grid locations:
+
+  for (size_t n = 0; n != NUM_SPHERES; ++n)
+  {
+    size_t const i = (n % count);
+    double const pos = 1.0 + 2.0 * ( (double) i );
+    x[n] = pos;
+  }
+
+  for (size_t n = 0; n != NUM_SPHERES; ++n)
+  {
+    size_t const i = (n % count2) / count;
+    double const pos = 1.0 + 2.0 * ( (double) i );
+    y[n] = pos;
+  }
+
+  for (size_t n = 0; n != NUM_SPHERES; ++n)
+  {
+    size_t const i = (n / count2);
+    double const pos = 1.0 + 2.0 * ( (double) i );
+    z[n] = pos;
+  }
+
+  // shift the particles so that their coordinates are in the range [-LIMIT, +LIMIT]:
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    x[i] -= LIMIT;
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    y[i] -= LIMIT;
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    z[i] -= LIMIT;
+  }
+}
+
+
+static size_t overlap(const double* x,
+		      const double* y,
+		      const double* z,
+		      double const offset_x,
+		      double const offset_y,
+		      double const offset_z)
+{
+  size_t overlaps = 0;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const r_x = (x[j] + offset_x);
+      double const r_y = (y[j] + offset_y);
+      double const r_z = (z[j] + offset_z);
+      double const d_x = (x[i] - r_x);
+      double const d_y = (y[i] - r_y);
+      double const d_z = (z[i] - r_z);
+      // computes the squared distance of the pair for speed
+      double const d = (d_x * d_x) + (d_y * d_y) + (d_z * d_z);
+
+      size_t const contact = 4.0;
+      if (d < contact)
+      {
+	++overlaps;
+      }
+    }
+  }
+
+  return overlaps;
+}
+
+
+// counts overlapping particles
+int64_t overlaps (const double* restrict x,
+		  const double* restrict y,
+		  const double* restrict z)
+{
+  // checks for overlapping particles in the system:
+
+  int64_t overlaps = 0;
+  for (size_t i = 0; i != (NUM_SPHERES - 1); ++i)
+  {
+    for (size_t j = (i + 1); j != NUM_SPHERES; ++j)
+    {
+      double const d_x = (x[i] - x[j]);
+      double const d_y = (y[i] - y[j]);
+      double const d_z = (z[i] - z[j]);
+      // computes the squared distance of the pair for speed
+      double const d = (d_x * d_x) + (d_y * d_y) + (d_z * d_z);
+
+      size_t const contact = 4.0;
+      if (d < contact)
+      {
+	++overlaps;
+      }
+    }
+  }
+
+  // checks for overlaps with the images (accounts for the periodicity of the system):
+
+  double offset_x = 0.0;
+  double offset_y = 0.0;
+  double offset_z = 0.0;
+
+  offset_x = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_y = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_y = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_z = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_z = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  // checks even the less likely images:
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = -LENGTH;
+  offset_y = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = -LENGTH;
+  offset_y = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = +LENGTH;
+  offset_y = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = +LENGTH;
+  offset_y = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = -LENGTH;
+  offset_y = -LENGTH;
+  offset_z = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = -LENGTH;
+  offset_y = +LENGTH;
+  offset_z = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = +LENGTH;
+  offset_y = -LENGTH;
+  offset_z = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = +LENGTH;
+  offset_y = +LENGTH;
+  offset_z = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = -LENGTH;
+  offset_y = -LENGTH;
+  offset_z = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = -LENGTH;
+  offset_y = +LENGTH;
+  offset_z = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = +LENGTH;
+  offset_y = -LENGTH;
+  offset_z = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = +LENGTH;
+  offset_y = +LENGTH;
+  offset_z = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  return overlaps;
+}
+
+
 // void mask_partition (size_t size, double* x, double* mask)
 //
 // Synopsis:

@@ -488,6 +488,17 @@ module test
     end function
   end interface
 
+  interface
+    function c_overlaps (x, y, z) result(overlaps) bind(c, name = 'overlaps')
+      use, intrinsic :: iso_c_binding, only: c_double
+      use, intrinsic :: iso_c_binding, only: c_int64_t
+      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: x
+      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: y
+      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: z
+      integer(kind = c_int64_t) :: overlaps
+    end function
+  end interface
+
   interface test_init
     module procedure initialization
   end interface
@@ -517,6 +528,7 @@ module test
     subroutine initialization ()
       ! tests the initialization (done by the c_create() method implemented in C)
       integer(kind = int64), parameter :: numel = NUM_SPHERES
+      real(kind = real64), parameter :: lim = real(LIMIT, kind = real64)
 
       ! C pointer to the data of the spheres
       type(c_ptr) :: c_spheres
@@ -526,6 +538,8 @@ module test
       type(f_sphere_t) :: spheres
 
       real(kind = real64) :: f              ! accumulator for floating-point numbers
+      integer(kind = int64) :: fails        ! counts number of particles beyond limits
+      integer(kind = int64) :: overlaps     ! counts number of overlapping particles
       integer(kind = int64) :: num          ! accumulator for integral numbers
       integer(kind = int64) :: i            ! counter (or index)
 
@@ -593,12 +607,10 @@ module test
         print '(A)', 'PASS'
       end if
 
-      do i = 1, numel
-        f = f + spheres % x(i)**2 + spheres % y(i)**2 + spheres % z(i)**2
-      end do
+      overlaps = c_overlaps(spheres % x, spheres % y, spheres % z)
 
       write (*, '(A)', advance='no') 'test[4]: '
-      if (f /= 0.0_real64) then
+      if (overlaps /= 0_int64) then
         print '(A)', 'FAIL'
       else
         print '(A)', 'PASS'
@@ -610,6 +622,30 @@ module test
 
       write (*, '(A)', advance='no') 'test[5]: '
       if (f /= 0.0_real64) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      fails = 0_int64
+      do i = 1, numel
+
+        if (spheres % x(i) < -lim .or. spheres % x(i) > +lim) then
+          fails = fails + 1_int64
+        end if
+
+        if (spheres % y(i) < -lim .or. spheres % y(i) > +lim) then
+          fails = fails + 1_int64
+        end if
+
+        if (spheres % z(i) < -lim .or. spheres % z(i) > +lim) then
+          fails = fails + 1_int64
+        end if
+
+      end do
+
+      write (*, '(A)', advance='no') 'test[6]: '
+      if (fails /= 0_int64) then
         print '(A)', 'FAIL'
       else
         print '(A)', 'PASS'
