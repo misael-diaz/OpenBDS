@@ -7,6 +7,22 @@
 
 sphere_t* create ()
 {
+  // sane checks:
+
+  size_t const len = LENGTH;
+  // defines the number of spheres that fit (at contact) along any dimension (x, y, or z)
+  size_t const count = (len / 2);
+  size_t const count3 = (count * count * count);
+  // informs the user that the particle insertion scheme (grid-based) would fail
+  if (NUM_SPHERES > count3)
+  {
+    printf("create(): it is impossible to fit %d spheres in the system ", NUM_SPHERES);
+    printf("without incurring in overlaps; increase the system length\n");
+    return NULL;
+  }
+
+  // memory allocations:
+
   size_t const size_x = SIZE;
   size_t const size_y = SIZE;
   size_t const size_z = SIZE;
@@ -60,6 +76,8 @@ sphere_t* create ()
     printf("create(): failed to allocate memory for the sphere data type\n");
     return NULL;
   }
+
+  // initializations:
 
   spheres -> data = data;
   data = NULL;
@@ -120,6 +138,8 @@ sphere_t* create ()
   zeros(size_tmp, tmp);
   iota(size_list, list);
   iota(size_id, id);
+
+  grid(x, y, z);		// places particles at grid locations
 
   return spheres;
 }
