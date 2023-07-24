@@ -84,7 +84,7 @@ sphere_t* create ()
   double* t_y = spheres -> t_y;
   double* t_z = spheres -> t_z;
   double* list = spheres -> list;
-  double* id = spheres -> id;
+  int64_t* id = spheres -> id;
 
   zeros(size_x, x);
   zeros(size_y, y);

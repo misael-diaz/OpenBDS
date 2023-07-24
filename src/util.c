@@ -59,12 +59,11 @@ void zeros (size_t const size, double* x)
 }
 
 
-void iota (size_t const size, double* x)
+void iota (size_t const size, int64_t* x)
 {
   for (size_t i = 0; i != size; ++i)
   {
-    double const id = i;
-    x[i] = id;
+    x[i] = i;
   }
 }
 
