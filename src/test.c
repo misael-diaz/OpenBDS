@@ -20,6 +20,7 @@ void test_partition_masking();
 void test_unlimited_masking();
 void test_pbc();
 void test_list();
+void test_overlap();
 
 int main ()
 {
@@ -28,6 +29,7 @@ int main ()
   test_unlimited_masking();
   test_pbc();
   test_list();
+  test_overlap();
   return 0;
 }
 
@@ -356,6 +358,302 @@ void test_list ()
   else
   {
     printf("PASS\n");
+  }
+}
+
+
+// checks for particles overlapping with their images
+size_t overlap (const double* x,
+	      const double* y,
+	      const double* z,
+	      double const offset_x,
+	      double const offset_y,
+	      double const offset_z)
+{
+  size_t overlaps = 0;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const r_x = (x[j] + offset_x);
+      double const r_y = (y[j] + offset_y);
+      double const r_z = (z[j] + offset_z);
+      double const d_x = (x[i] - r_x);
+      double const d_y = (y[i] - r_y);
+      double const d_z = (z[i] - r_z);
+      // computes the squared distance of the pair for speed
+      double const d = (d_x * d_x) + (d_y * d_y) + (d_z * d_z);
+
+      size_t const contact = 4.0;
+      if (d < contact)
+      {
+	++overlaps;
+      }
+    }
+  }
+
+  return overlaps;
+}
+
+
+// checks if the particle-insertion algorithm (grid-based) produces overlaps
+void test_overlap ()
+{
+  // the system is cubic so we need only worry about one dimension only
+  size_t const len = LENGTH;
+  // defines the number of spheres that fit at contact along any dimension
+  size_t const count = (len / 2);
+  size_t const count2 = (count * count);
+  size_t const count3 = (count * count * count);
+
+  // informs the user if it is impossible (with the current scheme) to allocate the
+  // spheres in contact with one another in the space (volume) that the system has
+  if (NUM_SPHERES > count3)
+  {
+    printf("overlap(): it is impossible to fit %d spheres in the system", NUM_SPHERES);
+    return;
+  }
+
+  double pos[count];
+  // defines the contact position of the spheres along any dimension
+  for (size_t i = 0; i != count; ++i)
+  {
+    pos[i] = 1.0 + 2.0 * ( (double) i );
+  }
+
+  double x[NUM_SPHERES];
+  double y[NUM_SPHERES];
+  double z[NUM_SPHERES];
+  for (size_t n = 0; n != NUM_SPHERES; ++n)
+  {
+    size_t const i = (n % count);
+    x[n] = pos[i];
+  }
+
+  for (size_t n = 0; n != NUM_SPHERES; ++n)
+  {
+    size_t const j = (n % count2) / count;
+    y[n] = pos[j];
+  }
+
+  for (size_t n = 0; n != NUM_SPHERES; ++n)
+  {
+    size_t const k = (n / count2);
+    z[n] = pos[k];
+  }
+
+  // check for overlaps (we expect none):
+
+  size_t overlaps = 0;
+  for (size_t i = 0; i != (NUM_SPHERES - 1); ++i)
+  {
+    for (size_t j = (i + 1); j != NUM_SPHERES; ++j)
+    {
+      double const d_x = (x[i] - x[j]);
+      double const d_y = (y[i] - y[j]);
+      double const d_z = (z[i] - z[j]);
+      // computes the squared distance of the pair for speed
+      double const d = (d_x * d_x) + (d_y * d_y) + (d_z * d_z);
+
+      size_t const contact = 4.0;
+      if (d < contact)
+      {
+	++overlaps;
+      }
+    }
+  }
+
+  // checks for overlaps with the images (accounts for the periodicity of the system):
+
+  double offset_x = 0.0;
+  double offset_y = 0.0;
+  double offset_z = 0.0;
+
+  offset_x = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_y = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_y = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_z = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_z = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+
+  // checks even the less likely images:
+
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = -LENGTH;
+  offset_y = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = -LENGTH;
+  offset_y = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = +LENGTH;
+  offset_y = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = +LENGTH;
+  offset_y = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = -LENGTH;
+  offset_y = -LENGTH;
+  offset_z = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = -LENGTH;
+  offset_y = +LENGTH;
+  offset_z = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = +LENGTH;
+  offset_y = -LENGTH;
+  offset_z = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = +LENGTH;
+  offset_y = +LENGTH;
+  offset_z = -LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = -LENGTH;
+  offset_y = -LENGTH;
+  offset_z = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = -LENGTH;
+  offset_y = +LENGTH;
+  offset_z = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = 0.0;
+  offset_y = 0.0;
+  offset_z = 0.0;
+
+  offset_x = +LENGTH;
+  offset_y = -LENGTH;
+  offset_z = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+  offset_x = +LENGTH;
+  offset_y = +LENGTH;
+  offset_z = +LENGTH;
+  overlaps += overlap(x, y, z, offset_x, offset_y, offset_z);
+
+
+  printf("overlap-test[0]: ");
+  if (overlaps != 0)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+
+  // shift the particles so that their coordinates are in the range [-LIMIT, LIMIT]
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    x[i] -= LIMIT;
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    y[i] -= LIMIT;
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    z[i] -= LIMIT;
+  }
+
+
+  // checks that there are no particles beyond the system limits:
+
+
+  size_t fails = 0;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    if (x[i] < -LIMIT || x[i] > +LIMIT)
+    {
+      ++fails;
+    }
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    if (y[i] < -LIMIT || y[i] > +LIMIT)
+    {
+      ++fails;
+    }
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    if (z[i] < -LIMIT || z[i] > +LIMIT)
+    {
+      ++fails;
+    }
+  }
+
+
+  printf("overlap-test[1]: ");
+  if (overlaps != 0)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+
+  // uncomment if you wish to look at the coordinates
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    //printf("%+e %+e %+e\n", x[i], y[i], z[i]);
   }
 }
 
