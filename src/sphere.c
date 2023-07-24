@@ -22,6 +22,7 @@ sphere_t* create ()
   size_t const size_t_x = SIZE;
   size_t const size_t_y = SIZE;
   size_t const size_t_z = SIZE;
+  size_t const size_tmp = SIZE;
   size_t const size_list = SIZE;
   size_t const size_id = SIZE;
   size_t const size_data = size_x +
@@ -39,6 +40,7 @@ sphere_t* create ()
 			     size_t_x +
 			     size_t_y +
 			     size_t_z +
+			     size_tmp +
 			     size_list +
 			     size_id;
 
@@ -77,7 +79,8 @@ sphere_t* create ()
   spheres -> t_x = spheres -> f_z + size_f_z;
   spheres -> t_y = spheres -> t_x + size_t_x;
   spheres -> t_z = spheres -> t_y + size_t_y;
-  spheres -> list = spheres -> t_z + size_t_z;
+  spheres -> tmp = spheres -> t_z + size_t_z;
+  spheres -> list = spheres -> tmp + size_tmp;
   spheres -> id = spheres -> list + size_list;
 
   double* x = spheres -> x;
@@ -95,6 +98,7 @@ sphere_t* create ()
   double* t_x = spheres -> t_x;
   double* t_y = spheres -> t_y;
   double* t_z = spheres -> t_z;
+  double* tmp = spheres -> tmp;
   double* list = spheres -> list;
   int64_t* id = spheres -> id;
 
@@ -113,6 +117,7 @@ sphere_t* create ()
   zeros(size_t_x, t_x);
   zeros(size_t_y, t_y);
   zeros(size_t_z, t_z);
+  zeros(size_tmp, tmp);
   zeros(size_list, list);
   iota(size_id, id);
 

@@ -25,6 +25,8 @@ typedef struct
   double* t_x;
   double* t_y;
   double* t_z;
+  // array temporary (general purpose, usage example: MSD computation):
+  double* tmp;
   // neighbor-list
   double* list;
   // identifier:
