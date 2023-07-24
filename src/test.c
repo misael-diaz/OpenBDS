@@ -19,6 +19,7 @@ void test_init();
 void test_partition_masking();
 void test_unlimited_masking();
 void test_pbc();
+void test_list();
 
 int main ()
 {
@@ -26,6 +27,7 @@ int main ()
   test_partition_masking();
   test_unlimited_masking();
   test_pbc();
+  test_list();
   return 0;
 }
 
@@ -255,6 +257,109 @@ void test_pbc ()
 }
 
 
+// test the neighbor-list generator (see comments at the end of the source code)
+void test_list ()
+{
+  // x-axis coordinates of the particles (assumes a 1D system for simplicity)
+  const double x[] = {	// here we assume an interaction range of 1.0
+    0.0,		// does not interact with other particles (others are too far)
+    2.0,		// interacts with the next particle
+    3.0,		// does not interact with other particles other than the previous
+    7.0,		// interacts with the next two particles (see comments at the end)
+    8.0,		// interacts with the next and the previous particle
+    9.0,		// does not interact with other particles other than the previous
+    16.0		// does not interact with other particles
+    // Note: interactions with previous particles are implied by Newton's third law
+  };
+
+  size_t const N = ( sizeof(x) / sizeof(double) );	// gets the number of particles
+
+  // initializes the neighbor-list (assumes the particles to be too far to interact):
+
+  int64_t list[N];
+  for (size_t i = 0; i != N; ++i)
+  {
+    list[i] = -1;
+  }
+
+  // generates the neighbor-list (a list that links interacting pairs) with brute force:
+
+  for (size_t i = 0; i != (N - 1); ++i)
+  {
+    for (size_t j = (i + 1); j != N; ++j)
+    {
+      double const d = (x[i] - x[j]) * (x[i] - x[j]);
+      // the interaction range has been selected arbitrarily for the sake of this test;
+      // this will depend on the type of interaction in the actual BDS code
+      bool const interacting = (d <= 1.0);
+      if (interacting)
+      {
+	list[i] = j;
+	break;
+      }
+    }
+  }
+
+  // initializes the count of jth particles that interact with the ith particle to zero:
+
+  int64_t count[N];
+  for (size_t i = 0; i != N; ++i)
+  {
+    count[i] = 0;
+  }
+
+  // traverses the neighbor-list to check for its correctness:
+
+  for (size_t i = 0; i != (N - 1); ++i)
+  {
+    // if the ith particle is not interacting there's nothing to do so consider the next
+    bool const not_interacting = (list[i] == -1);
+    if (not_interacting)
+    {
+      continue;
+    }
+
+    // we have asserted that the ith particle interacts with at least one other particle
+    for (size_t j = (i + 1); j != N; ++j)
+    {
+      // increments the number of jth particles that interact with the ith particle
+      ++count[i];
+
+      // if the jth particle does not interact with other particles, we are done
+      bool const not_interacting = (list[j] == -1);
+      if (not_interacting)
+      {
+	break;
+      }
+    }
+  }
+
+  // counts the number of failures:
+
+  size_t fails = 0;
+  for (size_t i = 0; i != N; ++i)
+  {
+    // gets the index of the last particle that interacts with the ith particle
+    int64_t const idx = (i + count[i]);
+    // increment the failures counter if that's not the case
+    if (list[idx] != -1)
+    {
+      ++fails;
+    }
+  }
+
+  printf("list-test[0]: ");
+  if (fails != 0)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+}
+
+
 /*
 
 OpenBDS								July 19, 2023
@@ -276,3 +381,17 @@ References:
 [2] S Kim and S Karrila, Microhydrodynamics: Principles and Selected Applications.
 
 */
+
+
+// COMMENTS:
+//
+// Neighbor-List:
+// The used neighbor list is efficient for dilute and semi-dilute systems where only
+// a few pairs (or perhaps a triplet) are interacting. For denser systems the list will
+// include (nearly all if not) all the particles even if there are pairs that are actually
+// too far to be really interacting. This is the case because of the `implied assumption'
+// that the ith particle interacts will all the neighbors of the jth particle. I might
+// add other more efficient algorithms (with their respective data structures) later.
+//
+// Note that the test does not take into account the periodic boundaries for simplicity;
+// later I shall add more tests that take this into consideration.
