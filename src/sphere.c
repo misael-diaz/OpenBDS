@@ -99,7 +99,7 @@ sphere_t* create ()
   double* t_y = spheres -> t_y;
   double* t_z = spheres -> t_z;
   double* tmp = spheres -> tmp;
-  double* list = spheres -> list;
+  int64_t* list = spheres -> list;
   int64_t* id = spheres -> id;
 
   zeros(size_x, x);
@@ -118,7 +118,7 @@ sphere_t* create ()
   zeros(size_t_y, t_y);
   zeros(size_t_z, t_z);
   zeros(size_tmp, tmp);
-  zeros(size_list, list);
+  iota(size_list, list);
   iota(size_id, id);
 
   return spheres;

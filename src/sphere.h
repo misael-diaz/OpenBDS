@@ -27,8 +27,8 @@ typedef struct
   double* t_z;
   // array temporary (general purpose, usage example: MSD computation):
   double* tmp;
-  // neighbor-list
-  double* list;
+  // neighbor-list:
+  int64_t* list;
   // identifier:
   int64_t* id;
   // container (this is what we allocate on the heap memory, the rest are just pointers)

@@ -263,7 +263,7 @@ module bds
     real(kind = real64), pointer, contiguous :: t_y(:) => null()
     real(kind = real64), pointer, contiguous :: t_z(:) => null()
     real(kind = real64), pointer, contiguous :: tmp(:) => null()
-    real(kind = real64), pointer, contiguous :: list(:) => null()
+    integer(kind = int64), pointer, contiguous :: list(:) => null()
     integer(kind = int64), pointer, contiguous :: id(:) => null()
   end type
 
@@ -605,7 +605,7 @@ module test
       end if
 
       do i = 1, numel
-        f = f + spheres % list(i)
+        f = f + real(spheres % list(i) - (i - 1), kind = real64)
       end do
 
       write (*, '(A)', advance='no') 'test[5]: '
@@ -668,7 +668,7 @@ module test
       real(kind = real64), pointer, contiguous :: t_y(:) => null()
       real(kind = real64), pointer, contiguous :: t_z(:) => null()
       real(kind = real64), pointer, contiguous :: tmp(:) => null()
-      real(kind = real64), pointer, contiguous :: list(:) => null()
+      integer(kind = int64), pointer, contiguous :: list(:) => null()
 
       c_spheres = c_create()
 
@@ -746,7 +746,7 @@ module test
       real(kind = real64), pointer, contiguous :: t_y(:) => null()
       real(kind = real64), pointer, contiguous :: t_z(:) => null()
       real(kind = real64), pointer, contiguous :: tmp(:) => null()
-      real(kind = real64), pointer, contiguous :: list(:) => null()
+      integer(kind = int64), pointer, contiguous :: list(:) => null()
 
       c_spheres = c_create()
 
