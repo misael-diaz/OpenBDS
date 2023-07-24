@@ -23,7 +23,7 @@ from numpy import loadtxt
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 
-t, msd = loadtxt('msd.txt').transpose()
+t, msd = loadtxt('msd_linear.txt').transpose()
 
 plt.close('all')
 plt.ion()
@@ -31,6 +31,16 @@ fig, ax = plt.subplots()
 ax.loglog(t, 2 * t, linestyle='--', color='black', label='theory')
 ax.loglog(t, msd, linestyle='-', color='red', label='bds')
 ax.set_title('Mean Squared Displacement MSD of Brownian Spheres')
+ax.set_xlabel('time')
+ax.set_ylabel('MSD')
+ax.legend()
+
+t, msd = loadtxt('msd_angular.txt').transpose()
+
+fig, ax = plt.subplots()
+ax.loglog(t, 1.5 * t, linestyle='--', color='black', label='theory')
+ax.loglog(t, msd, linestyle='-', color='red', label='bds')
+ax.set_title('Mean Squared Rotational Displacement MSD of Brownian Spheres')
 ax.set_xlabel('time')
 ax.set_ylabel('MSD')
 ax.legend()

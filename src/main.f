@@ -30,6 +30,7 @@
 
 #include "system.h"
 #define DEBUG .true.
+#define ARGS x, y, z, r_x, r_y, r_z, a_x, a_y, a_z, f_x, f_y, f_z, t_x, t_y, t_z, list
 
 module param
   use, intrinsic :: iso_fortran_env, only: real64
@@ -98,13 +99,19 @@ module dynamic
   private
   save
 
-  public :: dynamic_stochastic_update
+  public :: dynamic_linear_stochastic_update
+  public :: dynamic_angular_stochastic_update
 
-  interface dynamic_stochastic_update
-    module procedure stochastic_update
+  interface dynamic_linear_stochastic_update
+    module procedure linear_stochastic_update
   end interface
 
-  real(kind = real64), parameter :: mobility_sphere = dsqrt(2.0_real64 * dt)
+  interface dynamic_angular_stochastic_update
+    module procedure angular_stochastic_update
+  end interface
+
+  real(kind = real64), parameter :: mobility_sphere_linear = dsqrt(2.0_real64 * dt)
+  real(kind = real64), parameter :: mobility_sphere_angular = dsqrt(1.5_real64 * dt)
 
   contains
 
@@ -122,17 +129,17 @@ module dynamic
       return
     end subroutine stochastic_force
 
-    subroutine stochastic_displ (x, f_x)
+    subroutine linear_stochastic_displ (x, f_x)
       ! displaces the spheres (along some axis) due to the (respective) stochastic forces
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
       real(kind = real64), dimension(NUM_SPHERES), intent(in) :: f_x
 
-      x = x + mobility_sphere * f_x
+      x = x + mobility_sphere_linear * f_x
 
       return
-    end subroutine stochastic_displ
+    end subroutine linear_stochastic_displ
 
-    subroutine stochastic_update (x, y, z, r_x, r_y, r_z, f_x, f_y, f_z)
+    subroutine linear_stochastic_update (x, y, z, r_x, r_y, r_z, f_x, f_y, f_z)
       ! updates the positions of the spheres by the action of to the stochastic forces
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
@@ -148,16 +155,45 @@ module dynamic
       call stochastic_force(f_y)
       call stochastic_force(f_z)
 
-      call stochastic_displ(x, f_x)
-      call stochastic_displ(y, f_y)
-      call stochastic_displ(z, f_z)
+      call linear_stochastic_displ(x, f_x)
+      call linear_stochastic_displ(y, f_y)
+      call linear_stochastic_displ(z, f_z)
 
-      call stochastic_displ(r_x, f_x)
-      call stochastic_displ(r_y, f_y)
-      call stochastic_displ(r_z, f_z)
+      call linear_stochastic_displ(r_x, f_x)
+      call linear_stochastic_displ(r_y, f_y)
+      call linear_stochastic_displ(r_z, f_z)
 
       return
-    end subroutine stochastic_update
+    end subroutine linear_stochastic_update
+
+    subroutine angular_stochastic_displ (a_x, t_x)
+      ! shifts the spheres orientation owing to the stochastic torque acting on them
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: a_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(in) :: t_x
+
+      a_x = a_x + mobility_sphere_angular * t_x
+
+      return
+    end subroutine angular_stochastic_displ
+
+    subroutine angular_stochastic_update (a_x, a_y, a_z, t_x, t_y, t_z)
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: a_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: a_y
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: a_z
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_y
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_z
+
+      call stochastic_force(t_x)
+      call stochastic_force(t_y)
+      call stochastic_force(t_z)
+
+      call angular_stochastic_displ(a_x, t_x)
+      call angular_stochastic_displ(a_y, t_y)
+      call angular_stochastic_displ(a_z, t_z)
+
+      return
+    end subroutine angular_stochastic_update
 
 end module dynamic
 
@@ -166,7 +202,8 @@ module bds
   use, intrinsic :: iso_fortran_env, only: real64
   use, intrinsic :: iso_fortran_env, only: int64
   use :: param, only: dt => param_dt
-  use :: dynamic, only: dynamic_stochastic_update
+  use :: dynamic, only: dynamic_linear_stochastic_update
+  use :: dynamic, only: dynamic_angular_stochastic_update
   implicit none
   private
   save
@@ -194,6 +231,9 @@ module bds
     type(c_ptr) :: r_x
     type(c_ptr) :: r_y
     type(c_ptr) :: r_z
+    type(c_ptr) :: a_x
+    type(c_ptr) :: a_y
+    type(c_ptr) :: a_z
     type(c_ptr) :: f_x
     type(c_ptr) :: f_y
     type(c_ptr) :: f_z
@@ -212,6 +252,9 @@ module bds
     real(kind = real64), pointer, contiguous :: r_x(:) => null()
     real(kind = real64), pointer, contiguous :: r_y(:) => null()
     real(kind = real64), pointer, contiguous :: r_z(:) => null()
+    real(kind = real64), pointer, contiguous :: a_x(:) => null()
+    real(kind = real64), pointer, contiguous :: a_y(:) => null()
+    real(kind = real64), pointer, contiguous :: a_z(:) => null()
     real(kind = real64), pointer, contiguous :: f_x(:) => null()
     real(kind = real64), pointer, contiguous :: f_y(:) => null()
     real(kind = real64), pointer, contiguous :: f_z(:) => null()
@@ -257,7 +300,7 @@ module bds
 
   contains
 
-    subroutine integrator (x, y, z, r_x, r_y, r_z, f_x, f_y, f_z, t_x, t_y, t_z, list)
+    subroutine integrator (ARGS)
       ! implements Euler's forward integration method, updates the position vectors
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: x
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: y
@@ -265,6 +308,9 @@ module bds
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_x
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_y
       real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: r_z
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: a_x
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: a_y
+      real(kind = real64), dimension(NUM_SPHERES), intent(inout) :: a_z
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_x
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_y
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: f_z
@@ -273,31 +319,47 @@ module bds
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_z
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: list
       real(kind = real64), parameter :: lim = real(LIMIT, kind = real64)
-      real(kind = real64) :: msd
+      real(kind = real64) :: msd_linear
+      real(kind = real64) :: msd_angular
       real(kind = real64) :: time
       integer(kind = int64) :: fails
-      integer(kind = int64) :: funit
+      integer(kind = int64) :: funit_msd_linear
+      integer(kind = int64) :: funit_msd_angular
       integer(kind = int64) :: stat
       integer(kind = int64) :: step
       integer(kind = int64) :: i
-      character(*), parameter :: fname = 'msd.txt'
+      character(*), parameter :: fname_msd_linear  = 'msd_linear.txt'
+      character(*), parameter :: fname_msd_angular = 'msd_angular.txt'
       character(*), parameter :: fmt = '(SP,2E32.15)'
 
-      open(newunit = funit, file = fname, action = 'write', iostat = stat)
+      open(newunit = funit_msd_linear, file = fname_msd_linear, action = 'write',&
+          &iostat = stat)
       if (stat /= 0_int64) then
+        print *, 'IO ERROR with file ', fname_msd_linear
+        return
+      end if
+
+      open(newunit = funit_msd_angular, file = fname_msd_angular, action = 'write',&
+          &iostat = stat)
+      if (stat /= 0_int64) then
+        close(funit_msd_linear)
+        print *, 'IO ERROR with file ', fname_msd_angular
         return
       end if
 
       step = 0_int64
       fails = 0_int64
-      msd = 0.0_real64
+      msd_linear = 0.0_real64
+      msd_angular = 0.0_real64
       do while (step /= NUM_STEPS)
+
+        ! updates position vector:
 
         t_x = r_x
         t_y = r_y
         t_z = r_z
 
-        call dynamic_stochastic_update(x, y, z, r_x, r_y, r_z, f_x, f_y, f_z)
+        call dynamic_linear_stochastic_update(x, y, z, r_x, r_y, r_z, f_x, f_y, f_z)
 
         f_x = r_x
         f_y = r_y
@@ -305,12 +367,34 @@ module bds
 
         list = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
 
-        ! on-the-fly computation of the MSD
-        msd = msd + ( sum(list) / real(3 * NUM_SPHERES, kind = real64) )
+        ! on-the-fly computation of the linear MSD
+        msd_linear = msd_linear + ( sum(list) / real(3 * NUM_SPHERES, kind = real64) )
 
         if (mod(step + 1_int64, 16_int64) == 0_int64) then
           time = real(step + 1_int64, kind = real64) * dt
-          write (funit, fmt) time, msd
+          write (funit_msd_linear, fmt) time, msd_linear
+        end if
+
+        ! updates angular vector (or Euler angles):
+
+        f_x = a_x
+        f_y = a_y
+        f_z = a_z
+
+        call dynamic_angular_stochastic_update(a_x, a_y, a_z, t_x, t_y, t_z)
+
+        t_x = a_x
+        t_y = a_y
+        t_z = a_z
+
+        list = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
+
+        ! on-the-fly computation of the angular MSD
+        msd_angular = msd_angular + ( sum(list) / real(3 * NUM_SPHERES, kind = real64) )
+
+        if (mod(step + 1_int64, 16_int64) == 0_int64) then
+          time = real(step + 1_int64, kind = real64) * dt
+          write (funit_msd_angular, fmt) time, msd_angular
         end if
 
         ! applies periodic boundary conditions (note: the force is an array temporary):
@@ -351,7 +435,8 @@ module bds
         print '(A)', 'PASS'
       end if
 
-      close(funit)
+      close(funit_msd_linear)
+      close(funit_msd_angular)
 
       return
     end subroutine integrator
@@ -571,6 +656,9 @@ module test
       real(kind = real64), pointer, contiguous :: r_x(:) => null()
       real(kind = real64), pointer, contiguous :: r_y(:) => null()
       real(kind = real64), pointer, contiguous :: r_z(:) => null()
+      real(kind = real64), pointer, contiguous :: a_x(:) => null()
+      real(kind = real64), pointer, contiguous :: a_y(:) => null()
+      real(kind = real64), pointer, contiguous :: a_z(:) => null()
       real(kind = real64), pointer, contiguous :: f_x(:) => null()
       real(kind = real64), pointer, contiguous :: f_y(:) => null()
       real(kind = real64), pointer, contiguous :: f_z(:) => null()
@@ -588,6 +676,9 @@ module test
       call c_f_pointer(ptr_c_spheres % r_x, spheres % r_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % r_y, spheres % r_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % r_z, spheres % r_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % a_x, spheres % a_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % a_y, spheres % a_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % a_z, spheres % a_z, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
@@ -605,6 +696,10 @@ module test
       r_y => spheres % r_y
       r_z => spheres % r_z
 
+      a_x => spheres % a_x
+      a_y => spheres % a_y
+      a_z => spheres % a_z
+
       f_x => spheres % f_x
       f_y => spheres % f_y
       f_z => spheres % f_z
@@ -615,7 +710,7 @@ module test
 
       list => spheres % list
 
-      call integrator(x, y, z, r_x, r_y, r_z, f_x, f_y, f_z, t_x, t_y, t_z, list)
+      call integrator(ARGS)
 
       c_spheres = c_destroy(c_spheres)
 
@@ -635,6 +730,9 @@ module test
       real(kind = real64), pointer, contiguous :: r_x(:) => null()
       real(kind = real64), pointer, contiguous :: r_y(:) => null()
       real(kind = real64), pointer, contiguous :: r_z(:) => null()
+      real(kind = real64), pointer, contiguous :: a_x(:) => null()
+      real(kind = real64), pointer, contiguous :: a_y(:) => null()
+      real(kind = real64), pointer, contiguous :: a_z(:) => null()
       real(kind = real64), pointer, contiguous :: f_x(:) => null()
       real(kind = real64), pointer, contiguous :: f_y(:) => null()
       real(kind = real64), pointer, contiguous :: f_z(:) => null()
@@ -652,6 +750,9 @@ module test
       call c_f_pointer(ptr_c_spheres % r_x, spheres % r_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % r_y, spheres % r_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % r_z, spheres % r_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % a_x, spheres % a_x, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % a_y, spheres % a_y, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % a_z, spheres % a_z, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_x, spheres % f_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_y, spheres % f_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % f_z, spheres % f_z, [NUM_SPHERES])
@@ -668,6 +769,10 @@ module test
       r_x => spheres % r_x
       r_y => spheres % r_y
       r_z => spheres % r_z
+
+      a_x => spheres % a_x
+      a_y => spheres % a_y
+      a_z => spheres % a_z
 
       f_x => spheres % f_x
       f_y => spheres % f_y
@@ -689,7 +794,7 @@ module test
       r_y = real(LIMIT, kind = real64)
       r_z = real(LIMIT, kind = real64)
 
-      call integrator(x, y, z, r_x, r_y, r_z, f_x, f_y, f_z, t_x, t_y, t_z, list)
+      call integrator(ARGS)
 
       c_spheres = c_destroy(c_spheres)
 
