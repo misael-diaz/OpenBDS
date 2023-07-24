@@ -1,6 +1,8 @@
 #ifndef GUARD_OPENBDS_SPHERE_H
 #define GUARD_OPENBDS_SPHERE_H
 
+#include <stdint.h>
+
 typedef struct
 {
   // position subject to periodic boundaries:
@@ -22,7 +24,7 @@ typedef struct
   // neighbor-list
   double* list;
   // identifier:
-  double* id;
+  int64_t* id;
   // container (this is what we allocate on the heap memory, the rest are just pointers)
   double* data;
 } sphere_t;

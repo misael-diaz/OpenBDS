@@ -35,10 +35,10 @@ void test_init ()
   sphere_t* spheres = create();
 
   size_t const size = SIZE;
-  const double* id = spheres -> id;
+  const int64_t* id = spheres -> id;
   for (size_t i = 0; i != size; ++i)
   {
-    printf("id: %.0f \n", id[i]);
+    printf("id: %ld \n", id[i]);
   }
 
   double f = 0;

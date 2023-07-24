@@ -219,7 +219,7 @@ module bds
     real(kind = real64), pointer, contiguous :: t_y(:) => null()
     real(kind = real64), pointer, contiguous :: t_z(:) => null()
     real(kind = real64), pointer, contiguous :: list(:) => null()
-    real(kind = real64), pointer, contiguous :: id(:) => null()
+    integer(kind = int64), pointer, contiguous :: id(:) => null()
   end type
 
   ! defines interfaces to memory handling functions:
@@ -462,11 +462,7 @@ module test
 
       ! checks the data (in an aggregate sense) against the expected values:
 
-      num = 0_int64
-      do i = 1, numel
-        num = num + int(spheres % id(i), kind=int64)
-      end do
-
+      num = sum(spheres % id)
       write (*, '(A)', advance='no') 'test[0]: '
       if (num /= NUM_SPHERES * (NUM_SPHERES - 1) / 2) then
         print '(A)', 'FAIL'
