@@ -30,7 +30,7 @@
 
 #include "system.h"
 #define DEBUG .true.
-#define ARGS x, y, z, r_x, r_y, r_z, a_x, a_y, a_z, f_x, f_y, f_z, t_x, t_y, t_z, list
+#define ARGS x, y, z, r_x, r_y, r_z, a_x, a_y, a_z, f_x, f_y, f_z, t_x, t_y, t_z, tmp
 
 module param
   use, intrinsic :: iso_fortran_env, only: real64
@@ -240,6 +240,7 @@ module bds
     type(c_ptr) :: t_x
     type(c_ptr) :: t_y
     type(c_ptr) :: t_z
+    type(c_ptr) :: tmp
     type(c_ptr) :: list
     type(c_ptr) :: id
     type(c_ptr) :: data
@@ -261,6 +262,7 @@ module bds
     real(kind = real64), pointer, contiguous :: t_x(:) => null()
     real(kind = real64), pointer, contiguous :: t_y(:) => null()
     real(kind = real64), pointer, contiguous :: t_z(:) => null()
+    real(kind = real64), pointer, contiguous :: tmp(:) => null()
     real(kind = real64), pointer, contiguous :: list(:) => null()
     integer(kind = int64), pointer, contiguous :: id(:) => null()
   end type
@@ -317,7 +319,7 @@ module bds
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_x
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_y
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_z
-      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: list
+      real(kind = real64), dimension(NUM_SPHERES), intent(out) :: tmp
       real(kind = real64), parameter :: lim = real(LIMIT, kind = real64)
       real(kind = real64) :: msd_linear
       real(kind = real64) :: msd_angular
@@ -365,10 +367,10 @@ module bds
         f_y = r_y
         f_z = r_z
 
-        list = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
+        tmp = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
 
         ! on-the-fly computation of the linear MSD
-        msd_linear = msd_linear + ( sum(list) / real(3 * NUM_SPHERES, kind = real64) )
+        msd_linear = msd_linear + ( sum(tmp) / real(3 * NUM_SPHERES, kind = real64) )
 
         if (mod(step + 1_int64, 16_int64) == 0_int64) then
           time = real(step + 1_int64, kind = real64) * dt
@@ -387,10 +389,10 @@ module bds
         t_y = a_y
         t_z = a_z
 
-        list = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
+        tmp = (f_x - t_x)**2 + (f_y - t_y)**2 + (f_z - t_z)**2
 
         ! on-the-fly computation of the angular MSD
-        msd_angular = msd_angular + ( sum(list) / real(3 * NUM_SPHERES, kind = real64) )
+        msd_angular = msd_angular + ( sum(tmp) / real(3 * NUM_SPHERES, kind = real64) )
 
         if (mod(step + 1_int64, 16_int64) == 0_int64) then
           time = real(step + 1_int64, kind = real64) * dt
@@ -665,6 +667,7 @@ module test
       real(kind = real64), pointer, contiguous :: t_x(:) => null()
       real(kind = real64), pointer, contiguous :: t_y(:) => null()
       real(kind = real64), pointer, contiguous :: t_z(:) => null()
+      real(kind = real64), pointer, contiguous :: tmp(:) => null()
       real(kind = real64), pointer, contiguous :: list(:) => null()
 
       c_spheres = c_create()
@@ -685,6 +688,7 @@ module test
       call c_f_pointer(ptr_c_spheres % t_x, spheres % t_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % t_y, spheres % t_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % t_z, spheres % t_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % tmp, spheres % tmp, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % list, spheres % list, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % id, spheres % id, [NUM_SPHERES])
 
@@ -707,6 +711,8 @@ module test
       t_x => spheres % t_x
       t_y => spheres % t_y
       t_z => spheres % t_z
+
+      tmp => spheres % tmp
 
       list => spheres % list
 
@@ -739,6 +745,7 @@ module test
       real(kind = real64), pointer, contiguous :: t_x(:) => null()
       real(kind = real64), pointer, contiguous :: t_y(:) => null()
       real(kind = real64), pointer, contiguous :: t_z(:) => null()
+      real(kind = real64), pointer, contiguous :: tmp(:) => null()
       real(kind = real64), pointer, contiguous :: list(:) => null()
 
       c_spheres = c_create()
@@ -759,6 +766,7 @@ module test
       call c_f_pointer(ptr_c_spheres % t_x, spheres % t_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % t_y, spheres % t_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % t_z, spheres % t_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % tmp, spheres % tmp, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % list, spheres % list, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % id, spheres % id, [NUM_SPHERES])
 
@@ -781,6 +789,8 @@ module test
       t_x => spheres % t_x
       t_y => spheres % t_y
       t_z => spheres % t_z
+
+      tmp => spheres % tmp
 
       list => spheres % list
 
