@@ -391,16 +391,7 @@ void list(int64_t* restrict list,
 
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
-    for (size_t j = 0; j != i; ++j)
-    {
-      bool const linked = link(i, j, list, x, y, z);
-      if (linked)
-      {
-	break;
-      }
-    }
-
-    for (size_t j = (i + 1); j != NUM_SPHERES; ++j)
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
     {
       bool const linked = link(i, j, list, x, y, z);
       if (linked)
