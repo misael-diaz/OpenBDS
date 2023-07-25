@@ -499,6 +499,17 @@ module test
     end function
   end interface
 
+  interface
+    subroutine c_list (list, x, y, z) bind(c, name = 'list')
+      use, intrinsic :: iso_c_binding, only: c_double
+      use, intrinsic :: iso_c_binding, only: c_int64_t
+      integer(kind = c_int64_t), dimension(NUM_SPHERES), intent(out) :: list
+      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: x
+      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: y
+      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: z
+    end subroutine
+  end interface
+
   interface test_init
     module procedure initialization
   end interface
@@ -535,12 +546,20 @@ module test
       ! FORTRAN pointer for binding to the C pointer
       type(c_sphere_t), pointer :: ptr_c_spheres => null()
       ! with this we get access to the data from FORTRAN
-      type(f_sphere_t) :: spheres
+      type(f_sphere_t), target :: spheres
+
+      real(kind = real64), pointer, contiguous :: x(:) => null()
+      real(kind = real64), pointer, contiguous :: y(:) => null()
+      real(kind = real64), pointer, contiguous :: z(:) => null()
+      integer(kind = int64), pointer, contiguous :: list(:) => null()
 
       real(kind = real64) :: f              ! accumulator for floating-point numbers
+      logical(kind = int64) :: found        ! true when found, false otherwise
       integer(kind = int64) :: fails        ! counts number of particles beyond limits
       integer(kind = int64) :: overlaps     ! counts number of overlapping particles
+      integer(kind = int64) :: iter         ! iterator
       integer(kind = int64) :: num          ! accumulator for integral numbers
+      integer(kind = int64) :: tgt          ! target element
       integer(kind = int64) :: i            ! counter (or index)
 
       c_spheres = c_create()
@@ -645,6 +664,81 @@ module test
       end do
 
       write (*, '(A)', advance='no') 'test[6]: '
+      if (fails /= 0_int64) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      x => spheres % x
+      y => spheres % y
+      z => spheres % z
+
+      list => spheres % list
+
+      call c_list(list, x, y, z)
+
+      ! checks that all particles are interacting with one another, in such case the last
+      ! particle is the tail of the list and its stored value should be -1 to indicate
+      ! that the first element is the head of the list
+      write (*, '(A)', advance='no') 'test[7]: '
+      if (list(256) /= -1_int64) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      ! performs a linear search for all the particles but the list head (or root)
+
+      fails = 0_int64
+      do tgt = 1, numel - 1
+
+        found = .false.
+        do i = 1, numel - 1
+
+          if (tgt == list(i)) then
+            found = .true.
+            exit
+          end if
+
+        end do
+
+        if (.not. found) then
+          fails = fails + 1_int64
+        end if
+
+      end do
+
+      write (*, '(A)', advance='no') 'test[8]: '
+      if (fails /= 0_int64) then
+        print '(A)', 'FAIL'
+      else
+        print '(A)', 'PASS'
+      end if
+
+      ! list traversal test, all paths must lead to the tail
+
+      fails = 0_int64
+      do i = 1, numel
+
+        num = 0_int64
+        iter = list(i)
+        do while (iter >= 0)
+
+          ! the tail must be found (at most) after traversing (numel - 1) elements;
+          ! thus, this while-loop codeblock should not execute when num == (numel - 1)
+          if (num == numel - 1) then
+            fails = fails + 1_int64
+            exit
+          end if
+
+          iter = list(iter + 1) ! Note: list is a zero-starting array in C
+          num = num + 1_int64
+        end do
+
+      end do
+
+      write (*, '(A)', advance='no') 'test[9]: '
       if (fails /= 0_int64) then
         print '(A)', 'FAIL'
       else
