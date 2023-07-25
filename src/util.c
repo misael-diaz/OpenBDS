@@ -295,6 +295,123 @@ int64_t overlaps (const double* restrict x,
 }
 
 
+// returns the index of the head node (or root) given the ith node index
+static int64_t head (const int64_t* list, int64_t const i)
+{
+  int64_t tail = i;
+  while (tail >= 0)
+  {
+    tail = list[tail];
+  }
+
+  size_t const head = -(tail + 1);
+  return head;
+}
+
+
+// returns the index of the tail node given the ith node index
+static int64_t tail (const int64_t* list, int64_t const i)
+{
+  if (i < 0)
+  {
+    // return the node itself for it is unlinked to other nodes
+    return -(i + 1);
+  }
+
+  int64_t tail = i;
+  int64_t last = tail;
+  while (tail >= 0)
+  {
+    last = tail;
+    tail = list[tail];
+  }
+
+  return last;
+}
+
+
+static bool link (int64_t const i,
+		  int64_t const j,
+		  int64_t* restrict list,
+		  const double* restrict x,
+		  const double* restrict y,
+		  const double* restrict z)
+{
+  int64_t const root_i = head(list, i);
+  int64_t const root_j = head(list, j);
+  // returns if the i and j nodes are already linked, for there's nothing to do
+  if (root_i == root_j)
+  {
+    return false;
+  }
+
+  // checks if the particles interact with one another:
+
+  bool linked = false;
+  double const d_x = (x[i] - x[j]);
+  double const d_y = (y[i] - y[j]);
+  double const d_z = (z[i] - z[j]);
+  double const d = d_x * d_x + d_y * d_y + d_z * d_z;
+
+  if (d <= RANGE)
+  {
+    // merge the "clusters" by hierarchy (lowest rank has the highest hierarchy):
+
+    int64_t const leaf_i = tail(list, i);
+    int64_t const leaf_j = tail(list, j);
+
+    if (root_i < root_j)
+    {
+      list[leaf_i] = root_j;
+      list[leaf_j] = -(root_i + 1);
+    }
+    else
+    {
+      list[leaf_j] = root_i;
+      list[leaf_i] = -(root_j + 1);
+    }
+
+    linked = true;
+  }
+
+  return linked;
+}
+
+
+// generates the neighbor-list
+void list(int64_t* restrict list,
+	  const double* restrict x,
+	  const double* restrict y,
+	  const double* restrict z)
+{
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    list[i] = -(i + 1);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    for (size_t j = 0; j != i; ++j)
+    {
+      bool const linked = link(i, j, list, x, y, z);
+      if (linked)
+      {
+	break;
+      }
+    }
+
+    for (size_t j = (i + 1); j != NUM_SPHERES; ++j)
+    {
+      bool const linked = link(i, j, list, x, y, z);
+      if (linked)
+      {
+	break;
+      }
+    }
+  }
+}
+
+
 // void mask_partition (size_t size, double* x, double* mask)
 //
 // Synopsis:

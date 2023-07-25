@@ -9,6 +9,18 @@ sphere_t* create ()
 {
   // sane checks:
 
+  if (NUM_SPHERES == 0x7fffffffffffffff)
+  {
+    printf("create(): reserved value\n");
+    return NULL;
+  }
+
+  if (NUM_SPHERES % 2)
+  {
+    printf("create(): number of spheres must be even\n");
+    return NULL;
+  }
+
   size_t const len = LENGTH;
   // defines the number of spheres that fit (at contact) along any dimension (x, y, or z)
   size_t const count = (len / 2);
