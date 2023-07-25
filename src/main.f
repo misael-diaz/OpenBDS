@@ -626,7 +626,11 @@ module test
         print '(A)', 'PASS'
       end if
 
-      overlaps = c_overlaps(spheres % x, spheres % y, spheres % z)
+      x => spheres % x
+      y => spheres % y
+      z => spheres % z
+
+      overlaps = c_overlaps(x, y, z)
 
       write (*, '(A)', advance='no') 'test[4]: '
       if (overlaps /= 0_int64) then
@@ -669,10 +673,6 @@ module test
       else
         print '(A)', 'PASS'
       end if
-
-      x => spheres % x
-      y => spheres % y
-      z => spheres % z
 
       list => spheres % list
 
