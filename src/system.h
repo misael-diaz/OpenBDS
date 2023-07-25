@@ -6,6 +6,9 @@
 #define TIME_STEP 1.52587890625e-05
 #define LIMIT 8.0
 #define LENGTH (2.0 * LIMIT)
+#define RADIUS 1.0
+#define CONTACT (2.0 * RADIUS)
+#define RANGE ( (1.5 * CONTACT) * (1.5 * CONTACT) )
 
 #endif
 
