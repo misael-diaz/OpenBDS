@@ -333,9 +333,7 @@ static int64_t tail (const int64_t* list, int64_t const i)
 static bool link (int64_t const i,
 		  int64_t const j,
 		  int64_t* restrict list,
-		  const double* restrict x,
-		  const double* restrict y,
-		  const double* restrict z)
+		  double const d)
 {
   int64_t const root_i = head(list, i);
   int64_t const root_j = head(list, j);
@@ -348,10 +346,6 @@ static bool link (int64_t const i,
   // checks if the particles interact with one another:
 
   bool linked = false;
-  double const d_x = (x[i] - x[j]);
-  double const d_y = (y[i] - y[j]);
-  double const d_z = (z[i] - z[j]);
-  double const d = d_x * d_x + d_y * d_y + d_z * d_z;
 
   if (d <= RANGE)
   {
@@ -380,6 +374,7 @@ static bool link (int64_t const i,
 
 // generates the neighbor-list
 void list(int64_t* restrict list,
+	  double* restrict d,
 	  const double* restrict x,
 	  const double* restrict y,
 	  const double* restrict z)
@@ -393,7 +388,15 @@ void list(int64_t* restrict list,
   {
     for (size_t j = 0; j != NUM_SPHERES; ++j)
     {
-      bool const linked = link(i, j, list, x, y, z);
+      d[j] = (x[i] - x[j]) * (x[i] - x[j]) +
+	     (y[i] - y[j]) * (y[i] - y[j]) +
+	     (z[i] - z[j]) * (z[i] - z[j]);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      bool const linked = link(i, j, list, dist);
       if (linked)
       {
 	break;
