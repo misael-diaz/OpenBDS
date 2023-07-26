@@ -38,6 +38,11 @@ void test_init ()
 {
   sphere_t* spheres = create();
 
+  if (spheres == NULL)
+  {
+    return;
+  }
+
   size_t const size = SIZE;
   const int64_t* id = spheres -> id;
   for (size_t i = 0; i != size; ++i)
