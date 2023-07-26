@@ -415,7 +415,7 @@ void test_overlap ()
   // spheres in contact with one another in the space (volume) that the system has
   if (NUM_SPHERES > count3)
   {
-    printf("overlap(): it is impossible to fit %d spheres in the system", NUM_SPHERES);
+    printf("overlap(): it is impossible to fit %d spheres in the system\n", NUM_SPHERES);
     return;
   }
 
