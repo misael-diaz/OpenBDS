@@ -31,4 +31,6 @@ void list(int64_t* restrict list,
 	  const double* restrict x,
 	  const double* restrict y,
 	  const double* restrict z);
+
+int64_t clusters (const int64_t* restrict list, double* restrict mask);
 #endif
