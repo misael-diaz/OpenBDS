@@ -296,7 +296,7 @@ int64_t overlaps (const double* restrict x,
 
 
 // returns the index of the head node (or root) given the ith node index
-static int64_t head (const int64_t* list, int64_t const i)
+int64_t head (const int64_t* list, int64_t const i)
 {
   int64_t tail = i;
   while (tail >= 0)
@@ -408,6 +408,180 @@ void list(int64_t* restrict list,
       bool const linked = link(i, j, list, dist);
       // if the pair was linked we continue with the next ith particle, for each particle
       // can only be linked to just one other jth particle; otherwise we keep looking
+      if (linked)
+      {
+	break;
+      }
+    }
+
+    double offset_x = 0.0;
+    double offset_y = 0.0;
+    double offset_z = 0.0;
+
+    offset_x = -LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	     (y_i - y_j) * (y_i - y_j) +
+	     (z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      bool const linked = link(i, j, list, dist);
+      if (linked)
+      {
+	break;
+      }
+    }
+
+    offset_x = 0.0;
+    offset_y = 0.0;
+    offset_z = 0.0;
+
+    offset_x = +LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	     (y_i - y_j) * (y_i - y_j) +
+	     (z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      bool const linked = link(i, j, list, dist);
+      if (linked)
+      {
+	break;
+      }
+    }
+
+    offset_x = 0.0;
+    offset_y = 0.0;
+    offset_z = 0.0;
+
+    offset_y = -LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	     (y_i - y_j) * (y_i - y_j) +
+	     (z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      bool const linked = link(i, j, list, dist);
+      if (linked)
+      {
+	break;
+      }
+    }
+
+    offset_x = 0.0;
+    offset_y = 0.0;
+    offset_z = 0.0;
+
+    offset_y = +LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	     (y_i - y_j) * (y_i - y_j) +
+	     (z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      bool const linked = link(i, j, list, dist);
+      if (linked)
+      {
+	break;
+      }
+    }
+
+    offset_x = 0.0;
+    offset_y = 0.0;
+    offset_z = 0.0;
+
+    offset_z = -LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	     (y_i - y_j) * (y_i - y_j) +
+	     (z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      bool const linked = link(i, j, list, dist);
+      if (linked)
+      {
+	break;
+      }
+    }
+
+    offset_x = 0.0;
+    offset_y = 0.0;
+    offset_z = 0.0;
+
+    offset_z = +LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	     (y_i - y_j) * (y_i - y_j) +
+	     (z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      bool const linked = link(i, j, list, dist);
       if (linked)
       {
 	break;

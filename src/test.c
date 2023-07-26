@@ -733,6 +733,253 @@ void test_list2()
     printf("PASS\n");
   }
 
+  // generates the neighbor-list:
+
+  int64_t nlist[NUM_SPHERES];
+  list(nlist, d, x, y, z);
+
+  // checks if there are interacting spheres missing (or unlinked) in the neighbor-list:
+
+  count = 0;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      d[j] = (x[i] - x[j]) * (x[i] - x[j]) +
+	     (y[i] - y[j]) * (y[i] - y[j]) +
+	     (z[i] - z[j]) * (z[i] - z[j]);
+    }
+
+    int64_t const root_i = head(nlist, i);
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      int64_t const root_j = head(nlist, j);
+      bool const interacting = (dist <= RANGE);
+      bool const unlinked = (root_i != root_j);
+      if (interacting && unlinked)
+      {
+	++count;
+      }
+    }
+  }
+
+  printf("list-test[2]: ");
+  if (count != 0)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  count = 0;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double offset_x = 0.0;
+    double offset_y = 0.0;
+    double offset_z = 0.0;
+
+    offset_x = -LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	(y_i - y_j) * (y_i - y_j) +
+	(z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      int64_t const root_i = head(nlist, i);
+      int64_t const root_j = head(nlist, j);
+      bool const interacting = (dist <= RANGE);
+      bool const unlinked = (root_i != root_j);
+      if (interacting && unlinked)
+      {
+	++count;
+      }
+    }
+
+    offset_x = 0.0;
+    offset_y = 0.0;
+    offset_z = 0.0;
+
+    offset_x = +LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	(y_i - y_j) * (y_i - y_j) +
+	(z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      int64_t const root_i = head(nlist, i);
+      int64_t const root_j = head(nlist, j);
+      bool const interacting = (dist <= RANGE);
+      bool const unlinked = (root_i != root_j);
+      if (interacting && unlinked)
+      {
+	++count;
+      }
+    }
+
+    offset_x = 0.0;
+    offset_y = 0.0;
+    offset_z = 0.0;
+
+    offset_y = -LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	(y_i - y_j) * (y_i - y_j) +
+	(z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      int64_t const root_i = head(nlist, i);
+      int64_t const root_j = head(nlist, j);
+      bool const interacting = (dist <= RANGE);
+      bool const unlinked = (root_i != root_j);
+      if (interacting && unlinked)
+      {
+	++count;
+      }
+    }
+
+    offset_x = 0.0;
+    offset_y = 0.0;
+    offset_z = 0.0;
+
+    offset_y = +LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	(y_i - y_j) * (y_i - y_j) +
+	(z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      int64_t const root_i = head(nlist, i);
+      int64_t const root_j = head(nlist, j);
+      bool const interacting = (dist <= RANGE);
+      bool const unlinked = (root_i != root_j);
+      if (interacting && unlinked)
+      {
+	++count;
+      }
+    }
+
+    offset_x = 0.0;
+    offset_y = 0.0;
+    offset_z = 0.0;
+
+    offset_z = -LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	(y_i - y_j) * (y_i - y_j) +
+	(z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      int64_t const root_i = head(nlist, i);
+      int64_t const root_j = head(nlist, j);
+      bool const interacting = (dist <= RANGE);
+      bool const unlinked = (root_i != root_j);
+      if (interacting && unlinked)
+      {
+	++count;
+      }
+    }
+
+    offset_x = 0.0;
+    offset_y = 0.0;
+    offset_z = 0.0;
+
+    offset_z = +LENGTH;
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const x_i = x[i];
+      double const y_i = y[i];
+      double const z_i = z[i];
+
+      double const x_j = (x[j] + offset_x);
+      double const y_j = (y[j] + offset_y);
+      double const z_j = (z[j] + offset_z);
+      d[j] = (x_i - x_j) * (x_i - x_j) +
+	(y_i - y_j) * (y_i - y_j) +
+	(z_i - z_j) * (z_i - z_j);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      int64_t const root_i = head(nlist, i);
+      int64_t const root_j = head(nlist, j);
+      bool const interacting = (dist <= RANGE);
+      bool const unlinked = (root_i != root_j);
+      if (interacting && unlinked)
+      {
+	++count;
+      }
+    }
+  }
+
+  printf("list-test[3]: ");
+  if (count != 0)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
   fclose(file);
 }
 

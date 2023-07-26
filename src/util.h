@@ -33,4 +33,5 @@ void list(int64_t* restrict list,
 	  const double* restrict z);
 
 int64_t clusters (const int64_t* restrict list, double* restrict mask);
+int64_t head (const int64_t* list, int64_t const i);
 #endif
