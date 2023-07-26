@@ -27,6 +27,7 @@ int64_t overlaps (const double* restrict x,
 		  const double* restrict z);
 
 void list(int64_t* restrict list,
+	  double* restrict d,
 	  const double* restrict x,
 	  const double* restrict y,
 	  const double* restrict z);

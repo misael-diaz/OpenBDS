@@ -500,10 +500,11 @@ module test
   end interface
 
   interface
-    subroutine c_list (list, x, y, z) bind(c, name = 'list')
+    subroutine c_list (list, dist, x, y, z) bind(c, name = 'list')
       use, intrinsic :: iso_c_binding, only: c_double
       use, intrinsic :: iso_c_binding, only: c_int64_t
       integer(kind = c_int64_t), dimension(NUM_SPHERES), intent(out) :: list
+      real(kind = c_double), dimension(NUM_SPHERES), intent(out) :: dist
       real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: x
       real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: y
       real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: z
@@ -551,6 +552,7 @@ module test
       real(kind = real64), pointer, contiguous :: x(:) => null()
       real(kind = real64), pointer, contiguous :: y(:) => null()
       real(kind = real64), pointer, contiguous :: z(:) => null()
+      real(kind = real64), pointer, contiguous :: dist(:) => null()
       integer(kind = int64), pointer, contiguous :: list(:) => null()
 
       real(kind = real64) :: f              ! accumulator for floating-point numbers
@@ -577,6 +579,7 @@ module test
       call c_f_pointer(ptr_c_spheres % t_x, spheres % t_x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % t_y, spheres % t_y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % t_z, spheres % t_z, [NUM_SPHERES])
+      call c_f_pointer(ptr_c_spheres % tmp, spheres % tmp, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % list, spheres % list, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % id, spheres % id, [NUM_SPHERES])
 
@@ -674,9 +677,10 @@ module test
         print '(A)', 'PASS'
       end if
 
+      dist => spheres % tmp
       list => spheres % list
 
-      call c_list(list, x, y, z)
+      call c_list(list, dist, x, y, z)
 
       ! checks that all particles are interacting with one another, in such case the last
       ! particle is the tail of the list and its stored value should be -1 to indicate

@@ -330,43 +330,41 @@ static int64_t tail (const int64_t* list, int64_t const i)
 }
 
 
+// links "clusters" of particles if the ith and jth particles interact with one another
+// note that the "clusters" could each contain a single particle or several
 static bool link (int64_t const i,
 		  int64_t const j,
 		  int64_t* restrict list,
-		  const double* restrict x,
-		  const double* restrict y,
-		  const double* restrict z)
+		  double const d)
 {
   int64_t const root_i = head(list, i);
   int64_t const root_j = head(list, j);
-  // returns if the i and j nodes are already linked, for there's nothing to do
+  // returns false if the i and j nodes are already linked, for there's nothing to do
   if (root_i == root_j)
   {
     return false;
   }
 
-  // checks if the particles interact with one another:
+  // checks if the pair of particles interacts with one another:
 
   bool linked = false;
-  double const d_x = (x[i] - x[j]);
-  double const d_y = (y[i] - y[j]);
-  double const d_z = (z[i] - z[j]);
-  double const d = d_x * d_x + d_y * d_y + d_z * d_z;
 
   if (d <= RANGE)
   {
-    // merge the "clusters" by hierarchy (lowest rank has the highest hierarchy):
+    // merges the "clusters" by hierarchy (lowest rank has the highest hierarchy):
 
     int64_t const leaf_i = tail(list, i);
     int64_t const leaf_j = tail(list, j);
 
     if (root_i < root_j)
     {
+      // nests the (high rank) jth "cluster" under the (low rank) ith "cluster"
       list[leaf_i] = root_j;
       list[leaf_j] = -(root_i + 1);
     }
     else
     {
+      // nests the (high rank) ith "cluster" under the (low rank) jth "cluster"
       list[leaf_j] = root_i;
       list[leaf_i] = -(root_j + 1);
     }
@@ -380,29 +378,36 @@ static bool link (int64_t const i,
 
 // generates the neighbor-list
 void list(int64_t* restrict list,
+	  double* restrict d,
 	  const double* restrict x,
 	  const double* restrict y,
 	  const double* restrict z)
 {
+  // initializes the linked-list array so that each node is a root:
+
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     list[i] = -(i + 1);
   }
 
+  // generates the initial list of neighbors without considering the periodic boundaries:
+
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
-    for (size_t j = 0; j != i; ++j)
+    // vectorizable by GCC, calculates the (squared) interpaticle distance for speed
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
     {
-      bool const linked = link(i, j, list, x, y, z);
-      if (linked)
-      {
-	break;
-      }
+      d[j] = (x[i] - x[j]) * (x[i] - x[j]) +
+	     (y[i] - y[j]) * (y[i] - y[j]) +
+	     (z[i] - z[j]) * (z[i] - z[j]);
     }
 
-    for (size_t j = (i + 1); j != NUM_SPHERES; ++j)
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
     {
-      bool const linked = link(i, j, list, x, y, z);
+      double const dist = d[j];
+      bool const linked = link(i, j, list, dist);
+      // if the pair was linked we continue with the next ith particle, for each particle
+      // can only be linked to just one other jth particle; otherwise we keep looking
       if (linked)
       {
 	break;
