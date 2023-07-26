@@ -29,7 +29,9 @@
 !
 
 #include "system.h"
+#define LOG .false.
 #define DEBUG .true.
+#define VERBOSE .true.
 #define ARGS x, y, z, r_x, r_y, r_z, a_x, a_y, a_z, f_x, f_y, f_z, t_x, t_y, t_z, tmp
 
 module param
@@ -334,19 +336,24 @@ module bds
       character(*), parameter :: fname_msd_angular = 'msd_angular.txt'
       character(*), parameter :: fmt = '(SP,2E32.15)'
 
-      open(newunit = funit_msd_linear, file = fname_msd_linear, action = 'write',&
-          &iostat = stat)
-      if (stat /= 0_int64) then
-        print *, 'IO ERROR with file ', fname_msd_linear
-        return
-      end if
 
-      open(newunit = funit_msd_angular, file = fname_msd_angular, action = 'write',&
-          &iostat = stat)
-      if (stat /= 0_int64) then
-        close(funit_msd_linear)
-        print *, 'IO ERROR with file ', fname_msd_angular
-        return
+      if (LOG) then
+
+        open(newunit = funit_msd_linear, file = fname_msd_linear, action = 'write',&
+            &iostat = stat)
+        if (stat /= 0_int64) then
+          print *, 'IO ERROR with file ', fname_msd_linear
+          return
+        end if
+
+        open(newunit = funit_msd_angular, file = fname_msd_angular, action = 'write',&
+            &iostat = stat)
+        if (stat /= 0_int64) then
+          close(funit_msd_linear)
+          print *, 'IO ERROR with file ', fname_msd_angular
+          return
+        end if
+
       end if
 
       step = 0_int64
@@ -372,9 +379,13 @@ module bds
         ! on-the-fly computation of the linear MSD
         msd_linear = msd_linear + ( sum(tmp) / real(3 * NUM_SPHERES, kind = real64) )
 
-        if (mod(step + 1_int64, 16_int64) == 0_int64) then
-          time = real(step + 1_int64, kind = real64) * dt
-          write (funit_msd_linear, fmt) time, msd_linear
+        if (LOG) then
+
+          if (mod(step + 1_int64, 16_int64) == 0_int64) then
+            time = real(step + 1_int64, kind = real64) * dt
+            write (funit_msd_linear, fmt) time, msd_linear
+          end if
+
         end if
 
         ! updates angular vector (or Euler angles):
@@ -394,9 +405,13 @@ module bds
         ! on-the-fly computation of the angular MSD
         msd_angular = msd_angular + ( sum(tmp) / real(3 * NUM_SPHERES, kind = real64) )
 
-        if (mod(step + 1_int64, 16_int64) == 0_int64) then
-          time = real(step + 1_int64, kind = real64) * dt
-          write (funit_msd_angular, fmt) time, msd_angular
+        if (LOG) then
+
+          if (mod(step + 1_int64, 16_int64) == 0_int64) then
+            time = real(step + 1_int64, kind = real64) * dt
+            write (funit_msd_angular, fmt) time, msd_angular
+          end if
+
         end if
 
         ! applies periodic boundary conditions (note: the force is an array temporary):
@@ -430,15 +445,23 @@ module bds
         step = step + 1_int64
       end do
 
-      write (*, '(A)', advance='no') 'pbc-test[0]: '
-      if (fails /= 0) then
-        print '(A)', 'FAIL'
-      else
-        print '(A)', 'PASS'
+      if (DEBUG) then
+
+        write (*, '(A)', advance='no') 'pbc-test[0]: '
+        if (fails /= 0) then
+          print '(A)', 'FAIL'
+        else
+          print '(A)', 'PASS'
+        end if
+
       end if
 
-      close(funit_msd_linear)
-      close(funit_msd_angular)
+      if (LOG) then
+
+        close(funit_msd_linear)
+        close(funit_msd_angular)
+
+      end if
 
       return
     end subroutine integrator
@@ -680,6 +703,15 @@ module test
         print '(A)', 'FAIL'
       else
         print '(A)', 'PASS'
+      end if
+
+
+      if (VERBOSE) then
+
+        print *, 'x_min: ', minval(x), 'x_max: ', maxval(x)
+        print *, 'y_min: ', minval(y), 'y_max: ', maxval(y)
+        print *, 'z_min: ', minval(z), 'z_max: ', maxval(z)
+
       end if
 
       dist => spheres % tmp
