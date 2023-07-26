@@ -464,7 +464,7 @@ void mask_partition(size_t const size,
 		    const double* restrict x,
 		    double* restrict mask)
 {
-  alias_t* fp = x;	// floating-point number fp
+  const alias_t* fp = x;// floating-point number fp
   alias_t* m = mask;	// bitmasks with respect to the x, y, or z-axis coordinates
   for (size_t i = 0; i != size; ++i)
   {
@@ -480,7 +480,7 @@ void mask_unlimited(size_t const size,
 		    double* restrict temp,
 		    double* restrict bitmask)
 {
-  alias_t* fp = x;
+  const alias_t* fp = x;
   alias_t* t = temp;
   // uses the binary representation of `x' to determine if abs(x) > 1.0
   for (size_t i = 0; i != size; ++i)
