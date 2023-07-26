@@ -812,6 +812,11 @@ module test
       c_spheres = c_create()
 
       call c_f_pointer(c_spheres, ptr_c_spheres)
+
+      if ( .not. associated(ptr_c_spheres) ) then
+        return
+      end if
+
       call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
@@ -890,6 +895,11 @@ module test
       c_spheres = c_create()
 
       call c_f_pointer(c_spheres, ptr_c_spheres)
+
+      if ( .not. associated(ptr_c_spheres) ) then
+        return
+      end if
+
       call c_f_pointer(ptr_c_spheres % x, spheres % x, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % y, spheres % y, [NUM_SPHERES])
       call c_f_pointer(ptr_c_spheres % z, spheres % z, [NUM_SPHERES])
