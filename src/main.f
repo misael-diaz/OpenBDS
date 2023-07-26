@@ -29,10 +29,10 @@
 !
 
 #include "system.h"
-#define LOG .false.
+#include "fmacros.h"
+#define LOG .true.
 #define DEBUG .true.
 #define VERBOSE .true.
-#define ARGS x, y, z, r_x, r_y, r_z, a_x, a_y, a_z, f_x, f_y, f_z, t_x, t_y, t_z, tmp
 
 module param
   use, intrinsic :: iso_fortran_env, only: real64
@@ -222,6 +222,7 @@ module bds
 
   ! methods:
 
+  public :: c_list
   public :: bds_integrator
 
   ! type definitions:
@@ -298,6 +299,28 @@ module bds
     end subroutine
   end interface
 
+  interface
+    subroutine c_list (list, dist, x, y, z) bind(c, name = 'list')
+      use, intrinsic :: iso_c_binding, only: c_double
+      use, intrinsic :: iso_c_binding, only: c_int64_t
+      integer(kind = c_int64_t), dimension(NUM_SPHERES), intent(out) :: list
+      real(kind = c_double), dimension(NUM_SPHERES), intent(out) :: dist
+      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: x
+      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: y
+      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: z
+    end subroutine
+  end interface
+
+  interface
+    function c_clusters (list, bitmask) bind(c, name = 'clusters') result(clusters)
+      use, intrinsic :: iso_c_binding, only: c_int64_t
+      use, intrinsic :: iso_c_binding, only: c_double
+      integer(kind = c_int64_t), dimension(NUM_SPHERES), intent(in) :: list
+      real(kind = c_double), dimension(NUM_SPHERES), intent(out) :: bitmask
+      integer(kind = c_int64_t) :: clusters
+    end function
+  end interface
+
   interface bds_integrator
     module procedure integrator
   end interface
@@ -322,16 +345,21 @@ module bds
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_y
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: t_z
       real(kind = real64), dimension(NUM_SPHERES), intent(out) :: tmp
+      integer(kind = int64), dimension(NUM_SPHERES), intent(out) :: list
       real(kind = real64), parameter :: lim = real(LIMIT, kind = real64)
       real(kind = real64) :: msd_linear
       real(kind = real64) :: msd_angular
       real(kind = real64) :: time
       integer(kind = int64) :: fails
+      integer(kind = int64) :: counter
+      integer(kind = int64) :: clusters
       integer(kind = int64) :: funit_msd_linear
       integer(kind = int64) :: funit_msd_angular
+      integer(kind = int64) :: funit_positions
       integer(kind = int64) :: stat
       integer(kind = int64) :: step
       integer(kind = int64) :: i
+      character(*), parameter :: fname_positions   = 'positions.txt'
       character(*), parameter :: fname_msd_linear  = 'msd_linear.txt'
       character(*), parameter :: fname_msd_angular = 'msd_angular.txt'
       character(*), parameter :: fmt = '(SP,2E32.15)'
@@ -351,6 +379,13 @@ module bds
         if (stat /= 0_int64) then
           close(funit_msd_linear)
           print *, 'IO ERROR with file ', fname_msd_angular
+          return
+        end if
+
+        open(newunit = funit_positions, file = fname_positions, action = 'write',&
+            &iostat = stat)
+        if (stat /= 0_int64) then
+          print *, 'IO ERROR with file ', fname_positions
           return
         end if
 
@@ -442,6 +477,38 @@ module bds
 
         end if
 
+        ! generates the neighbor-list:
+
+        call c_list(list, tmp, x, y, z)
+
+        if (DEBUG) then
+
+          clusters = c_clusters(list, tmp)
+
+          if (clusters /= 1_int64) then
+
+            if (counter == 0_int64) then
+
+              if (VERBOSE) then
+                print *, 'clusters: ', clusters
+              end if
+
+              if (LOG) then
+
+                do i = 1, NUM_SPHERES
+                  write (funit_positions, '(SP,3E32.15)') x(i), y(i), z(i)
+                end do
+
+              end if
+
+            end if
+
+            counter = counter + 1_int64
+
+          end if
+
+        end if
+
         step = step + 1_int64
       end do
 
@@ -460,6 +527,7 @@ module bds
 
         close(funit_msd_linear)
         close(funit_msd_angular)
+        close(funit_positions)
 
       end if
 
@@ -481,6 +549,7 @@ module test
   use :: bds, only: f_sphere_t
   use :: bds, only: c_destroy
   use :: bds, only: c_create
+  use :: bds, only: c_list
   use :: bds, only: integrator => bds_integrator
   implicit none
   private
@@ -520,18 +589,6 @@ module test
       real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: z
       integer(kind = c_int64_t) :: overlaps
     end function
-  end interface
-
-  interface
-    subroutine c_list (list, dist, x, y, z) bind(c, name = 'list')
-      use, intrinsic :: iso_c_binding, only: c_double
-      use, intrinsic :: iso_c_binding, only: c_int64_t
-      integer(kind = c_int64_t), dimension(NUM_SPHERES), intent(out) :: list
-      real(kind = c_double), dimension(NUM_SPHERES), intent(out) :: dist
-      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: x
-      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: y
-      real(kind = c_double), dimension(NUM_SPHERES), intent(in) :: z
-    end subroutine
   end interface
 
   interface test_init

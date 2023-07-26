@@ -20,6 +20,7 @@ void test_partition_masking();
 void test_unlimited_masking();
 void test_pbc();
 void test_list();
+void test_list2();
 void test_overlap();
 
 int main ()
@@ -29,6 +30,7 @@ int main ()
   test_unlimited_masking();
   test_pbc();
   test_list();
+  test_list2();
   test_overlap();
   return 0;
 }
@@ -660,6 +662,78 @@ void test_overlap ()
   {
     //printf("%+e %+e %+e\n", x[i], y[i], z[i]);
   }
+}
+
+
+void test_list2()
+{
+  const char fname[] = "positions.txt";
+  FILE* file = fopen(fname, "r");
+  if (file == NULL)
+  {
+    printf("IO ERROR with file: %s \n", fname);
+    return;
+  }
+
+  double data[4 * NUM_SPHERES];
+  double* x = data;
+  double* y = x + NUM_SPHERES;
+  double* z = y + NUM_SPHERES;
+  double* d = z + NUM_SPHERES;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    int const numit = fscanf(file, "%lf %lf %lf \n", x, y, z);
+    if (numit != 3)
+    {
+      fclose(file);
+      // an error could happen if the number of spheres does not match the number of lines
+      printf("test_list2(): unexpected IO Error with %s \n", fname);
+      return;
+    }
+    ++x;
+    ++y;
+    ++z;
+  }
+
+  x = data;
+  y = x + NUM_SPHERES;
+  z = y + NUM_SPHERES;
+
+  // counts the number of out-of-range (or non-interacting) spheres:
+
+  size_t count = 0;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      d[j] = (x[i] - x[j]) * (x[i] - x[j]) +
+	     (y[i] - y[j]) * (y[i] - y[j]) +
+	     (z[i] - z[j]) * (z[i] - z[j]);
+    }
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      double const dist = d[j];
+      if (dist > RANGE)
+      {
+	++count;
+      }
+    }
+  }
+
+  // `count' shouldn't be zero because the data (presumably) has more than one cluster:
+
+  printf("list-test[1]: ");
+  if (count == 0)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  fclose(file);
 }
 
 

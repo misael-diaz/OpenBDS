@@ -417,6 +417,31 @@ void list(int64_t* restrict list,
 }
 
 
+// counts the number of "clusters" in the system
+int64_t clusters (const int64_t* restrict list, double* restrict mask)
+{
+  typedef union
+  {
+    int64_t bin;
+    double data;
+  } alias_t;
+
+  alias_t* m = mask;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    m[i].bin = ( (list[i] & MSBMASK) >> 63 );
+  }
+
+  int64_t clusters = 0;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    clusters += m[i].bin;
+  }
+
+  return clusters;
+}
+
+
 // void mask_partition (size_t size, double* x, double* mask)
 //
 // Synopsis:
