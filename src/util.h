@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+void inrange (const double* restrict x, double* restrict mask, double* restrict bitmask);
+
 bool sign (double const x);
 void zeros (size_t const size, double* x);
 void grid (double* restrict x, double* restrict y, double* restrict z);
