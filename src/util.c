@@ -43,6 +43,48 @@ static uint64_t get_unlimited (uint64_t const x)
 }
 
 
+// yields one if abs(x) < 1, zero otherwise
+static uint64_t mask_inrange (uint64_t const x)
+{
+
+  uint64_t const m = ~(0x3ff);
+  // masks the "high" bits that characterize 64-bit floats with exponent n > 0:
+  uint64_t const hi =
+    ( ( ( ( ( ( (get_exp(x) & m) & 0x7ff ) + (m & 0x7ff) ) & 0x800 ) >> 11 ) + 1 ) & 1 );
+  // masks the "low" bits that characterize 64-bit floats with exponents n < 0:
+  uint64_t const lo =
+    ( ( ( ( ( (get_exp(x) & 0x3ff) ^ 0x3ff ) & 0x3ff ) + 0x3ff ) & 0x400 ) >> 10 );
+  // Note: there are 64-bit floats with "low" bits set with exponent n > 0, so we have to
+  // bitwise AND to make sure sure that the "high" bits are not set (that is, that x < 1).
+  return ( (hi & lo) );
+}
+
+
+// yields one if x != 0, zero otherwise
+static uint64_t mask_zero (uint64_t const x)
+{
+  return ( ( ( ( x & (~MSBMASK) ) + (~MSBMASK) ) & MSBMASK ) >> 63 );
+}
+
+
+// bitmasks interacting particles with ones, zeros otherwise
+void inrange (const double* restrict r, double* restrict mask, double* restrict bitmask)
+{
+  alias_t* m = mask;
+  const alias_t* fp = r;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    m[i].bin = twos_complement( mask_zero(fp[i].bin) );
+  }
+
+  alias_t* b = bitmask;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    b[i].bin = ( m[i].bin & twos_complement( mask_inrange(fp[i].bin) ) );
+  }
+}
+
+
 bool sign (double const x)
 {
   bool const ret = signbit(x);

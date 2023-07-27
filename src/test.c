@@ -22,6 +22,7 @@ void test_pbc();
 void test_list();
 void test_list2();
 void test_overlap();
+void test_inrange();
 
 int main ()
 {
@@ -32,6 +33,7 @@ int main ()
   test_list();
   test_list2();
   test_overlap();
+  test_inrange();
   return 0;
 }
 
@@ -971,6 +973,102 @@ void test_list2()
   }
 
   printf("list-test[3]: ");
+  if (count != 0)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  fclose(file);
+}
+
+
+void test_inrange ()
+{
+  const char fname[] = "positions.txt";
+  FILE* file = fopen(fname, "r");
+  if (file == NULL)
+  {
+    printf("IO ERROR with file: %s \n", fname);
+    return;
+  }
+
+  double data[6 * NUM_SPHERES];
+  double* x = data;		// x-position
+  double* y = x + NUM_SPHERES;	// y-position
+  double* z = y + NUM_SPHERES;	// z-position
+  double* d = z + NUM_SPHERES;	// interparticle distance
+  double* m = d + NUM_SPHERES;	// bitmask
+  double* t = m + NUM_SPHERES;	// temporary (placeholder for intermediate computations)
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    int const numit = fscanf(file, "%lf %lf %lf \n", x, y, z);
+    if (numit != 3)
+    {
+      fclose(file);
+      // an error could happen if the number of spheres does not match the number of lines
+      printf("test_list2(): unexpected IO Error with %s \n", fname);
+      return;
+    }
+    ++x;
+    ++y;
+    ++z;
+  }
+
+  x = data;
+  y = x + NUM_SPHERES;
+  z = y + NUM_SPHERES;
+
+  // counts the number of false positives (masked particles that do not really interact):
+
+  size_t count = 0;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+
+    // scales the (squared) separation distance of the pairs (an inrange() requirement):
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      d[j] = (x[i] - x[j]) * (x[i] - x[j]) +
+	     (y[i] - y[j]) * (y[i] - y[j]) +
+	     (z[i] - z[j]) * (z[i] - z[j]);
+
+      d[j] /= RANGE;
+    }
+
+    // generates bitmasks for the pairs (ones if interacting, zeros otherwise):
+
+    inrange(d, t, m);
+
+    for (size_t j = 0; j != NUM_SPHERES; ++j)
+    {
+      const alias_t* mask = m;
+      double const dist = d[j];
+      bool const not_interacting = (dist >= 1.0);
+      // checks if the pair is not interacting but inrange() says otherwise
+      if (not_interacting && mask[i].bin)
+      {
+	++count;
+      }
+
+      // checks if we are properly masking the particle itself to avert (future) NaNs
+      if (dist == 0 && mask[i].bin)
+      {
+	++count;
+      }
+
+      // checks if the distance is non-zero when the pair is the same particle
+      if (i == j && dist != 0)
+      {
+	++count;
+      }
+    }
+  }
+
+  printf("inrange-test[0]: ");
   if (count != 0)
   {
     printf("FAIL\n");
