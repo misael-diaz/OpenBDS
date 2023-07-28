@@ -132,24 +132,24 @@ sphere_t* create ()
   int64_t* list = spheres -> list;
   int64_t* id = spheres -> id;
 
-  zeros(size_x, x);
-  zeros(size_y, y);
-  zeros(size_z, z);
-  zeros(size_r_x, r_x);
-  zeros(size_r_y, r_y);
-  zeros(size_r_z, r_z);
-  zeros(size_a_x, a_x);
-  zeros(size_a_y, a_y);
-  zeros(size_a_z, a_z);
-  zeros(size_f_x, f_x);
-  zeros(size_f_y, f_y);
-  zeros(size_f_z, f_z);
-  zeros(size_t_x, t_x);
-  zeros(size_t_y, t_y);
-  zeros(size_t_z, t_z);
-  zeros(size_tmp, tmp);
-  iota(size_list, list);
-  iota(size_id, id);
+  zeros(x);
+  zeros(y);
+  zeros(z);
+  zeros(r_x);
+  zeros(r_y);
+  zeros(r_z);
+  zeros(a_x);
+  zeros(a_y);
+  zeros(a_z);
+  zeros(f_x);
+  zeros(f_y);
+  zeros(f_z);
+  zeros(t_x);
+  zeros(t_y);
+  zeros(t_z);
+  zeros(tmp);
+  iota(list);
+  iota(id);
 
   grid(x, y, z);		// places particles at grid locations
 

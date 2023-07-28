@@ -8,13 +8,12 @@
 void inrange (const double* restrict x, double* restrict mask, double* restrict bitmask);
 
 bool sign (double const x);
-void zeros (size_t const size, double* x);
+void zeros (double* x);
 void grid (double* restrict x, double* restrict y, double* restrict z);
-void iota (size_t const size, int64_t* x);
+void iota (int64_t* x);
 
-void mask_partition (size_t const size, const double* restrict x, double* restrict mask);
-void mask_unlimited (size_t const size,
-		     const double* restrict x,
+void mask_partition (const double* restrict x, double* restrict mask);
+void mask_unlimited (const double* restrict x,
 		     const double* restrict mask,
 		     double* restrict temp,
 		     double* restrict bitmask);
