@@ -92,18 +92,18 @@ bool sign (double const x)
 }
 
 
-void zeros (size_t const size, double* x)
+void zeros (double* x)
 {
-  for (size_t i = 0; i != size; ++i)
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     x[i] = 0.0;
   }
 }
 
 
-void iota (size_t const size, int64_t* x)
+void iota (int64_t* x)
 {
-  for (size_t i = 0; i != size; ++i)
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     x[i] = i;
   }
@@ -658,7 +658,7 @@ int64_t clusters (const int64_t* restrict list, double* restrict mask)
 }
 
 
-// void mask_partition (size_t size, double* x, double* mask)
+// void mask_partition (double* x, double* mask)
 //
 // Synopsis:
 // Vectorizable by GCC.
@@ -668,7 +668,6 @@ int64_t clusters (const int64_t* restrict list, double* restrict mask)
 // or 3D), for it only acts on one dimension at a time (and that's exactly what we need).
 //
 // Inputs:
-// size		number of elements of the arrays (both `x' and `mask')
 // x		either x, y, or z-axis coordinates of the particles
 //
 // Output:
@@ -676,13 +675,11 @@ int64_t clusters (const int64_t* restrict list, double* restrict mask)
 //		otherwise it is equal to the binary pattern of the BITMASK MACRO.
 
 
-void mask_partition(size_t const size,
-		    const double* restrict x,
-		    double* restrict mask)
+void mask_partition (const double* restrict x, double* restrict mask)
 {
   const alias_t* fp = x;// floating-point number fp
   alias_t* m = mask;	// bitmasks with respect to the x, y, or z-axis coordinates
-  for (size_t i = 0; i != size; ++i)
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     m[i].bin = twos_complement( get_msb(fp[i].bin) );
   }
@@ -690,8 +687,7 @@ void mask_partition(size_t const size,
 
 
 // analogous to mask_partition(), vectorizable by gcc
-void mask_unlimited(size_t const size,
-		    const double* restrict x,
+void mask_unlimited(const double* restrict x,
 		    const double* restrict mask,
 		    double* restrict temp,
 		    double* restrict bitmask)
@@ -699,7 +695,7 @@ void mask_unlimited(size_t const size,
   const alias_t* fp = x;
   alias_t* t = temp;
   // uses the binary representation of `x' to determine if abs(x) > 1.0
-  for (size_t i = 0; i != size; ++i)
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     t[i].bin = twos_complement( get_unlimited(fp[i].bin) );
   }
@@ -707,7 +703,7 @@ void mask_unlimited(size_t const size,
   const alias_t* m = mask;
   alias_t* b = bitmask;
   // masks unlimited particles whose x < -1.0 (x > +1.0):
-  for (size_t i = 0; i != size; ++i)
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     b[i].bin = (m[i].bin & t[i].bin);
   }
@@ -773,8 +769,8 @@ void pbc (double* restrict x,
 
   // applies periodic boundary conditions on the particles in the left partition:
 
-  mask_partition(NUM_SPHERES, x, mask);
-  mask_unlimited(NUM_SPHERES, x, mask, temp, bitmask);
+  mask_partition(x, mask);
+  mask_unlimited(x, mask, temp, bitmask);
   offset(+1.0, temp, bitmask);
   shift(x, temp);
 
@@ -792,7 +788,7 @@ void pbc (double* restrict x,
     m[i].bin = t[i].bin;
   }
 
-  mask_unlimited(NUM_SPHERES, x, mask, temp, bitmask);
+  mask_unlimited(x, mask, temp, bitmask);
   offset(-1.0, temp, bitmask);
   shift(x, temp);
 

@@ -103,7 +103,7 @@ void test_partition_masking ()
 
   // masks particles in the right partition so that we work on those in the left:
 
-  mask_partition(numel, x, mask);
+  mask_partition(x, mask);
 
   // counts the number of particles in the left partition to test the masking algorithm:
 
@@ -157,8 +157,8 @@ void test_unlimited_masking ()
 
   // masks particles in the right partition:
 
-  mask_partition(numel, x, mask);
-  mask_unlimited(numel, x, mask, temp, bitmask);
+  mask_partition(x, mask);
+  mask_unlimited(x, mask, temp, bitmask);
 
   // applies periodic boundary conditions (for particles whose x < -1.0):
 
@@ -183,7 +183,7 @@ void test_unlimited_masking ()
     m[i].bin = ~m[i].bin;
   }
 
-  mask_unlimited(numel, x, mask, temp, bitmask);
+  mask_unlimited(x, mask, temp, bitmask);
 
   l.data = -1.0;
   for (size_t i = 0; i != numel; ++i)
