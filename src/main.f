@@ -223,6 +223,7 @@ module bds
   ! methods:
 
   public :: c_list
+  public :: c_clusters
   public :: bds_integrator
 
   ! type definitions:
@@ -550,6 +551,7 @@ module test
   use :: bds, only: c_destroy
   use :: bds, only: c_create
   use :: bds, only: c_list
+  use :: bds, only: c_clusters
   use :: bds, only: integrator => bds_integrator
   implicit none
   private
@@ -633,6 +635,7 @@ module test
       real(kind = real64), pointer, contiguous :: y(:) => null()
       real(kind = real64), pointer, contiguous :: z(:) => null()
       real(kind = real64), pointer, contiguous :: dist(:) => null()
+      real(kind = real64), pointer, contiguous :: mask(:) => null()
       integer(kind = int64), pointer, contiguous :: list(:) => null()
 
       real(kind = real64) :: f              ! accumulator for floating-point numbers
@@ -772,15 +775,15 @@ module test
       end if
 
       dist => spheres % tmp
+      mask => spheres % t_x
       list => spheres % list
 
       call c_list(list, dist, x, y, z)
 
-      ! checks that all particles are interacting with one another, in such case the last
-      ! particle is the tail of the list and its stored value should be -1 to indicate
-      ! that the first element is the head of the list
+      ! checks that all particles are interacting with one another, in such case there's
+      ! only one cluster (of linked particles)
       write (*, '(A)', advance='no') 'test[7]: '
-      if (list(256) /= -1_int64) then
+      if (c_clusters(list, mask) /= 1_int64) then
         print '(A)', 'FAIL'
       else
         print '(A)', 'PASS'
@@ -792,7 +795,7 @@ module test
       do tgt = 1, numel - 1
 
         found = .false.
-        do i = 1, numel - 1
+        do i = 1, numel
 
           if (tgt == list(i)) then
             found = .true.
