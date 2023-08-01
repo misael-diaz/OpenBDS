@@ -27,6 +27,9 @@ typedef struct
   double* t_z;
   // array temporary (general purpose, usage example: MSD computation):
   double* tmp;
+  double* temp;
+  // bitmask:
+  double* mask;
   // neighbor-list:
   int64_t* list;
   // identifier:
