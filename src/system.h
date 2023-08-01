@@ -6,7 +6,8 @@
 #define LENGTH (2.0 * LIMIT)
 #define RADIUS 1.0
 #define CONTACT (2.0 * RADIUS)
-#define RANGE ( (1.5 * CONTACT) * (1.5 * CONTACT) )
+#define RANGE (1.5 * CONTACT)
+#define RANGE2 (RANGE * RANGE)
 
 #endif
 
