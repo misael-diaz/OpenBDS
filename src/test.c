@@ -716,7 +716,7 @@ void test_list2()
     for (size_t j = 0; j != NUM_SPHERES; ++j)
     {
       double const dist = d[j];
-      if (dist > RANGE)
+      if (dist > RANGE2)
       {
 	++count;
       }
@@ -757,7 +757,7 @@ void test_list2()
     {
       double const dist = d[j];
       int64_t const root_j = head(nlist, j);
-      bool const interacting = (dist <= RANGE);
+      bool const interacting = (dist <= RANGE2);
       bool const unlinked = (root_i != root_j);
       if (interacting && unlinked)
       {
@@ -803,7 +803,7 @@ void test_list2()
       double const dist = d[j];
       int64_t const root_i = head(nlist, i);
       int64_t const root_j = head(nlist, j);
-      bool const interacting = (dist <= RANGE);
+      bool const interacting = (dist <= RANGE2);
       bool const unlinked = (root_i != root_j);
       if (interacting && unlinked)
       {
@@ -835,7 +835,7 @@ void test_list2()
       double const dist = d[j];
       int64_t const root_i = head(nlist, i);
       int64_t const root_j = head(nlist, j);
-      bool const interacting = (dist <= RANGE);
+      bool const interacting = (dist <= RANGE2);
       bool const unlinked = (root_i != root_j);
       if (interacting && unlinked)
       {
@@ -867,7 +867,7 @@ void test_list2()
       double const dist = d[j];
       int64_t const root_i = head(nlist, i);
       int64_t const root_j = head(nlist, j);
-      bool const interacting = (dist <= RANGE);
+      bool const interacting = (dist <= RANGE2);
       bool const unlinked = (root_i != root_j);
       if (interacting && unlinked)
       {
@@ -899,7 +899,7 @@ void test_list2()
       double const dist = d[j];
       int64_t const root_i = head(nlist, i);
       int64_t const root_j = head(nlist, j);
-      bool const interacting = (dist <= RANGE);
+      bool const interacting = (dist <= RANGE2);
       bool const unlinked = (root_i != root_j);
       if (interacting && unlinked)
       {
@@ -931,7 +931,7 @@ void test_list2()
       double const dist = d[j];
       int64_t const root_i = head(nlist, i);
       int64_t const root_j = head(nlist, j);
-      bool const interacting = (dist <= RANGE);
+      bool const interacting = (dist <= RANGE2);
       bool const unlinked = (root_i != root_j);
       if (interacting && unlinked)
       {
@@ -963,7 +963,7 @@ void test_list2()
       double const dist = d[j];
       int64_t const root_i = head(nlist, i);
       int64_t const root_j = head(nlist, j);
-      bool const interacting = (dist <= RANGE);
+      bool const interacting = (dist <= RANGE2);
       bool const unlinked = (root_i != root_j);
       if (interacting && unlinked)
       {
@@ -1035,7 +1035,7 @@ void test_inrange ()
 	     (y[i] - y[j]) * (y[i] - y[j]) +
 	     (z[i] - z[j]) * (z[i] - z[j]);
 
-      d[j] /= RANGE;
+      d[j] /= RANGE2;
     }
 
     // generates bitmasks for the pairs (ones if interacting, zeros otherwise):
