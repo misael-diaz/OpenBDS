@@ -24,6 +24,7 @@ void test_list2();
 void test_overlap();
 void test_inrange();
 void test_force();
+void test_force2();
 void test_xorshift64();
 
 int main ()
@@ -37,6 +38,7 @@ int main ()
   test_overlap();
   test_inrange();
   test_force();
+  test_force2();
   test_xorshift64();
   return 0;
 }
@@ -1125,6 +1127,49 @@ void test_force ()
   {
     double const force = f[i] * d[i];
     printf("r: %e f: %+e \n", -d[i], force);
+  }
+}
+
+
+// checks that a pair of particles reach the equilibrium distance as time progresses,
+// the equilibrium distance is equal to the interaction range and it is approached
+// asymptotically
+void test_force2 ()
+{
+  // we need these arrays because the utilities expect arrays of size NUM_SPHERES
+  double x[NUM_SPHERES];		// position array
+  double r[NUM_SPHERES];		// placeholder
+  double f[NUM_SPHERES];		// force
+  double mask[NUM_SPHERES];		// placeholder for the bitmask
+
+  // sets the `fixed' particle at the origin along others which are not considered at all
+  zeros(x);
+  zeros(r);
+  zeros(f);
+  zeros(mask);
+
+  // sets the `free' particle at contact with the fixed particle
+  x[1] = CONTACT;
+
+  // updates the position of the `free' particle:
+
+  size_t const steps = 1048576;
+  double const dt = 1.52587890625e-05;
+  for (size_t step = 0; step != steps; ++step)
+  {
+    // gets the distance between the fixed and free particles
+    double const dist = (x[1] - x[0]);
+    // sets the distance in the designated placeholder
+    r[1] = dist;
+    force(r, f, mask);
+    // updates position of the `free' particle via Euler's method (force is f[1] * dist):
+    x[1] = x[1] + dt * (f[1] * dist);
+
+    if (step % (steps / 16) == 0)
+    {
+      // logs the position and the interaction force (shows expected behavior)
+      printf("x: %e f: %+e \n", x[1], (f[1] * dist));
+    }
   }
 }
 
