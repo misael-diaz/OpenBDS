@@ -19,14 +19,18 @@ FC = gfortran
 # clang compiler
 CC = gcc
 
-FCOPT = -O2 -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form
+FCOPT = -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form\
+	-ffree-line-length-none
+FCOPT = -O2 -mavx -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form\
+	-ffree-line-length-none
 FCOPT = -g -Wall -Wextra -Waliasing -Wsurprising -Warray-bounds -Warray-temporaries\
 	-Wcharacter-truncation -Wconversion-extra -Wimplicit-interface\
 	-Wimplicit-procedure -Wuse-without-only -Wrealloc-lhs -Wrealloc-lhs-all\
-	-fcheck=all -O0 -cpp -ffree-form
+	-fcheck=all -O0 -cpp -ffree-form -ffree-line-length-none
 
 # clang options
-CCOPT = -O2 -ftree-vectorize -fopt-info-optimized=opts.log
+CCOPT = -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log
+CCOPT = -O2 -mavx -ftree-vectorize -fopt-info-optimized=opts.log
 CCOPT = -g -Wall -Wextra -O0
 
 # libraries
@@ -46,6 +50,6 @@ SPHERE_OBJ = sphere.o
 
 # binaries
 TEST_BIN = test.bin
-MAIN_BIN = main.bin
+MAIN_BIN = OpenBDS.bin
 
 TESTS = $(MAIN_BIN) $(TEST_BIN)
