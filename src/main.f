@@ -289,6 +289,8 @@ module bds
     type(c_ptr) :: t_y
     type(c_ptr) :: t_z
     type(c_ptr) :: tmp
+    type(c_ptr) :: temp
+    type(c_ptr) :: mask
     type(c_ptr) :: list
     type(c_ptr) :: id
     type(c_ptr) :: data
@@ -311,6 +313,8 @@ module bds
     real(kind = real64), pointer, contiguous :: t_y(:) => null()
     real(kind = real64), pointer, contiguous :: t_z(:) => null()
     real(kind = real64), pointer, contiguous :: tmp(:) => null()
+    real(kind = real64), pointer, contiguous :: temp(:) => null()
+    real(kind = real64), pointer, contiguous :: mask(:) => null()
     integer(kind = int64), pointer, contiguous :: list(:) => null()
     integer(kind = int64), pointer, contiguous :: id(:) => null()
   end type
