@@ -46,6 +46,6 @@ SPHERE_OBJ = sphere.o
 
 # binaries
 TEST_BIN = test.bin
-MAIN_BIN = main.bin
+MAIN_BIN = OpenBDS.bin
 
 TESTS = $(MAIN_BIN) $(TEST_BIN)
