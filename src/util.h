@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-void inrange (const double* restrict x, double* restrict mask, double* restrict bitmask);
+void inrange (const double* restrict x, double* restrict bitmask);
 
 bool sign (double const x);
 void zeros (double* x);
