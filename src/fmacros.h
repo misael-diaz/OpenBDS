@@ -8,6 +8,9 @@
 	     t_x, t_y, t_z,\
 	     tmp, list
 
+#define NUM_STEPS 1048576_int64
+#define TIME_STEP 1.52587890625e-05_real64
+
 #endif
 
 /*
