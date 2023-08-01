@@ -40,7 +40,7 @@ module param
   public
   save
 
-  real(kind = real64), parameter :: param_dt = real(TIME_STEP, kind = real64)
+  real(kind = real64), parameter :: param_dt = TIME_STEP
 
 end module param
 

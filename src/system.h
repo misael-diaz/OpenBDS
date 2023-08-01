@@ -2,8 +2,6 @@
 #define GUARD_OPENBDS_SYSTEM_H
 
 #define NUM_SPHERES 256
-#define NUM_STEPS 1048576
-#define TIME_STEP 1.52587890625e-05
 #define LIMIT 8.0
 #define LENGTH (2.0 * LIMIT)
 #define RADIUS 1.0
