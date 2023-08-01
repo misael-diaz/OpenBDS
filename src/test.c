@@ -1041,7 +1041,7 @@ void test_inrange ()
 
     // generates bitmasks for the pairs (ones if interacting, zeros otherwise):
 
-    inrange(d, t, m);
+    inrange(d, m);
 
     for (size_t j = 0; j != NUM_SPHERES; ++j)
     {
