@@ -68,19 +68,15 @@ static uint64_t mask_zero (uint64_t const x)
 
 
 // bitmasks interacting particles with ones, zeros otherwise
-void inrange (const double* restrict r, double* restrict mask, double* restrict bitmask)
+void inrange (const double* restrict r, double* restrict bitmask)
 {
-  alias_t* m = mask;
+  alias_t* b = bitmask;
   const alias_t* fp = r;
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
-    m[i].bin = twos_complement( mask_zero(fp[i].bin) );
-  }
-
-  alias_t* b = bitmask;
-  for (size_t i = 0; i != NUM_SPHERES; ++i)
-  {
-    b[i].bin = ( m[i].bin & twos_complement( mask_inrange(fp[i].bin) ) );
+    uint64_t const z = twos_complement( mask_zero(fp[i].bin) );         // masks zeros
+    uint64_t const d = twos_complement( mask_inrange(fp[i].bin) );      // masks distant
+    b[i].bin = (z & d);
   }
 }
 
