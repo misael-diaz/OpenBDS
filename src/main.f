@@ -47,13 +47,23 @@ end module param
 module random
   use :: ieee_arithmetic, only: ieee_value, ieee_positive_inf
   use, intrinsic :: iso_fortran_env, only: real64
+  use, intrinsic :: iso_fortran_env, only: int64
   implicit none
   private
 
   public :: random_prng
 
   interface random_prng
-    module procedure prng
+    module procedure prng, xorshift64
+  end interface
+
+  interface
+    function c_xorshift64 (state) result(r) bind(c, name = 'xorshift64')
+      use, intrinsic :: iso_c_binding, only: c_int64_t
+      use, intrinsic :: iso_c_binding, only: c_double
+      integer(kind = c_int64_t), intent(inout) :: state
+      real(kind = c_double) :: r
+      end function
   end interface
 
   contains
@@ -89,6 +99,39 @@ module random
 
       return
     end subroutine prng
+
+    subroutine xorshift64 (state, x)
+      ! as prng() but uses Marsaglia's xorshift 64-bit Pseudo Random Number Generator PRNG
+      real(kind = real64), intent(out) :: x
+      real(kind = real64) :: x1
+      real(kind = real64) :: x2
+      real(kind = real64) :: dist
+      real(kind = real64) :: positive_infinity
+      integer(kind = int64), intent(inout) :: state
+
+      positive_infinity = ieee_value(0.0_real64, ieee_positive_inf)
+      dist = positive_infinity
+      do while (dist > 1.0_real64)
+
+        x1 = c_xorshift64(state)
+        x2 = c_xorshift64(state)
+
+        x1 = 2.0_real64 * x1 - 1.0_real64
+        x2 = 2.0_real64 * x2 - 1.0_real64
+
+        dist = x1**2 + x2**2
+
+      end do
+
+      dist = dsqrt( ( -2.0_real64 * dlog(dist) ) / dist )
+
+      x1 = dist * x1
+      x2 = dist * x2
+
+      x = x1
+
+      return
+    end subroutine xorshift64
 
 end module random
 
@@ -858,11 +901,32 @@ module test
       real(kind = real64) :: avg
       real(kind = real64) :: std
       integer(kind = int64) :: i
+      integer(kind = int64) :: state
 
       avg = 0.0_real64
       std = 0.0_real64
       do i = 1, NUM_SPHERES
         call random_prng(x)
+        avg = avg + x
+        std = std + x**2
+      end do
+
+      avg = avg / real(NUM_SPHERES, kind = real64)
+      std = sqrt(std / real(NUM_SPHERES - 1, kind = real64) )
+
+      print *, 'avg (should be close to zero): ', avg
+      print *, 'std (should be close to one):  ', std
+
+      call system_clock(count = state)
+      if (state == 0_int64) then
+        state = 1
+      end if
+      state = -state
+
+      avg = 0.0_real64
+      std = 0.0_real64
+      do i = 1, NUM_SPHERES
+        call random_prng(state, x)
         avg = avg + x
         std = std + x**2
       end do
