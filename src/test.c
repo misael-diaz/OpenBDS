@@ -1002,7 +1002,6 @@ void test_inrange ()
   double* z = y + NUM_SPHERES;	// z-position
   double* d = z + NUM_SPHERES;	// interparticle distance
   double* m = d + NUM_SPHERES;	// bitmask
-  double* t = m + NUM_SPHERES;	// temporary (placeholder for intermediate computations)
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     int const numit = fscanf(file, "%lf %lf %lf \n", x, y, z);
