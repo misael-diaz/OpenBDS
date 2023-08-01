@@ -24,6 +24,7 @@ void test_list2();
 void test_overlap();
 void test_inrange();
 void test_force();
+void test_xorshift64();
 
 int main ()
 {
@@ -36,6 +37,7 @@ int main ()
   test_overlap();
   test_inrange();
   test_force();
+  test_xorshift64();
   return 0;
 }
 
@@ -1125,6 +1127,36 @@ void test_force ()
     printf("r: %e f: %+e \n", -d[i], force);
   }
 }
+
+
+// checks only if xorshift64() returns values in the asymmetric range [0, 1)
+void test_xorshift64 ()
+{
+  size_t fails = 0;
+  int64_t state[] = { 0xffffffffffffffff };		// -1
+  uint64_t const period = 0xffffffffffffffff;		// 2^64 - 1
+  printf("xorshift64() period: %lu \n", period);
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const r = xorshift64(state);
+    //printf("r: %f \n", r);
+    if (r >= 1.0)
+    {
+      ++fails;
+    }
+  }
+
+  printf("xorshift64-test[0]: ");
+  if (fails != 0)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+}
+
 
 /*
 
