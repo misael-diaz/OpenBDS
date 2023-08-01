@@ -37,4 +37,4 @@ $(MAIN_OBJ): $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_SRC)
 	$(FC) $(FCOPT) -c $(MAIN_SRC) -o $(MAIN_OBJ)
 
 clean:
-	/bin/rm -rf *.o $(TESTS)
+	/bin/rm -rf *.o *.mod *.bin
