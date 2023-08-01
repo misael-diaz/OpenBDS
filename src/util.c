@@ -81,6 +81,91 @@ void inrange (const double* restrict r, double* restrict bitmask)
 }
 
 
+// void force(double* r, double* force, double* bitmask)
+//
+// Synopsis:
+//
+// Obtains the force-magnitudes and distances ratio F_ij / r_ij, where F_ij are the
+// magnitudes of the forces on the ith particle due to its interaction with the jth
+// particles, and r_ij is the distance of the ith particle relative to the jth particles.
+// The bitmask is used to mask those particles that do not interact with the ith particle,
+// including the ith particle itself.
+//
+// NOTES:
+// The caller method only cares about the F_ij / r_ij values. It does not care if this
+// method modifies the distances array `r' and it is even less interested in what values
+// happen to be written to the bitmask.
+//
+// Input:
+// r            distance array of the ith particle with all the jth particles
+//
+// Outputs:
+// r            this array is also used as a placeholder for intermediate computations
+// force        the force-magnitudes and distances ratios array, F_ij / r_ij
+// bitmask      this array is used as placeholder for the bitmask
+
+void force (double* restrict r,
+	    double* restrict force,
+	    double* restrict bitmask)
+{
+
+  // scales the interparticle distance (as required by inrange() method):
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const c = (1.0 / RANGE);
+    r[i] *= c;
+  }
+
+  // generates bitmask to mask non-interacting particles (zero force between them):
+
+  inrange(r, bitmask);
+
+  // restores the original scale of the interparticle distance:
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const c = RANGE;
+    r[i] *= c;
+  }
+
+  // computes the magnitude of the force via a Lennard-Jones like interaction:
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    // radius of cutoff
+    double const r_c = RANGE;
+    double const r_c13 = (r_c * r_c * r_c * r_c * r_c * r_c * r_c *
+			  r_c * r_c * r_c * r_c * r_c * r_c);
+    double const r13 = (r[i] * r[i] * r[i] * r[i] * r[i] * r[i] * r[i] *
+			r[i] * r[i] * r[i] * r[i] * r[i] * r[i]);
+    double const r14 = r[i] * r13;
+    // short-ranged point-force
+    force[i] = ( 1.0 - (r13 / r_c13) ) * (1.0 / r14);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const c2 = CONTACT2;
+    double const eps = EPSILON;
+    double const c12 = ( (c2 * c2 * c2) * (c2 * c2 * c2) );
+    double const kappa = (4.0 * eps * c12);
+    double const k = (12.0 * kappa);
+    r[i] = k * force[i];
+  }
+
+  // zeros the force of non-interacting (pairs of) particles:
+
+  alias_t* f = force;
+  const alias_t* fp = r;
+  const alias_t* b = bitmask;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    f[i].bin = (b[i].bin & fp[i].bin);
+  }
+}
+
+
 bool sign (double const x)
 {
   bool const ret = signbit(x);

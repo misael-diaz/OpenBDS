@@ -23,6 +23,7 @@ void test_list();
 void test_list2();
 void test_overlap();
 void test_inrange();
+void test_force();
 
 int main ()
 {
@@ -34,6 +35,7 @@ int main ()
   test_list2();
   test_overlap();
   test_inrange();
+  test_force();
   return 0;
 }
 
@@ -1080,6 +1082,49 @@ void test_inrange ()
   fclose(file);
 }
 
+
+// shows that the force is zero for non-interacting particles
+void test_force ()
+{
+  double d[NUM_SPHERES];
+  double r[NUM_SPHERES];
+  double f[NUM_SPHERES];
+  double mask[NUM_SPHERES];
+
+  zeros(d);
+  zeros(r);
+  zeros(f);
+  zeros(mask);
+
+  r[0] = 0.00;
+  r[1] = 1.00;
+  r[2] = 1.50;
+  r[3] = 2.00;
+  r[4] = 2.50;
+  r[5] = 2.75;
+  r[6] = 3.00;
+  r[7] = 4.00;
+  r[8] = 16.0;
+  r[9] = 64.0;
+
+  // we assume that the ith particle is located at the origin and that the jth particles
+  // are at a distance d = (d_i - d_j) from the ith particle (hence the negative sign)
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    d[i] = -r[i];
+  }
+
+  // note that we should not expect r to retain its values after calling force() because
+  // it is used as a placeholder for intermediate computations (the benefit of doing so
+  // is not evident at this point but it shall be later)
+  force(r, f, mask);
+
+  for (size_t i = 0; i != 16; ++i)
+  {
+    double const force = f[i] * d[i];
+    printf("r: %e f: %+e \n", -d[i], force);
+  }
+}
 
 /*
 

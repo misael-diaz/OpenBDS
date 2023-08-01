@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 void inrange (const double* restrict x, double* restrict bitmask);
+void force (double* restrict r, double* restrict force, double* restrict bitmask);
 
 bool sign (double const x);
 void zeros (double* x);
