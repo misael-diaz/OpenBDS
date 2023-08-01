@@ -14,6 +14,22 @@ typedef union
 } alias_t;
 
 
+// implements Marsaglia's 64-bit xorshift, yields a uniformly distributed number in [0, 1)
+// uses a signed 64-bit integer for compatibility with FORTRAN
+double xorshift64 (int64_t* state)
+{
+  int64_t x = *state;
+  x ^= (x << 13);
+  x ^= (x >> 7);
+  x ^= (x << 17);
+  *state = x;
+
+  double const c = 1.0 / ( (int64_t) 0x8000000000000000 );
+  double const r = c * x;
+  return (0.5 * (r + 1.0) );
+}
+
+
 // returns the Most Significant Bit MSB (yields either zero or one)
 static uint64_t get_msb (uint64_t const x)
 {

@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+double xorshift64 (int64_t* state);
+
 void inrange (const double* restrict x, double* restrict bitmask);
 void force (double* restrict r, double* restrict force, double* restrict bitmask);
 
