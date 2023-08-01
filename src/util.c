@@ -432,7 +432,7 @@ void list(int64_t* restrict list,
     list[i] = -(i + 1);
   }
 
-  // generates the initial list of neighbors without considering the periodic boundaries:
+  // generates the initial list of neighbors while accounting for the periodic boundaries:
 
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
