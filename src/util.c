@@ -387,7 +387,7 @@ static bool link (int64_t const i,
 
   bool linked = false;
 
-  if (d <= RANGE)
+  if (d <= RANGE2)
   {
     // merges the "clusters" by hierarchy (lowest rank has the highest hierarchy):
 
