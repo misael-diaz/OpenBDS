@@ -45,7 +45,8 @@ module param
 end module param
 
 module random
-  use :: ieee_arithmetic, only: ieee_value, ieee_positive_inf
+  use :: ieee_arithmetic, only: ieee_value
+  use :: ieee_arithmetic, only: ieee_positive_inf
   use, intrinsic :: iso_fortran_env, only: real64
   use, intrinsic :: iso_fortran_env, only: int64
   implicit none
