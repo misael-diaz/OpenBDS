@@ -1176,6 +1176,128 @@ void test_force2 ()
 }
 
 
+void shift (double* restrict x, const double* restrict f_x)
+{
+  double const dt = 1.52587890625e-05;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    x[i] += (dt * f_x[i]);
+  }
+}
+
+
+void updates (double* restrict x,
+	      double* restrict y,
+	      double* restrict z,
+	      const double* restrict f_x,
+	      const double* restrict f_y,
+	      const double* restrict f_z)
+{
+  shift(x, f_x);
+  shift(y, f_y);
+  shift(z, f_z);
+}
+
+
+// gets the net force on the ith particle by considering its interactions with the
+// jth particles
+void pairs (size_t const i,
+	    const double* restrict x,
+	    const double* restrict y,
+	    const double* restrict z,
+	    double* restrict f_x,
+	    double* restrict f_y,
+	    double* restrict f_z,
+	    double* restrict f,
+	    double* restrict d,
+	    double* restrict mask)
+{
+  // computes the interparticle distance of the ith and jth particles:
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    double const d_x = (x[i] - x[j]);
+    double const d_y = (y[i] - y[j]);
+    double const d_z = (z[i] - z[j]);
+    double const d2 = d_x * d_x + d_y * d_y + d_z * d_z;
+    d[j] = d2;
+  }
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    d[j] = sqrt(d[j]);
+  }
+
+  // gets the force to distance ratio, F / r
+  force(d, f, mask);
+
+  // calculates the force components:
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    d[j] = (x[i] - x[j]);
+  }
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    mask[j] = f[j] * d[j];
+  }
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    f_x[i] += mask[j];
+  }
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    d[j] = (y[i] - y[j]);
+  }
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    mask[j] = f[j] * d[j];
+  }
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    f_y[i] += mask[j];
+  }
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    d[j] = (z[i] - z[j]);
+  }
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    mask[j] = f[j] * d[j];
+  }
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    f_z[i] += mask[j];
+  }
+}
+
+
+// gets the net (or resultant) force on the ith particles
+void resultant (const double* restrict x,
+		const double* restrict y,
+		const double* restrict z,
+		double* restrict f_x,
+		double* restrict f_y,
+		double* restrict f_z,
+		double* restrict f,
+		double* restrict d,
+		double* restrict mask)
+{
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    pairs(i, x, y, z, f_x, f_y, f_z, f, d, mask);
+  }
+}
+
+
 void test_force3 ()
 {
   double x[NUM_SPHERES];		// x position array
@@ -1226,113 +1348,22 @@ void test_force3 ()
   y[3] = CONTACT;
   z[3] = 0.0;
 
-  size_t const steps = 1048576;
-  double const dt = 1.52587890625e-05;
+  size_t const steps = 65536;
   for (size_t step = 0; step != steps; ++step)
   {
     // initializes the net force on the ith particles
 
-    for (size_t i = 0; i != NUM_SPHERES; ++i)
-    {
-      f_x[i] = 0;
-    }
-
-    for (size_t i = 0; i != NUM_SPHERES; ++i)
-    {
-      f_y[i] = 0;
-    }
-
-    for (size_t i = 0; i != NUM_SPHERES; ++i)
-    {
-      f_z[i] = 0;
-    }
+    zeros(f_x);
+    zeros(f_y);
+    zeros(f_z);
 
     // computes the net force on the ith particles
 
-    for (size_t i = 0; i != NUM_SPHERES; ++i)
-    {
-      // computes the interparticle distance of the ith and jth particles
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	double const d_x = (x[i] - x[j]);
-	double const d_y = (y[i] - y[j]);
-	double const d_z = (z[i] - z[j]);
-	double const d2 = d_x * d_x + d_y * d_y + d_z * d_z;
-	d[j] = d2;
-      }
-
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	d[j] = sqrt(d[j]);
-      }
-
-      // gets the force to distance ratio, F / r
-      force(d, f, mask);
-
-      // calculates the force components:
-
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	d[j] = (x[i] - x[j]);
-      }
-
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	mask[j] = f[j] * d[j];
-      }
-
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	f_x[i] += mask[j];
-      }
-
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	d[j] = (y[i] - y[j]);
-      }
-
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	mask[j] = f[j] * d[j];
-      }
-
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	f_y[i] += mask[j];
-      }
-
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	d[j] = (z[i] - z[j]);
-      }
-
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	mask[j] = f[j] * d[j];
-      }
-
-      for (size_t j = 0; j != NUM_SPHERES; ++j)
-      {
-	f_z[i] += mask[j];
-      }
-    }
+    resultant(x, y, z, f_x, f_y, f_z, f, d, mask);
 
     // updates the particle positions
 
-    for (size_t i = 0; i != NUM_SPHERES; ++i)
-    {
-      x[i] += dt * f_x[i];
-    }
-
-    for (size_t i = 0; i != NUM_SPHERES; ++i)
-    {
-      y[i] += dt * f_y[i];
-    }
-
-    for (size_t i = 0; i != NUM_SPHERES; ++i)
-    {
-      z[i] += dt * f_z[i];
-    }
+    updates(x, y, z, f_x, f_y, f_z);
   }
 
   // logs the final particle positions:
