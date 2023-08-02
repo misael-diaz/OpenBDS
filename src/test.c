@@ -26,6 +26,7 @@ void test_inrange();
 void test_force();
 void test_force2();
 void test_force3();
+void test_force4();
 void test_xorshift64();
 
 int main ()
@@ -40,7 +41,8 @@ int main ()
   test_inrange();
 //test_force();
 //test_force2();
-  test_force3();
+//test_force3();
+  test_force4();
   test_xorshift64();
   return 0;
 }
@@ -1205,6 +1207,9 @@ void pairs (size_t const i,
 	    const double* restrict x,
 	    const double* restrict y,
 	    const double* restrict z,
+	    double const offset_x,
+	    double const offset_y,
+	    double const offset_z,
 	    double* restrict f_x,
 	    double* restrict f_y,
 	    double* restrict f_z,
@@ -1216,9 +1221,9 @@ void pairs (size_t const i,
 
   for (size_t j = 0; j != NUM_SPHERES; ++j)
   {
-    double const d_x = (x[i] - x[j]);
-    double const d_y = (y[i] - y[j]);
-    double const d_z = (z[i] - z[j]);
+    double const d_x = ( x[i] - (x[j] + offset_x) );
+    double const d_y = ( y[i] - (y[j] + offset_y) );
+    double const d_z = ( z[i] - (z[j] + offset_z) );
     double const d2 = d_x * d_x + d_y * d_y + d_z * d_z;
     d[j] = d2;
   }
@@ -1235,7 +1240,7 @@ void pairs (size_t const i,
 
   for (size_t j = 0; j != NUM_SPHERES; ++j)
   {
-    d[j] = (x[i] - x[j]);
+    d[j] = ( x[i] - (x[j] + offset_x) );
   }
 
   for (size_t j = 0; j != NUM_SPHERES; ++j)
@@ -1250,7 +1255,7 @@ void pairs (size_t const i,
 
   for (size_t j = 0; j != NUM_SPHERES; ++j)
   {
-    d[j] = (y[i] - y[j]);
+    d[j] = ( y[i] - (y[j] + offset_y) );
   }
 
   for (size_t j = 0; j != NUM_SPHERES; ++j)
@@ -1265,7 +1270,7 @@ void pairs (size_t const i,
 
   for (size_t j = 0; j != NUM_SPHERES; ++j)
   {
-    d[j] = (z[i] - z[j]);
+    d[j] = ( z[i] - (z[j] + offset_z) );
   }
 
   for (size_t j = 0; j != NUM_SPHERES; ++j)
@@ -1291,9 +1296,81 @@ void resultant (const double* restrict x,
 		double* restrict d,
 		double* restrict mask)
 {
+  double const offset_x = 0;
+  double const offset_y = 0;
+  double const offset_z = 0;
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
-    pairs(i, x, y, z, f_x, f_y, f_z, f, d, mask);
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, f, d, mask);
+  }
+}
+
+
+// as resultant() but with periodic boundaries considerations
+void resultant2(const double* restrict x,
+		const double* restrict y,
+		const double* restrict z,
+		double* restrict f_x,
+		double* restrict f_y,
+		double* restrict f_z,
+		double* restrict tmp,
+		double* restrict temp,
+		double* restrict mask)
+{
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = 0;
+    double const offset_z = 0;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = 0;
+    double const offset_z = 0;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = 0;
+    double const offset_z = 0;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = -LENGTH;
+    double const offset_z = 0;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = +LENGTH;
+    double const offset_z = 0;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = 0;
+    double const offset_z = -LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = 0;
+    double const offset_z = +LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
   }
 }
 
@@ -1388,6 +1465,136 @@ void test_force3 ()
   {
     printf("dist: %e \n", d[j]);
   }
+}
+
+
+void pbcs(double* restrict x,
+	  double* restrict y,
+	  double* restrict z,
+	  double* restrict tmp,
+	  double* restrict temp,
+	  double* restrict mask)
+{
+    pbc(x, tmp, temp, mask);
+    pbc(y, tmp, temp, mask);
+    pbc(z, tmp, temp, mask);
+}
+
+
+// this test is a system equilibration run (without Brownian motion)
+void test_force4 ()
+{
+  // sets the particles at grid locations (or lattice structure):
+
+  sphere_t* spheres = create();
+
+  double* x = spheres -> x;
+  double* y = spheres -> y;
+  double* z = spheres -> z;
+  double* f_x = spheres -> f_x;
+  double* f_y = spheres -> f_y;
+  double* f_z = spheres -> f_z;
+  double* f = spheres -> tmp;
+  double* d = spheres -> temp;
+  double* mask = spheres -> mask;
+
+  // performs an equilibration run:
+
+  bool failed = false;
+  size_t const steps = 1048576;
+  for (size_t step = 0; step != steps; ++step)
+  {
+    // zeroes the net force on particles:
+
+    zeros(f_x);
+    zeros(f_y);
+    zeros(f_z);
+
+    // computes the net force on the particles (considers periodicity):
+
+    resultant2(x, y, z, f_x, f_y, f_z, f, d, mask);
+
+    // gets the force along the axes for logging purposes
+
+    double force = 0;
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      force += (f_x[i] * f_x[i]);
+    }
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      force += (f_y[i] * f_y[i]);
+    }
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      force += (f_z[i] * f_z[i]);
+    }
+
+    // updates the particle positions
+
+    updates(x, y, z, f_x, f_y, f_z);
+
+    // applies periodic boundary conditions to the positions of the particles:
+
+    pbcs(x, y, z, f, d, mask);
+
+    // checks for out-of-bounds instances:
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      if (x[i] < -LIMIT || x[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      if (y[i] < -LIMIT || y[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      if (z[i] < -LIMIT || z[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    if (failed)
+    {
+      break;
+    }
+
+    // logs the average force along the axes on the console:
+
+    if (step % 256 == 0)
+    {
+      force /= ( (3.0 * ( (double) NUM_SPHERES) ) );
+      force = sqrt(force);
+      printf("step: %lu force: %e \n", step, force);
+    }
+  }
+
+  printf("equilibration-test[0]: ");
+  if (failed)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  spheres = destroy(spheres);
 }
 
 
