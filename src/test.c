@@ -25,6 +25,7 @@ void test_overlap();
 void test_inrange();
 void test_force();
 void test_force2();
+void test_force3();
 void test_xorshift64();
 
 int main ()
@@ -37,8 +38,9 @@ int main ()
   test_list2();
   test_overlap();
   test_inrange();
-  test_force();
-  test_force2();
+//test_force();
+//test_force2();
+  test_force3();
   test_xorshift64();
   return 0;
 }
@@ -1170,6 +1172,190 @@ void test_force2 ()
       // logs the position and the interaction force (shows expected behavior)
       printf("x: %e f: %+e \n", x[1], (f[1] * dist));
     }
+  }
+}
+
+
+void test_force3 ()
+{
+  double x[NUM_SPHERES];		// x position array
+  double y[NUM_SPHERES];		// y position array
+  double z[NUM_SPHERES];		// z position array
+  double d[NUM_SPHERES];		// distance
+  double f_x[NUM_SPHERES];		// x component of the force
+  double f_y[NUM_SPHERES];		// y component of the force
+  double f_z[NUM_SPHERES];		// z component of the force
+  double f[NUM_SPHERES];		// magnitude of the force
+  double mask[NUM_SPHERES];		// placeholder for the bitmask
+
+  zeros(x);
+  zeros(y);
+  zeros(z);
+  zeros(d);
+  zeros(f);
+  zeros(mask);
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    x[i] = LENGTH;
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    y[i] = LENGTH;
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    z[i] = LENGTH;
+  }
+
+  x[0] = 0.0;
+  y[0] = 0.0;
+  z[0] = 0.0;
+
+  x[1] = CONTACT;
+  y[1] = 0.0;
+  z[1] = 0.0;
+
+  x[2] = 0.0;
+  y[2] = CONTACT;
+  z[2] = 0.0;
+
+  x[3] = CONTACT;
+  y[3] = CONTACT;
+  z[3] = 0.0;
+
+  size_t const steps = 1048576;
+  double const dt = 1.52587890625e-05;
+  for (size_t step = 0; step != steps; ++step)
+  {
+    // initializes the net force on the ith particles
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      f_x[i] = 0;
+    }
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      f_y[i] = 0;
+    }
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      f_z[i] = 0;
+    }
+
+    // computes the net force on the ith particles
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      // computes the interparticle distance of the ith and jth particles
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	double const d_x = (x[i] - x[j]);
+	double const d_y = (y[i] - y[j]);
+	double const d_z = (z[i] - z[j]);
+	double const d2 = d_x * d_x + d_y * d_y + d_z * d_z;
+	d[j] = d2;
+      }
+
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	d[j] = sqrt(d[j]);
+      }
+
+      // gets the force to distance ratio, F / r
+      force(d, f, mask);
+
+      // calculates the force components:
+
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	d[j] = (x[i] - x[j]);
+      }
+
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	mask[j] = f[j] * d[j];
+      }
+
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	f_x[i] += mask[j];
+      }
+
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	d[j] = (y[i] - y[j]);
+      }
+
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	mask[j] = f[j] * d[j];
+      }
+
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	f_y[i] += mask[j];
+      }
+
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	d[j] = (z[i] - z[j]);
+      }
+
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	mask[j] = f[j] * d[j];
+      }
+
+      for (size_t j = 0; j != NUM_SPHERES; ++j)
+      {
+	f_z[i] += mask[j];
+      }
+    }
+
+    // updates the particle positions
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      x[i] += dt * f_x[i];
+    }
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      y[i] += dt * f_y[i];
+    }
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      z[i] += dt * f_z[i];
+    }
+  }
+
+  // logs the final particle positions:
+
+  printf("(x, y, z): %+e %+e %+e \n", x[0], y[0], z[0]);
+  printf("(x, y, z): %+e %+e %+e \n", x[1], y[1], z[1]);
+  printf("(x, y, z): %+e %+e %+e \n", x[2], y[2], z[2]);
+  printf("(x, y, z): %+e %+e %+e \n", x[3], y[3], z[3]);
+
+  // logs the distances relative to the first particle (id = 0):
+
+  for (size_t j = 0; j != NUM_SPHERES; ++j)
+  {
+    double const d_x = (x[0] - x[j]);
+    double const d_y = (y[0] - y[j]);
+    double const d_z = (z[0] - z[j]);
+    double const d2 = d_x * d_x + d_y * d_y + d_z * d_z;
+    d[j] = sqrt(d2);
+  }
+
+  for (size_t j = 0; j != 4; ++j)
+  {
+    printf("dist: %e \n", d[j]);
   }
 }
 
