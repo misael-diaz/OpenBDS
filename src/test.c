@@ -32,6 +32,7 @@ void test_force3();
 void test_force4();
 void test_xorshift64();
 void test_nrand();
+void test_sha512sum();
 
 int main ()
 {
@@ -49,6 +50,7 @@ int main ()
   test_force4();
   test_xorshift64();
   test_nrand();
+  test_sha512sum();
   return 0;
 }
 
@@ -1715,6 +1717,26 @@ void test_nrand ()
 
   printf("avg (should be close to zero): %f \n", avg / size);
   printf("std (should be close to one): %f \n", sqrt( std / (size - 1) ) );
+}
+
+
+// tests getting the sha512sum of positions.txt
+void test_sha512sum ()
+{
+  FILE* pipe = popen("sha512sum positions.txt", "r");
+  if (pipe == NULL)
+  {
+    printf("test-sha512sum(): failed read sha512sum\n");
+    return;
+  }
+
+  char sha[256];
+  fscanf(pipe, "%s", sha);
+
+//printf("%s\n", sha);
+
+  pclose(pipe);
+  printf("test-sha512sum(): succeeded in getting the sha512sum of positions.txt\n");
 }
 
 
