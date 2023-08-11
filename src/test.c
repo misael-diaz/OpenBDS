@@ -28,6 +28,7 @@ void test_force2();
 void test_force3();
 void test_force4();
 void test_xorshift64();
+void test_nrand();
 
 int main ()
 {
@@ -44,7 +45,71 @@ int main ()
 //test_force3();
   test_force4();
   test_xorshift64();
+  test_nrand();
   return 0;
+}
+
+
+// seeds the xorshif64() backed Pseudo Random Number Generator PRNG
+void seed (uint64_t* state)
+{
+  size_t count = 0;			// initializes the tries counter
+  srand( time(NULL) & getpid() );	// uses the time and process id to seed rand()
+  uint64_t seed = rand();		// initializes the seed
+  uint64_t const seed_default = (0xffffffffffffffff);
+  // caters zero valued seeds, which render xorshift64() useless
+  while (seed == 0)
+  {
+    if (count == 16)
+    {
+      printf("seed(): WARNING using default seed value\n");
+      seed = seed_default;
+      break;
+    }
+    seed = rand();
+    ++count;
+  }
+  *state = seed;
+}
+
+
+// yields uniformly pseudo-random numbers in the asymmetric range [0, 1)
+double urand (uint64_t* state)
+{
+  // implements Marsaglia's 64-bit xorshift pseudo-random number generator:
+  uint64_t x = *state;
+  x ^= (x << 13);
+  x ^= (x >> 7);
+  x ^= (x << 17);
+  *state = x;
+
+  // constructs the binary floating-point representation of 2^(-64):
+  uint64_t const n = -64;					// exponent
+  uint64_t const bias = 1023;					// bias
+  alias_t const c = { .bin = ( (n + bias) << 52 ) };		// binary representation
+  double const data = c.data;					// floating point value
+
+  // scales the pseudo-random number so that the generator returns values in [0, 1):
+  return ( data * ( (double) x ) );
+}
+
+
+// yields normally distributed pseudo-random numbers
+double nrand (uint64_t* state)
+{
+  // implements Box-Muller's method:
+  double x = INFINITY;
+  double y = INFINITY;
+  double r = INFINITY;
+  while (r > 1.0)
+  {
+    x = 2.0 * urand(state) - 1.0;
+    y = 2.0 * urand(state) - 1.0;
+    r = (x * x) + (y * y);
+  }
+  r = sqrt( ( -2.0 * log(r) ) / r );
+  x *= r;
+  return x;
 }
 
 
@@ -1624,6 +1689,29 @@ void test_xorshift64 ()
   {
     printf("PASS\n");
   }
+}
+
+
+// tests the statistics of the normally distributed pseudo-random number generator;
+// this is too simple a test but a test for checking if nrand() is not quite right
+void test_nrand ()
+{
+  double avg = 0;				// average
+  double std = 0;				// standard-deviation
+  uint64_t state[] = { 0xffffffffffffffff };	// xorshift64() initial seed
+  seed(state);					// attempts to improve the seed
+  // could have stored the pseudo-random numbers in an array but this approach suffices
+  // to get an estimate of the standard deviation since the average is close to zero
+  size_t const size = (SIZE * SIZE);
+  for (size_t i = 0; i != size; ++i)
+  {
+    double const r = nrand(state);
+    avg += r;
+    std += (r * r);
+  }
+
+  printf("avg (should be close to zero): %f \n", avg / size);
+  printf("std (should be close to one): %f \n", sqrt( std / (size - 1) ) );
 }
 
 
