@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
+#include <time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "sphere.h"
 #include "system.h"
