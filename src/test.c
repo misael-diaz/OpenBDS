@@ -55,8 +55,9 @@ int main ()
   test_force4();
   test_xorshift64();
   test_nrand();
-  test_sha512sum();
-  test_info();
+//disabled tests:
+//test_sha512sum();	// uncomment if there's a positions.txt file to check
+//test_info();		// we don't want to overwrite the BDS parameters file
   return 0;
 }
 
