@@ -14,7 +14,7 @@
 #define SIZE ( (size_t) NUM_SPHERES )
 #define FAILURE ( (int) 0xffffffff )
 #define SUCCESS ( (int) 0x00000000 )
-#define MIN_NUM_STEPS ( (size_t) 0x0000000004000000 )
+#define MIN_NUM_STEPS ( (size_t) 0x0000000000010000 )
 #define TIME_STEP ( 1.0 / ( (double) MIN_NUM_STEPS ) )
 
 typedef union
