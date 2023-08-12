@@ -49,14 +49,15 @@ int main ()
   test_list2();
   test_overlap();
   test_inrange();
-//test_force();
-//test_force2();
-//test_force3();
   test_force4();
   test_xorshift64();
   test_nrand();
-  test_sha512sum();
-  test_info();
+//disabled tests:
+//test_force();		// we can safely disable this test at this point
+//test_force2();	// disables the equilibration run for a pair of particles
+//test_force3();	// disables the equilibration run for two pairs of particles
+//test_sha512sum();	// uncomment if there's a positions.txt file to check
+//test_info();		// we don't want to overwrite the BDS parameters file
   return 0;
 }
 
@@ -1869,6 +1870,31 @@ void test_force4 ()
   else
   {
     printf("PASS\n");
+  }
+
+  // exports the particle positions for post-processing:
+
+  const char fname[] = "stable.txt";
+  FILE* file = fopen(fname, "w");
+  if (file == NULL)
+  {
+    printf("IO ERROR with file %s\n", fname);
+    spheres = destroy(spheres);
+    return;
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    fprintf(file, "%+.15e %+.15e %+.15e\n", x[i], y[i], z[i]);
+  }
+
+  fclose(file);
+
+  // dumps BDS equilibration run info to a plain text file:
+
+  if (info() == FAILURE)
+  {
+    printf("WARNING: failed to dump BDS run info\n");
   }
 
   spheres = destroy(spheres);
