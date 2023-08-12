@@ -14,7 +14,8 @@
 #define SIZE ( (size_t) NUM_SPHERES )
 #define FAILURE ( (int) 0xffffffff )
 #define SUCCESS ( (int) 0x00000000 )
-#define TIME_STEP 1.4901161193847656e-08
+#define MIN_NUM_STEPS ( (size_t) 0x0000000004000000 )
+#define TIME_STEP ( 1.0 / ( (double) MIN_NUM_STEPS ) )
 
 typedef union
 {
@@ -1435,8 +1436,8 @@ void test_force2 ()
 
   // updates the position of the `free' particle:
 
-  size_t const steps = 1048576;
-  double const dt = 1.52587890625e-05;
+  double const dt = TIME_STEP;
+  size_t const steps = 16 * MIN_NUM_STEPS;
   for (size_t step = 0; step != steps; ++step)
   {
     // gets the distance between the fixed and free particles
@@ -1458,7 +1459,7 @@ void test_force2 ()
 
 void shift (double* restrict x, const double* restrict f_x)
 {
-  double const dt = 1.52587890625e-05;
+  double const dt = TIME_STEP;
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     x[i] += (dt * f_x[i]);
@@ -1779,7 +1780,7 @@ void test_force4 ()
   // performs an equilibration run:
 
   bool failed = false;
-  size_t const steps = 1048576;
+  size_t const steps = 16 * MIN_NUM_STEPS;
   for (size_t step = 0; step != steps; ++step)
   {
     // zeroes the net force on particles:
