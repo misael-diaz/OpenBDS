@@ -49,13 +49,13 @@ int main ()
   test_list2();
   test_overlap();
   test_inrange();
-//test_force();
-//test_force2();
-//test_force3();
   test_force4();
   test_xorshift64();
   test_nrand();
 //disabled tests:
+//test_force();		// we can safely disable this test at this point
+//test_force2();	// disables the equilibration run for a pair of particles
+//test_force3();	// disables the equilibration run for two pairs of particles
 //test_sha512sum();	// uncomment if there's a positions.txt file to check
 //test_info();		// we don't want to overwrite the BDS parameters file
   return 0;
