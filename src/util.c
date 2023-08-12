@@ -151,22 +151,20 @@ void force (double* restrict r,
   {
     // radius of cutoff
     double const r_c = RANGE;
-    double const r_c13 = (r_c * r_c * r_c * r_c * r_c * r_c * r_c *
-			  r_c * r_c * r_c * r_c * r_c * r_c);
-    double const r13 = (r[i] * r[i] * r[i] * r[i] * r[i] * r[i] * r[i] *
-			r[i] * r[i] * r[i] * r[i] * r[i] * r[i]);
-    double const r14 = r[i] * r13;
+    double const r_c7 = (r_c * r_c * r_c * r_c * r_c * r_c * r_c);
+    double const r7 = (r[i] * r[i] * r[i] * r[i] * r[i] * r[i] * r[i]);
+    double const r8 = r[i] * r7;
     // short-ranged point-force
-    force[i] = ( 1.0 - (r13 / r_c13) ) * (1.0 / r14);
+    force[i] = ( 1.0 - (r7 / r_c7) ) * (1.0 / r8);
   }
 
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     double const c2 = CONTACT2;
     double const eps = EPSILON;
-    double const c12 = ( (c2 * c2 * c2) * (c2 * c2 * c2) );
-    double const kappa = (4.0 * eps * c12);
-    double const k = (12.0 * kappa);
+    double const c6 = (c2 * c2 * c2);
+    double const kappa = (4.0 * eps * c6);
+    double const k = (6.0 * kappa);
     r[i] = k * force[i];
   }
 
