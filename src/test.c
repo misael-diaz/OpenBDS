@@ -4,6 +4,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "sphere.h"
 #include "system.h"
@@ -11,6 +12,9 @@
 
 // defines the system size, or equivalently, the number of spheres
 #define SIZE ( (size_t) NUM_SPHERES )
+#define FAILURE ( (int) 0xffffffff )
+#define SUCCESS ( (int) 0x00000000 )
+#define TIME_STEP 1.4901161193847656e-08
 
 typedef union
 {
@@ -32,6 +36,8 @@ void test_force3();
 void test_force4();
 void test_xorshift64();
 void test_nrand();
+void test_sha512sum();
+void test_info();
 
 int main ()
 {
@@ -49,7 +55,210 @@ int main ()
   test_force4();
   test_xorshift64();
   test_nrand();
+  test_sha512sum();
+  test_info();
   return 0;
+}
+
+
+// gets the sha512sum of stable.txt file
+int getsha512sum (char* hash)
+{
+  FILE* file = fopen("stable.txt", "r");
+  if (file == NULL)
+  {
+    printf("getsha512sum(): stable.txt file missing\n");
+    return FAILURE;
+  }
+  fclose(file);
+
+  FILE* pipe = popen("sha512sum stable.txt", "r");
+  if (pipe == NULL)
+  {
+    printf("getsha512sum(): failed generate sha512sum\n");
+    return FAILURE;
+  }
+
+  if (fscanf(pipe, "%s", hash) != 1)
+  {
+    pclose(pipe);
+    printf("getsha512sum(): failed read sha512sum\n");
+    return FAILURE;
+  }
+
+  pclose(pipe);
+  return SUCCESS;
+}
+
+
+// dumps BDS parameters to a plain text file
+int info ()
+{
+  char hash[256];
+  if (getsha512sum(hash) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  FILE* file = fopen("params-bds.txt", "w");
+  if (file == NULL)
+  {
+    printf("info(): IO ERROR\n");
+    return FAILURE;
+  }
+
+  fprintf(file, "LIMIT:       %.16e\n", LIMIT);
+  fprintf(file, "LENGTH:      %.16e\n", LENGTH);
+  fprintf(file, "TIME_STEP:   %.16e\n", TIME_STEP);
+  fprintf(file, "NUM_SPHERES: %lu\n",   SIZE);
+  fprintf(file, "SHA512SUM:   %s\n",    hash);
+
+  fclose(file);
+  return SUCCESS;
+}
+
+
+// compares the keys of the BDS parameters file
+int keys (const char* restrict key, const char* restrict str)
+{
+  return strcmp(key, str);
+}
+
+
+// checks the simulation parameters against the MACROS
+int getinfo ()
+{
+  char hash[256];
+  if (getsha512sum(hash) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  FILE* file = fopen("params-bds.txt", "r");
+  if (file == NULL)
+  {
+    printf("getinfo(): IO ERROR\n");
+    return FAILURE;
+  }
+
+  char key[32];
+  char sha[256];
+  double limit[1];
+  double length[1];
+  double time_step[1];
+  size_t num_spheres[1];
+  char const limit_key[] = "LIMIT:";
+  char const length_key[] = "LENGTH:";
+  char const time_step_key[] = "TIME_STEP:";
+  char const num_spheres_key[] = "NUM_SPHERES:";
+  char const sha512sum_key[] = "SHA512SUM:";
+  if (fscanf(file, "%s %lf",  key, limit) != 2)
+  {
+    fclose(file);
+    printf("getinfo(): unexpected IO ERROR while reading limit\n");
+    return FAILURE;
+  }
+
+  if (keys(limit_key, key) != 0)
+  {
+    fclose(file);
+    printf("getinfo(): expected key %s but got %s \n", limit_key, key);
+    return FAILURE;
+  }
+
+  if (fscanf(file, "%s %lf",  key, length) != 2)
+  {
+    fclose(file);
+    printf("getinfo(): unexpected IO ERROR while reading length\n");
+    return FAILURE;
+  }
+
+  if (keys(length_key, key) != 0)
+  {
+    fclose(file);
+    printf("getinfo(): expected key %s but got %s \n", length_key, key);
+    return FAILURE;
+  }
+
+  if (fscanf(file, "%s %lf",  key, time_step) != 2)
+  {
+    fclose(file);
+    printf("getinfo(): unexpected IO ERROR while reading time-step\n");
+    return FAILURE;
+  }
+
+  if (keys(time_step_key, key) != 0)
+  {
+    fclose(file);
+    printf("getinfo(): expected key %s but got %s \n", time_step_key, key);
+    return FAILURE;
+  }
+
+  if (fscanf(file, "%s %lu", key, num_spheres) != 2)
+  {
+    fclose(file);
+    printf("getinfo(): unexpected IO ERROR while reading the number of spheres\n");
+    return FAILURE;
+  }
+
+  if (keys(num_spheres_key, key) != 0)
+  {
+    fclose(file);
+    printf("getinfo(): expected key %s but got %s \n", num_spheres_key, key);
+    return FAILURE;
+  }
+
+  if (fscanf(file, "%s %s", key, sha) != 2)
+  {
+    fclose(file);
+    printf("getinfo(): unexpected IO ERROR while reading sha512sum\n");
+    return FAILURE;
+  }
+
+  if (keys(sha512sum_key, key) != 0)
+  {
+    fclose(file);
+    printf("getinfo(): expected key %s but got %s \n", sha512sum_key, key);
+    return FAILURE;
+  }
+
+  if (*limit != LIMIT)
+  {
+    fclose(file);
+    printf("getinfo(): wrong LIMIT\n");
+    return FAILURE;
+  }
+
+  if (*length != LENGTH)
+  {
+    fclose(file);
+    printf("getinfo(): wrong LENGTH\n");
+    return FAILURE;
+  }
+
+  if (*time_step != TIME_STEP)
+  {
+    fclose(file);
+    printf("getinfo(): wrong TIME_STEP\n");
+    return FAILURE;
+  }
+
+  if (*num_spheres != SIZE)
+  {
+    fclose(file);
+    printf("getinfo(): wrong NUM_SPHERES\n");
+    return FAILURE;
+  }
+
+  if (strcmp(sha, hash) != 0)
+  {
+    fclose(file);
+    printf("getinfo(): detected differing sha512sums\n");
+    return FAILURE;
+  }
+
+  fclose(file);
+  return SUCCESS;
 }
 
 
@@ -1715,6 +1924,60 @@ void test_nrand ()
 
   printf("avg (should be close to zero): %f \n", avg / size);
   printf("std (should be close to one): %f \n", sqrt( std / (size - 1) ) );
+}
+
+
+// tests getting the sha512sum of positions.txt
+void test_sha512sum ()
+{
+  FILE* pipe = popen("sha512sum positions.txt", "r");
+  if (pipe == NULL)
+  {
+    printf("test-sha512sum(): failed read sha512sum\n");
+    return;
+  }
+
+  char sha[256];
+  fscanf(pipe, "%s", sha);
+
+//printf("%s\n", sha);
+
+  pclose(pipe);
+  printf("test-sha512sum(): succeeded in getting the sha512sum of positions.txt\n");
+}
+
+
+// tests dumping BDS info
+void test_info ()
+{
+  // dumps the info:
+
+  printf("dump-bds-info-test[0]: ");
+  if (info() == FAILURE)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  if (info() == FAILURE)
+  {
+    return;
+  }
+
+  // checks the info:
+
+  printf("dump-bds-info-test[1]: ");
+  if (getinfo() == FAILURE)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
 }
 
 
