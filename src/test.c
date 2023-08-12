@@ -1871,6 +1871,31 @@ void test_force4 ()
     printf("PASS\n");
   }
 
+  // exports the particle positions for post-processing:
+
+  const char fname[] = "stable.txt";
+  FILE* file = fopen(fname, "w");
+  if (file == NULL)
+  {
+    printf("IO ERROR with file %s\n", fname);
+    spheres = destroy(spheres);
+    return;
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    fprintf(file, "%+.15e %+.15e %+.15e\n", x[i], y[i], z[i]);
+  }
+
+  fclose(file);
+
+  // dumps BDS equilibration run info to a plain text file:
+
+  if (info() == FAILURE)
+  {
+    printf("WARNING: failed to dump BDS run info\n");
+  }
+
   spheres = destroy(spheres);
 }
 
