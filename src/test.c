@@ -35,7 +35,7 @@ void test_inrange();
 void test_force();
 void test_force2();
 void test_force3();
-void test_force4();
+void test_equilibration();
 void test_xorshift64();
 void test_nrand();
 void test_sha512sum();
@@ -51,7 +51,7 @@ int main ()
   test_list2();
   test_overlap();
   test_inrange();
-  test_force4();
+  test_equilibration();
   test_xorshift64();
   test_nrand();
 //disabled tests:
@@ -1787,7 +1787,7 @@ int logger (const sphere_t* spheres, const size_t step)
 
 
 // this test is a system equilibration run (without Brownian motion)
-void test_force4 ()
+void test_equilibration ()
 {
   // sets the particles at grid locations (or lattice structure):
 
