@@ -16,6 +16,7 @@
 #define SUCCESS ( (int) 0x00000000 )
 #define MIN_NUM_STEPS ( (size_t) 0x0000000000010000 )
 #define TIME_STEP ( 1.0 / ( (double) MIN_NUM_STEPS ) )
+#define LOG true
 
 typedef union
 {
@@ -34,7 +35,7 @@ void test_inrange();
 void test_force();
 void test_force2();
 void test_force3();
-void test_force4();
+void test_equilibration();
 void test_xorshift64();
 void test_nrand();
 void test_sha512sum();
@@ -50,7 +51,7 @@ int main ()
   test_list2();
   test_overlap();
   test_inrange();
-  test_force4();
+  test_equilibration();
   test_xorshift64();
   test_nrand();
 //disabled tests:
@@ -1760,12 +1761,47 @@ void pbcs(double* restrict x,
 }
 
 
+// logs the current (determined by the step id) particle positions to a plain text file
+int logger (const sphere_t* spheres, const size_t step)
+{
+  char fname[256];
+  sprintf(fname, "run/equilibration/data/positions/positions-%lu.txt", step);
+  FILE* file = fopen(fname, "w");
+  if (file == NULL)
+  {
+    return FAILURE;
+  }
+
+  const double* x = spheres -> x;
+  const double* y = spheres -> y;
+  const double* z = spheres -> z;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    const char format[] = "%+.16e %+.16e %+.16e\n";
+    fprintf(file, format, x[i], y[i], z[i]);
+  }
+
+  fclose(file);
+  return SUCCESS;
+}
+
+
 // this test is a system equilibration run (without Brownian motion)
-void test_force4 ()
+void test_equilibration ()
 {
   // sets the particles at grid locations (or lattice structure):
 
   sphere_t* spheres = create();
+  if (LOG)
+  {
+    if (logger(spheres, 0) == FAILURE)
+    {
+      const char exports[] = "run/equilibration/data/positions/positions";
+      printf("test-equilibration(): data exports directory %s does not exist\n", exports);
+      spheres = destroy(spheres);
+      return;
+    }
+  }
 
   double* x = spheres -> x;
   double* y = spheres -> y;
@@ -1783,6 +1819,14 @@ void test_force4 ()
   size_t const steps = 16 * MIN_NUM_STEPS;
   for (size_t step = 0; step != steps; ++step)
   {
+    if (LOG)
+    {
+      if (step % 16 == 0)
+      {
+	logger(spheres, step);
+      }
+    }
+
     // zeroes the net force on particles:
 
     zeros(f_x);
