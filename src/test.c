@@ -1873,6 +1873,12 @@ void test_force4 ()
     printf("PASS\n");
   }
 
+  if (failed)
+  {
+    spheres = destroy(spheres);
+    return;
+  }
+
   // exports the particle positions for post-processing:
 
   const char fname[] = "stable.txt";
