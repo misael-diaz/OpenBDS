@@ -1853,12 +1853,21 @@ void test_force4 ()
       break;
     }
 
+    // checks if the positions are close to their final equilibrium positions:
+
+    force /= ( (3.0 * ( (double) NUM_SPHERES) ) );
+    force = sqrt(force);
+
+    double const tol = 9.5367431640625e-07;
+    if (force < tol)
+    {
+      break;
+    }
+
     // logs the average force along the axes on the console:
 
     if (step % 256 == 0)
     {
-      force /= ( (3.0 * ( (double) NUM_SPHERES) ) );
-      force = sqrt(force);
       printf("step: %lu force: %e \n", step, force);
     }
   }
