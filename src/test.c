@@ -1,10 +1,10 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <math.h>
-#include <time.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <string.h>
+#include <stdio.h>		// for console and file logging purposes
+#include <stdint.h>		// used by xorshift() pseudo-random number generator
+#include <math.h>		// needed by nrand() pseudo-random number generator
+#include <time.h>		// provides system time(), used for seeding rand()
+#include <sys/types.h>		// required by getpid(), we use the process id for seeding
+#include <unistd.h>		// also required by getpid()
+#include <string.h>		// for string comparison util strcmp()
 
 #include "sphere.h"
 #include "system.h"
@@ -40,6 +40,7 @@ void test_xorshift64();
 void test_nrand();
 void test_sha512sum();
 void test_info();
+void test_bds();
 
 int main ()
 {
@@ -54,6 +55,7 @@ int main ()
   test_equilibration();
   test_xorshift64();
   test_nrand();
+  test_bds();
 //disabled tests:
 //test_force();		// we can safely disable this test at this point
 //test_force2();	// disables the equilibration run for a pair of particles
@@ -1902,7 +1904,7 @@ void test_equilibration ()
     force /= ( (3.0 * ( (double) NUM_SPHERES) ) );
     force = sqrt(force);
 
-    double const tol = 9.5367431640625e-07;
+    double const tol = 7.450580596923828e-09;
     if (force < tol)
     {
       break;
@@ -1966,8 +1968,8 @@ void test_xorshift64 ()
 {
   size_t fails = 0;
   int64_t state[] = { 0xffffffffffffffff };		// -1
-  uint64_t const period = 0xffffffffffffffff;		// 2^64 - 1
-  printf("xorshift64() period: %lu \n", period);
+//uint64_t const period = 0xffffffffffffffff;		// 2^64 - 1
+//printf("xorshift64() period: %lu \n", period);
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     double const r = xorshift64(state);
@@ -2019,7 +2021,7 @@ void test_sha512sum ()
   FILE* pipe = popen("sha512sum positions.txt", "r");
   if (pipe == NULL)
   {
-    printf("test-sha512sum(): failed read sha512sum\n");
+    printf("test_sha512sum(): failed read sha512sum\n");
     return;
   }
 
@@ -2030,6 +2032,256 @@ void test_sha512sum ()
 
   pclose(pipe);
   printf("test-sha512sum(): succeeded in getting the sha512sum of positions.txt\n");
+}
+
+
+void force_stochastic (uint64_t* restrict state, double* restrict f_x)
+{
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    f_x[i] = nrand(state);
+  }
+}
+
+
+void shift_stochastic (double* restrict x, const double* restrict f_x)
+{
+  double const dt = TIME_STEP;
+  double const mobility = sqrt(2.0 * dt);
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    x[i] += (mobility * f_x[i]);
+  }
+}
+
+
+// computes the stochastic forces
+void forces_stochastic (uint64_t* state, double* f_x, double* f_y, double* f_z)
+{
+  force_stochastic(state, f_x);
+  force_stochastic(state, f_y);
+  force_stochastic(state, f_z);
+}
+
+
+// shifts the particle positions by the effect of the Stochastic forces
+void updates_stochastic(double* restrict x,
+			double* restrict y,
+			double* restrict z,
+			const double* restrict f_x,
+			const double* restrict f_y,
+			const double* restrict f_z)
+{
+  shift_stochastic(x, f_x);
+  shift_stochastic(y, f_y);
+  shift_stochastic(z, f_z);
+}
+
+
+// gets the particle positions
+int getpos (double* x, double* y, double* z)
+{
+  const char fname[] = "stable.txt";
+  FILE* file = fopen(fname, "r");
+  if (file == NULL)
+  {
+    printf("test_bds(): IO ERROR with file %s", fname);
+    return FAILURE;
+  }
+
+  // iterators:
+
+  double* xit = x;
+  double* yit = y;
+  double* zit = z;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    int const numit = fscanf(file, "%lf %lf %lf \n", xit, yit, zit);
+    if (numit != 3)
+    {
+      fclose(file);
+      printf("test_bds(): unexpected IO Error with %s \n", fname);
+      return FAILURE;
+    }
+    ++xit;
+    ++yit;
+    ++zit;
+  }
+
+  fclose(file);
+
+  return SUCCESS;
+}
+
+
+double minval (const double* x)
+{
+  double min = INFINITY;
+  for (size_t i = 0; i != SIZE; ++i)
+  {
+    if (x[i] < min)
+    {
+      min = x[i];
+    }
+  }
+  return min;
+}
+
+
+double maxval (const double* x)
+{
+  double max = -INFINITY;
+  for (size_t i = 0; i != SIZE; ++i)
+  {
+    if (x[i] > max)
+    {
+      max = x[i];
+    }
+  }
+  return max;
+}
+
+
+// this method takes into account how vectors are stored in spheres
+double vmax (const double* x)
+{
+  double max = -INFINITY;
+  for (size_t i = 0; i != (3 * SIZE); ++i)
+  {
+    if (x[i] > max)
+    {
+      max = x[i];
+    }
+  }
+  return max;
+}
+
+
+// conducts a BDS test run
+void test_bds ()
+{
+  if (getinfo() == FAILURE)
+  {
+    return;
+  }
+
+  // seeds the xorshift64() prng
+  uint64_t state[] = { 0xffffffffffffffff };
+  seed(state);
+
+  sphere_t* spheres = create();
+
+  double* x = spheres -> x;
+  double* y = spheres -> y;
+  double* z = spheres -> z;
+  double* f_x = spheres -> f_x;
+  double* f_y = spheres -> f_y;
+  double* f_z = spheres -> f_z;
+  double* f = spheres -> tmp;
+  double* d = spheres -> temp;
+  double* mask = spheres -> mask;
+
+  if (getpos(x, y, z) == FAILURE)
+  {
+    spheres = destroy(spheres);
+    return;
+  }
+
+  // executes the BDS integrator
+
+  bool failed = false;
+  size_t const steps = 16777216;
+  for (size_t step = 0; step != steps; ++step)
+  {
+    // zeroes the net force on particles:
+
+    zeros(f_x);
+    zeros(f_y);
+    zeros(f_z);
+
+    // updates the particle positions by the action of the determinstic forces:
+
+    resultant2(x, y, z, f_x, f_y, f_z, f, d, mask);
+    updates(x, y, z, f_x, f_y, f_z);
+
+    // logs the maximum deterministic force:
+
+    if (step % 256 == 0)
+    {
+      const double* f = f_x;
+      const double* vector = f;
+      const char fmt[] = "step: %lu max-interaction-force: %.16e \n";
+      printf(fmt, step, vmax(vector) );
+    }
+
+    // updates the particle positions by the action of the Stochastic forces:
+
+    forces_stochastic(state, f_x, f_y, f_z);
+    updates_stochastic(x, y, z, f_x, f_y, f_z);
+
+    // applies periodic boundary conditions to the positions of the particles:
+
+    pbcs(x, y, z, f, d, mask);
+
+    // logs the maximum stochastic force:
+
+    if (step % 256 == 0)
+    {
+      const double* f = f_x;
+      const double* vector = f;
+      const char fmt[] = "step: %lu max-stochatic-force: %.16e \n";
+      printf(fmt, step, vmax(vector) );
+    }
+
+    // checks for out-of-bounds instances:
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      if (x[i] < -LIMIT || x[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      if (y[i] < -LIMIT || y[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    for (size_t i = 0; i != NUM_SPHERES; ++i)
+    {
+      if (z[i] < -LIMIT || z[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    if (failed)
+    {
+      printf("xmin: %+.16e xmax: %+.16e \n", minval(x), maxval(x));
+      printf("ymin: %+.16e ymax: %+.16e \n", minval(y), maxval(y));
+      printf("zmin: %+.16e zmax: %+.16e \n", minval(z), maxval(z));
+      break;
+    }
+  }
+
+  printf("bds-test[0]: ");
+  if (failed)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  spheres = destroy(spheres);
 }
 
 
