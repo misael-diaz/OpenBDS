@@ -4,7 +4,10 @@
 *.swp
 *.mod
 *.bin
+*.pov
+*.png
 *.o
+*backup*
 # old
 old/TODO.txt
 old/Vector.for-flipped
