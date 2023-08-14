@@ -1765,7 +1765,7 @@ void pbcs(double* restrict x,
 int logger (const sphere_t* spheres, const size_t step)
 {
   char fname[256];
-  sprintf(fname, "run/equilibration/data/positions/positions-%lu.txt", step);
+  sprintf(fname, "run/equilibration/data/positions/positions-%032lu.txt", step);
   FILE* file = fopen(fname, "w");
   if (file == NULL)
   {
