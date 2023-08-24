@@ -116,7 +116,7 @@ sphere_t* create ()
   spheres -> tmp = spheres -> t_z + size_t_z;
   spheres -> temp = spheres -> tmp + size_tmp;
   spheres -> mask = spheres -> temp + size_temp;
-  spheres -> list = spheres -> mask + size_mask;
+  spheres -> list = ( (int64_t*) (spheres -> mask + size_mask) );
   spheres -> id = spheres -> list + size_list;
 
   double* x = spheres -> x;
