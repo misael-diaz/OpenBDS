@@ -30,7 +30,7 @@ FCOPT = -g -Wall -Wextra -Waliasing -Wsurprising -Warray-bounds -Warray-temporar
 
 # clang options
 CCOPT = -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log
-CCOPT = -O2 -mavx -ftree-vectorize -fopt-info-optimized=opts.log
+CCOPT = -O2 -mavx2 -ftree-vectorize -fopt-info-optimized=opts.log
 CCOPT = -g -Wall -Wextra -O0
 
 # libraries
