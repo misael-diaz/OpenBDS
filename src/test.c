@@ -16,6 +16,7 @@
 #define SUCCESS ( (int) 0x00000000 )
 #define MIN_NUM_STEPS ( (size_t) 0x0000000000010000 )
 #define TIME_STEP ( 1.0 / ( (double) MIN_NUM_STEPS ) )
+#define CLAMP (0.0625 / TIME_STEP)
 #define LOG true
 
 typedef union
@@ -41,6 +42,11 @@ void test_nrand();
 void test_sha512sum();
 void test_info();
 void test_bds();
+
+void clamp (double* restrict force,
+	    double* restrict tmp,
+	    double* restrict temp,
+	    double* restrict bitmask);
 
 int main ()
 {
@@ -1379,6 +1385,8 @@ void test_force ()
   double d[NUM_SPHERES];
   double r[NUM_SPHERES];
   double f[NUM_SPHERES];
+  double t[NUM_SPHERES];
+  double res[NUM_SPHERES];
   double mask[NUM_SPHERES];
 
   zeros(d);
@@ -1386,7 +1394,7 @@ void test_force ()
   zeros(f);
   zeros(mask);
 
-  r[0] = 0.00;
+  r[0] = 0.50;
   r[1] = 1.00;
   r[2] = 1.50;
   r[3] = 2.00;
@@ -1412,7 +1420,15 @@ void test_force ()
   for (size_t i = 0; i != 16; ++i)
   {
     double const force = f[i] * d[i];
-    printf("r: %e f: %+e \n", -d[i], force);
+    res[i] = force;
+  }
+
+  // clamps the force so that it does not exceeds its maximum value `CLAMP'
+  clamp(res, r, t, mask);
+
+  for (size_t i = 0; i != 16; ++i)
+  {
+    printf("r: %e f: %+e \n", -d[i], res[i]);
   }
 }
 
@@ -1607,11 +1623,45 @@ void resultant2(const double* restrict x,
     pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
   }
 
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = -LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     double const offset_x = -LENGTH;
     double const offset_y = 0;
-    double const offset_z = 0;
+    double const offset_z = -LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = 0;
+    double const offset_z = -LENGTH;
     pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
   }
 
@@ -1619,6 +1669,40 @@ void resultant2(const double* restrict x,
   {
     double const offset_x = +LENGTH;
     double const offset_y = 0;
+    double const offset_z = -LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = +LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = +LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = +LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = -LENGTH;
     double const offset_z = 0;
     pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
   }
@@ -1633,7 +1717,41 @@ void resultant2(const double* restrict x,
 
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
-    double const offset_x = 0;
+    double const offset_x = +LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = 0;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = 0;
+    double const offset_z = 0;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+//for (size_t i = 0; i != NUM_SPHERES; ++i)
+//{
+//  double const offset_x = 0;
+//  double const offset_y = 0;
+//  double const offset_z = 0;
+//  pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+//}
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = 0;
+    double const offset_z = 0;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = -LENGTH;
     double const offset_y = +LENGTH;
     double const offset_z = 0;
     pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
@@ -1642,8 +1760,50 @@ void resultant2(const double* restrict x,
   for (size_t i = 0; i != NUM_SPHERES; ++i)
   {
     double const offset_x = 0;
+    double const offset_y = +LENGTH;
+    double const offset_z = 0;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = +LENGTH;
+    double const offset_z = 0;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = -LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = -LENGTH;
     double const offset_y = 0;
-    double const offset_z = -LENGTH;
+    double const offset_z = +LENGTH;
     pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
   }
 
@@ -1651,6 +1811,39 @@ void resultant2(const double* restrict x,
   {
     double const offset_x = 0;
     double const offset_y = 0;
+    double const offset_z = +LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = 0;
+    double const offset_z = +LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = +LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = +LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = +LENGTH;
     double const offset_z = +LENGTH;
     pairs(i, x, y, z, offset_x, offset_y, offset_z, f_x, f_y, f_z, tmp, temp, mask);
   }
@@ -1798,7 +1991,7 @@ void test_equilibration ()
   {
     if (logger(spheres, 0) == FAILURE)
     {
-      const char exports[] = "run/equilibration/data/positions/positions";
+      const char exports[] = "run/equilibration/data/positions/";
       printf("test-equilibration(): data exports directory %s does not exist\n", exports);
       spheres = destroy(spheres);
       return;
@@ -2085,7 +2278,7 @@ int getpos (double* x, double* y, double* z)
   FILE* file = fopen(fname, "r");
   if (file == NULL)
   {
-    printf("test_bds(): IO ERROR with file %s", fname);
+    printf("test-bds(): IO ERROR with file %s", fname);
     return FAILURE;
   }
 
@@ -2100,7 +2293,7 @@ int getpos (double* x, double* y, double* z)
     if (numit != 3)
     {
       fclose(file);
-      printf("test_bds(): unexpected IO Error with %s \n", fname);
+      printf("test-bds(): unexpected IO Error with %s \n", fname);
       return FAILURE;
     }
     ++xit;
@@ -2157,6 +2350,83 @@ double vmax (const double* x)
 }
 
 
+// gets the 11-bits that comprise the exponent of a double precision floating-point number
+uint64_t get_exp (uint64_t const x)
+{
+  return ( (x >> 52) & 0x7ff );
+}
+
+
+// yields bitmask of ones if abs(x) < 1, zeros otherwise
+uint64_t fbitmask (uint64_t const x)
+{
+  uint64_t const m = ~(0x3ff);
+  // masks the "high" bits that characterize 64-bit floats with exponent n > 0:
+  uint64_t const hi =
+    ( ( ( ( ( ( (get_exp(x) & m) & 0x7ff ) + (m & 0x7ff) ) & 0x800 ) >> 11 ) + 1 ) & 1 );
+  // masks the "low" bits that characterize 64-bit floats with exponents n < 0:
+  uint64_t const lo =
+    ( ( ( ( ( (get_exp(x) & 0x3ff) ^ 0x3ff ) & 0x3ff ) + 0x3ff ) & 0x400 ) >> 10 );
+  // Note: there are 64-bit floats with "low" bits set with exponent n > 0, so we have to
+  // bitwise AND to make sure sure that the "high" bits are not set (that is, that x < 1).
+  return ( (hi & lo) );
+}
+
+
+uint64_t twos_complement (uint64_t const x)
+{
+  return (~x + 1);
+}
+
+
+void mask_force (const double* restrict force, double* restrict bitmask)
+{
+  alias_t* b = bitmask;
+  const alias_t* fp = force;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    b[i].bin = twos_complement( fbitmask(fp[i].bin) );
+  }
+}
+
+
+void clamp (double* restrict force,
+	    double* restrict tmp,
+	    double* restrict temp,
+	    double* restrict bitmask)
+{
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    double const c = (1.0 / CLAMP);
+    temp[i] = c * force[i];
+  }
+
+  mask_force(temp, bitmask);
+
+  alias_t* t = temp;
+  alias_t* f = force;
+  alias_t* b = bitmask;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    t[i].bin = (f[i].bin & b[i].bin);
+  }
+
+  alias_t* a = tmp;
+  alias_t const max = { .data = CLAMP };
+  // clamps with the maximum force in the same sense as the (original) force
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    uint64_t const MSBMASK = 0x8000000000000000;
+    a[i].bin = ( (f[i].bin & MSBMASK) | ( max.bin & (~b[i].bin) ) );
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    force[i] = (tmp[i] + temp[i]);
+  }
+}
+
+
 // conducts a BDS test run
 void test_bds ()
 {
@@ -2170,6 +2440,17 @@ void test_bds ()
   seed(state);
 
   sphere_t* spheres = create();
+
+  if (LOG)
+  {
+    if (logger(spheres, 0) == FAILURE)
+    {
+      const char exports[] = "run/equilibration/data/positions/positions";
+      printf("test-bds(): data exports directory %s does not exist\n", exports);
+      spheres = destroy(spheres);
+      return;
+    }
+  }
 
   double* x = spheres -> x;
   double* y = spheres -> y;
@@ -2190,10 +2471,18 @@ void test_bds ()
   // executes the BDS integrator
 
   bool failed = false;
-  size_t const steps = 16777216;
+  size_t const steps = 16 * MIN_NUM_STEPS;
   for (size_t step = 0; step != steps; ++step)
   {
-    // zeroes the net force on particles:
+    if (LOG)
+    {
+      if (step % 16 == 0)
+      {
+	logger(spheres, step);
+      }
+    }
+
+    // zeroes the net force on the particles:
 
     zeros(f_x);
     zeros(f_y);
@@ -2202,16 +2491,26 @@ void test_bds ()
     // updates the particle positions by the action of the determinstic forces:
 
     resultant2(x, y, z, f_x, f_y, f_z, f, d, mask);
+    clamp(f_x, f, d, mask);
+    clamp(f_y, f, d, mask);
+    clamp(f_z, f, d, mask);
     updates(x, y, z, f_x, f_y, f_z);
 
     // logs the maximum deterministic force:
 
+    /*
     if (step % 256 == 0)
     {
       const double* f = f_x;
       const double* vector = f;
       const char fmt[] = "step: %lu max-interaction-force: %.16e \n";
       printf(fmt, step, vmax(vector) );
+    }
+    */
+
+    if (vmax(f_x) == CLAMP)
+    {
+      printf("test-bds(): clamped force detected in step %lu\n", step);
     }
 
     // updates the particle positions by the action of the Stochastic forces:
@@ -2225,6 +2524,7 @@ void test_bds ()
 
     // logs the maximum stochastic force:
 
+    /*
     if (step % 256 == 0)
     {
       const double* f = f_x;
@@ -2232,6 +2532,7 @@ void test_bds ()
       const char fmt[] = "step: %lu max-stochatic-force: %.16e \n";
       printf(fmt, step, vmax(vector) );
     }
+    */
 
     // checks for out-of-bounds instances:
 
@@ -2279,6 +2580,20 @@ void test_bds ()
   else
   {
     printf("PASS\n");
+  }
+
+  if (failed)
+  {
+    spheres = destroy(spheres);
+    return;
+  }
+
+  if (LOG)
+  {
+    if (steps % 16 == 0)
+    {
+      logger(spheres, steps);
+    }
   }
 
   spheres = destroy(spheres);
@@ -2354,3 +2669,7 @@ References:
 //
 // Note that the test does not take into account the periodic boundaries for simplicity;
 // later I shall add more tests that take this into consideration.
+
+
+// TODO:
+// [x] consider all possible images when computing the interparticle forces
