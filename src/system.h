@@ -7,7 +7,7 @@
 #define RADIUS 1.0
 #define CONTACT (2.0 * RADIUS)
 #define CONTACT2 (CONTACT * CONTACT)
-#define RANGE (1.25 * CONTACT)
+#define RANGE (4.0 * CONTACT)
 #define RANGE2 (RANGE * RANGE)
 #define EPSILON 1.0
 
