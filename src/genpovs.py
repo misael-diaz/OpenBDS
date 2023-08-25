@@ -50,6 +50,7 @@ def getBDSParams():
 # defines the header for the povray files (same for each)
 params = getBDSParams()
 lim = params['LIMIT']
+t = edge_thickness = 0.0625
 header = (
     f'#version 3.7;\n'
     f'#include "colors.inc"\n'
