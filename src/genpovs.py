@@ -61,7 +61,7 @@ header = (
     f'light_source {{ <128, 128, 128> color 1.8 * White }}\n'
     f'camera {{\n'
     f'sky <0, 0, 1>\n'
-    f'angle 40\n'
+    f'angle 50\n'
     f'right <-4/3, 0, 0>\n'
     f'location <{4 * lim}, 0, {2 * lim}>\n'
     f'look_at <{lim}, 0, 0>\n'
