@@ -2474,7 +2474,7 @@ void test_bds ()
   {
     if (logger(spheres, 0) == FAILURE)
     {
-      const char exports[] = "run/equilibration/data/positions/positions";
+      const char exports[] = "run/equilibration/data/positions/";
       printf("test-bds(): data exports directory %s does not exist\n", exports);
       spheres = destroy(spheres);
       return;
