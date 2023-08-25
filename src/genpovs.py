@@ -67,7 +67,7 @@ header = (
     f'location <{4 * lim}, 0, {2 * lim}>\n'
     f'look_at <0, 0, 0>\n'
     f'}}\n'
-    f'// system box edges\n'
+    f'//system box edges:\n'
     f'cylinder {{<{-lim},{-lim},{-lim}>, <{+lim},{-lim},{-lim}> {t} pigment {{White}}}}\n'
     f'cylinder {{<{-lim},{+lim},{-lim}>, <{+lim},{+lim},{-lim}> {t} pigment {{White}}}}\n'
     f'cylinder {{<{-lim},{-lim},{+lim}>, <{+lim},{-lim},{+lim}> {t} pigment {{White}}}}\n'
