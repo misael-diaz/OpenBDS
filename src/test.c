@@ -2501,6 +2501,15 @@ void test_bds ()
     return;
   }
 
+  const char fname[] = "positions.txt";
+  FILE* fread = fopen(fname, "r");
+  if (fread != NULL)
+  {
+    const char errmsg[] = "test-bds(): this run would have overwritten %s\n";
+    fprintf(stderr, errmsg, fname);
+    return;
+  }
+
   const char fmsd[] = "run/bds/data/msd/msd.txt";
   if (LOG)
   {
@@ -2720,8 +2729,24 @@ void test_bds ()
     }
   }
 
+  FILE* fpos = fopen(fname, "w");
+  if (fpos == NULL)
+  {
+    const char errmsg[] = "test-bds(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, fname, strerror(errno));
+    spheres = destroy(spheres);
+    fclose(file);
+    return;
+  }
+
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    fprintf(fpos, "%+.16e %+.16e %+.16e\n", x[i], y[i], z[i]);
+  }
+
   spheres = destroy(spheres);
   fclose(file);
+  fclose(fpos);
 }
 
 
