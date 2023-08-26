@@ -2034,6 +2034,9 @@ void test_equilibration ()
     // computes the net force on the particles (considers periodicity):
 
     resultant2(x, y, z, f_x, f_y, f_z, f, d, mask);
+    clamp(f_x, f, d, mask);
+    clamp(f_y, f, d, mask);
+    clamp(f_z, f, d, mask);
 
     // gets the force along the axes for logging purposes
 
