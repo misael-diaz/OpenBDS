@@ -2014,7 +2014,7 @@ void test_equilibration ()
   // performs an equilibration run:
 
   bool failed = false;
-  size_t const steps = 16 * MIN_NUM_STEPS;
+  size_t const steps = 256 * MIN_NUM_STEPS;
   for (size_t step = 0; step != steps; ++step)
   {
     if (LOG)
@@ -2034,6 +2034,9 @@ void test_equilibration ()
     // computes the net force on the particles (considers periodicity):
 
     resultant2(x, y, z, f_x, f_y, f_z, f, d, mask);
+    clamp(f_x, f, d, mask);
+    clamp(f_y, f, d, mask);
+    clamp(f_z, f, d, mask);
 
     // gets the force along the axes for logging purposes
 
@@ -2529,7 +2532,7 @@ void test_bds ()
 
   double msd = 0;
   bool failed = false;
-  size_t const steps = 16 * MIN_NUM_STEPS;
+  size_t const steps = 256 * MIN_NUM_STEPS;
   for (size_t step = 0; step != steps; ++step)
   {
     if (LOG)
