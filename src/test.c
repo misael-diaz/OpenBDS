@@ -2014,7 +2014,7 @@ void test_equilibration ()
   // performs an equilibration run:
 
   bool failed = false;
-  size_t const steps = 16 * MIN_NUM_STEPS;
+  size_t const steps = 256 * MIN_NUM_STEPS;
   for (size_t step = 0; step != steps; ++step)
   {
     if (LOG)
@@ -2529,7 +2529,7 @@ void test_bds ()
 
   double msd = 0;
   bool failed = false;
-  size_t const steps = 16 * MIN_NUM_STEPS;
+  size_t const steps = 256 * MIN_NUM_STEPS;
   for (size_t step = 0; step != steps; ++step)
   {
     if (LOG)
