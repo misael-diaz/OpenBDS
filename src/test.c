@@ -5,6 +5,7 @@
 #include <sys/types.h>		// required by getpid(), we use the process id for seeding
 #include <unistd.h>		// also required by getpid()
 #include <string.h>		// for string comparison util strcmp()
+#include <errno.h>		// for logging library functions and system calls errors
 
 #include "sphere.h"
 #include "system.h"
@@ -78,7 +79,8 @@ int getsha512sum (char* hash)
   FILE* file = fopen("stable.txt", "r");
   if (file == NULL)
   {
-    printf("getsha512sum(): stable.txt file missing\n");
+    const char errmsg[] = "getsha512sum(): IO ERROR with file stable.txt: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
     return FAILURE;
   }
   fclose(file);
@@ -86,14 +88,16 @@ int getsha512sum (char* hash)
   FILE* pipe = popen("sha512sum stable.txt", "r");
   if (pipe == NULL)
   {
-    printf("getsha512sum(): failed generate sha512sum\n");
+    const char errmsg[] = "getsha512sum(): failed to generate sha512sum: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
     return FAILURE;
   }
 
   if (fscanf(pipe, "%s", hash) != 1)
   {
     pclose(pipe);
-    printf("getsha512sum(): failed read sha512sum\n");
+    const char errmsg[] = "getsha512sum(): failed to read sha512sum: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
     return FAILURE;
   }
 
@@ -111,10 +115,12 @@ int info ()
     return FAILURE;
   }
 
-  FILE* file = fopen("params-bds.txt", "w");
+  const char fname[] = "params-bds.txt";
+  FILE* file = fopen(fname, "w");
   if (file == NULL)
   {
-    printf("info(): IO ERROR\n");
+    const char errmsg[] = "info(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, fname, strerror(errno));
     return FAILURE;
   }
 
@@ -145,10 +151,12 @@ int getinfo ()
     return FAILURE;
   }
 
-  FILE* file = fopen("params-bds.txt", "r");
+  const char fname[] = "params-bds.txt";
+  FILE* file = fopen(fname, "w");
   if (file == NULL)
   {
-    printf("getinfo(): IO ERROR\n");
+    const char errmsg[] = "getinfo(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, fname, strerror(errno));
     return FAILURE;
   }
 
@@ -166,105 +174,110 @@ int getinfo ()
   if (fscanf(file, "%s %lf",  key, limit) != 2)
   {
     fclose(file);
-    printf("getinfo(): unexpected IO ERROR while reading limit\n");
+    const char errmsg[] = "getinfo(): unexpected IO ERROR while reading `limit': %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
     return FAILURE;
   }
 
   if (keys(limit_key, key) != 0)
   {
     fclose(file);
-    printf("getinfo(): expected key %s but got %s \n", limit_key, key);
+    fprintf(stderr, "getinfo(): expected key %s but got %s\n", limit_key, key);
     return FAILURE;
   }
 
   if (fscanf(file, "%s %lf",  key, length) != 2)
   {
     fclose(file);
-    printf("getinfo(): unexpected IO ERROR while reading length\n");
+    const char errmsg[] = "getinfo(): unexpected IO ERROR while reading `length': %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
     return FAILURE;
   }
 
   if (keys(length_key, key) != 0)
   {
     fclose(file);
-    printf("getinfo(): expected key %s but got %s \n", length_key, key);
+    fprintf(stderr, "getinfo(): expected key %s but got %s\n", length_key, key);
     return FAILURE;
   }
 
   if (fscanf(file, "%s %lf",  key, time_step) != 2)
   {
     fclose(file);
-    printf("getinfo(): unexpected IO ERROR while reading time-step\n");
+    const char errmsg[] = "getinfo(): unexpected IO ERROR while reading time-step: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
     return FAILURE;
   }
 
   if (keys(time_step_key, key) != 0)
   {
     fclose(file);
-    printf("getinfo(): expected key %s but got %s \n", time_step_key, key);
+    fprintf(stderr, "getinfo(): expected key %s but got %s\n", time_step_key, key);
     return FAILURE;
   }
 
   if (fscanf(file, "%s %lu", key, num_spheres) != 2)
   {
     fclose(file);
-    printf("getinfo(): unexpected IO ERROR while reading the number of spheres\n");
+    const char errmsg[] = "getinfo(): unexpected IO ERROR while reading #spheres: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
     return FAILURE;
   }
 
   if (keys(num_spheres_key, key) != 0)
   {
     fclose(file);
-    printf("getinfo(): expected key %s but got %s \n", num_spheres_key, key);
+    fprintf(stderr, "getinfo(): expected key %s but got %s\n", num_spheres_key, key);
     return FAILURE;
   }
 
   if (fscanf(file, "%s %s", key, sha) != 2)
   {
     fclose(file);
-    printf("getinfo(): unexpected IO ERROR while reading sha512sum\n");
+    const char errmsg[] = "getinfo(): unexpected IO ERROR while reading sha512sum: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
     return FAILURE;
   }
 
   if (keys(sha512sum_key, key) != 0)
   {
     fclose(file);
-    printf("getinfo(): expected key %s but got %s \n", sha512sum_key, key);
+    fprintf(stderr, "getinfo(): expected key %s but got %s\n", sha512sum_key, key);
     return FAILURE;
   }
 
   if (*limit != LIMIT)
   {
     fclose(file);
-    printf("getinfo(): wrong LIMIT\n");
+    fprintf(stderr, "getinfo(): wrong LIMIT\n");
     return FAILURE;
   }
 
   if (*length != LENGTH)
   {
     fclose(file);
-    printf("getinfo(): wrong LENGTH\n");
+    fprintf(stderr, "getinfo(): wrong LENGTH\n");
     return FAILURE;
   }
 
   if (*time_step != TIME_STEP)
   {
     fclose(file);
-    printf("getinfo(): wrong TIME_STEP\n");
+    fprintf(stderr, "getinfo(): wrong TIME_STEP\n");
     return FAILURE;
   }
 
   if (*num_spheres != SIZE)
   {
     fclose(file);
-    printf("getinfo(): wrong NUM_SPHERES\n");
+    fprintf(stderr, "getinfo(): wrong NUM_SPHERES\n");
     return FAILURE;
   }
 
   if (strcmp(sha, hash) != 0)
   {
     fclose(file);
-    printf("getinfo(): detected differing sha512sums\n");
+    fprintf(stderr, "getinfo(): detected differing sha512sums\n");
     return FAILURE;
   }
 
@@ -971,7 +984,8 @@ void test_list2()
   FILE* file = fopen(fname, "r");
   if (file == NULL)
   {
-    printf("IO ERROR with file: %s \n", fname);
+    const char errmsg[] = "test-list2(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, fname, strerror(errno));
     return;
   }
 
@@ -987,7 +1001,8 @@ void test_list2()
     {
       fclose(file);
       // an error could happen if the number of spheres does not match the number of lines
-      printf("test_list2(): unexpected IO Error with %s \n", fname);
+      const char errmsg[] = "test-list2(): IO ERROR with file %s: %s\n";
+      fprintf(stderr, errmsg, fname, strerror(errno));
       return;
     }
     ++x;
@@ -1290,7 +1305,8 @@ void test_inrange ()
   FILE* file = fopen(fname, "r");
   if (file == NULL)
   {
-    printf("IO ERROR with file: %s \n", fname);
+    const char errmsg[] = "test-inrange(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, fname, strerror(errno));
     return;
   }
 
@@ -1307,7 +1323,8 @@ void test_inrange ()
     {
       fclose(file);
       // an error could happen if the number of spheres does not match the number of lines
-      printf("test_list2(): unexpected IO Error with %s \n", fname);
+      const char errmsg[] = "test-inrange(): IO ERROR with file %s: %s\n";
+      fprintf(stderr, errmsg, fname, strerror(errno));
       return;
     }
     ++x;
@@ -1967,6 +1984,8 @@ int logger (const sphere_t* spheres, const char* path, const size_t step)
   FILE* file = fopen(fname, "w");
   if (file == NULL)
   {
+    const char errmsg[] = "logger(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, fname, strerror(errno));
     return FAILURE;
   }
 
@@ -1995,7 +2014,6 @@ void test_equilibration ()
   {
     if (logger(spheres, exports, 0) == FAILURE)
     {
-      printf("test-equilibration(): data exports directory %s does not exist\n", exports);
       spheres = destroy(spheres);
       return;
     }
@@ -2021,7 +2039,11 @@ void test_equilibration ()
     {
       if (step % 16 == 0)
       {
-	logger(spheres, exports, step);
+	if (logger(spheres, exports, step) == FAILURE)
+	{
+	  spheres = destroy(spheres);
+	  return;
+	}
       }
     }
 
@@ -2139,7 +2161,8 @@ void test_equilibration ()
   FILE* file = fopen(fname, "w");
   if (file == NULL)
   {
-    printf("IO ERROR with file %s\n", fname);
+    const char errmsg[] = "test-equilibration(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, fname, strerror(errno));
     spheres = destroy(spheres);
     return;
   }
@@ -2220,12 +2243,18 @@ void test_sha512sum ()
   FILE* pipe = popen("sha512sum positions.txt", "r");
   if (pipe == NULL)
   {
-    printf("test_sha512sum(): failed read sha512sum\n");
+    const char errmsg[] = "test-sha512sum(): IO ERROR: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
     return;
   }
 
   char sha[256];
-  fscanf(pipe, "%s", sha);
+  if (fscanf(pipe, "%s", sha) != 1)
+  {
+    const char errmsg[] = "test-sha512sum(): IO ERROR: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
+    return;
+  }
 
 //printf("%s\n", sha);
 
@@ -2284,7 +2313,8 @@ int getpos (double* x, double* y, double* z)
   FILE* file = fopen(fname, "r");
   if (file == NULL)
   {
-    printf("test-bds(): IO ERROR with file %s", fname);
+    const char errmsg[] = "getpos(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, fname, strerror(errno));
     return FAILURE;
   }
 
@@ -2299,7 +2329,8 @@ int getpos (double* x, double* y, double* z)
     if (numit != 3)
     {
       fclose(file);
-      printf("test-bds(): unexpected IO Error with %s \n", fname);
+      const char errmsg[] = "getpos(): unexpected IO ERROR with file %s: %s\n";
+      fprintf(stderr, errmsg, fname, strerror(errno));
       return FAILURE;
     }
     ++xit;
@@ -2485,7 +2516,8 @@ void test_bds ()
   FILE* file = fopen(fmsd, "w");
   if (file == NULL)
   {
-    printf("test-bds(): IO Error with file %s\n", fmsd);
+    const char errmsg[] = "test-bds(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, fmsd, strerror(errno));
     return;
   }
 
@@ -2500,8 +2532,8 @@ void test_bds ()
   {
     if (logger(spheres, exports, 0) == FAILURE)
     {
-      printf("test-bds(): data exports directory %s does not exist\n", exports);
       spheres = destroy(spheres);
+      fclose(file);
       return;
     }
   }
@@ -2525,6 +2557,7 @@ void test_bds ()
   if (getpos(x, y, z) == FAILURE)
   {
     spheres = destroy(spheres);
+    fclose(file);
     return;
   }
 
@@ -2539,7 +2572,12 @@ void test_bds ()
     {
       if (step % 16 == 0)
       {
-	logger(spheres, exports, step);
+	if (logger(spheres, exports, step) == FAILURE)
+	{
+	  spheres = destroy(spheres);
+	  fclose(file);
+	  return;
+	}
       }
     }
 
@@ -2665,6 +2703,7 @@ void test_bds ()
   if (failed)
   {
     spheres = destroy(spheres);
+    fclose(file);
     return;
   }
 
@@ -2672,7 +2711,12 @@ void test_bds ()
   {
     if (steps % 16 == 0)
     {
-      logger(spheres, exports, steps);
+      if (logger(spheres, exports, steps) == FAILURE)
+      {
+	spheres = destroy(spheres);
+	fclose(file);
+	return;
+      }
     }
   }
 
