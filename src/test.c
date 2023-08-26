@@ -2467,6 +2467,25 @@ void test_bds ()
     return;
   }
 
+  const char fmsd[] = "run/bds/data/msd/msd.txt";
+  if (LOG)
+  {
+    FILE* file = fopen(fmsd, "r");
+    if (file != NULL)
+    {
+      printf("test-bds(): MSD data %s would have been overwritten by this run\n", fmsd);
+      fclose(file);
+      return;
+    }
+  }
+
+  FILE* file = fopen(fmsd, "w");
+  if (file == NULL)
+  {
+    printf("test-bds(): IO Error with file %s\n", fmsd);
+    return;
+  }
+
   // seeds the xorshift64() prng
   uint64_t state[] = { 0xffffffffffffffff };
   seed(state);
@@ -2573,6 +2592,13 @@ void test_bds ()
 
     msd += MSD(t_x, r_x, f);
 
+    if (LOG)
+    {
+      double const dt = TIME_STEP;
+      double const time = ( (double) (step + 1) ) * dt;
+      fprintf(file, "%.16e %.16e\n", time, msd);
+    }
+
     // logs the maximum stochastic force:
 
     /*
@@ -2648,6 +2674,7 @@ void test_bds ()
   }
 
   spheres = destroy(spheres);
+  fclose(file);
 }
 
 
