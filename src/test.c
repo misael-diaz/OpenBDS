@@ -55,8 +55,6 @@ int main ()
   test_partition_masking();
   test_unlimited_masking();
   test_pbc();
-  test_list();
-  test_list2();
   test_overlap();
   test_inrange();
   test_equilibration();
@@ -64,6 +62,8 @@ int main ()
   test_nrand();
   test_bds();
 //disabled tests:
+//test_list();		// note that we are not (yet) using neighbor-lists
+//test_list2();		// if uncommented it will overwrite an existing `positions.txt'
 //test_force();		// we can safely disable this test at this point
 //test_force2();	// disables the equilibration run for a pair of particles
 //test_force3();	// disables the equilibration run for two pairs of particles
