@@ -1957,10 +1957,13 @@ void pbcs(double* restrict x,
 
 
 // logs the current (determined by the step id) particle positions to a plain text file
-int logger (const sphere_t* spheres, const size_t step)
+int logger (const sphere_t* spheres, const char* path, const size_t step)
 {
+  char data[80];
+  sprintf(data, "positions-%032lu.txt", step);
   char fname[256];
-  sprintf(fname, "run/equilibration/data/positions/positions-%032lu.txt", step);
+  strcpy(fname, path);
+  strcat(fname, data);
   FILE* file = fopen(fname, "w");
   if (file == NULL)
   {
@@ -1987,11 +1990,11 @@ void test_equilibration ()
   // sets the particles at grid locations (or lattice structure):
 
   sphere_t* spheres = create();
+  const char exports[] = "run/equilibration/data/positions/";
   if (LOG)
   {
-    if (logger(spheres, 0) == FAILURE)
+    if (logger(spheres, exports, 0) == FAILURE)
     {
-      const char exports[] = "run/equilibration/data/positions/";
       printf("test-equilibration(): data exports directory %s does not exist\n", exports);
       spheres = destroy(spheres);
       return;
@@ -2018,7 +2021,7 @@ void test_equilibration ()
     {
       if (step % 16 == 0)
       {
-	logger(spheres, step);
+	logger(spheres, exports, step);
       }
     }
 
@@ -2470,11 +2473,11 @@ void test_bds ()
 
   sphere_t* spheres = create();
 
+  const char exports[] = "run/bds/data/positions/";
   if (LOG)
   {
-    if (logger(spheres, 0) == FAILURE)
+    if (logger(spheres, exports, 0) == FAILURE)
     {
-      const char exports[] = "run/equilibration/data/positions/";
       printf("test-bds(): data exports directory %s does not exist\n", exports);
       spheres = destroy(spheres);
       return;
@@ -2514,7 +2517,7 @@ void test_bds ()
     {
       if (step % 16 == 0)
       {
-	logger(spheres, step);
+	logger(spheres, exports, step);
       }
     }
 
@@ -2640,7 +2643,7 @@ void test_bds ()
   {
     if (steps % 16 == 0)
     {
-      logger(spheres, steps);
+      logger(spheres, exports, steps);
     }
   }
 
