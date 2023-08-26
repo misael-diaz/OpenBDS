@@ -1957,10 +1957,13 @@ void pbcs(double* restrict x,
 
 
 // logs the current (determined by the step id) particle positions to a plain text file
-int logger (const sphere_t* spheres, const size_t step)
+int logger (const sphere_t* spheres, const char* path, const size_t step)
 {
+  char data[80];
+  sprintf(data, "positions-%032lu.txt", step);
   char fname[256];
-  sprintf(fname, "run/equilibration/data/positions/positions-%032lu.txt", step);
+  strcpy(fname, path);
+  strcat(fname, data);
   FILE* file = fopen(fname, "w");
   if (file == NULL)
   {
@@ -1987,11 +1990,11 @@ void test_equilibration ()
   // sets the particles at grid locations (or lattice structure):
 
   sphere_t* spheres = create();
+  const char exports[] = "run/equilibration/data/positions/";
   if (LOG)
   {
-    if (logger(spheres, 0) == FAILURE)
+    if (logger(spheres, exports, 0) == FAILURE)
     {
-      const char exports[] = "run/equilibration/data/positions/";
       printf("test-equilibration(): data exports directory %s does not exist\n", exports);
       spheres = destroy(spheres);
       return;
@@ -2018,7 +2021,7 @@ void test_equilibration ()
     {
       if (step % 16 == 0)
       {
-	logger(spheres, step);
+	logger(spheres, exports, step);
       }
     }
 
@@ -2427,11 +2430,59 @@ void clamp (double* restrict force,
 }
 
 
+// gets the Mean Squared Displacement from the particle positions at time t and t + dt
+double MSD (const double* restrict r1, const double* restrict r2, double* restrict msd)
+{
+  size_t const size = NUM_SPHERES;
+  const double* x1 = r1;
+  const double* y1 = x1 + size;
+  const double* z1 = y1 + size;
+  const double* x2 = r2;
+  const double* y2 = x2 + size;
+  const double* z2 = y2 + size;
+
+  for (size_t i = 0; i != size; ++i)
+  {
+    msd[i] = (x1[i] - x2[i]) * (x1[i] - x2[i]) +
+	     (y1[i] - y2[i]) * (y1[i] - y2[i]) +
+	     (z1[i] - z2[i]) * (z1[i] - z2[i]);
+  }
+
+  double ret = 0;
+  for (size_t i = 0; i != size; ++i)
+  {
+    ret += msd[i];
+  }
+
+  ret /= ( 3.0 * ( (double) NUM_SPHERES ) );
+  return ret;
+}
+
+
 // conducts a BDS test run
 void test_bds ()
 {
   if (getinfo() == FAILURE)
   {
+    return;
+  }
+
+  const char fmsd[] = "run/bds/data/msd/msd.txt";
+  if (LOG)
+  {
+    FILE* file = fopen(fmsd, "r");
+    if (file != NULL)
+    {
+      printf("test-bds(): MSD data %s would have been overwritten by this run\n", fmsd);
+      fclose(file);
+      return;
+    }
+  }
+
+  FILE* file = fopen(fmsd, "w");
+  if (file == NULL)
+  {
+    printf("test-bds(): IO Error with file %s\n", fmsd);
     return;
   }
 
@@ -2441,11 +2492,11 @@ void test_bds ()
 
   sphere_t* spheres = create();
 
+  const char exports[] = "run/bds/data/positions/";
   if (LOG)
   {
-    if (logger(spheres, 0) == FAILURE)
+    if (logger(spheres, exports, 0) == FAILURE)
     {
-      const char exports[] = "run/equilibration/data/positions/positions";
       printf("test-bds(): data exports directory %s does not exist\n", exports);
       spheres = destroy(spheres);
       return;
@@ -2455,9 +2506,15 @@ void test_bds ()
   double* x = spheres -> x;
   double* y = spheres -> y;
   double* z = spheres -> z;
+  double* r_x = spheres -> r_x;
+  double* r_y = spheres -> r_y;
+  double* r_z = spheres -> r_z;
   double* f_x = spheres -> f_x;
   double* f_y = spheres -> f_y;
   double* f_z = spheres -> f_z;
+  double* t_x = spheres -> t_x;
+  double* t_y = spheres -> t_y;
+  double* t_z = spheres -> t_z;
   double* f = spheres -> tmp;
   double* d = spheres -> temp;
   double* mask = spheres -> mask;
@@ -2470,6 +2527,7 @@ void test_bds ()
 
   // executes the BDS integrator
 
+  double msd = 0;
   bool failed = false;
   size_t const steps = 16 * MIN_NUM_STEPS;
   for (size_t step = 0; step != steps; ++step)
@@ -2478,7 +2536,7 @@ void test_bds ()
     {
       if (step % 16 == 0)
       {
-	logger(spheres, step);
+	logger(spheres, exports, step);
       }
     }
 
@@ -2488,6 +2546,12 @@ void test_bds ()
     zeros(f_y);
     zeros(f_z);
 
+    // stores the current (unbounded) positions for the MSD computation:
+
+    t_x = r_x;
+    t_y = r_y;
+    t_z = r_z;
+
     // updates the particle positions by the action of the determinstic forces:
 
     resultant2(x, y, z, f_x, f_y, f_z, f, d, mask);
@@ -2495,6 +2559,7 @@ void test_bds ()
     clamp(f_y, f, d, mask);
     clamp(f_z, f, d, mask);
     updates(x, y, z, f_x, f_y, f_z);
+    updates(r_x, r_y, r_z, f_x, f_y, f_z);
 
     // logs the maximum deterministic force:
 
@@ -2517,10 +2582,22 @@ void test_bds ()
 
     forces_stochastic(state, f_x, f_y, f_z);
     updates_stochastic(x, y, z, f_x, f_y, f_z);
+    updates(r_x, r_y, r_z, f_x, f_y, f_z);
 
     // applies periodic boundary conditions to the positions of the particles:
 
     pbcs(x, y, z, f, d, mask);
+
+    // logs the Mean Squared Displacement MSD:
+
+    msd += MSD(t_x, r_x, f);
+
+    if (LOG)
+    {
+      double const dt = TIME_STEP;
+      double const time = ( (double) (step + 1) ) * dt;
+      fprintf(file, "%.16e %.16e\n", time, msd);
+    }
 
     // logs the maximum stochastic force:
 
@@ -2592,11 +2669,12 @@ void test_bds ()
   {
     if (steps % 16 == 0)
     {
-      logger(spheres, steps);
+      logger(spheres, exports, steps);
     }
   }
 
   spheres = destroy(spheres);
+  fclose(file);
 }
 
 
