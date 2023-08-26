@@ -9,3 +9,6 @@ This is a work in progress, contributions are welcomed.
 
 Click on the image below to watch the video on youtube.
 [![Watch the video](https://img.youtube.com/vi/ykZwhjFEyho/hqdefault.jpg)](https://www.youtube.com/watch?v=ykZwhjFEyho)
+
+## BDS Run Video
+[![Watch the video](https://img.youtube.com/vi/WmljeRStXR0/hqdefault.jpg)](https://www.youtube.com/watch?v=WmljeRStXR0)
