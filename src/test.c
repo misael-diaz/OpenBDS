@@ -162,7 +162,7 @@ int getinfo ()
   }
 
   const char fname[] = "params-bds.txt";
-  FILE* file = fopen(fname, "w");
+  FILE* file = fopen(fname, "r");
   if (file == NULL)
   {
     const char errmsg[] = "getinfo(): IO ERROR with file %s: %s\n";
