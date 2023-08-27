@@ -34,6 +34,9 @@ CCOPT = -O2 -mavx2 -ftree-vectorize -fopt-info-optimized=opts.log
 CCOPT = -g -Wall -Wextra -O0
 
 # libraries
+# if the glibc version is older than 2.17, you will need these libraries
+LIBS = -lm -lrt
+# otherwise just link against C's math library
 LIBS = -lm
 
 # headers
