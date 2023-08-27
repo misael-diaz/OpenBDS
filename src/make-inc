@@ -36,6 +36,12 @@ CCOPT = -g -Wall -Wextra -O0
 # libraries
 LIBS = -lm
 
+# headers
+SYSTEM_H = system.h
+SPHERE_H = sphere.h
+UTIL_H = util.h
+FMACROS_H = fmacros.h
+
 # sources
 MAIN_SRC = main.f
 TEST_SRC = test.c
