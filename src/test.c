@@ -2635,9 +2635,9 @@ void test_bds ()
 
     // stores the current (unbounded) positions for the MSD computation:
 
-    t_x = r_x;
-    t_y = r_y;
-    t_z = r_z;
+    copy(r_x, t_x);
+    copy(r_y, t_y);
+    copy(r_z, t_z);
 
     // updates the particle positions by the action of the determinstic forces:
 

@@ -14,6 +14,15 @@ typedef union
 } alias_t;
 
 
+void copy (const double* restrict src, double* restrict dst)
+{
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    dst[i] = src[i];
+  }
+}
+
+
 // implements Marsaglia's 64-bit xorshift, yields a uniformly distributed number in [0, 1)
 // uses a signed 64-bit integer for compatibility with FORTRAN
 double xorshift64 (int64_t* state)
