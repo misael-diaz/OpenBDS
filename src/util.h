@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+void copy (const double* restrict src, double* restrict dst);
 double xorshift64 (int64_t* state);
 
 void inrange (const double* restrict x, double* restrict bitmask);
