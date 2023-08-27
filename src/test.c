@@ -3,6 +3,10 @@
 #include <math.h>		// needed by nrand() pseudo-random number generator
 #include <time.h>		// provides system time(), used for seeding rand()
 #include <sys/types.h>		// required by getpid(), we use the process id for seeding
+#define __HAS_GRND__ ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
+#if __HAS_GRND__
+#include <sys/random.h>		// uses getrandom() for seeding the PRNG if available
+#endif
 #include <unistd.h>		// also required by getpid()
 #include <string.h>		// for string comparison util strcmp()
 #include <errno.h>		// for logging library functions and system calls errors
@@ -40,6 +44,9 @@ void test_force3();
 void test_equilibration();
 void test_xorshift64();
 void test_nrand();
+#if __HAS_GRND__
+void test_getrandom();
+#endif
 void test_sha512sum();
 void test_info();
 void test_bds();
@@ -60,6 +67,9 @@ int main ()
   test_equilibration();
   test_xorshift64();
   test_nrand();
+#if __HAS_GRND__
+  test_getrandom();
+#endif
   test_bds();
 //disabled tests:
 //test_list();		// note that we are not (yet) using neighbor-lists
@@ -286,11 +296,38 @@ int getinfo ()
 }
 
 
+#if __HAS_GRND__
+void test_getrandom ()
+{
+  uint64_t const default_value = 0xffffffffffffffff;
+  uint64_t prn = default_value;
+  if (getrandom(&prn, sizeof(uint64_t), GRND_NONBLOCK) == -1)
+  {
+    const char errmsg[] = "test-getrandom() ERROR: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
+    return;
+  }
+  //printf("pseudo-random number: %lu default-value: %lu\n", prn, default_value);
+}
+#endif
+
+
 // seeds the xorshif64() backed Pseudo Random Number Generator PRNG
 void seed (uint64_t* state)
 {
   size_t count = 0;			// initializes the tries counter
+#if __HAS_GRND__
+  unsigned int prn = 0xffffffff;
+  if (getrandom(&prn, sizeof(unsigned int), GRND_NONBLOCK) == -1)
+  {
+    const char errmsg[] = "getrandom() ERROR: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
+    prn = ( time(NULL) & getpid() );
+  }
+  srand(prn);
+#else
   srand( time(NULL) & getpid() );	// uses the time and process id to seed rand()
+#endif
   uint64_t seed = rand();		// initializes the seed
   uint64_t const seed_default = (0xffffffffffffffff);
   // caters zero valued seeds, which render xorshift64() useless
