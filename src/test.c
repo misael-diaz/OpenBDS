@@ -2379,9 +2379,8 @@ void updates_stochastic(double* restrict x,
 
 
 // gets the particle positions
-int getpos (double* x, double* y, double* z)
+int getpos (const char* fname, double* restrict x, double* restrict y, double* restrict z)
 {
-  const char fname[] = "stable.txt";
   FILE* file = fopen(fname, "r");
   if (file == NULL)
   {
@@ -2411,7 +2410,6 @@ int getpos (double* x, double* y, double* z)
   }
 
   fclose(file);
-
   return SUCCESS;
 }
 
@@ -2635,7 +2633,7 @@ void test_bds ()
   double* d = spheres -> temp;
   double* mask = spheres -> mask;
 
-  if (getpos(x, y, z) == FAILURE)
+  if (getpos("stable.txt", x, y, z) == FAILURE)
   {
     spheres = destroy(spheres);
     fclose(file);
