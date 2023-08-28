@@ -1,7 +1,7 @@
 #include <stdio.h>		// for console and file logging purposes
 #include <stdint.h>		// used by xorshift() pseudo-random number generator
 #include <math.h>		// needed by nrand() pseudo-random number generator
-#include <time.h>		// provides system time(), used for seeding rand()
+#include <time.h>		// provides system time(), used for seeding random()
 #include <sys/types.h>		// required by getpid(), we use the process id for seeding
 #define __HAS_GRND__ ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
 #if __HAS_GRND__
@@ -359,11 +359,11 @@ void seed (uint64_t* state)
     fprintf(stderr, errmsg, strerror(errno));
     prn = xor();
   }
-  srand(prn);
+  srandom(prn);
 #else
-  srand(xor());				// uses the time and process id to seed rand()
+  srandom(xor());			// uses the time and process id to seed random()
 #endif
-  uint64_t seed = rand();		// initializes the seed
+  uint64_t seed = random();		// initializes the seed
   uint64_t const seed_default = (0xffffffffffffffff);
   // caters zero valued seeds, which render xorshift64() useless
   while (seed == 0)
@@ -374,7 +374,7 @@ void seed (uint64_t* state)
       seed = seed_default;
       break;
     }
-    seed = rand();
+    seed = random();
     ++count;
   }
   *state = seed;
@@ -2894,5 +2894,5 @@ References:
 
 
 // TODO:
-// [ ] use (s)random() instead of (s)rand()
+// [x] use (s)random() instead of (s)rand()
 // [x] consider all possible images when computing the interparticle forces
