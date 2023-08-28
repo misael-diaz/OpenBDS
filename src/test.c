@@ -2894,4 +2894,5 @@ References:
 
 
 // TODO:
+// [ ] use (s)random() instead of (s)rand()
 // [x] consider all possible images when computing the interparticle forces
