@@ -312,6 +312,41 @@ void test_getrandom ()
 #endif
 
 
+// uint32_t xor()
+//
+// Synopsis:
+// Yields the XORed time (seconds since the Epoch) and process id `pid'.
+//
+// NOTES:
+// The MACRO __TIMESIZE is defined in <bits/timesize.h>
+// getpid() yields a 32-bit integer, see man getpid, <bits/typesizes.h> and <bits/types.h>
+// Also refer to man time(2)
+
+
+uint32_t xor ()
+{
+#if __TIMESIZE == 64
+  // if the underlying type of `time_t' is 64-bits, then use both the low and high bits
+  time_t const t = time(NULL);
+  if (t == -1)
+  {
+    // warns user about unexpected error, for time(NULL) should not fail see man time(2)
+    fprintf(stderr, "xor(): UNEXPECTED ERROR %s\n", strerror(errno));
+  }
+  uint32_t const hi = ( (uint32_t) ( (t >> 32) & 0xffffffff ) );
+  uint32_t const lo = ( (uint32_t) (t & 0xffffffff) );
+  uint32_t const pid = ( (uint32_t) getpid() );
+  uint32_t const ret = ( (hi | lo) ^ pid );
+  return ret;
+#else
+  time_t const t = time(NULL);
+  uint32_t const pid = ( (uint32_t) getpid() );
+  uint32_t const ret = (t ^ pid);
+  return ret;
+#endif
+}
+
+
 // seeds the xorshif64() backed Pseudo Random Number Generator PRNG
 void seed (uint64_t* state)
 {
@@ -322,11 +357,11 @@ void seed (uint64_t* state)
   {
     const char errmsg[] = "getrandom() ERROR: %s\n";
     fprintf(stderr, errmsg, strerror(errno));
-    prn = ( time(NULL) & getpid() );
+    prn = xor();
   }
   srand(prn);
 #else
-  srand( time(NULL) & getpid() );	// uses the time and process id to seed rand()
+  srand(xor());				// uses the time and process id to seed rand()
 #endif
   uint64_t seed = rand();		// initializes the seed
   uint64_t const seed_default = (0xffffffffffffffff);
