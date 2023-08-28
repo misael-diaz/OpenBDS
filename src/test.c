@@ -370,7 +370,7 @@ void seed (uint64_t* state)
   {
     if (count == 16)
     {
-      printf("seed(): WARNING using default seed value\n");
+      fprintf(stderr, "seed(): WARNING using default seed value\n");
       seed = seed_default;
       break;
     }
