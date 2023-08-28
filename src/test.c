@@ -2894,5 +2894,6 @@ References:
 
 
 // TODO:
+// [ ] consider aborting execution of production runs if seed() uses the default value
 // [x] use (s)random() instead of (s)rand()
 // [x] consider all possible images when computing the interparticle forces
