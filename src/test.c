@@ -430,7 +430,10 @@ void seed (uint64_t* state)
       fprintf(stderr, "seed(): falling back to XORing\n");
       srandom(xor());
     }
-    srandom(prn);
+    else
+    {
+      srandom(prn);
+    }
     close(devurand);
   }
 #endif
