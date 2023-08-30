@@ -69,15 +69,15 @@ int main ()
   test_pbc();
   test_overlap();
   test_inrange();
-//test_equilibration();
+  test_equilibration();
   test_xorshift64();
   test_nrand();
 #if __HAS_GRND__
   test_getrandom();
 #endif
   test_devurandom();
-//test_bds();
-//test_bds2();
+  test_bds();
+  test_bds2();
 //disabled tests:
 //test_list();		// note that we are not (yet) using neighbor-lists
 //test_list2();		// if uncommented it will overwrite an existing `positions.txt'
