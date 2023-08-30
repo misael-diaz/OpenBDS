@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <time.h>
 
+double getElapsedTime (const struct timespec* start, const struct timespec* end);
 void copy (const double* restrict src, double* restrict dst);
 double xorshift64 (int64_t* state);
 

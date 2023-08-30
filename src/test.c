@@ -22,6 +22,7 @@
 #define MIN_NUM_STEPS ( (size_t) 0x0000000000010000 )
 #define TIME_STEP ( 1.0 / ( (double) MIN_NUM_STEPS ) )
 #define CLAMP (0.0625 / TIME_STEP)
+#define WALLTIME 601200000000000.0
 #define LOG true
 
 typedef union
@@ -50,6 +51,7 @@ void test_getrandom();
 void test_sha512sum();
 void test_info();
 void test_bds();
+void test_bds2();
 
 void clamp (double* restrict force,
 	    double* restrict tmp,
@@ -71,6 +73,7 @@ int main ()
   test_getrandom();
 #endif
   test_bds();
+  test_bds2();
 //disabled tests:
 //test_list();		// note that we are not (yet) using neighbor-lists
 //test_list2();		// if uncommented it will overwrite an existing `positions.txt'
@@ -158,6 +161,7 @@ int getinfo ()
   char hash[256];
   if (getsha512sum(hash) == FAILURE)
   {
+    fprintf(stderr, "getinfo()\n");
     return FAILURE;
   }
 
@@ -2379,9 +2383,8 @@ void updates_stochastic(double* restrict x,
 
 
 // gets the particle positions
-int getpos (double* x, double* y, double* z)
+int getpos (const char* fname, double* restrict x, double* restrict y, double* restrict z)
 {
-  const char fname[] = "stable.txt";
   FILE* file = fopen(fname, "r");
   if (file == NULL)
   {
@@ -2411,7 +2414,6 @@ int getpos (double* x, double* y, double* z)
   }
 
   fclose(file);
-
   return SUCCESS;
 }
 
@@ -2635,7 +2637,7 @@ void test_bds ()
   double* d = spheres -> temp;
   double* mask = spheres -> mask;
 
-  if (getpos(x, y, z) == FAILURE)
+  if (getpos("stable.txt", x, y, z) == FAILURE)
   {
     spheres = destroy(spheres);
     fclose(file);
@@ -2822,6 +2824,416 @@ void test_bds ()
 }
 
 
+// sets the name of the checkpoint file
+void set_chkpnt (char* checkpoint, size_t const step)
+{
+  char checkpoints[256];
+  strcpy(checkpoints, "run/bds/checkpoints/");
+  sprintf(checkpoint, "checkpoint-%lu.txt", step);
+  strcat(checkpoints, checkpoint);
+  strcpy(checkpoint, checkpoints);
+}
+
+
+// reads the name of the last checkpoint from a plain text file
+int fread_chkpnt (char* checkpoint, size_t* istep)
+{
+  char const last[] = "run/bds/log/last-checkpoint.txt";
+  FILE* flast = fopen(last, "r");
+  if (flast == NULL)
+  {
+    const char errmsg[] = "fread_chkpnt(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, last, strerror(errno));
+    return FAILURE;
+  }
+
+  if (fscanf(flast, "%s", checkpoint) != 1)
+  {
+    const char errmsg[] = "fread_chkpnt(): IO ERROR while reading %s: %s\n";
+    fprintf(stderr, errmsg, last, strerror(errno));
+    fclose(flast);
+    return FAILURE;
+  }
+
+  if (sscanf(checkpoint, "run/bds/checkpoints/checkpoint-%lu.txt", istep) != 1)
+  {
+    const char errmsg[] = "fread_chkpnt(): IO ERROR while fetching the step: %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
+    fclose(flast);
+    return FAILURE;
+  }
+
+  fclose(flast);
+  return SUCCESS;
+}
+
+
+// writes the name of the last checkpoint to a plain text file
+int fwrite_chkpnt (const char* checkpoint)
+{
+  char const last[] = "run/bds/log/last-checkpoint.txt";
+  FILE* flast = fopen(last, "w");
+  if (flast == NULL)
+  {
+    const char errmsg[] = "fwrite_chkpnt(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, last, strerror(errno));
+    return FAILURE;
+  }
+
+  fprintf(flast, "%s\n", checkpoint);
+
+  fclose(flast);
+  return SUCCESS;
+}
+
+
+// dumps the particle positions to the checkpoint file
+int dump_chkpnt (const sphere_t* spheres, size_t const step)
+{
+  char checkpoint[256];
+  set_chkpnt(checkpoint, step);
+
+  if (fwrite_chkpnt(checkpoint) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  FILE* file = fopen(checkpoint, "w");
+  if (file == NULL)
+  {
+    const char errmsg[] = "dump_chkpnt(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, checkpoint, strerror(errno));
+    return FAILURE;
+  }
+
+  const double* x = spheres -> x;
+  const double* y = spheres -> y;
+  const double* z = spheres -> z;
+  const double* r_x = spheres -> r_x;
+  const double* r_y = spheres -> r_y;
+  const double* r_z = spheres -> r_z;
+  const int64_t* id = spheres -> id;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    const char fmt[] = "%+.16e %+.16e %+.16e %+.16e %+.16e %+.16e %ld\n";
+    fprintf(file, fmt, x[i], y[i], z[i], r_x[i], r_y[i], r_z[i], id[i]);
+  }
+
+  fclose(file);
+  return SUCCESS;
+}
+
+
+// loads the checkpointed sphere data
+int load_chkpnt (const char* checkpoint, sphere_t* spheres)
+{
+  FILE* file = fopen(checkpoint, "r");
+  if (file == NULL)
+  {
+    const char errmsg[] = "load_chkpnt(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, checkpoint, strerror(errno));
+    return FAILURE;
+  }
+
+  double* x = spheres -> x;
+  double* y = spheres -> y;
+  double* z = spheres -> z;
+  double* r_x = spheres -> r_x;
+  double* r_y = spheres -> r_y;
+  double* r_z = spheres -> r_z;
+  int64_t* id = spheres -> id;
+  for (size_t i = 0; i != NUM_SPHERES; ++i)
+  {
+    const char fmt[] = "%lf %lf %lf %lf %lf %lf %ld\n";
+    if (fscanf(file, fmt, x, y, z, r_x, r_y, r_z, id) != 7)
+    {
+      fclose(file);
+      const char errmsg[] = "load_chkpnt(): IO ERROR while loading data in %s: %s\n";
+      fprintf(stderr, errmsg, checkpoint, strerror(errno));
+      return FAILURE;
+    }
+    ++x;
+    ++y;
+    ++z;
+    ++r_x;
+    ++r_y;
+    ++r_z;
+    ++id;
+  }
+
+  fclose(file);
+  return SUCCESS;
+}
+
+
+// dumps the execution status of the BDS
+int dumpstat (const char* status)
+{
+  const char stat[] = "run/bds/status/stat.txt";
+  FILE* file = fopen(stat, "w");
+  if (file == NULL)
+  {
+    const char errmsg[] = "dumpstat(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, stat, strerror(errno));
+    return FAILURE;
+  }
+
+  fprintf(file, "%s\n", status);
+  fclose(file);
+  return SUCCESS;
+}
+
+
+// int getMSD (const char* msdtxt, double* msd)
+//
+// Synopsis:
+// Gets the MSD of the checkpointed step.
+
+
+int getMSD (const char* msdtxt, double* msd)
+{
+  FILE* file = fopen(msdtxt, "r");
+  if (file == NULL)
+  {
+    const char errmsg[] = "getMSD(): UNEXPECTED IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, msdtxt, strerror(errno));
+    return FAILURE;
+  }
+
+  int count = 0;
+  double time = 0;
+  while (fscanf(file, "%lf %lf\n", &time, msd) != EOF)
+  {
+    ++count;
+  }
+
+  if (count == 0)
+  {
+    const char errmsg[] = "getMSD(): UNEXPECTED IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, msdtxt, strerror(errno));
+    return FAILURE;
+  }
+
+  fclose(file);
+  return SUCCESS;
+}
+
+
+// as test_bds() but with `checkpointing'
+void test_bds2()
+{
+  // checks if we can dump the status file before anything else
+  if (dumpstat("unknown") == FAILURE)
+  {
+    fprintf(stderr, "test-bds2(): backtrace\n");
+    return;
+  }
+
+  if (getinfo() == FAILURE)
+  {
+    fprintf(stderr, "test-bds2(): backtrace\n");
+    dumpstat("error");
+    return;
+  }
+
+  size_t istep = 0;
+  char checkpoint[256];
+  // gets the `id' of the last step and the name of the checkpoint file
+  if (fread_chkpnt(checkpoint, &istep) == FAILURE)
+  {
+    fprintf(stderr, "test-bds2(): backtrace\n");
+    dumpstat("error");
+    return;
+  }
+
+  // we initialize the MSD with zero because this could be the initial `checkpoint-0.txt'
+  double imsd = 0;
+  const char msdtxt[] = "run/bds/data/msd/msd.txt";
+  if (istep != 0)
+  {
+    if (getMSD(msdtxt, &imsd) == FAILURE)
+    {
+      fprintf(stderr, "test-bds2(): backtrace\n");
+      dumpstat("error");
+      return;
+    }
+  }
+
+  FILE* fmsd = fopen(msdtxt, "a");
+  if (fmsd == NULL)
+  {
+    const char errmsg[] = "test-bds2(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, msdtxt, strerror(errno));
+    dumpstat("error");
+    return;
+  }
+
+  // seeds the xorshift64() prng
+  uint64_t state[] = { 0xffffffffffffffff };
+  seed(state);
+
+  sphere_t* spheres = create();
+
+  double* x = spheres -> x;
+  double* y = spheres -> y;
+  double* z = spheres -> z;
+  double* r_x = spheres -> r_x;
+  double* r_y = spheres -> r_y;
+  double* r_z = spheres -> r_z;
+  double* f_x = spheres -> f_x;
+  double* f_y = spheres -> f_y;
+  double* f_z = spheres -> f_z;
+  double* t_x = spheres -> t_x;
+  double* t_y = spheres -> t_y;
+  double* t_z = spheres -> t_z;
+  double* f = spheres -> tmp;
+  double* d = spheres -> temp;
+  double* mask = spheres -> mask;
+  int64_t* id = spheres -> id;
+
+  if (load_chkpnt(checkpoint, spheres) == FAILURE)
+  {
+    fclose(fmsd);
+    spheres = destroy(spheres);
+    fprintf(stderr, "test-bds2(): backtrace\n");
+    dumpstat("error");
+    return;
+  }
+
+  // checks if the positions directory exists
+  const char exports[] = "run/bds/data/positions/";
+  if (logger(spheres, exports, SIZE_MAX) == FAILURE)
+  {
+    fclose(fmsd);
+    spheres = destroy(spheres);
+    fprintf(stderr, "test-bds2(): backtrace\n");
+    dumpstat("error");
+    return;
+  }
+
+  double msd = imsd;
+  size_t const steps = 256 * MIN_NUM_STEPS;
+
+  // the submit script shouldn't schedule this job
+  if ( (istep + 1) >= steps )
+  {
+    fclose(fmsd);
+    spheres = destroy(spheres);
+    fprintf(stderr, "test-bds2(): possible reschedule error\n");
+    dumpstat("schedule-error");
+    return;
+  }
+
+  // executes the BDS integrator
+
+  struct timespec end;
+  struct timespec start;
+  clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+  // if we have the initial checkpoint `checkpoint-0.txt', then `step' must start at zero
+  istep = (istep == 0)? SIZE_MAX : istep;
+  for (size_t step = (istep + 1); step != steps; ++step)
+  {
+    if (step % 16 == 0)
+    {
+      if (logger(spheres, exports, step) == FAILURE)
+      {
+	fclose(fmsd);
+	spheres = destroy(spheres);
+	fprintf(stderr, "test-bds2(): backtrace\n");
+	dumpstat("error");
+	return;
+      }
+    }
+
+    // zeroes the net force on the particles:
+
+    zeros(f_x);
+    zeros(f_y);
+    zeros(f_z);
+
+    // stores the current (unbounded) positions for the MSD computation:
+
+    copy(r_x, t_x);
+    copy(r_y, t_y);
+    copy(r_z, t_z);
+
+    // updates the particle positions by the action of the determinstic forces:
+
+    resultant2(x, y, z, f_x, f_y, f_z, f, d, mask);
+    clamp(f_x, f, d, mask);
+    clamp(f_y, f, d, mask);
+    clamp(f_z, f, d, mask);
+    updates(x, y, z, f_x, f_y, f_z);
+    updates(r_x, r_y, r_z, f_x, f_y, f_z);
+
+    // updates the particle positions by the action of the Stochastic forces:
+
+    forces_stochastic(state, f_x, f_y, f_z);
+    updates_stochastic(x, y, z, f_x, f_y, f_z);
+    updates(r_x, r_y, r_z, f_x, f_y, f_z);
+
+    // applies periodic boundary conditions to the positions of the particles:
+
+    pbcs(x, y, z, f, d, mask);
+
+    // logs the Mean Squared Displacement MSD:
+
+    msd += MSD(t_x, r_x, f);
+
+    if ( ( (step + 1) % 16 ) == 0 )
+    {
+      double const dt = TIME_STEP;
+      double const time = ( (double) (step + 1) ) * dt;
+      fprintf(fmsd, "%.16e %.16e\n", time, msd);
+
+      if (dump_chkpnt(spheres, step) == FAILURE)
+      {
+	fclose(fmsd);
+	spheres = destroy(spheres);
+	fprintf(stderr, "test-bds2(): backtrace\n");
+	dumpstat("error");
+	return;
+      }
+    }
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+    if (getElapsedTime(&start, &end) >= WALLTIME)
+    {
+      fclose(fmsd);
+      spheres = destroy(spheres);
+      printf("test-bds2(): walltime reached\n");
+      dumpstat("reschedule");
+      return;
+    }
+  }
+
+  if (steps % 16 == 0)
+  {
+    if (logger(spheres, exports, steps) == FAILURE)
+    {
+      fclose(fmsd);
+      spheres = destroy(spheres);
+      fprintf(stderr, "test-bds2(): backtrace\n");
+      dumpstat("error");
+      return;
+    }
+  }
+
+  if (dump_chkpnt(spheres, steps) == FAILURE)
+  {
+    fclose(fmsd);
+    spheres = destroy(spheres);
+    fprintf(stderr, "test-bds2(): backtrace\n");
+    dumpstat("error");
+    return;
+  }
+
+  fclose(fmsd);
+  spheres = destroy(spheres);
+  dumpstat("done");
+}
+
+
 // tests dumping BDS info
 void test_info ()
 {
@@ -2894,6 +3306,20 @@ References:
 
 
 // TODO:
+// [ ] add code to read from /dev/urandom in systems with older glibc versions
 // [ ] consider aborting execution of production runs if seed() uses the default value
+// [x] load the msd data
+// [x] add getElapsedTime() method (straight from your other projects)
+// [x] make sure to dump checkpoints whenever the MSD data is updated in file
+// [x] use clock_gettime() to compute the elapsed time
+// [x] upon reaching walltime halt execution right away
+// [x] check if the walltime has been reached at the end of the BDS integrator loop
+// [x] dump the name of the last checkpoint file
+// [x] dump data to the last checkpoint file
+// [x] dump the last checkpoint file if the integrator finishes
+// [x] dump the status file so that submit.sh won't submit the job again
+// [x] make the submit script dump "unknown" to the status file as a fail-safe mechanism
+// [x] consider updating the name (in file) of the last checkpoint every so steps
+// [x] extend getpos() by passing filename as argument to reuse it
 // [x] use (s)random() instead of (s)rand()
 // [x] consider all possible images when computing the interparticle forces
