@@ -3,6 +3,8 @@
 #include <math.h>		// needed by nrand() pseudo-random number generator
 #include <time.h>		// provides system time(), used for seeding random()
 #include <sys/types.h>		// required by getpid(), we use the process id for seeding
+#include <sys/stat.h>		// for reading /dev/urandom
+#include <fcntl.h>		// for reading /dev/urandom
 #define __HAS_GRND__ ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
 #if __HAS_GRND__
 #include <sys/random.h>		// uses getrandom() for seeding the PRNG if available
@@ -48,6 +50,7 @@ void test_nrand();
 #if __HAS_GRND__
 void test_getrandom();
 #endif
+void test_devurandom();
 void test_sha512sum();
 void test_info();
 void test_bds();
@@ -72,6 +75,7 @@ int main ()
 #if __HAS_GRND__
   test_getrandom();
 #endif
+  test_devurandom();
   test_bds();
   test_bds2();
 //disabled tests:
@@ -316,6 +320,48 @@ void test_getrandom ()
 #endif
 
 
+void test_devurandom ()
+{
+  int f = open("/dev/urandom", O_RDONLY);
+  if (f == FAILURE)
+  {
+    const char errmsg[] = "test-/dev/urandom(): ERROR %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
+    return;
+  }
+
+  unsigned int prn = 0;
+  ssize_t size = read(f, &prn, sizeof(unsigned int));
+  if (size == -1)
+  {
+    const char errmsg[] = "test-/dev/urandom(): ERROR %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
+    close(f);
+    return;
+  }
+
+  printf("test-/dev/urandom(): %d\n", prn);
+  printf("test-/dev/urandom[0]: ");
+  if (size != sizeof(unsigned int))
+  {
+    // shouldn't fail because we are reading less than 256 bytes (see `man urandom')
+    printf("UNEXPECTED FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  int stat = close(f);
+  if (stat != 0)
+  {
+    const char errmsg[] = "test-devurand(): ERROR %s\n";
+    fprintf(stderr, errmsg, strerror(errno));
+    return;
+  }
+}
+
+
 // uint32_t xor()
 //
 // Synopsis:
@@ -365,7 +411,28 @@ void seed (uint64_t* state)
   }
   srandom(prn);
 #else
-  srandom(xor());			// uses the time and process id to seed random()
+  // tries to fetch pseudo-random number from /dev/urandom, fallsback to XORing on failure
+  int devurand = open("/dev/urandom", O_RDONLY);
+  if (devurand == FAILURE)
+  {
+    fprintf(stderr, "seed(): ERROR %s\n", strerror(errno));
+    fprintf(stderr, "seed(): falling back to XORing\n");
+    srandom(xor());
+  }
+  else
+  {
+    unsigned int prn = -1;
+    ssize_t size = read(devurand, &prn, sizeof(unsigned int));
+    if (size == -1 || size != sizeof(unsigned int))
+    {
+      // NOTE that read() may not check for errors (see `man read(2)')
+      fprintf(stderr, "seed(): ERROR %s\n", strerror(errno));
+      fprintf(stderr, "seed(): falling back to XORing\n");
+      srandom(xor());
+    }
+    srandom(prn);
+    close(devurand);
+  }
 #endif
   uint64_t seed = random();		// initializes the seed
   uint64_t const seed_default = (0xffffffffffffffff);
@@ -3306,8 +3373,8 @@ References:
 
 
 // TODO:
-// [ ] add code to read from /dev/urandom in systems with older glibc versions
 // [ ] consider aborting execution of production runs if seed() uses the default value
+// [x] add code to read from /dev/urandom in systems with older glibc versions
 // [x] load the msd data
 // [x] add getElapsedTime() method (straight from your other projects)
 // [x] make sure to dump checkpoints whenever the MSD data is updated in file
