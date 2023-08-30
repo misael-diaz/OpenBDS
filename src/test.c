@@ -411,7 +411,28 @@ void seed (uint64_t* state)
   }
   srandom(prn);
 #else
-  srandom(xor());			// uses the time and process id to seed random()
+  // tries to fetch pseudo-random number from /dev/urandom, fallsback to XORing on failure
+  int devurand = open("/dev/urandom", O_RDONLY);
+  if (devurand == FAILURE)
+  {
+    fprintf(stderr, "seed(): ERROR %s\n", strerror(errno));
+    fprintf(stderr, "seed(): falling back to XORing\n");
+    srandom(xor());
+  }
+  else
+  {
+    unsigned int prn = -1;
+    ssize_t size = read(devurand, &prn, sizeof(unsigned int));
+    if (size == -1 || size != sizeof(unsigned int))
+    {
+      // NOTE that read() may not check for errors (see `man read(2)')
+      fprintf(stderr, "seed(): ERROR %s\n", strerror(errno));
+      fprintf(stderr, "seed(): falling back to XORing\n");
+      srandom(xor());
+    }
+    srandom(prn);
+    close(devurand);
+  }
 #endif
   uint64_t seed = random();		// initializes the seed
   uint64_t const seed_default = (0xffffffffffffffff);
@@ -3352,8 +3373,8 @@ References:
 
 
 // TODO:
-// [ ] add code to read from /dev/urandom in systems with older glibc versions
 // [ ] consider aborting execution of production runs if seed() uses the default value
+// [x] add code to read from /dev/urandom in systems with older glibc versions
 // [x] load the msd data
 // [x] add getElapsedTime() method (straight from your other projects)
 // [x] make sure to dump checkpoints whenever the MSD data is updated in file
