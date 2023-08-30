@@ -14,6 +14,14 @@ typedef union
 } alias_t;
 
 
+double getElapsedTime (const struct timespec* b, const struct timespec* e)
+{
+  double begin = ( (double) (b -> tv_nsec) ) + 1.0e9 * ( (double) (b -> tv_sec) );
+  double end   = ( (double) (e -> tv_nsec) ) + 1.0e9 * ( (double) (e -> tv_sec) );
+  return (end - begin);
+}
+
+
 void copy (const double* restrict src, double* restrict dst)
 {
   for (size_t i = 0; i != NUM_SPHERES; ++i)
