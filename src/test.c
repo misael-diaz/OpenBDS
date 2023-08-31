@@ -3194,6 +3194,8 @@ void test_bds2()
     return;
   }
 
+  dumpstat("running");
+
   // executes the BDS integrator
 
   struct timespec end;
