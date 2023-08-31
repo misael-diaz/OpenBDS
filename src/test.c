@@ -2776,7 +2776,7 @@ void test_bds ()
 
     forces_stochastic(state, f_x, f_y, f_z);
     updates_stochastic(x, y, z, f_x, f_y, f_z);
-    updates(r_x, r_y, r_z, f_x, f_y, f_z);
+    updates_stochastic(r_x, r_y, r_z, f_x, f_y, f_z);
 
     // applies periodic boundary conditions to the positions of the particles:
 
@@ -3240,7 +3240,7 @@ void test_bds2()
 
     forces_stochastic(state, f_x, f_y, f_z);
     updates_stochastic(x, y, z, f_x, f_y, f_z);
-    updates(r_x, r_y, r_z, f_x, f_y, f_z);
+    updates_stochastic(r_x, r_y, r_z, f_x, f_y, f_z);
 
     // applies periodic boundary conditions to the positions of the particles:
 
