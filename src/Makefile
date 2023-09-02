@@ -16,7 +16,11 @@
 
 include make-inc
 
-all: $(TESTS)
+export CC
+export CCOPT
+export LIBS
+
+all: $(TESTS) utils tests
 
 $(MAIN_BIN): $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ)
 	$(FC) $(FCOPT) $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ) -o $(MAIN_BIN)
@@ -36,5 +40,13 @@ $(TEST_OBJ): $(UTIL_OBJ) $(SPHERE_OBJ) $(TEST_SRC)
 $(MAIN_OBJ): $(FMACROS_H) $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_SRC)
 	$(FC) $(FCOPT) -c $(MAIN_SRC) -o $(MAIN_OBJ)
 
+utils:
+	@$(MAKE) -C util
+
+tests: utils
+	@$(MAKE) -C test
+
 clean:
 	/bin/rm -rf *.o *.mod *.bin
+	@$(MAKE) -C util clean
+	@$(MAKE) -C test clean
