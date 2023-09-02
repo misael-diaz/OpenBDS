@@ -14,16 +14,22 @@ struct generator {
   uint64_t* state;
   void (*seed) (struct generator*);
   double (*fetch) (struct generator*);
-} generator_t;
+};
+
+typedef struct generator generator_t;
 
 struct random
 {
-  struct generator* generator;
+  generator_t* generator;
   double (*fetch) (struct random*);
-} random_t;
+};
+
+typedef struct random random_t;
 
 struct iPRNG {
   void (*initializer) (struct random*, enum PRNG);
-} initPRNG_t;
+};
+
+typedef struct iPRNG iPRNG_t;
 
 #endif
