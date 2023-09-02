@@ -8,7 +8,7 @@
 #define EXP(N) ( (N + BIAS) << 52 )
 
 
-static void seeder (struct generator* generator)
+static void seeder (generator_t* generator)
 {
   *generator -> state = 0xffffffffffffffff;
   *generator -> count = 0;
@@ -47,7 +47,7 @@ double sxorshift64 (int64_t* state)
 
 
 // as sxorshift64() but uses unsigned 64-bit integers to update the PRNG state
-static double xorshift64 (struct generator* generator)
+static double xorshift64 (generator_t* generator)
 {
   uint64_t x = *(generator -> state);
   x ^= (x << 13);
@@ -66,14 +66,14 @@ static double xorshift64 (struct generator* generator)
 
 
 // aliases Marsaglia's xorshift64() uniform pseudo random number generator
-static double urand (struct generator* generator)
+static double urand (generator_t* generator)
 {
   return xorshift64(generator);
 }
 
 
 // implements Böx-Muller's method to yield normally distributed pseudo-random numbers
-static double nrand (struct generator* generator)
+static double nrand (generator_t* generator)
 {
   double const inf = INFINITY;
   double x = inf;
@@ -91,16 +91,16 @@ static double nrand (struct generator* generator)
 }
 
 
-static double fetcher (struct random* random)
+static double fetcher (random_t* random)
 {
   return random -> generator -> fetch(random -> generator);
 }
 
 
 // initial version of the PRNG initializer, state seeding and binding
-void util_random_initializer (struct random* random, enum PRNG PRNG)
+void util_random_initializer (random_t* random, enum PRNG PRNG)
 {
-  struct generator* generator = random -> generator;
+  generator_t* generator = random -> generator;
   generator -> seed = seeder;
   if (PRNG == URAND)
   {

@@ -1,11 +1,11 @@
 #include "util/type.h"
 
-extern void util_random_initializer(struct random*, enum PRNG);
+extern void util_random_initializer(random_t*, enum PRNG);
 
-static struct iPRNG const random = {
+static iPRNG_t const random = {
   .initializer = util_random_initializer
 };
 
-struct util const util = {
+util_t const util = {
   .random = random
 };

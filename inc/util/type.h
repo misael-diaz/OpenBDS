@@ -5,7 +5,9 @@
 
 struct util
 {
-  struct iPRNG random;		// PRNG initializer
-} util_t;
+  iPRNG_t random;		// PRNG initializer
+};
+
+typedef struct util util_t;
 
 #endif
