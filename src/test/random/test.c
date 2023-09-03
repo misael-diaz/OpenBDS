@@ -82,7 +82,14 @@ void test ()
   random -> generator -> state = (uint64_t*) iter;
   iter += sizeof(uint64_t);
 
-  util.random.initializer(random, NRAND);
+  int const stat = util.random.initializer(random, NRAND);
+  if (stat != 0)
+  {
+    free(data);
+    data = NULL;
+    fprintf(stderr, "test-random(): PRNG seeding error\n");
+    return;
+  }
 
   double* prns = malloc( NUMEL * sizeof(double) );
   if (prns == NULL)

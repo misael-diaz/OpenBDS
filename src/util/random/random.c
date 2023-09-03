@@ -1,6 +1,16 @@
-#include <math.h>
+#include <sys/types.h>	// required by getpid(), see man getpid
+#include <unistd.h>	// required by getpid(), see man getpid
+#include <assert.h>	// for performing assertions at compile time via static_assert()
+#include <string.h>	// for logging errors on the standard error stream
+#include <stdio.h>	// for logging errors on the standard error stream
+#include <errno.h>	// number of last error, see man errno
+#include <time.h>	// provides system time(), see man time(2)
+#include <math.h>	// for generating normally distributed pseudo-random numbers
+
 #include "util/random.h"
 
+#define FAILURE ( (int) 0xffffffff )
+#define SUCCESS ( (int) 0x00000000 )
 #define MSBMASK ( (int64_t) 0x8000000000000000 )
 #define SCALING ( 1.0 / ( (double) MSBMASK ) )
 // 64-bit binary floatint-poing representation of 2^N
@@ -8,10 +18,38 @@
 #define EXP(N) ( (N + BIAS) << 52 )
 
 
-static void seeder (generator_t* generator)
+static uint32_t xor ()	// XORs the current time and the process ID for seeding the PRNG
 {
-  *generator -> state = 0xffffffffffffffff;
+  static_assert(sizeof(time_t) == 8);
+  // if the underlying type of `time_t' is 64-bits, then use both the low and high bits
+  time_t const t = time(NULL);
+  if (t == -1)
+  {
+    // warns user about unexpected error, for time(NULL) should not fail see `man time(2)'
+    fprintf(stderr, "xor(): UNEXPECTED ERROR %s\n", strerror(errno));
+    return 0xffffffff;
+  }
+  uint32_t const hi = ( (uint32_t) ( (t >> 32) & 0xffffffff ) );
+  uint32_t const lo = ( (uint32_t) (t & 0xffffffff) );
+  uint32_t const pid = ( (uint32_t) getpid() );
+  uint32_t const ret = ( ( (hi | lo) ^ pid ) & 0xfffffffe );
+  return ret;
+}
+
+
+static int seeder (generator_t* generator)
+{
+  uint64_t const seed = xor();
+  if ( (seed == 0) || (seed & 0x0000000000000001) )
+  {
+    return FAILURE;
+  }
+  uint64_t const hi = 0xffffffff00000000;
+  uint64_t const lo = 0x00000000ffffffff;
+  // using the bitwise AND to be explicit about the bits (un)set
+  *generator -> state = ( ( (seed << 32) & hi ) | (seed & lo) );
   *generator -> count = 0;
+  return SUCCESS;
 }
 
 
@@ -98,7 +136,7 @@ static double fetcher (random_t* random)
 
 
 // initial version of the PRNG initializer, state seeding and binding
-void util_random_initializer (random_t* random, enum PRNG PRNG)
+int util_random_initializer (random_t* random, enum PRNG PRNG)
 {
   generator_t* generator = random -> generator;
   generator -> seed = seeder;
@@ -110,8 +148,9 @@ void util_random_initializer (random_t* random, enum PRNG PRNG)
   {
     generator -> fetch = nrand;
   }
-  generator -> seed(generator);
+  int const stat = generator -> seed(generator);
   random -> fetch = fetcher;
+  return stat;
 }
 
 
@@ -136,3 +175,8 @@ References:
 [2] S Kim and S Karrila, Microhydrodynamics: Principles and Selected Applications.
 
 */
+
+
+// TODO:
+// [ ] use either stdlib's getrandom() or read /dev/urandom to seed the PRNG
+// [ ] fallback to XORing if the /dev/urandom does not have enough entropy
