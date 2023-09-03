@@ -12,7 +12,7 @@ enum PRNG {		// Pseudo Random Number Generator
 struct generator {
   size_t* count;
   uint64_t* state;
-  void (*seed) (struct generator*);
+  int (*seed) (struct generator*);
   double (*fetch) (struct generator*);
 };
 
@@ -27,7 +27,7 @@ struct random
 typedef struct random random_t;
 
 struct iPRNG {
-  void (*initializer) (struct random*, enum PRNG);
+  int (*initializer) (struct random*, enum PRNG);
 };
 
 typedef struct iPRNG iPRNG_t;
