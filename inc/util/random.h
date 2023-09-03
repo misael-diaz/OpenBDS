@@ -4,13 +4,15 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define OBDS_ERR_PRNG ( (uint64_t) 0xfff0000000000000 )
+
 enum PRNG {		// Pseudo Random Number Generator
   URAND,		// Uniform PRNG
   NRAND			// Normal PRNG
 };
 
 struct generator {
-  size_t* count;
+  double* count;
   uint64_t* state;
   int (*seed) (struct generator*);
   double (*fetch) (struct generator*);

@@ -12,7 +12,7 @@
 #define ABS(x) ( (x < 0)? -x : x )
 #define SIZE_RANDOM sizeof(struct random)
 #define SIZE_GENERATOR sizeof(struct generator)
-#define SIZE_COUNT sizeof(size_t)
+#define SIZE_COUNT sizeof(double)
 #define SIZE_STATE sizeof(uint64_t)
 #define SIZE (SIZE_RANDOM + SIZE_GENERATOR + SIZE_COUNT + SIZE_STATE)
 #define NUMEL ( (size_t) 0x0000000001000000 )
@@ -61,8 +61,7 @@ void test ()
   static_assert(sizeof(struct random) == 16);
   static_assert(sizeof(struct generator) == 32);
   static_assert(sizeof(uint64_t) == 8);
-  static_assert(sizeof(size_t) == 8);
-  static_assert(sizeof(size_t) == 8);
+  static_assert(sizeof(double) == 8);
   static_assert(SIZE == 64);
   size_t const size = SIZE;
 
@@ -77,8 +76,8 @@ void test ()
   iter += sizeof(struct random);
   random -> generator = (struct generator*) iter;
   iter += sizeof(struct generator);
-  random -> generator -> count = (size_t*) iter;
-  iter += sizeof(size_t);
+  random -> generator -> count = (double*) iter;
+  iter += sizeof(double);
   random -> generator -> state = (uint64_t*) iter;
   iter += sizeof(uint64_t);
 
@@ -101,10 +100,27 @@ void test ()
   }
 
   double* prn = prns;
+  bool failure = false;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    *prn = random -> fetch(random);
+    union { double dat; uint64_t bin; } const fetch = { .dat = random -> fetch(random) };
+    if (fetch.bin == OBDS_ERR_PRNG)
+    {
+      failure = true;
+      break;
+    }
+    *prn = fetch.dat;
     ++prn;
+  }
+
+  if (failure)
+  {
+    free(data);
+    free(prns);
+    data = NULL;
+    prns = NULL;
+    fprintf(stderr, "test-random(): UNEXPECTED PRNG ERROR\n");
+    return;
   }
 
   double avg = mean(prns);

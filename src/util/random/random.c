@@ -12,6 +12,7 @@
 #define FAILURE ( (int) 0xffffffff )
 #define SUCCESS ( (int) 0x00000000 )
 #define MSBMASK ( (int64_t) 0x8000000000000000 )
+#define PERIOD ( (uint64_t) 0xffffffffffffffff )
 #define SCALING ( 1.0 / ( (double) MSBMASK ) )
 // 64-bit binary floatint-poing representation of 2^N
 #define BIAS ( (uint64_t) 1023 )
@@ -39,9 +40,11 @@ static uint32_t xor ()	// XORs the current time and the process ID for seeding t
 
 static int seeder (generator_t* generator)
 {
+  static_assert(sizeof(int) == 4);
   uint64_t const seed = xor();
   if ( (seed == 0) || (seed & 0x0000000000000001) )
   {
+    fprintf(stderr, "seed(): ERROR\n");
     return FAILURE;
   }
   uint64_t const hi = 0xffffffff00000000;
@@ -129,8 +132,31 @@ static double nrand (generator_t* generator)
 }
 
 
+// resets the PRNG by seeding and resetting the counter to zero
+static int reset (random_t* random)
+{
+  if (random -> generator -> seed(random -> generator) == FAILURE)
+  {
+    fprintf(stderr, "reset(): ERROR\n");
+    return FAILURE;
+  }
+  *(random -> generator -> count) = 0;
+  return SUCCESS;
+}
+
+
 static double fetcher (random_t* random)
 {
+  double const count = *(random -> generator -> count);
+  if (count >= PERIOD)
+  {
+    if (reset(random) == FAILURE)
+    {
+      fprintf(stderr, "fetch(): ERROR\n");
+      union { double dat; uint64_t bin; } const errstat = { .bin = OBDS_ERR_PRNG };
+      return errstat.dat;
+    }
+  }
   return random -> generator -> fetch(random -> generator);
 }
 
