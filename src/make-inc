@@ -29,9 +29,9 @@ FCOPT = -g -Wall -Wextra -Waliasing -Wsurprising -Warray-bounds -Warray-temporar
 	-fcheck=all -O0 -cpp -ffree-form -ffree-line-length-none
 
 # clang options
-CCOPT = -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log
-CCOPT = -O2 -mavx2 -ftree-vectorize -fopt-info-optimized=opts.log
-CCOPT = -g -Wall -Wextra -O0
+CCOPT = -std=gnu2x -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log
+CCOPT = -std=gnu2x -O2 -mavx2 -ftree-vectorize -fopt-info-optimized=opts.log
+CCOPT = -std=gnu2x -g -Wall -Wextra -O0
 
 # libraries
 # if the glibc version is older than 2.17, you will need these libraries
