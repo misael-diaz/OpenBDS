@@ -70,7 +70,16 @@ void test ()
   _Static_assert(sizeof(double) == 8);
   _Static_assert(SIZE == 64);
 #endif
+
+#if __STDC_VERSION__ > STDC17
+  constexpr size_t size = sizeof(random_t) +
+			  sizeof(generator_t) +
+			  sizeof(uint64_t) +
+			  sizeof(double);
+  static_assert(size == 64);
+#else
   size_t const size = SIZE;
+#endif
 
   void* data = malloc(size);
   if (data == NULL)
