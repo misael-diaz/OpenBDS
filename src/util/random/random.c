@@ -94,6 +94,7 @@ static uint32_t genseed ()
     return prn;
   }
 
+  close(devurand);
   return (prn & 0xfffffffe);
 }
 #endif
