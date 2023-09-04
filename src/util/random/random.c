@@ -14,6 +14,7 @@
 
 #include "util/random.h"
 
+#define STDC17 201710L
 #define FAILURE ( (int) 0xffffffff )
 #define SUCCESS ( (int) 0x00000000 )
 #define MSBMASK ( (int64_t) 0x8000000000000000 )
