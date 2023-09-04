@@ -57,12 +57,19 @@ double std (const double* x)
 
 void test ()
 {
-  // NOTE: if compilation fails replace static_assert() calls with _Static_assert()
+#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
   static_assert(sizeof(struct random) == 16);
   static_assert(sizeof(struct generator) == 32);
   static_assert(sizeof(uint64_t) == 8);
   static_assert(sizeof(double) == 8);
   static_assert(SIZE == 64);
+#else
+  _Static_assert(sizeof(struct random) == 16);
+  _Static_assert(sizeof(struct generator) == 32);
+  _Static_assert(sizeof(uint64_t) == 8);
+  _Static_assert(sizeof(double) == 8);
+  _Static_assert(SIZE == 64);
+#endif
   size_t const size = SIZE;
 
   void* data = malloc(size);

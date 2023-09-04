@@ -1,4 +1,9 @@
+#include <fcntl.h>	// for reading /dev/urandom
+#include <sys/stat.h>	// for reading /dev/urandom
 #include <sys/types.h>	// required by getpid(), see man getpid
+#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
+#include <sys/random.h>	// for seeding the PRNG with getrandom()
+#endif
 #include <unistd.h>	// required by getpid(), see man getpid
 #include <assert.h>	// for performing assertions at compile time via static_assert()
 #include <string.h>	// for logging errors on the standard error stream
@@ -21,7 +26,11 @@
 
 static uint32_t xor ()	// XORs the current time and the process ID for seeding the PRNG
 {
+#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
   static_assert(sizeof(time_t) == 8);
+#else
+  _Static_assert(sizeof(time_t) == 8);
+#endif
   // if the underlying type of `time_t' is 64-bits, then use both the low and high bits
   time_t const t = time(NULL);
   if (t == -1)
@@ -38,10 +47,66 @@ static uint32_t xor ()	// XORs the current time and the process ID for seeding t
 }
 
 
+#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
+static uint32_t genseed () // generates seed by fetching /dev/urandom or fallsback to XOR
+{
+#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
+  static_assert(sizeof(uint32_t) == sizeof(unsigned int));
+#else
+  _Static_assert(sizeof(uint32_t) == sizeof(unsigned int));
+#endif
+
+  uint32_t prn = 0xffffffff;
+  if (getrandom(&prn, sizeof(uint32_t), GRND_NONBLOCK) == -1)
+  {
+    fprintf(stderr, "genseed(): ERROR %s\n", strerror(errno));
+    fprintf(stderr, "genseed(): falling back to XORing\n");
+    prn = xor();
+  }
+
+  return (prn & 0xfffffffe);
+}
+#else
+static uint32_t genseed ()
+{
+#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
+  static_assert(sizeof(uint32_t) == sizeof(unsigned int));
+#else
+  _Static_assert(sizeof(uint32_t) == sizeof(unsigned int));
+#endif
+
+  int devurand = open("/dev/urandom", O_RDONLY);
+  if (devurand == FAILURE)
+  {
+    fprintf(stderr, "genseed(): ERROR %s\n", strerror(errno));
+    fprintf(stderr, "genseed(): falling back to XORing\n");
+    return xor();
+  }
+
+  uint32_t prn = 0xffffffff;
+  ssize_t size = read(devurand, &prn, sizeof(uint32_t));
+  if (size == -1 || size != sizeof(uint32_t))
+  {
+    // NOTE that read() may not check for errors (see `man read(2)')
+    fprintf(stderr, "genseed(): ERROR %s\n", strerror(errno));
+    fprintf(stderr, "genseed(): falling back to XORing\n");
+    prn = xor();
+    return prn;
+  }
+
+  return (prn & 0xfffffffe);
+}
+#endif
+
+
 static int seeder (generator_t* generator)
 {
+#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
   static_assert(sizeof(int) == 4);
-  uint64_t const seed = xor();
+#else
+  _Static_assert(sizeof(int) == 4);
+#endif
+  uint64_t const seed = genseed();
   if ( (seed == 0) || (seed & 0x0000000000000001) )
   {
     fprintf(stderr, "seed(): ERROR\n");
