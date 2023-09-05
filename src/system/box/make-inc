@@ -1,12 +1,11 @@
-#!/usr/bin/make
 #
 # OpenBDS						July 19, 2023
 #
-# source: Makefile
+# source: make-inc
 # author: @misael-diaz
 #
 # Synopsis:
-# Defines the Makefile for building the program with GNU make.
+# Defines the include file for building the program with GNU make.
 #
 # Copyright (c) 2023 Misael Diaz-Maldonado
 # This file is released under the GNU General Public License as published
@@ -14,14 +13,15 @@
 # (at your option) any later version.
 #
 
-all: PRNGs util-system-box
+# include
+INC = -I../../../inc
 
-PRNGs:
-	@$(MAKE) -C random
+# headers
+SYSTEM_H = ../../../inc/system.h
+BOX_H = ../../../inc/system/box.h
 
-util-system-box:
-	@$(MAKE) -C system-box
+# sources
+BOX_C = box.c
 
-clean:
-	@$(MAKE) -C random clean
-	@$(MAKE) -C system-box clean
+# objects
+BOX_O = box.o

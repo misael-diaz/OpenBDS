@@ -14,14 +14,15 @@
 # (at your option) any later version.
 #
 
-all: PRNGs util-system-box
+include make-inc
 
-PRNGs:
-	@$(MAKE) -C random
+all: $(TEST)
 
-util-system-box:
-	@$(MAKE) -C system-box
+$(TEST): $(TEST_O)
+	$(CC) $(INC) $(CCOPT) $(BOX_O) $(TEST_O) -o $(TEST) $(LIBS)
+
+$(TEST_O): $(SYSTEM_H) $(BOX_H) $(BOX_O) $(TEST_C)
+	$(CC) $(INC) $(CCOPT) -c $(TEST_C) -o $(TEST_O)
 
 clean:
-	@$(MAKE) -C random clean
-	@$(MAKE) -C system-box clean
+	/bin/rm -f *.o *.bin

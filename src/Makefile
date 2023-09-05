@@ -20,7 +20,7 @@ export CC
 export CCOPT
 export LIBS
 
-all: $(TESTS) utils tests
+all: $(TESTS) utils system-utils tests
 
 $(MAIN_BIN): $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ)
 	$(FC) $(FCOPT) $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ) -o $(MAIN_BIN)
@@ -43,10 +43,14 @@ $(MAIN_OBJ): $(FMACROS_H) $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_SRC)
 utils:
 	@$(MAKE) -C util
 
+system-utils:
+	@$(MAKE) -C system
+
 tests: utils
 	@$(MAKE) -C test
 
 clean:
 	/bin/rm -rf *.o *.mod *.bin
 	@$(MAKE) -C util clean
+	@$(MAKE) -C system clean
 	@$(MAKE) -C test clean
