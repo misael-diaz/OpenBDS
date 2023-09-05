@@ -14,14 +14,9 @@
 # (at your option) any later version.
 #
 
-all: PRNGs util-system-box
+all: system-box
 
-PRNGs:
-	@$(MAKE) -C random
-
-util-system-box:
-	@$(MAKE) -C system-box
-
+system-box:
+	@$(MAKE) -C box
 clean:
-	@$(MAKE) -C random clean
-	@$(MAKE) -C system-box clean
+	@$(MAKE) -C box clean
