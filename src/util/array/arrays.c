@@ -2,7 +2,7 @@
 #include "util/arrays.h"
 #include "system.h"
 
-#define NUMEL NUM_SPHERES
+#define NUMEL NUM_PARTICLES
 
 void copy (const double* restrict src, double* restrict dst)
 {

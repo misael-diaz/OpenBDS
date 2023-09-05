@@ -1,0 +1,31 @@
+#
+# OpenBDS						July 19, 2023
+#
+# source: make-inc
+# author: @misael-diaz
+#
+# Synopsis:
+# Defines the include file for building the program with GNU make.
+#
+# Copyright (c) 2023 Misael Diaz-Maldonado
+# This file is released under the GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+
+# include
+INC = -I../../../inc
+
+# headers
+SYSTEM_H = ../../../inc/system.h
+BOX_H = ../../../inc/system/box.h
+
+# sources
+TEST_C = test.c
+
+# objects
+BOX_O = ../../system/box/box.o
+TEST_O = test.o
+
+#binaries
+TEST = test-system-box.bin
