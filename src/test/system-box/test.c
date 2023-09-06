@@ -4,6 +4,7 @@
 
 #include "system.h"
 #include "system/box.h"
+#include "bds/types.h"
 
 #define NUMEL NUM_PARTICLES
 
@@ -18,35 +19,36 @@ int main ()
 
 void test (void)
 {
-  double x[NUMEL];
+  prop_t x[NUMEL];
 
+  double* data = &x[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    x[i] = 0.0;
+    data[i] = 0.0;
   }
 
-  x[0] = -1.0009765625;
-  x[1] = -1.0000000000;
-  x[2] = -0.5000000000;
-  x[3] = +0.0000000000;
-  x[4] = +0.5000000000;
-  x[5] = +1.0000000000;
-  x[6] = +1.0009765625;
+  data[0] = -1.0009765625;
+  data[1] = -1.0000000000;
+  data[2] = -0.5000000000;
+  data[3] = +0.0000000000;
+  data[4] = +0.5000000000;
+  data[5] = +1.0000000000;
+  data[6] = +1.0009765625;
 
   for (size_t i = 0; i != NUMEL; ++i)
   {
     double const c = LIMIT;
-    x[i] *= c;
+    data[i] *= c;
   }
 
-  double offset[NUMEL];
-  double bitmask[NUMEL];
+  prop_t offset[NUMEL];
+  prop_t bitmask[NUMEL];
   pbc(x, offset, bitmask);
 
   bool failed = false;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    if (x[i] < -LIMIT || x[i] > LIMIT)
+    if (data[i] < -LIMIT || data[i] > LIMIT)
     {
       failed = true;
       break;

@@ -3,16 +3,10 @@
 
 #include "system.h"
 #include "system/box.h"
+#include "bds/types.h"
 
 #define NUMEL NUM_PARTICLES
 #define MSBMASK 0x8000000000000000
-
-// we use this for bitmasking floating-point numbers and for writing vectorizable code
-typedef union
-{
-  uint64_t bin;
-  double data;
-} alias_t;
 
 
 // gets the 11-bits that comprise the exponent of a double precision floating-point number
@@ -67,68 +61,73 @@ static uint64_t unlimited (uint64_t const x)
 
 
 // masks particles beyond the system limits with a binary pattern of ones, otherwise zeros
-static void mask (const double* restrict x, double* restrict bitmask)
+static void mask (const prop_t* restrict x, prop_t* restrict bitmask)
 {
-  alias_t* b = bitmask;
-  const alias_t* fp = x;
+  uint64_t* b = &bitmask[0].bin;
+  const uint64_t* fp = &x[0].bin;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    b[i].bin = unlimited(fp[i].bin);
+    b[i] = unlimited(fp[i]);
   }
 }
 
 
 // performs the pre-scaling so that x ~ 1 (or x = O(1))
-static void scale (double* x)
+static void scale (prop_t* x)
 {
+  double* data = &x[0].data;
   double const c = 1.0 / LIMIT;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    x[i] *= c;
+    data[i] *= c;
   }
 }
 
 
 // restores the original scaling of x ~ LIMIT
-static void rescale (double* x)
+static void rescale (prop_t* x)
 {
   double const c = LIMIT;
+  double* data = &x[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    x[i] *= c;
+    data[i] *= c;
   }
 }
 
 
 // sets the offset on the particles according to the bitmask and their positions (signbit)
-static void offset (const double* restrict x,
-		    const double* restrict bitmask,
-		    double* restrict offset)
+static void offset (const prop_t* restrict x,
+		    const prop_t* restrict bitmask,
+		    prop_t* restrict offset)
 {
-  alias_t* o = offset;
-  const alias_t* fp = x;
-  double const len = 2.0;
-  const alias_t* b = bitmask;
-  alias_t const l = { .data = len };
+  double const length = 2.0;
+  uint64_t* o = &offset[0].bin;
+  const uint64_t* fp = &x[0].bin;
+  const uint64_t* b = &bitmask[0].bin;
+  prop_t const len = { .data = length };
+  uint64_t const l = len.bin;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    o[i].bin = (b[i].bin & l.bin) | ( ( (MSBMASK & fp[i].bin) ^ MSBMASK ) & MSBMASK );
+    o[i] = (b[i] & l) | ( ( (MSBMASK & fp[i]) ^ MSBMASK ) & MSBMASK );
   }
 }
 
 
 // shifts x, y, or z-axis coordinates by the offset
-static void shift (double* restrict x, const double* restrict offset)
+static void shift (prop_t* restrict x, const prop_t* restrict offset)
 {
+  double* data = &x[0].data;
+  const double* o = &offset[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    x[i] += offset[i];
+    data[i] += o[i];
   }
 }
 
 
 // applies periodic boundary conditions to the particles
-void pbc (double* restrict x, double* restrict distance, double* restrict bitmask)
+void pbc (prop_t* restrict x, prop_t* restrict distance, prop_t* restrict bitmask)
 {
   // applies required pre-scaling:
 
