@@ -10,7 +10,7 @@
 
 
 // gets the 11-bits that comprise the exponent of a double precision floating-point number
-static uint64_t exp (uint64_t const x)
+static uint64_t exponent (uint64_t const x)
 {
   return ( (x >> 52) & 0x7ff );
 }
@@ -23,40 +23,40 @@ static uint64_t twos_complement (uint64_t const x)
 }
 
 
-// static uint64_t pexp (uint64_t const x)
+// static uint64_t pexponent (uint64_t const x)
 //
 // Synopsis:
-// Positive Exponent, pexp().
+// Positive Exponent, pexponent().
 // Yields one if the exponent bits correspond to an exponent n > 0, yields zero otherwise.
 // The parameter `x' stores the binary floating-point representation of a 64-bit floating
 // point number.
 
 
-static uint64_t pexp (uint64_t const x)
+static uint64_t pexponent (uint64_t const x)
 {
-  return ( (exp(x) & 0x400) >> 10 );
+  return ( (exponent(x) & 0x400) >> 10 );
 }
 
 
-// static uint64_t zexp (uint64_t const x)
+// static uint64_t zexponent (uint64_t const x)
 //
 // Synopsis:
-// Zero Exponent, zexp().
+// Zero Exponent, zexponent().
 // Yields one if the exponent bits correspond to an exponent n = 0, yields zero otherwise.
 // The parameter `x' stores the binary floating-point representation of a 64-bit floating
 // point number.
 
 
-static uint64_t zexp (uint64_t const x)
+static uint64_t zexponent (uint64_t const x)
 {
- return ((((((((exp(x) & 0x3ff) ^ 0x3ff) & 0x3ff) + 0x3ff) & 0x400) >> 10) + 1) & 1);
+ return ((((((((exponent(x) & 0x3ff) ^ 0x3ff) & 0x3ff) + 0x3ff) & 0x400) >> 10) + 1) & 1);
 }
 
 
 // yields a bitmask of ones if abs(x) >= 1, bitmask of zeros otherwise
 static uint64_t unlimited (uint64_t const x)
 {
-  return ( twos_complement( pexp(x) | zexp(x) ) );
+  return ( twos_complement( pexponent(x) | zexponent(x) ) );
 }
 
 
