@@ -9,6 +9,7 @@
 #include "util/random.h"
 #include "util/type.h"
 
+#define STDC17 201710L
 #define ABS(x) ( (x < 0)? -x : x )
 #define SIZE_RANDOM sizeof(struct random)
 #define SIZE_GENERATOR sizeof(struct generator)
