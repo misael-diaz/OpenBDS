@@ -1,0 +1,33 @@
+#
+# OpenBDS						July 19, 2023
+#
+# source: make-inc
+# author: @misael-diaz
+#
+# Synopsis:
+# Defines the include file for building the program with GNU make.
+#
+# Copyright (c) 2023 Misael Diaz-Maldonado
+# This file is released under the GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+
+# include
+INC = -I../../../inc
+
+# sources
+TEST_C = test.c
+TEST_F = test.f
+
+# objects
+SYSBOX_O = ../../system/box/box.o
+ARRAYS_O = ../../util/array/arrays.o
+SPHERE_O = ../../particles/sphere/sphere.o
+DEPS_O = $(SYSBOX_O) $(ARRAYS_O) $(SPHERE_O)
+TEST_O = test.o
+FEST_O = fest.o
+
+# binaries
+TEST = test-particles-sphere.bin
+FEST = fortran-test-particles-sphere.bin

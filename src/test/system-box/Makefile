@@ -25,4 +25,4 @@ $(TEST_O): $(SYSTEM_H) $(BOX_H) $(BOX_O) $(TEST_C)
 	$(CC) $(INC) $(CCOPT) -c $(TEST_C) -o $(TEST_O)
 
 clean:
-	/bin/rm -f *.o *.bin
+	/bin/rm -f *.o *.log *.bin

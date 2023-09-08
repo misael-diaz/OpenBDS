@@ -25,4 +25,4 @@ $(TEST_O): $(RANDOM_H) $(RANDOM_O) $(TYPE_O) $(TEST_C)
 	$(CC) $(INC) $(CCOPT) -c $(TEST_C) -o $(TEST_O)
 
 clean:
-	/bin/rm -f *.o *.bin
+	/bin/rm -f *.o *.log *.bin

@@ -1,8 +1,10 @@
-#ifndef GUARD_OPENBDS_SYSTEM_H
-#define GUARD_OPENBDS_SYSTEM_H
+#ifndef GUARD_OPENBDS_SYSTEM_BOX_PARAMS_H
+#define GUARD_OPENBDS_SYSTEM_BOX_PARAMS_H
 
-#include "system/params.h"
-#include "system/box.h"
+#include "config.h"
+
+#define __OBDS_LIMIT__ ( (double) ( CONF_LIMIT ) )
+#define __OBDS_LENGTH__ ( (double) ( 2.0 * ( __OBDS_LIMIT__ ) ) )
 
 #endif
 
@@ -10,11 +12,11 @@
 
 OpenBDS							September 05, 2023
 
-source: system.h
+source: system/box/params.h
 author: @misael-diaz
 
 Synopsis:
-Bundles system parameters and utilities.
+Defines the system box (cubic) limits.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

@@ -1,20 +1,21 @@
-#ifndef GUARD_OPENBDS_SYSTEM_H
-#define GUARD_OPENBDS_SYSTEM_H
+#ifndef GUARD_OPENBDS_PARTICLES_SPHERE_UTILS_H
+#define GUARD_OPENBDS_PARTICLES_SPHERE_UTILS_H
 
-#include "system/params.h"
-#include "system/box.h"
+#include "particles/sphere/type.h"
+
+sphere_t* particles_sphere_initializer(void*);
 
 #endif
 
 /*
 
-OpenBDS							September 05, 2023
+OpenBDS							September 07, 2023
 
-source: system.h
+source: particles/sphere/utils.h
 author: @misael-diaz
 
 Synopsis:
-Bundles system parameters and utilities.
+Defines an interface for the sphere utilities.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published
