@@ -106,7 +106,7 @@ program main
   real(kind = c_double), pointer, contiguous :: x(:) => null()
   real(kind = c_double), pointer, contiguous :: y(:) => null()
   real(kind = c_double), pointer, contiguous :: z(:) => null()
-  real(kind = c_double), parameter :: lim = real(LIMIT, kind = c_double)
+  real(kind = c_double), parameter :: syslim = real(LIMIT, kind = c_double)
   integer(kind = c_size_t), parameter :: numel = int(NUMEL, kind = c_size_t)
   integer(kind = c_size_t), parameter :: size_sphere_t = 32_c_size_t
   integer(kind = c_size_t), parameter :: size_OBDS_Sphere_t = 128_c_size_t
@@ -128,27 +128,27 @@ program main
 
   ! puts the particles outside the box (we can afford particle overlapping in this test)
 
-  x = 1.0009765625_c_double * lim
-  y = 1.0009765625_c_double * lim
-  z = 1.0009765625_c_double * lim
+  x = 1.0009765625_c_double * syslim
+  y = 1.0009765625_c_double * syslim
+  z = 1.0009765625_c_double * syslim
 
   call limit(spheres)                           ! applies periodic boundary conditions
 
   ! we can afford not to break the loops right away since the computing cost is just O(N)
   do i = 1, numel
-    if (x(i) < -lim .or. x(i) > +lim) then
+    if (x(i) < -syslim .or. x(i) > +syslim) then
       failed = .true.
     end if
   end do
 
   do i = 1, numel
-    if (y(i) < -lim .or. y(i) > +lim) then
+    if (y(i) < -syslim .or. y(i) > +syslim) then
       failed = .true.
     end if
   end do
 
   do i = 1, numel
-    if (z(i) < -lim .or. z(i) > +lim) then
+    if (z(i) < -syslim .or. z(i) > +syslim) then
       failed = .true.
     end if
   end do
