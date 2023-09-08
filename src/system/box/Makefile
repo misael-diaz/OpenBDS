@@ -22,4 +22,4 @@ $(BOX_O): $(SYSTEM_H) $(BOX_H) $(BOX_C)
 	$(CC) $(INC) $(CCOPT) -c $(BOX_C) -o $(BOX_O)
 
 clean:
-	/bin/rm -f *.o
+	/bin/rm -f *.log *.o

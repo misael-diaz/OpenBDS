@@ -1,20 +1,21 @@
-#ifndef GUARD_OPENBDS_SYSTEM_H
-#define GUARD_OPENBDS_SYSTEM_H
+#ifndef GUARD_OPENBDS_FORTRAN_CONFIG_H
+#define GUARD_OPENBDS_FORTRAN_CONFIG_H
 
-#include "system/params.h"
-#include "system/box.h"
+#define FCONF_NUM_PARTICLES 256
+#define FCONF_LIMIT 8.0
 
 #endif
 
 /*
 
-OpenBDS							September 05, 2023
+OpenBDS                                                 September 07, 2023
 
-source: system.h
+source: fconfig.h
 author: @misael-diaz
 
 Synopsis:
-Bundles system parameters and utilities.
+FORTRAN configuration file for the Brownian Dynamics Simulations.
+Defines the number of particles and the system (cubic) box limit.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

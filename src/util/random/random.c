@@ -251,7 +251,7 @@ int util_random_initializer (random_t* random, enum PRNG PRNG)
 
 OpenBDS								July 19, 2023
 
-source: random.c
+source: util/random/random.c
 author: @misael-diaz
 
 Synopsis:

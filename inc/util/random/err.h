@@ -1,8 +1,7 @@
-#ifndef GUARD_OPENBDS_SYSTEM_H
-#define GUARD_OPENBDS_SYSTEM_H
+#ifndef GUARD_OPENBDS_UTIL_RANDOM_ERR_H
+#define GUARD_OPENBDS_UTIL_RANDOM_ERR_H
 
-#include "system/params.h"
-#include "system/box.h"
+#define OBDS_ERR_PRNG ( (uint64_t) 0xfff0000000000000 )
 
 #endif
 
@@ -10,11 +9,11 @@
 
 OpenBDS							September 05, 2023
 
-source: system.h
+source: util/random/err.h
 author: @misael-diaz
 
 Synopsis:
-Bundles system parameters and utilities.
+Defines the Pseudo Random Number Generator PRNG Error MACRO.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published
