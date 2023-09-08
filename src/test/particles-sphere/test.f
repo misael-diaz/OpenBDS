@@ -86,6 +86,7 @@ program main
   use, intrinsic :: iso_c_binding, only: c_bool
   use, intrinsic :: iso_c_binding, only: c_size_t
   use, intrinsic :: iso_c_binding, only: c_double
+  use, intrinsic :: iso_c_binding, only: c_sizeof
   use, intrinsic :: iso_c_binding, only: c_associated
   use, intrinsic :: iso_c_binding, only: c_f_procpointer
   use, intrinsic :: iso_c_binding, only: c_f_pointer
@@ -98,6 +99,8 @@ program main
   use api, only: c_init
   implicit none
 
+  type(sphere_t) :: c_sphere_t
+  type(OBDS_Sphere_t) :: c_OBDS_Sphere_t
   type(c_ptr) :: workspace = c_null_ptr
   type(c_ptr) :: c_spheres = c_null_ptr
   type(sphere_t), pointer :: spheres => null()
@@ -116,6 +119,16 @@ program main
                                             & 16_c_size_t * numel * size_prop_t
   logical(kind = c_bool) :: failed = .false.
   integer(kind = c_size_t) :: i
+
+  ! performs runtime checks (that are more like reminders that these are C types)
+
+  if (c_sizeof(c_sphere_t) /= 32) then
+    error stop "test(): expects size of sphere_t to be 32 bytes"
+  end if
+
+  if (c_sizeof(c_OBDS_Sphere_t) /= 128) then
+    error stop "test(): expects size of OBDS_Sphere_t to be 128 bytes"
+  end if
 
   workspace = c_malloc(sz)                      ! allocates workspace on the heap
   c_spheres = c_init(workspace)                 ! initializes the sphere properties
