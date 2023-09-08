@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 
@@ -22,7 +23,7 @@ int main ()
 }
 
 
-#if __STDC_VERSION__ > STDC17
+#if ( __GNUC__ > 11 ) && ( __STDC_VERSION__ > STDC17 )
 void test (void)
 {
   static_assert(sizeof(sphere_t) == 32);
@@ -109,7 +110,86 @@ void test (void)
 #else
 void test (void)
 {
-  printf("test-sphere[0]: UNIMPLEMENTED\n");
+  _Static_assert(sizeof(sphere_t) == 32);
+  _Static_assert(sizeof(OBDS_Sphere_t) == 128);
+  _Static_assert(sizeof(prop_t) == 8);
+  size_t const sz = sizeof(sphere_t) + sizeof(OBDS_Sphere_t) + PROPS * sizeof(prop_t);
+  void* workspace = malloc(sz);
+  if (workspace == NULL)
+  {
+    fprintf(stderr, "test-spheres(): memory allocation error %s\n", strerror(errno));
+
+    return;
+  }
+
+  sphere_t* spheres = particles_sphere_initializer(workspace);
+
+  double* x = &(spheres -> props -> x -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    *x = 1.0009765625 * LIMIT;
+    ++x;
+  }
+
+  double* y = &(spheres -> props -> y -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    *y = 1.0009765625 * LIMIT;
+    ++y;
+  }
+
+  double* z = &(spheres -> props -> z -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    *z = 1.0009765625 * LIMIT;
+    ++z;
+  }
+
+  spheres -> limit(spheres);
+
+  bool failed = false;
+  x = &(spheres -> props -> x -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    if (x[i] < -LIMIT || x[i] > +LIMIT)
+    {
+      failed = true;
+      break;
+    }
+  }
+
+  y = &(spheres -> props -> y -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    if (y[i] < -LIMIT || y[i] > +LIMIT)
+    {
+      failed = true;
+      break;
+    }
+  }
+
+  z = &(spheres -> props -> z -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    if (z[i] < -LIMIT || z[i] > +LIMIT)
+    {
+      failed = true;
+      break;
+    }
+  }
+
+  printf("test-sphere[0]: ");
+  if (failed)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  free(workspace);
+  workspace = NULL;
 }
 #endif
 
