@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <assert.h>
 #include <string.h>
 #include <errno.h>
 
@@ -94,7 +95,7 @@ sphere_t* particles_sphere_initializer (void* data)
 {
   // compile-time sane checks:
 
-#if __STDC_VERSION__ > STDC17
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
   static_assert(sizeof(NUMEL) == 8);
   static_assert(sizeof(RADIUS) == 8);
   static_assert(sizeof(CONTACT) == 8);
@@ -136,7 +137,11 @@ sphere_t* particles_sphere_initializer (void* data)
     errno = EINVAL;
     char err[] = "sphere-initializer() expects the time-step to be a power of two: %s\n";
     fprintf(stderr, err, strerror(errno));
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
     return nullptr;
+#else
+    return NULL;
+#endif
   }
 
   // bindinds:
