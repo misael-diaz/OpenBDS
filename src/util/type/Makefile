@@ -22,4 +22,4 @@ $(TYPE_O): $(TYPE_H) $(TYPE_C)
 	$(CC) $(INC) $(CCOPT) -c $(TYPE_C) -o $(TYPE_O)
 
 clean:
-	/bin/rm -f *.o
+	/bin/rm -f *.log *.o

@@ -16,10 +16,19 @@
 
 include make-inc
 
-all: $(ARRAYS_O)
+all: $(TEST) $(FEST)
 
-$(ARRAYS_O): $(SYSTEM_H) $(ARRAYS_H) $(ARRAYS_C)
-	$(CC) $(INC) $(CCOPT) -c $(ARRAYS_C) -o $(ARRAYS_O)
+$(TEST): $(TEST_O)
+	$(CC) $(INC) $(CCOPT) $(DEPS_O) $(TEST_O) -o $(TEST) $(LIBS)
+
+$(FEST): $(FEST_O)
+	$(FC) $(INC) $(FCOPT) $(DEPS_O) $(FEST_O) -o $(FEST)
+
+$(TEST_O): $(DEPS_O) $(TEST_C)
+	$(CC) $(INC) $(CCOPT) -c $(TEST_C) -o $(TEST_O)
+
+$(FEST_O): $(TEST_F)
+	$(FC) $(INC) $(FCOPT) -c $(TEST_F) -o $(FEST_O)
 
 clean:
-	/bin/rm -f *.log *.o
+	/bin/rm -f *.o *.log *.mod *.bin

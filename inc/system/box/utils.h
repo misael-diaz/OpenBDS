@@ -1,8 +1,9 @@
-#ifndef GUARD_OPENBDS_SYSTEM_H
-#define GUARD_OPENBDS_SYSTEM_H
+#ifndef GUARD_OPENBDS_SYSTEM_BOX_UTILS_H
+#define GUARD_OPENBDS_SYSTEM_BOX_UTILS_H
 
-#include "system/params.h"
-#include "system/box.h"
+#include "bds/types.h"
+
+void pbc(prop_t* restrict x, prop_t* restrict offset, prop_t* restrict bitmask);
 
 #endif
 
@@ -10,11 +11,11 @@
 
 OpenBDS							September 05, 2023
 
-source: system.h
+source: system/box/utils.h
 author: @misael-diaz
 
 Synopsis:
-Bundles system parameters and utilities.
+Defines the system box utils for applying periodic boundary conditions PBCs.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

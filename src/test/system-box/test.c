@@ -1,12 +1,12 @@
 #include <stdio.h>
-#include <stddef.h>
 #include <stdbool.h>
 
-#include "system.h"
-#include "system/box.h"
-#include "bds/types.h"
+#include "system/params.h"
+#include "system/box/params.h"
+#include "system/box/utils.h"
 
-#define NUMEL NUM_PARTICLES
+#define NUMEL ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
+#define LIMIT ( (double) ( __OBDS_LIMIT__ ) )
 
 void test(void);
 
@@ -71,7 +71,7 @@ void test (void)
 
 OpenBDS							September 05, 2023
 
-source: test.c
+source: test/system-box/test.c
 author: @misael-diaz
 
 Synopsis:

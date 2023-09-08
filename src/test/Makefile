@@ -14,7 +14,7 @@
 # (at your option) any later version.
 #
 
-all: PRNGs util-system-box
+all: PRNGs util-system-box spheres
 
 PRNGs:
 	@$(MAKE) -C random
@@ -22,6 +22,10 @@ PRNGs:
 util-system-box:
 	@$(MAKE) -C system-box
 
+spheres:
+	@$(MAKE) -C particles-sphere
+
 clean:
 	@$(MAKE) -C random clean
 	@$(MAKE) -C system-box clean
+	@$(MAKE) -C particles-sphere clean

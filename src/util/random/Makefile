@@ -22,4 +22,4 @@ $(RANDOM_O): $(RANDOM_H) $(RANDOM_C)
 	$(CC) $(INC) $(CCOPT) -c $(RANDOM_C) -o $(RANDOM_O)
 
 clean:
-	/bin/rm -f *.o
+	/bin/rm -f *.log *.o

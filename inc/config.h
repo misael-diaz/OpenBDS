@@ -1,20 +1,25 @@
-#ifndef GUARD_OPENBDS_SYSTEM_H
-#define GUARD_OPENBDS_SYSTEM_H
+#ifndef GUARD_OPENBDS_CONFIG_H
+#define GUARD_OPENBDS_CONFIG_H
 
-#include "system/params.h"
-#include "system/box.h"
+#include <stddef.h>
+
+#include "fconfig.h"
+
+#define CONF_NUM_PARTICLES ( (size_t) FCONF_NUM_PARTICLES )
+#define CONF_LIMIT ( (double) FCONF_LIMIT )
 
 #endif
 
 /*
 
-OpenBDS							September 05, 2023
+OpenBDS                                                 September 07, 2023
 
-source: system.h
+source: config.h
 author: @misael-diaz
 
 Synopsis:
-Bundles system parameters and utilities.
+Defines some parameters for configuring the Brownian Dynamics Simulations BDS.
+Do not edit this header file manually, edit the FORTRAN fconfig.h instead.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

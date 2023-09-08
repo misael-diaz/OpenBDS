@@ -1,8 +1,9 @@
-#ifndef GUARD_OPENBDS_SYSTEM_H
-#define GUARD_OPENBDS_SYSTEM_H
+#ifndef GUARD_OPENBDS_UTIL_H
+#define GUARD_OPENBDS_UTIL_H
 
-#include "system/params.h"
-#include "system/box.h"
+#include "util/arrays.h"
+#include "util/random.h"
+#include "util/type.h"
 
 #endif
 
@@ -10,11 +11,11 @@
 
 OpenBDS							September 05, 2023
 
-source: system.h
+source: util.h
 author: @misael-diaz
 
 Synopsis:
-Bundles system parameters and utilities.
+Bundles the core utilities.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

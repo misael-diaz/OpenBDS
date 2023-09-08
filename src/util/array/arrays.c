@@ -1,30 +1,34 @@
 #include <stddef.h>
 #include "util/arrays.h"
-#include "system.h"
+#include "system/params.h"
 
-#define NUMEL NUM_PARTICLES
+#define NUMEL ( (size_t) __OBDS_NUM_PARTICLES__ )
 
-void copy (const double* restrict src, double* restrict dst)
+void copy (const prop_t* restrict source, prop_t* restrict dest)
 {
+  double* dst = &dest[0].data;
+  const double* src = &source[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
   {
     dst[i] = src[i];
   }
 }
 
-void zeros (double* x)
+void zeros (prop_t* x)
 {
+  double* data = &x[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    x[i] = 0.0;
+    data[i] = 0.0;
   }
 }
 
-void iota (int64_t* x)
+void iota (prop_t* ID)
 {
+  uint64_t* id = &ID[0].bin;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    x[i] = i;
+    id[i] = i;
   }
 }
 
@@ -32,7 +36,7 @@ void iota (int64_t* x)
 
 OpenBDS								July 19, 2023
 
-source: arrays.c
+source: util/array/arrays.c
 author: @misael-diaz
 
 Synopsis:

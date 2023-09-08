@@ -17,10 +17,12 @@
 include make-inc
 
 export CC
+export FC
 export CCOPT
+export FCOPT
 export LIBS
 
-all: $(TESTS) utils system-utils tests
+all: $(TESTS) utils system-utils particle-utils tests
 
 $(MAIN_BIN): $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ)
 	$(FC) $(FCOPT) $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ) -o $(MAIN_BIN)
@@ -46,11 +48,15 @@ utils:
 system-utils:
 	@$(MAKE) -C system
 
+particle-utils: utils
+	@$(MAKE) -C particles
+
 tests: utils
 	@$(MAKE) -C test
 
 clean:
-	/bin/rm -rf *.o *.mod *.bin
+	/bin/rm -rf *.o *.log *.mod *.bin
 	@$(MAKE) -C util clean
 	@$(MAKE) -C system clean
+	@$(MAKE) -C particles clean
 	@$(MAKE) -C test clean

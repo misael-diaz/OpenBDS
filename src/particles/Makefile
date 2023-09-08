@@ -14,12 +14,10 @@
 # (at your option) any later version.
 #
 
-include make-inc
+all: spheres
 
-all: $(ARRAYS_O)
-
-$(ARRAYS_O): $(SYSTEM_H) $(ARRAYS_H) $(ARRAYS_C)
-	$(CC) $(INC) $(CCOPT) -c $(ARRAYS_C) -o $(ARRAYS_O)
+spheres:
+	@$(MAKE) -C sphere
 
 clean:
-	/bin/rm -f *.log *.o
+	@$(MAKE) -C sphere clean

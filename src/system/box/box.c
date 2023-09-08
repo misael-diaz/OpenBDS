@@ -1,12 +1,10 @@
-#include <stddef.h>
-#include <stdint.h>
-
-#include "system.h"
-#include "system/box.h"
+#include "system/params.h"
+#include "system/box/params.h"
 #include "bds/types.h"
 
-#define NUMEL NUM_PARTICLES
-#define MSBMASK 0x8000000000000000
+#define NUMEL ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
+#define LIMIT ( (double) ( __OBDS_LIMIT__ ) )
+#define MSBMASK ( (uint64_t) 0x8000000000000000 )
 
 
 // gets the 11-bits that comprise the exponent of a double precision floating-point number
@@ -149,7 +147,7 @@ void pbc (prop_t* restrict x, prop_t* restrict distance, prop_t* restrict bitmas
 
 OpenBDS								September 05, 2023
 
-source: box.c
+source: system/box/box.c
 author: @misael-diaz
 
 Synopsis:
