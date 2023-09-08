@@ -27,7 +27,7 @@
 
 static uint32_t xor ()	// XORs the current time and the process ID for seeding the PRNG
 {
-#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
+#if ( ( __GNUC__ > 12 ) && (__STDC_VERSION__ > STDC17 ) )
   static_assert(sizeof(time_t) == 8);
 #else
   _Static_assert(sizeof(time_t) == 8);
@@ -51,12 +51,11 @@ static uint32_t xor ()	// XORs the current time and the process ID for seeding t
 #if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
 static uint32_t genseed () // generates seed by fetching /dev/urandom or fallsback to XOR
 {
-#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
+#if ( ( __GNUC__ > 12 ) && (__STDC_VERSION__ > STDC17 ) )
   static_assert(sizeof(uint32_t) == sizeof(unsigned int));
 #else
   _Static_assert(sizeof(uint32_t) == sizeof(unsigned int));
 #endif
-
   uint32_t prn = 0xffffffff;
   if (getrandom(&prn, sizeof(uint32_t), GRND_NONBLOCK) == -1)
   {
@@ -70,7 +69,7 @@ static uint32_t genseed () // generates seed by fetching /dev/urandom or fallsba
 #else
 static uint32_t genseed ()
 {
-#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
+#if ( ( __GNUC__ > 12 ) && (__STDC_VERSION__ > STDC17 ) )
   static_assert(sizeof(uint32_t) == sizeof(unsigned int));
 #else
   _Static_assert(sizeof(uint32_t) == sizeof(unsigned int));
@@ -103,7 +102,7 @@ static uint32_t genseed ()
 
 static int seeder (generator_t* generator)
 {
-#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
+#if ( ( __GNUC__ > 12 ) && (__STDC_VERSION__ > STDC17 ) )
   static_assert(sizeof(int) == 4);
 #else
   _Static_assert(sizeof(int) == 4);
