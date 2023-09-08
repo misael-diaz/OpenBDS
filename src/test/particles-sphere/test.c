@@ -23,7 +23,7 @@ int main ()
 }
 
 
-#if ( __GNUC__ > 11 ) && ( __STDC_VERSION__ > STDC17 )
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
 void test (void)
 {
   static_assert(sizeof(sphere_t) == 32);

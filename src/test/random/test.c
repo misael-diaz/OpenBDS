@@ -58,7 +58,7 @@ double std (const double* x)
 
 void test ()
 {
-#if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
   static_assert(sizeof(struct random) == 16);
   static_assert(sizeof(struct generator) == 32);
   static_assert(sizeof(uint64_t) == 8);
@@ -72,7 +72,7 @@ void test ()
   _Static_assert(SIZE == 64);
 #endif
 
-#if __STDC_VERSION__ > STDC17
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
   constexpr size_t size = sizeof(random_t) +
 			  sizeof(generator_t) +
 			  sizeof(uint64_t) +
@@ -82,11 +82,19 @@ void test ()
   size_t const size = SIZE;
 #endif
 
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  void* data = malloc(size);
+  if (data == nullptr)
+  {
+    return;
+  }
+#else
   void* data = malloc(size);
   if (data == NULL)
   {
     return;
   }
+#endif
 
   void* iter = data;
   struct random* random = (struct random*) iter;
@@ -102,11 +110,25 @@ void test ()
   if (stat != 0)
   {
     free(data);
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+    data = nullptr;
+#else
     data = NULL;
+#endif
     fprintf(stderr, "test-random(): PRNG seeding error\n");
     return;
   }
 
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  double* prns = malloc( NUMEL * sizeof(double) );
+  if (prns == nullptr)
+  {
+    free(data);
+    data = nullptr;
+    fprintf(stderr, "test-random(): memory error %s\n", strerror(errno));
+    return;
+  }
+#else
   double* prns = malloc( NUMEL * sizeof(double) );
   if (prns == NULL)
   {
@@ -115,6 +137,7 @@ void test ()
     fprintf(stderr, "test-random(): memory error %s\n", strerror(errno));
     return;
   }
+#endif
 
   double* prn = prns;
   bool failure = false;
@@ -130,6 +153,17 @@ void test ()
     ++prn;
   }
 
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  if (failure)
+  {
+    free(data);
+    free(prns);
+    data = nullptr;
+    prns = nullptr;
+    fprintf(stderr, "test-random(): UNEXPECTED PRNG ERROR\n");
+    return;
+  }
+#else
   if (failure)
   {
     free(data);
@@ -139,6 +173,7 @@ void test ()
     fprintf(stderr, "test-random(): UNEXPECTED PRNG ERROR\n");
     return;
   }
+#endif
 
   double avg = mean(prns);
   avg = ABS(avg);
@@ -172,8 +207,13 @@ void test ()
 
   free(data);
   free(prns);
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  data = nullptr;
+  prns = nullptr;
+#else
   data = NULL;
   prns = NULL;
+#endif
 }
 
 
