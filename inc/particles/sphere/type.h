@@ -3,6 +3,15 @@
 
 #include "bds/types.h"
 
+// defines enum for selecting the logging level
+enum SPHLOG
+{
+  SPH_LOG_LEVEL_DEFAULT,
+  SPH_LOG_LEVEL_VERBOSE
+};
+
+typedef enum SPHLOG SPHLOG;
+
 // defines the underlying properties of the sphere type:
 struct __OBDS_SPHERE_TYPE__
 {
@@ -37,7 +46,7 @@ struct sphere
   OBDS_Sphere_t* props;			// properties
   void (*update) (struct sphere*);	// updates the particles position and orientation
   void (*limit) (struct sphere*);	// limits the particles to the system boundaries
-  void (*log) (const struct sphere*);	// logs the particles position and orientation
+  int (*log) (const struct sphere* spheres, size_t const step);	// logs the positions
 };
 
 typedef struct sphere sphere_t;

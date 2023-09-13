@@ -10,6 +10,8 @@
 #define __OBDS_SPH_RADIUS__ ( (double) 1.0 )
 #define __OBDS_SPH_DIAMETER__ ( (double) ( 2.0 * __OBDS_SPH_RADIUS__ ) )
 #define __OBDS_SPH_CONTACT__ ( (double) ( __OBDS_SPH_DIAMETER__ ) )
+#define __OBDS_SPH_RANGE__ ( (double) ( 4.0 * ( __OBDS_SPH_CONTACT__ ) ) )
+#define __OBDS_SPH_EPSILON__ ( (double) 1.0 )
 
 #define __OBDS_NUM_SPHERES__ ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
 

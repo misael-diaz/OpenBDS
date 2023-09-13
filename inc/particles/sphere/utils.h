@@ -3,7 +3,7 @@
 
 #include "particles/sphere/type.h"
 
-sphere_t* particles_sphere_initializer(void*);
+sphere_t* particles_sphere_initializer(void*, SPHLOG);
 
 #endif
 
