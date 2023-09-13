@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
+#include <float.h>
+#include <math.h>
 
 #include "system/box.h"
 #include "particles/sphere/params.h"
@@ -9,14 +11,714 @@
 #include "util/arrays.h"
 
 #define STDC17 201710L
+#define SUCCESS ( (int) 0x00000000 )
+#define FAILURE ( (int) 0xffffffff )
 #define LIMIT ( (double) ( __OBDS_LIMIT__ ) )
+#define LENGTH ( (double) ( __OBDS_LENGTH__ ) )
 #define SIZED ( (double) ( __OBDS_NUM_SPHERES__ ) )
 #define TSTEP ( (double) ( __OBDS_TIME_STEP__ ) )
 #define NUMEL ( (size_t) ( __OBDS_NUM_SPHERES__ ) )
+#define EPSILON ( (double) ( __OBDS_SPH_EPSILON__ ) )
 #define RADIUS ( (double) ( __OBDS_SPH_RADIUS__ ) )
 #define CONTACT ( (double) ( __OBDS_SPH_CONTACT__ ) )
+#define CONTACT2 ( (double) ( ( CONTACT ) * ( CONTACT ) ) )
+#define RANGE ( (double) ( __OBDS_SPH_RANGE__ ) )
 #define MANTISSA ( (uint64_t) 0x000fffffffffffff )
+#define MSB ( (uint64_t) 0x8000000000000000 )
+#define TWOS_COMPLEMENT(x) ( ( ~(x) ) + 1 )
+#define NOT_ZERO(x) ( ( ( ( ( (x) & (~MSB) ) + (~MSB) ) & MSB ) >> 63 ) )
+#define NOT_SELF(x) ( TWOS_COMPLEMENT( NOT_ZERO( (x) ) ) )
+#define EXP(x) ( ( ( (x) >> 52) & 0x7ff ) )
+#define CLAMP (0.0625 / TSTEP)
 
+
+// static uint64_t nexp (uint64_t const x)
+//
+// Synopsis:
+// Negative Exponent.
+// Yields a 64-bit bitmask of `ones' if the floating point number whose binary floating
+// point representation is `x' has a negative exponent (n < 0) meaning that it is less
+// than one, otherwise it yields a bitmask of `zeros' because it is greater than or equal
+// to one (n >= 0).
+
+
+static uint64_t nexp (uint64_t const x)
+{
+  // if `hi' is one, then the exponent `n' satisfies n <= 0, otherwise n > 0
+  uint64_t h = ( ( ( (EXP(x) & 0x400) >> 10 ) + 1 ) & 1 );
+  // if `lo' is one, then the exponent `n' satisfies n < 0, otherwise n == 0
+  uint64_t l = ( ( ( ( ( (EXP(x) & 0x3ff) ^ 0x3ff ) & 0x3ff ) + 0x3ff ) & 0x400 ) >> 10 );
+  // (hi & lo) yields one if the exponent `n' satisfies n < 0, zero otherwise (n >= 0)
+  return TWOS_COMPLEMENT(h & l);
+}
+
+
+// static void inrange(dist, bitmask)
+//
+// Synopsis:
+// Yields a 64-bit bitmask of `ones' for interacting pairs of particles, `zeros' otherwise
+// for non-interacting pairs.
+//
+// Notes:
+// If the interpaticle distance `dist' satisfies dist < 1, the pair interacts, the pair
+// does not interact otherwise (dist >= 1). The caller method scales the interparticle
+// distance so that the interparticle distance `dist' is O(1).
+//
+// We use the NOT_SELF(x) MACRO to mask the ith particle itself, in this case the distance
+// is zero (64-bits of zeros in binary according to IEEE 754). If we didn't we would have
+// an infinite force acting on the ith particle itself. The method does not care (and does
+// not need to care) about the location of ith particle in the array `dist'; instead, it
+// just masks whatever array element has a zero value. Normally this is not a problem
+// because the particles are initialized in a grid, the interaction forces are repulsive,
+// and the default time-step is enough to capture the particle dynamics.
+//
+// Parameters:
+// dist		(read-only) the interparticle distance relative to the interaction length
+// bitmask	on entry contains whatever the method does not care, on exit we have a 64
+// 		bitmask of `ones' for interacting pairs and a bitmask of `zeros' otherwise
+// 		for non-interacting pairs
+
+
+static void inrange (const prop_t* restrict dist, prop_t* restrict bitmask)
+{
+  uint64_t* b = &bitmask[0].bin;
+  const uint64_t* r = &dist[0].bin;
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    b[i] = ( NOT_SELF(r[i]) & nexp(r[i]) );
+  }
+}
+
+
+// zeroes the x, y, and z components of the force
+static void zeroes (prop_t* restrict f_x, prop_t* restrict f_y, prop_t* restrict f_z)
+{
+  zeros(f_x);
+  zeros(f_y);
+  zeros(f_z);
+}
+
+
+// static double max (vectors)
+//
+// Synopsis:
+// Yields the absolute maximum component of the OBDS property `vectors' (often the forces)
+// We do not care about the direction (signness) of the components of the vectors, just
+// their magnitudes. This is why the signbit (the Most Significant Bit MSB) is ignored.
+// This method is useful to see how near is the initialization run (at the highest verbose
+// level) from reaching steady-state.
+//
+// Notes:
+// Since the x, y, and z components are contiguous in memory by design we can afford to
+// pass a pointer to the `x' component array and traverse the other two arrays in one
+// sweep since we know their sizes at compile-time.
+
+
+static double max (const prop_t* vectors)
+{
+  double max = 0;
+  for (size_t i = 0; i != (3 * NUMEL); ++i)
+  {
+    uint64_t const bin = vectors[i].bin;
+    prop_t const p = { .bin = ( bin & (~MSB) ) };
+    double const data = p.data;
+    if (data > max)
+    {
+      max = data;
+    }
+  }
+  return max;
+}
+
+
+// as max(), yields the absolute minimum component of the OBDS property `vector'
+static double min (const prop_t* vectors)
+{
+  double min = DBL_MAX;
+  for (size_t i = 0; i != (3 * NUMEL); ++i)
+  {
+    uint64_t const bin = vectors[i].bin;
+    prop_t const p = { .bin = ( bin & (~MSB) ) };
+    double const data = p.data;
+    if (data < min)
+    {
+      min = data;
+    }
+  }
+  return min;
+}
+
+
+// void SLJ (dist, force, bitmask)
+//
+// Synopsis:
+// Computes the force-to-distance ratio, F / r, of the Shifted Lennard-Jones SLJ (like)
+// interaction, where `F' is the force on the ith particle due to its interaction with the
+// jth particles, and `r' is the respective distance.
+//
+// Parameters:
+// dist		on entry the array of size NUMEL stores the distances of the jth particles
+//              relative to the ith particle, on exit it holds whatever, for it is also
+//              used to store intermediate computations (caller must be aware of this)
+//
+// force	on entry it holds whatever it happens be on memory, on exit it holds the
+// 		force-to-distance ratio
+//
+// bitmask	both on entry and exit it holds whatever it happens to be in memory, the
+//              caller method must be aware of this. The bitmask is used to mask particles
+//              that do not interact with the ith particle. This method delegates the
+//              computation of the bitmask to the inrange method().
+
+
+static void SLJ (prop_t* restrict dist, prop_t* restrict force, prop_t* restrict  bitmask)
+{
+
+  // scales the interparticle distance (as required by the inrange() method):
+
+  double* r = &dist[0].data;
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    double const c = (1.0 / RANGE);
+    r[j] *= c;
+  }
+
+  // generates bitmask to mask non-interacting particle pairs (zero force between them):
+
+  inrange(dist, bitmask);
+
+  // restores the original scale of the interparticle distance:
+
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    double const c = RANGE;
+    r[j] *= c;
+  }
+
+  // computes the "point-force" contribution of the SLJ interaction:
+
+  double* frc = &force[0].data;
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    // radius of cutoff
+    double const r_c = RANGE;
+    double const r_c7 = (r_c * r_c * r_c * r_c * r_c * r_c * r_c);
+    double const r7 = (r[j] * r[j] * r[j] * r[j] * r[j] * r[j] * r[j]);
+    double const r8 = r[j] * r7;
+    // short-ranged point-force
+    frc[j] = ( 1.0 - (r7 / r_c7) ) * (1.0 / r8);
+  }
+
+  // stores the SLJ force-to-distance ratio in the temporary placeholder:
+
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    double const c2 = CONTACT2;
+    double const eps = EPSILON;
+    double const c6 = (c2 * c2 * c2);
+    double const kappa = (4.0 * eps * c6);
+    double const k = (6.0 * kappa);
+    r[j] = k * frc[j];
+  }
+
+  // zeros the SLJ force-to-distance ratio for non-interacting (pairs of) particles:
+
+  uint64_t* f = &force[0].bin;
+  const uint64_t* d = &dist[0].bin;
+  const uint64_t* b = &bitmask[0].bin;
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    f[j] = (b[j] & d[j]);
+  }
+}
+
+
+// void pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, f, d, bitmask)
+//
+// Synopsis:
+// Computes the force on the ith particle exerted by the jth (interacting) particles.
+//
+// Notes:
+// The offsets are used to account for the periodic boundaries of the system box. The
+// caller method handles the setting of these parameters. This method updates the ith
+// element of the force components F_x, F_y, and F_z.
+//
+// Parameters:
+// i		(read-only) the positional index of the ith particle
+// offset_x	(read-only) offset in the x dimension to be applied to the jth particles
+// offset_y	(read-only) offset in the y dimension to be applied to the jth particles
+// offset_z	(read-only) offset in the z dimension to be applied to the jth particles
+// x		(read-only) array of size NUMEL storing the x components of the position
+// 			    vectors of the particles
+// y		(read-only) array of size NUMEL storing the y components of the position
+// 			    vectors of the particles
+// z		(read-only) array of size NUMEL storing the z components of the position
+// 			    vectors of the particles
+// F_x		array of size NUMEL storing the x components of the force
+// F_y		array of size NUMEL storing the y components of the force
+// F_z		array of size NUMEL storing the z components of the force
+// f		array of size NUMEL used for storing intermediate results
+// d		array of size NUMEL used for storing intermediate results
+// bitmask	array of size NUMEL used for storing intermediate results
+
+
+static void pairs (size_t const i,
+		   double const offset_x,
+		   double const offset_y,
+		   double const offset_z,
+		   const prop_t* restrict p_x,
+		   const prop_t* restrict p_y,
+		   const prop_t* restrict p_z,
+		   prop_t* restrict p_F_x,
+		   prop_t* restrict p_F_y,
+		   prop_t* restrict p_F_z,
+		   prop_t* restrict p_f,
+		   prop_t* restrict p_d,
+		   prop_t* restrict p_bitmask)
+{
+  // computes the interparticle distance between the ith and jth particles:
+
+  double* d = &p_d[0].data;
+  const double* x = &p_x[0].data;
+  const double* y = &p_y[0].data;
+  const double* z = &p_z[0].data;
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    double const d_x = ( x[i] - (x[j] + offset_x) );
+    double const d_y = ( y[i] - (y[j] + offset_y) );
+    double const d_z = ( z[i] - (z[j] + offset_z) );
+    double const d2 = d_x * d_x + d_y * d_y + d_z * d_z;
+    d[j] = d2;
+  }
+
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    d[j] = sqrt(d[j]);
+  }
+
+  // obtains the force-to-distance ratio, F / r:
+
+  SLJ(p_d, p_f, p_bitmask);
+
+  // updates the x, y, and z components of the force on the ith particle:
+
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    d[j] = ( x[i] - (x[j] + offset_x) );
+  }
+
+  const double* f = &p_f[0].data;
+  double* force = &p_bitmask[0].data;
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    force[j] = f[j] * d[j];
+  }
+
+  double* F_x = &p_F_x[0].data;
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    F_x[i] += force[j];
+  }
+
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    d[j] = ( y[i] - (y[j] + offset_y) );
+  }
+
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    force[j] = f[j] * d[j];
+  }
+
+  double* F_y = &p_F_y[0].data;
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    F_y[i] += force[j];
+  }
+
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    d[j] = ( z[i] - (z[j] + offset_z) );
+  }
+
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    force[j] = f[j] * d[j];
+  }
+
+  double* F_z = &p_F_z[0].data;
+  for (size_t j = 0; j != NUMEL; ++j)
+  {
+    F_z[i] += force[j];
+  }
+}
+
+
+// void resultants(x, y, z, F_x, F_y, F_z, tmp, temp, mask)
+//
+// Synopsis:
+// Uses brute force to compute the resultant (deterministic) forces on all the particles,
+// accounts for the periodicity of the system box. Note that the particles positions in
+// the neighboring boxes are obtained by applying an offset to the components of the
+// position vectors `x', `y', and `z'.
+//
+// Notes on Performance:
+// This is the bottleneck of the Brownian Dynamics Simulator BDS, the time complexity of
+// this method is quadratic. We can do better though, a divide and conquer approach might
+// be implemented (later) to reach an overall time complexity of O(N log N). Having a
+// working application is far more important to me now than optimizing it to the extent
+// possible of my current ability.
+//
+// Parameters:
+// x		(read-only) array of size NUMEL storing the x components of the position
+// 			    vectors of the particles
+// y		(read-only) array of size NUMEL storing the y components of the position
+// 			    vectors of the particles
+// z		(read-only) array of size NUMEL storing the z components of the position
+// 			    vectors of the particles
+// F_x		array of size NUMEL storing the x components of the force
+// F_y		array of size NUMEL storing the y components of the force
+// F_z		array of size NUMEL storing the z components of the force
+// tmp		array of size NUMEL used for storing intermediate results
+// temp		array of size NUMEL used for storing intermediate results
+// mask		array of size NUMEL used for storing intermediate results
+
+
+static void resultants (const prop_t* restrict x,
+		        const prop_t* restrict y,
+		        const prop_t* restrict z,
+		        prop_t* restrict F_x,
+		        prop_t* restrict F_y,
+		        prop_t* restrict F_z,
+		        prop_t* restrict tmp,
+		        prop_t* restrict temp,
+		        prop_t* restrict mask)
+{
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = 0;
+    double const offset_z = 0;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = -LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = 0;
+    double const offset_z = -LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = 0;
+    double const offset_z = -LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = 0;
+    double const offset_z = -LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = +LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = +LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = +LENGTH;
+    double const offset_z = -LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = 0;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = -LENGTH;
+    double const offset_z = 0;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = 0;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = 0;
+    double const offset_z = 0;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+//for (size_t i = 0; i != NUMEL; ++i)
+//{
+//  double const offset_x = 0;
+//  double const offset_y = 0;
+//  double const offset_z = 0;
+//  pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+//}
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = 0;
+    double const offset_z = 0;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = +LENGTH;
+    double const offset_z = 0;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = +LENGTH;
+    double const offset_z = 0;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = +LENGTH;
+    double const offset_z = 0;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = -LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = -LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = 0;
+    double const offset_z = +LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = 0;
+    double const offset_z = +LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = 0;
+    double const offset_z = +LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = -LENGTH;
+    double const offset_y = +LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = 0;
+    double const offset_y = +LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const offset_x = +LENGTH;
+    double const offset_y = +LENGTH;
+    double const offset_z = +LENGTH;
+    pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
+  }
+}
+
+
+// clamps forces larger than CLAMP to CLAMP; in other words, this method makes sure that
+// there is no force (component) larger than the value represented by the CLAMP MACRO.
+static void clamp (prop_t* restrict p_force,
+		   prop_t* restrict p_tmp,
+		   prop_t* restrict p_temp,
+		   prop_t* restrict p_bitmask)
+{
+  double* temp = &p_temp[0].data;
+  double* force = &p_force[0].data;
+  // stores the scaled force in the temporary (required for masking)
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const c = (1.0 / CLAMP);
+    temp[i] = c * force[i];
+  }
+
+  uint64_t* t = &p_temp[0].bin;
+  uint64_t* b = &p_bitmask[0].bin;
+  // masks the particles that do not require clamping
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    b[i] = nexp(t[i]);
+  }
+
+  uint64_t* f = &p_force[0].bin;
+  // stores the forces that do not require clamping
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    t[i] = (f[i] & b[i]);
+  }
+
+  uint64_t* a = &p_tmp[0].bin;
+  prop_t const clamp = { .data = CLAMP };
+  uint64_t const max = clamp.bin;
+  // clamps with the maximum force in the same sense as the (original) force
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    a[i] = ( ( f[i] & MSB ) | ( max & (~b[i]) ) );
+  }
+
+  double* tmp = &p_tmp[0].data;
+  // addes the stored forces to finalize the clamping
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    force[i] = (tmp[i] + temp[i]);
+  }
+}
+
+
+// clamps the x, y, and z components of the force
+static void clamps (prop_t* restrict f_x,
+		    prop_t* restrict f_y,
+		    prop_t* restrict f_z,
+		    prop_t* restrict tmp,
+		    prop_t* restrict temp,
+		    prop_t* restrict bitmask)
+{
+  clamp(f_x, tmp, temp, bitmask);
+  clamp(f_y, tmp, temp, bitmask);
+  clamp(f_z, tmp, temp, bitmask);
+}
+
+
+// shifts the particles along the x, y, or z axis due to deterministic force effects
+static void shift (prop_t* restrict prop_x, const prop_t* restrict prop_F_x)
+{
+  double const dt = TSTEP;
+  double* x = &prop_x[0].data;
+  const double* F_x = &prop_F_x[0].data;
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    x[i] += (dt * F_x[i]);
+  }
+}
+
+
+// shifts the particles along the axes owing to the net deterministic forces
+static void shifts (prop_t* restrict x,
+		    prop_t* restrict y,
+		    prop_t* restrict z,
+		    const prop_t* restrict f_x,
+		    const prop_t* restrict f_y,
+		    const prop_t* restrict f_z)
+{
+  shift(x, f_x);
+  shift(y, f_y);
+  shift(z, f_z);
+}
+
+
+// places the spheres in a grid (or lattice) like structure for system initialization
 static void grid (prop_t* restrict xprop, prop_t* restrict yprop, prop_t* restrict zprop)
 {
   // gets the number of spheres (at contact) that can be fitted along any dimension:
@@ -69,9 +771,27 @@ static void grid (prop_t* restrict xprop, prop_t* restrict yprop, prop_t* restri
 }
 
 
+// updates the positions of the particles due to the forces acting on them
 static void updater (sphere_t* spheres)
 {
-  printf("x: %+.16e\n", spheres -> props -> x -> data);
+  prop_t* x = spheres -> props -> x;
+  prop_t* y = spheres -> props -> y;
+  prop_t* z = spheres -> props -> z;
+  prop_t* r_x = spheres -> props -> r_x;
+  prop_t* r_y = spheres -> props -> r_y;
+  prop_t* r_z = spheres -> props -> r_z;
+  prop_t* f_x = spheres -> props -> f_x;
+  prop_t* f_y = spheres -> props -> f_y;
+  prop_t* f_z = spheres -> props -> f_z;
+  // uses (for now) these properties as temporary placeholders
+  prop_t* tmp = spheres -> props -> t_x;
+  prop_t* temp = spheres -> props -> t_y;
+  prop_t* bitmask = spheres -> props -> t_z;
+  zeroes(f_x, f_y, f_z);
+  resultants(x, y, z, f_x, f_y, f_z, tmp, temp, bitmask);
+  clamps(f_x, f_y, f_z, tmp, temp, bitmask);
+  shifts(r_x, r_y, r_z, f_x, f_y, f_z);
+  shifts(x, y, z, f_x, f_y, f_z);
 }
 
 
@@ -85,13 +805,76 @@ static void limiter (sphere_t* spheres)
 }
 
 
-static void logger (const sphere_t* spheres)
+// logs some properties of interest such as the positions of the particles
+static int logger (const sphere_t* spheres, size_t const step)
 {
-  printf("x: %+.16e\n", spheres -> props -> x -> data);
+  char log[80];
+  sprintf(log, "run/bds/data/positions/spheres-%zu.txt", step);
+  FILE* file = fopen(log, "w");
+  if (file == NULL)
+  {
+    fprintf(stderr, "log-positions(): IO ERROR with file %s: %s\n", log, strerror(errno));
+    return FAILURE;
+  }
+
+  const double* x = &(spheres -> props -> x -> data);
+  const double* y = &(spheres -> props -> y -> data);
+  const double* z = &(spheres -> props -> z -> data);
+  const double* r_x = &(spheres -> props -> r_x -> data);
+  const double* r_y = &(spheres -> props -> r_y -> data);
+  const double* r_z = &(spheres -> props -> r_z -> data);
+  const double* f_x = &(spheres -> props -> f_x -> data);
+  const double* f_y = &(spheres -> props -> f_y -> data);
+  const double* f_z = &(spheres -> props -> f_z -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    const char fmt[] = "%+.16e %+.16e %+.16e %+.16e %+.16e %+.16e %+.16e %+.16e %+.16e\n";
+    fprintf(file, fmt, x[i], y[i], z[i], r_x[i], r_y[i], r_z[i], f_x[i], f_y[i], f_z[i]);
+  }
+
+  fclose(file);
+  return SUCCESS;
 }
 
 
-sphere_t* particles_sphere_initializer (void* data)
+// default logger, just logs the properties of interest to a plain text file
+static int logger_default (const sphere_t* spheres, size_t const step)
+{
+  if (logger(spheres, step) == FAILURE)
+  {
+    fprintf(stderr, "logger(): ERROR\n");
+    return FAILURE;
+  }
+
+  return SUCCESS;
+}
+
+
+// as the default logger but also logs some info on the console
+static int logger_verbose (const sphere_t* spheres, size_t const step)
+{
+  if (logger(spheres, step) == FAILURE)
+  {
+    fprintf(stderr, "logger(): ERROR\n");
+    return FAILURE;
+  }
+
+  const prop_t* force = spheres -> props -> f_x;
+  double const f_min = min(force);
+  double const f_max = max(force);
+  if (f_max == CLAMP)
+  {
+    fprintf(stdout, "logger(): clamping detected in step %zu\n", step);
+  }
+
+  fprintf(stdout, "logger(): min: %.16e max: %.16e\n", f_min, f_max);
+
+  return SUCCESS;
+}
+
+
+// initializes the spheres object from the available memory in the workspace
+sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 {
   // compile-time sane checks:
 
@@ -146,7 +929,7 @@ sphere_t* particles_sphere_initializer (void* data)
 
   // bindinds:
 
-  void* iter = data;
+  void* iter = workspace;
   sphere_t* spheres = (sphere_t*) iter;
   iter += sizeof(sphere_t);
 
@@ -193,7 +976,15 @@ sphere_t* particles_sphere_initializer (void* data)
 
   spheres -> update = updater;
   spheres -> limit = limiter;
-  spheres -> log = logger;
+
+  switch (LVL)
+  {
+    case (SPH_LOG_LEVEL_VERBOSE):
+	spheres -> log = logger_verbose;
+	break;
+    default:
+      spheres -> log = logger_default;
+  }
 
   prop_t* x = spheres -> props -> x;
   prop_t* y = spheres -> props -> y;
@@ -256,5 +1047,8 @@ References:
 [0] A Koenig and B Moo, Accelerated C++ Practical Programming by Example.
 [1] MP Allen and DJ Tildesley, Computer Simulation of Liquids.
 [2] S Kim and S Karrila, Microhydrodynamics: Principles and Selected Applications.
+[3] https://en.cppreference.com
+[4] https://www.man7.org/linux/man-pages/index.html
+[5] https://www.gnu.org/software/libc/manual/html_node/index.html#SEC_Contents
 
 */

@@ -10,15 +10,23 @@
 #include "particles/sphere/utils.h"
 
 #define STDC17 201710L
+#define IOERR ( (int) 0xffffffff )
 #define LIMIT ( (double) ( __OBDS_LIMIT__ ) )
+#define TSTEP ( (double) ( __OBDS_TIME_STEP__ ) )
+#define STEPS ( 256LU * ( (size_t) (1.0 / TSTEP) ) )
 #define NUMEL ( (size_t) ( __OBDS_NUM_SPHERES__ ) )
 #define PROPS ( (size_t) ( 16 * ( NUMEL ) ) )
+#define DEFAULT SPH_LOG_LEVEL_DEFAULT
+#define VERBOSE SPH_LOG_LEVEL_VERBOSE
+#define LOG(x) ( (bool) ( ( x ) % ( (size_t) ( 0.001953125 / TSTEP ) ) == 0 ) )
 
 void test(void);
+void test1(void);
 
 int main ()
 {
-  test();
+//test();
+  test1();
   return 0;
 }
 
@@ -38,7 +46,93 @@ void test (void)
     return;
   }
 
-  sphere_t* spheres = particles_sphere_initializer(workspace);
+  SPHLOG lvl = DEFAULT;
+  sphere_t* spheres = particles_sphere_initializer(workspace, lvl);
+
+  double* x = &(spheres -> props -> x -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    *x = 1.0009765625 * LIMIT;
+    ++x;
+  }
+
+  double* y = &(spheres -> props -> y -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    *y = 1.0009765625 * LIMIT;
+    ++y;
+  }
+
+  double* z = &(spheres -> props -> z -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    *z = 1.0009765625 * LIMIT;
+    ++z;
+  }
+
+  spheres -> limit(spheres);
+
+  bool failed = false;
+  x = &(spheres -> props -> x -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    if (x[i] < -LIMIT || x[i] > +LIMIT)
+    {
+      failed = true;
+      break;
+    }
+  }
+
+  y = &(spheres -> props -> y -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    if (y[i] < -LIMIT || y[i] > +LIMIT)
+    {
+      failed = true;
+      break;
+    }
+  }
+
+  z = &(spheres -> props -> z -> data);
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    if (z[i] < -LIMIT || z[i] > +LIMIT)
+    {
+      failed = true;
+      break;
+    }
+  }
+
+  printf("test-sphere[0]: ");
+  if (failed)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  free(workspace);
+  workspace = nullptr;
+}
+#else
+void test (void)
+{
+  _Static_assert(sizeof(sphere_t) == 32);
+  _Static_assert(sizeof(OBDS_Sphere_t) == 128);
+  _Static_assert(sizeof(prop_t) == 8);
+  size_t const sz = sizeof(sphere_t) + sizeof(OBDS_Sphere_t) + PROPS * sizeof(prop_t);
+  void* workspace = malloc(sz);
+  if (workspace == NULL)
+  {
+    fprintf(stderr, "test-spheres(): memory allocation error %s\n", strerror(errno));
+
+    return;
+  }
+
+  SPHLOG lvl = VERBOSE;
+  sphere_t* spheres = particles_sphere_initializer(workspace, lvl);
 
   double* x = &(spheres -> props -> x -> data);
   for (size_t i = 0; i != NUMEL; ++i)
@@ -107,8 +201,104 @@ void test (void)
   free(workspace);
   workspace = NULL;
 }
+#endif
+
+
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+void test1 (void)
+{
+  static_assert(sizeof(sphere_t) == 32);
+  static_assert(sizeof(OBDS_Sphere_t) == 128);
+  static_assert(sizeof(prop_t) == 8);
+  constexpr size_t sz = sizeof(sphere_t) + sizeof(OBDS_Sphere_t) + PROPS * sizeof(prop_t);
+  void* workspace = malloc(sz);
+  if (workspace == nullptr)
+  {
+    fprintf(stderr, "test-spheres1(): memory allocation error %s\n", strerror(errno));
+    return;
+  }
+
+  SPHLOG lvl = VERBOSE;
+  sphere_t* spheres = particles_sphere_initializer(workspace, lvl);
+
+  if (spheres -> log(spheres, 0) == IOERR)
+  {
+    free(workspace);
+    workspace = nullptr;
+    fprintf(stderr, "test1() ERROR\n");
+    return;
+  }
+
+  double* x = &(spheres -> props -> x -> data);
+  double* y = &(spheres -> props -> y -> data);
+  double* z = &(spheres -> props -> z -> data);
+
+  bool failed = false;
+  size_t const steps = STEPS;
+  for (size_t step = 0; step != steps; ++step)
+  {
+    spheres -> update(spheres);
+    spheres -> limit(spheres);
+
+    if ( LOG(step + 1) )
+    {
+      if (spheres -> log(spheres, step + 1) == IOERR)
+      {
+	fprintf(stderr, "test1(): UNEXPECTED IO ERROR\n");
+	free(workspace);
+	workspace = nullptr;
+	return;
+      }
+    }
+
+    for (size_t i = 0; i != NUMEL; ++i)
+    {
+      if (x[i] < -LIMIT || x[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    for (size_t i = 0; i != NUMEL; ++i)
+    {
+      if (y[i] < -LIMIT || y[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    for (size_t i = 0; i != NUMEL; ++i)
+    {
+      if (z[i] < -LIMIT || z[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    if (failed)
+    {
+      break;
+    }
+  }
+
+  printf("test-sphere[1]: ");
+  if (failed)
+  {
+    printf("FAIL\n");
+  }
+  else
+  {
+    printf("PASS\n");
+  }
+
+  free(workspace);
+  workspace = nullptr;
+}
 #else
-void test (void)
+void test1 (void)
 {
   _Static_assert(sizeof(sphere_t) == 32);
   _Static_assert(sizeof(OBDS_Sphere_t) == 128);
@@ -117,68 +307,77 @@ void test (void)
   void* workspace = malloc(sz);
   if (workspace == NULL)
   {
-    fprintf(stderr, "test-spheres(): memory allocation error %s\n", strerror(errno));
-
+    fprintf(stderr, "test-spheres1(): memory allocation error %s\n", strerror(errno));
     return;
   }
 
-  sphere_t* spheres = particles_sphere_initializer(workspace);
+  SPHLOG lvl = VERBOSE;
+  sphere_t* spheres = particles_sphere_initializer(workspace, lvl);
+
+  if (spheres -> log(spheres, 0) == IOERR)
+  {
+    free(workspace);
+    workspace = NULL;
+    fprintf(stderr, "test1() ERROR\n");
+    return;
+  }
 
   double* x = &(spheres -> props -> x -> data);
-  for (size_t i = 0; i != NUMEL; ++i)
-  {
-    *x = 1.0009765625 * LIMIT;
-    ++x;
-  }
-
   double* y = &(spheres -> props -> y -> data);
-  for (size_t i = 0; i != NUMEL; ++i)
-  {
-    *y = 1.0009765625 * LIMIT;
-    ++y;
-  }
-
   double* z = &(spheres -> props -> z -> data);
-  for (size_t i = 0; i != NUMEL; ++i)
-  {
-    *z = 1.0009765625 * LIMIT;
-    ++z;
-  }
-
-  spheres -> limit(spheres);
 
   bool failed = false;
-  x = &(spheres -> props -> x -> data);
-  for (size_t i = 0; i != NUMEL; ++i)
+  size_t const steps = STEPS;
+  for (size_t step = 0; step != steps; ++step)
   {
-    if (x[i] < -LIMIT || x[i] > +LIMIT)
+    spheres -> update(spheres);
+    spheres -> limit(spheres);
+
+    if ( LOG(step + 1) )
     {
-      failed = true;
+      if (spheres -> log(spheres, step + 1) == IOERR)
+      {
+	fprintf(stderr, "test1(): UNEXPECTED IO ERROR\n");
+	free(workspace);
+	workspace = NULL;
+	return;
+      }
+    }
+
+    for (size_t i = 0; i != NUMEL; ++i)
+    {
+      if (x[i] < -LIMIT || x[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    for (size_t i = 0; i != NUMEL; ++i)
+    {
+      if (y[i] < -LIMIT || y[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    for (size_t i = 0; i != NUMEL; ++i)
+    {
+      if (z[i] < -LIMIT || z[i] > +LIMIT)
+      {
+	failed = true;
+	break;
+      }
+    }
+
+    if (failed)
+    {
       break;
     }
   }
 
-  y = &(spheres -> props -> y -> data);
-  for (size_t i = 0; i != NUMEL; ++i)
-  {
-    if (y[i] < -LIMIT || y[i] > +LIMIT)
-    {
-      failed = true;
-      break;
-    }
-  }
-
-  z = &(spheres -> props -> z -> data);
-  for (size_t i = 0; i != NUMEL; ++i)
-  {
-    if (z[i] < -LIMIT || z[i] > +LIMIT)
-    {
-      failed = true;
-      break;
-    }
-  }
-
-  printf("test-sphere[0]: ");
+  printf("test-sphere[1]: ");
   if (failed)
   {
     printf("FAIL\n");
