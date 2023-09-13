@@ -14,9 +14,11 @@
 #
 
 # FORTRAN compiler
+FC = gfortran-10
 FC = gfortran
 
 # clang compiler
+CC = gcc-10
 CC = gcc
 
 FCOPT = -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form\

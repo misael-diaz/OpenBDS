@@ -63,10 +63,12 @@ module api
   end interface
 
   interface
-    function c_init (workspace) bind(c, name = 'particles_sphere_initializer') result(sph)
+    function c_init (ptr, lvl) bind(c, name = 'particles_sphere_initializer') result(sph)
       use, intrinsic :: iso_c_binding, only: c_ptr
+      use, intrinsic :: iso_c_binding, only: c_int
       implicit none
-      type(c_ptr), value :: workspace
+      type(c_ptr), value :: ptr                 ! pointer to workspace
+      integer(kind = c_int), value :: lvl       ! log level (NOTE: enum is of type int)
       type(c_ptr) :: sph
     end function
   end interface
@@ -131,7 +133,7 @@ program main
   end if
 
   workspace = c_malloc(sz)                      ! allocates workspace on the heap
-  c_spheres = c_init(workspace)                 ! initializes the sphere properties
+  c_spheres = c_init(workspace, 0)              ! initializes the sphere properties
   call c_f_pointer(c_spheres, spheres)          ! binds to the C spheres container
   call c_f_pointer(spheres % props, props)      ! binds to the sphere properties
   call c_f_pointer(props % x, x, [numel])       ! binds to the x positions of the spheres
