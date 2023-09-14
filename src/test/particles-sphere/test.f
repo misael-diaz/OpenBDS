@@ -12,6 +12,7 @@ module API
   public :: OBDS_Sphere_t
   public :: sphere_t
   public :: limiter
+  public :: updater
   public :: c_malloc
   public :: c_free
   public :: c_init
@@ -81,7 +82,136 @@ module API
     end subroutine
   end interface
 
+  interface
+    subroutine updater (spheres)
+      import sphere_t
+      implicit none
+      type(sphere_t), intent(inout) :: spheres
+    end subroutine
+  end interface
+
 end module API
+
+module OBDS
+  use, intrinsic :: iso_c_binding, only: c_ptr
+  use, intrinsic :: iso_c_binding, only: c_null_ptr
+  use, intrinsic :: iso_c_binding, only: c_associated
+  use, intrinsic :: iso_c_binding, only: c_f_procpointer
+  use, intrinsic :: iso_c_binding, only: c_f_pointer
+  use, intrinsic :: iso_c_binding, only: c_size_t
+  use, intrinsic :: iso_fortran_env, only: int32
+  use API, only: c_sphere_t => sphere_t
+  use API, only: c_limiter => limiter
+  use API, only: c_updater => updater
+  use API, only: c_malloc
+  use API, only: c_free
+  use API, only: c_init
+  implicit none
+  private
+
+  type, abstract, public :: particle_t
+    contains
+      procedure(updater), deferred, public :: update
+      procedure(limiter), deferred, public :: limit
+  end type
+
+  type, extends(particle_t), public :: sphere_t
+    private
+    type(c_ptr) :: workspace = c_null_ptr
+    type(c_sphere_t), pointer :: c_spheres => null()
+    procedure(c_updater), pointer, nopass :: c_update => null()
+    procedure(c_limiter), pointer, nopass :: c_limit => null()
+    contains
+      private
+      procedure, public :: update
+      procedure, public :: limit
+      final :: destructor
+  end type
+
+  interface
+    subroutine updater (this)
+      import particle_t
+      implicit none
+      class(particle_t), intent(inout) :: this
+    end subroutine
+  end interface
+
+  interface
+    subroutine limiter (this)
+      import particle_t
+      implicit none
+      class(particle_t), intent(inout) :: this
+    end subroutine
+  end interface
+
+  interface sphere_t
+    module procedure constructor
+  end interface
+
+contains
+
+  function constructor () result(spheres)
+    type(c_ptr) :: ptr = c_null_ptr
+    type(sphere_t), pointer :: spheres
+    integer(kind = c_size_t), parameter :: numel = int(NUMEL, kind = c_size_t)
+    integer(kind = c_size_t), parameter :: size_sphere_t = 32_c_size_t
+    integer(kind = c_size_t), parameter :: size_OBDS_Sphere_t = 128_c_size_t
+    integer(kind = c_size_t), parameter :: size_prop_t = 8_c_size_t
+    integer(kind = c_size_t), parameter :: sz = size_sphere_t + &
+                                              & size_OBDS_Sphere_t + &
+                                              & 16_c_size_t * numel * size_prop_t
+    integer(kind = int32) :: mstat
+    character(*), parameter :: errmsg = "constructor(): memory allocation error"
+
+    spheres => null()
+    allocate(spheres, stat=mstat)
+    if (mstat /= 0) then
+      error stop errmsg
+    end if
+
+    spheres % workspace = c_malloc(sz)
+
+    if ( .not. c_associated(spheres % workspace) ) then
+      error stop errmsg
+    end if
+
+    ptr = c_init(spheres % workspace, 0)
+    call c_f_pointer(ptr, spheres % c_spheres)
+    call c_f_procpointer(spheres % c_spheres % limit, spheres % c_limit)
+    call c_f_procpointer(spheres % c_spheres % update, spheres % c_update)
+
+    return
+  end function constructor
+
+  subroutine update (this)
+    class(sphere_t), intent(inout) :: this
+
+    call this % c_update(this % c_spheres)
+
+    return
+  end subroutine update
+
+  subroutine limit (this)
+    class(sphere_t), intent(inout) :: this
+
+    call this % c_limit(this % c_spheres)
+
+    return
+  end subroutine limit
+
+  subroutine destructor (spheres)
+    type(sphere_t), intent(inout) :: spheres
+
+    if ( c_associated(spheres % workspace) ) then
+      call c_free(spheres % workspace)
+      spheres % workspace = c_null_ptr
+      spheres % c_spheres => null()
+    end if
+
+    return
+  end subroutine destructor
+
+end module OBDS
 
 program main
   use, intrinsic :: iso_c_binding, only: c_ptr
@@ -99,6 +229,7 @@ program main
   use API, only: c_malloc
   use API, only: c_free
   use API, only: c_init
+  use OBDS, only: f_sphere_t => sphere_t
   implicit none
 
   type(sphere_t) :: c_sphere_t
@@ -107,6 +238,7 @@ program main
   type(c_ptr) :: c_spheres = c_null_ptr
   type(sphere_t), pointer :: spheres => null()
   type(OBDS_Sphere_t), pointer :: props => null()
+  type(f_sphere_t), pointer :: f_spheres => null()
   procedure(limiter), pointer :: limit => null()
   real(kind = c_double), pointer, contiguous :: x(:) => null()
   real(kind = c_double), pointer, contiguous :: y(:) => null()
@@ -179,6 +311,11 @@ program main
 
   call c_free(workspace)                        ! frees workspace from memory
   workspace = c_null_ptr                        ! nullifies pointer to workspace
+
+  f_spheres => f_sphere_t()                     ! instantiates OBDS f_sphere_t object
+  call f_spheres % update()                     ! updates the positions of the spheres
+  call f_spheres % limit()                      ! applies periodic boundary conditions
+  deallocate(f_spheres)                         ! invokes the OBDS f_sphere_t finalizer
 
 end program main
 
