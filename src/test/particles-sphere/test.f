@@ -3,7 +3,7 @@
 #define LIMIT FCONF_LIMIT
 #define NUMEL FCONF_NUM_PARTICLES
 
-module api
+module API
   use, intrinsic :: iso_c_binding, only: c_ptr
   use, intrinsic :: iso_c_binding, only: c_funptr
   implicit none
@@ -81,7 +81,7 @@ module api
     end subroutine
   end interface
 
-end module api
+end module API
 
 program main
   use, intrinsic :: iso_c_binding, only: c_ptr
@@ -93,12 +93,12 @@ program main
   use, intrinsic :: iso_c_binding, only: c_f_procpointer
   use, intrinsic :: iso_c_binding, only: c_f_pointer
   use, intrinsic :: iso_c_binding, only: c_null_ptr
-  use api, only: OBDS_Sphere_t
-  use api, only: sphere_t
-  use api, only: limiter
-  use api, only: c_malloc
-  use api, only: c_free
-  use api, only: c_init
+  use API, only: OBDS_Sphere_t
+  use API, only: sphere_t
+  use API, only: limiter
+  use API, only: c_malloc
+  use API, only: c_free
+  use API, only: c_init
   implicit none
 
   type(sphere_t) :: c_sphere_t
