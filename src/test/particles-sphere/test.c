@@ -37,7 +37,13 @@ void test (void)
   static_assert(sizeof(sphere_t) == 32);
   static_assert(sizeof(OBDS_Sphere_t) == 128);
   static_assert(sizeof(prop_t) == 8);
-  constexpr size_t sz = sizeof(sphere_t) + sizeof(OBDS_Sphere_t) + PROPS * sizeof(prop_t);
+  constexpr size_t sz = sizeof(sphere_t) +
+			sizeof(OBDS_Sphere_t) +
+			PROPS * sizeof(prop_t) +
+			sizeof(random_t) +
+			sizeof(generator_t) +
+			sizeof(double) +
+			sizeof(uint64_t);
   void* workspace = malloc(sz);
   if (workspace == nullptr)
   {
@@ -48,6 +54,13 @@ void test (void)
 
   SPHLOG lvl = DEFAULT;
   sphere_t* spheres = particles_sphere_initializer(workspace, lvl);
+  if (spheres == nullptr)
+  {
+    free(workspace);
+    workspace = nullptr;
+    fprintf(stderr, "test-spheres(): ERROR\n");
+    return;
+  }
 
   double* x = &(spheres -> props -> x -> data);
   for (size_t i = 0; i != NUMEL; ++i)
@@ -70,7 +83,7 @@ void test (void)
     ++z;
   }
 
-  spheres -> limit(spheres);
+  spheres -> update(spheres);
 
   bool failed = false;
   x = &(spheres -> props -> x -> data);
@@ -122,17 +135,30 @@ void test (void)
   _Static_assert(sizeof(sphere_t) == 32);
   _Static_assert(sizeof(OBDS_Sphere_t) == 128);
   _Static_assert(sizeof(prop_t) == 8);
-  size_t const sz = sizeof(sphere_t) + sizeof(OBDS_Sphere_t) + PROPS * sizeof(prop_t);
+  size_t const sz = sizeof(sphere_t) +
+		    sizeof(OBDS_Sphere_t) +
+		    PROPS * sizeof(prop_t) +
+		    sizeof(random_t) +
+		    sizeof(generator_t) +
+		    sizeof(double) +
+		    sizeof(uint64_t);
   void* workspace = malloc(sz);
   if (workspace == NULL)
   {
     fprintf(stderr, "test-spheres(): memory allocation error %s\n", strerror(errno));
-
     return;
   }
 
   SPHLOG lvl = VERBOSE;
   sphere_t* spheres = particles_sphere_initializer(workspace, lvl);
+  if (spheres == NULL)
+  {
+    free(workspace);
+    workspace = NULL;
+    fprintf(stderr, "test-spheres(): ERROR\n");
+    return;
+  }
+
 
   double* x = &(spheres -> props -> x -> data);
   for (size_t i = 0; i != NUMEL; ++i)
@@ -155,7 +181,7 @@ void test (void)
     ++z;
   }
 
-  spheres -> limit(spheres);
+  spheres -> update(spheres);
 
   bool failed = false;
   x = &(spheres -> props -> x -> data);
@@ -210,7 +236,13 @@ void test1 (void)
   static_assert(sizeof(sphere_t) == 32);
   static_assert(sizeof(OBDS_Sphere_t) == 128);
   static_assert(sizeof(prop_t) == 8);
-  constexpr size_t sz = sizeof(sphere_t) + sizeof(OBDS_Sphere_t) + PROPS * sizeof(prop_t);
+  constexpr size_t sz = sizeof(sphere_t) +
+			sizeof(OBDS_Sphere_t) +
+			PROPS * sizeof(prop_t) +
+			sizeof(random_t) +
+			sizeof(generator_t) +
+			sizeof(double) +
+			sizeof(uint64_t);
   void* workspace = malloc(sz);
   if (workspace == nullptr)
   {
@@ -220,6 +252,13 @@ void test1 (void)
 
   SPHLOG lvl = VERBOSE;
   sphere_t* spheres = particles_sphere_initializer(workspace, lvl);
+  if (spheres == nullptr)
+  {
+    free(workspace);
+    workspace = nullptr;
+    fprintf(stderr, "test-spheres(): ERROR\n");
+    return;
+  }
 
   if (spheres -> log(spheres, 0) == IOERR)
   {
@@ -237,8 +276,13 @@ void test1 (void)
   size_t const steps = STEPS;
   for (size_t step = 0; step != steps; ++step)
   {
-    spheres -> update(spheres);
-    spheres -> limit(spheres);
+    if (spheres -> update(spheres) != 0)
+    {
+      fprintf(stderr, "test1(): ERROR\n");
+      free(workspace);
+      workspace = nullptr;
+      return;
+    }
 
     if ( LOG(step + 1) )
     {
@@ -303,7 +347,13 @@ void test1 (void)
   _Static_assert(sizeof(sphere_t) == 32);
   _Static_assert(sizeof(OBDS_Sphere_t) == 128);
   _Static_assert(sizeof(prop_t) == 8);
-  size_t const sz = sizeof(sphere_t) + sizeof(OBDS_Sphere_t) + PROPS * sizeof(prop_t);
+  size_t const sz = sizeof(sphere_t) +
+		    sizeof(OBDS_Sphere_t) +
+		    PROPS * sizeof(prop_t) +
+		    sizeof(random_t) +
+		    sizeof(generator_t) +
+		    sizeof(double) +
+		    sizeof(uint64_t);
   void* workspace = malloc(sz);
   if (workspace == NULL)
   {
@@ -313,6 +363,13 @@ void test1 (void)
 
   SPHLOG lvl = VERBOSE;
   sphere_t* spheres = particles_sphere_initializer(workspace, lvl);
+  if (spheres == NULL)
+  {
+    free(workspace);
+    workspace = NULL;
+    fprintf(stderr, "test-spheres(): ERROR\n");
+    return;
+  }
 
   if (spheres -> log(spheres, 0) == IOERR)
   {
@@ -330,8 +387,13 @@ void test1 (void)
   size_t const steps = STEPS;
   for (size_t step = 0; step != steps; ++step)
   {
-    spheres -> update(spheres);
-    spheres -> limit(spheres);
+    if (spheres -> update(spheres) != 0)
+    {
+      fprintf(stderr, "test1(): ERROR\n");
+      free(workspace);
+      workspace = NULL;
+      return;
+    }
 
     if ( LOG(step + 1) )
     {

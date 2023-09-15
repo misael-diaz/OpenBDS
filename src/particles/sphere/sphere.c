@@ -9,6 +9,7 @@
 #include "particles/sphere/params.h"
 #include "particles/sphere/type.h"
 #include "util/arrays.h"
+#include "util/type.h"
 
 #define STDC17 201710L
 #define SUCCESS ( (int) 0x00000000 )
@@ -21,6 +22,8 @@
 #define EPSILON ( (double) ( __OBDS_SPH_EPSILON__ ) )
 #define RADIUS ( (double) ( __OBDS_SPH_RADIUS__ ) )
 #define CONTACT ( (double) ( __OBDS_SPH_CONTACT__ ) )
+#define LINEAR_BROWNIAN_MOBILITY ( (double) ( __OBDS_SPH_LIN_BROWNIAN_MOBILITY__ ) )
+#define ANGULAR_BROWNIAN_MOBILITY ( (double) ( __OBDS_SPH_ANG_BROWNIAN_MOBILITY__ ) )
 #define CONTACT2 ( (double) ( ( CONTACT ) * ( CONTACT ) ) )
 #define RANGE ( (double) ( __OBDS_SPH_RANGE__ ) )
 #define MANTISSA ( (uint64_t) 0x000fffffffffffff )
@@ -31,6 +34,7 @@
 #define EXP(x) ( ( ( (x) >> 52) & 0x7ff ) )
 #define CLAMP (0.0625 / TSTEP)
 
+extern util_t const util;
 
 // static uint64_t nexp (uint64_t const x)
 //
@@ -691,6 +695,57 @@ static void clamps (prop_t* restrict f_x,
 }
 
 
+static int status (double const status)
+{
+  prop_t const error = { .data = status };
+  uint64_t const err = error.bin;
+  if (err == OBDS_ERR_PRNG)
+  {
+    return FAILURE;
+  }
+
+  return SUCCESS;
+}
+
+
+static int stochastic_force (random_t* random, prop_t* p_F_x)
+{
+  double* F_x = &p_F_x[0].data;
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const rand = random -> fetch(random);
+    if (status(rand) == FAILURE)
+    {
+      return FAILURE;
+    }
+    F_x[i] = rand;
+  }
+
+  return SUCCESS;
+}
+
+
+static int stochastic_forces (random_t* random, prop_t* f_x, prop_t* f_y, prop_t* f_z)
+{
+  if (stochastic_force(random, f_x) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  if (stochastic_force(random, f_y) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  if (stochastic_force(random, f_z) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  return SUCCESS;
+}
+
+
 // shifts the particles along the x, y, or z axis due to deterministic force effects
 static void shift (prop_t* restrict prop_x, const prop_t* restrict prop_F_x)
 {
@@ -700,6 +755,30 @@ static void shift (prop_t* restrict prop_x, const prop_t* restrict prop_F_x)
   for (size_t i = 0; i != NUMEL; ++i)
   {
     x[i] += (dt * F_x[i]);
+  }
+}
+
+
+static void stochastic_shift (prop_t* restrict prop_x, const prop_t* restrict prop_F_x)
+{
+  double* x = &prop_x[0].data;
+  const double* F_x = &prop_F_x[0].data;
+  double const linear_stochastic_mobility = LINEAR_BROWNIAN_MOBILITY;
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    x[i] += (linear_stochastic_mobility * F_x[i]);
+  }
+}
+
+
+static void stochastic_rotation (prop_t* restrict prop_x, const prop_t* restrict prop_T_x)
+{
+  double* x = &prop_x[0].data;
+  const double* T_x = &prop_T_x[0].data;
+  double const angular_stochastic_mobility = ANGULAR_BROWNIAN_MOBILITY;
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    x[i] += (angular_stochastic_mobility * T_x[i]);
   }
 }
 
@@ -715,6 +794,32 @@ static void shifts (prop_t* restrict x,
   shift(x, f_x);
   shift(y, f_y);
   shift(z, f_z);
+}
+
+
+static void stochastic_shifts (prop_t* restrict x,
+			       prop_t* restrict y,
+			       prop_t* restrict z,
+			       const prop_t* restrict f_x,
+			       const prop_t* restrict f_y,
+			       const prop_t* restrict f_z)
+{
+  stochastic_shift(x, f_x);
+  stochastic_shift(y, f_y);
+  stochastic_shift(z, f_z);
+}
+
+
+static void stochastic_rotations (prop_t* restrict x,
+				  prop_t* restrict y,
+				  prop_t* restrict z,
+				  const prop_t* restrict t_x,
+				  const prop_t* restrict t_y,
+				  const prop_t* restrict t_z)
+{
+  stochastic_rotation(x, t_x);
+  stochastic_rotation(y, t_y);
+  stochastic_rotation(z, t_z);
 }
 
 
@@ -771,8 +876,21 @@ static void grid (prop_t* restrict xprop, prop_t* restrict yprop, prop_t* restri
 }
 
 
+static void pbcs (prop_t* restrict x,
+		  prop_t* restrict y,
+		  prop_t* restrict z,
+		  prop_t* restrict tmp,
+		  prop_t* restrict temp,
+		  prop_t* restrict mask)
+{
+  pbc(x, tmp, temp);
+  pbc(y, tmp, temp);
+  pbc(z, tmp, mask);
+}
+
+
 // updates the positions of the particles due to the forces acting on them
-static void updater (sphere_t* spheres)
+static int updater (sphere_t* spheres)
 {
   prop_t* x = spheres -> props -> x;
   prop_t* y = spheres -> props -> y;
@@ -780,6 +898,9 @@ static void updater (sphere_t* spheres)
   prop_t* r_x = spheres -> props -> r_x;
   prop_t* r_y = spheres -> props -> r_y;
   prop_t* r_z = spheres -> props -> r_z;
+  prop_t* a_x = spheres -> props -> a_x;
+  prop_t* a_y = spheres -> props -> a_y;
+  prop_t* a_z = spheres -> props -> a_z;
   prop_t* f_x = spheres -> props -> f_x;
   prop_t* f_y = spheres -> props -> f_y;
   prop_t* f_z = spheres -> props -> f_z;
@@ -787,21 +908,30 @@ static void updater (sphere_t* spheres)
   prop_t* tmp = spheres -> props -> t_x;
   prop_t* temp = spheres -> props -> t_y;
   prop_t* bitmask = spheres -> props -> t_z;
+  random_t* random = spheres -> prng;
   zeroes(f_x, f_y, f_z);
   resultants(x, y, z, f_x, f_y, f_z, tmp, temp, bitmask);
   clamps(f_x, f_y, f_z, tmp, temp, bitmask);
   shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   shifts(x, y, z, f_x, f_y, f_z);
-}
+  if (stochastic_forces(random, f_x, f_y, f_z) == FAILURE)
+  {
+    return FAILURE;
+  }
+  stochastic_shifts(r_x, r_y, r_z, f_x, f_y, f_z);
+  stochastic_shifts(x, y, z, f_x, f_y, f_z);
 
+  prop_t* t_x = spheres -> props -> t_x;
+  prop_t* t_y = spheres -> props -> t_y;
+  prop_t* t_z = spheres -> props -> t_z;
+  if (stochastic_forces(random, t_x, t_y, t_z) == FAILURE)
+  {
+    return FAILURE;
+  }
+  stochastic_rotations(a_x, a_y, a_z, t_x, t_y, t_z);
 
-// applies periodic boundary conditions PBCs on the position vectors
-static void limiter (sphere_t* spheres)
-{
-  // NOTE: the torque is used as a temporary placeholder for now
-  pbc(spheres -> props -> x, spheres -> props -> t_x, spheres -> props -> t_y);
-  pbc(spheres -> props -> y, spheres -> props -> t_x, spheres -> props -> t_y);
-  pbc(spheres -> props -> z, spheres -> props -> t_x, spheres -> props -> t_y);
+  pbcs(x, y, z, tmp, temp, bitmask);
+  return SUCCESS;
 }
 
 
@@ -823,13 +953,22 @@ static int logger (const sphere_t* spheres, size_t const step)
   const double* r_x = &(spheres -> props -> r_x -> data);
   const double* r_y = &(spheres -> props -> r_y -> data);
   const double* r_z = &(spheres -> props -> r_z -> data);
+  const double* a_x = &(spheres -> props -> a_x -> data);
+  const double* a_y = &(spheres -> props -> a_y -> data);
+  const double* a_z = &(spheres -> props -> a_z -> data);
   const double* f_x = &(spheres -> props -> f_x -> data);
   const double* f_y = &(spheres -> props -> f_y -> data);
   const double* f_z = &(spheres -> props -> f_z -> data);
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    const char fmt[] = "%+.16e %+.16e %+.16e %+.16e %+.16e %+.16e %+.16e %+.16e %+.16e\n";
-    fprintf(file, fmt, x[i], y[i], z[i], r_x[i], r_y[i], r_z[i], f_x[i], f_y[i], f_z[i]);
+    const char fmt [] = "%+.16e %+.16e %+.16e "
+			"%+.16e %+.16e %+.16e "
+			"%+.16e %+.16e %+.16e "
+			"%+.16e %+.16e %+.16e\n";
+    fprintf(file, fmt,   x[i],   y[i],   z[i],
+		       r_x[i], r_y[i], r_z[i],
+		       a_x[i], a_y[i], a_z[i],
+		       f_x[i], f_y[i], f_z[i]);
   }
 
   fclose(file);
@@ -886,6 +1025,10 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   static_assert(sizeof(size_t) == sizeof(uint64_t));
   static_assert(sizeof(sphere_t) == 32);
   static_assert(sizeof(prop_t) == 8);
+  static_assert(sizeof(random_t) == 16);
+  static_assert(sizeof(generator_t) == 32);
+  static_assert(sizeof(uint64_t) == 8);
+  static_assert(sizeof(double) == 8);
   static_assert(NUMEL != 0);
   static_assert(NUMEL % 2 == 0);
   static_assert(SIZE_MAX == UINT64_MAX);
@@ -901,6 +1044,10 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   _Static_assert(sizeof(size_t) == sizeof(uint64_t));
   _Static_assert(sizeof(sphere_t) == 32);
   _Static_assert(sizeof(prop_t) == 8);
+  _Static_assert(sizeof(random_t) == 16);
+  _Static_assert(sizeof(generator_t) == 32);
+  _Static_assert(sizeof(uint64_t) == 8);
+  _Static_assert(sizeof(double) == 8);
   _Static_assert(NUMEL != 0);
   _Static_assert(NUMEL % 2 == 0);
   _Static_assert(SIZE_MAX == UINT64_MAX);
@@ -974,8 +1121,16 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   spheres -> props -> id = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
 
+  spheres -> prng = (random_t*) iter;
+  iter += sizeof(random_t);
+  spheres -> prng -> generator = (generator_t*) iter;
+  iter += sizeof(generator_t);
+  spheres -> prng -> generator -> count = (double*) iter;
+  iter += sizeof(double);
+  spheres -> prng -> generator -> state = (uint64_t*) iter;
+  iter += sizeof(uint64_t);
+
   spheres -> update = updater;
-  spheres -> limit = limiter;
 
   switch (LVL)
   {
@@ -1023,6 +1178,16 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   iota(id);
 
   grid(x, y, z);
+
+  if (util.random.initializer(spheres -> prng, NRAND) == FAILURE)
+  {
+    fprintf(stderr, "particles.sphere.initializer(): PRNG ERROR\n");
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+    return nullptr;
+#else
+    return NULL;
+#endif
+  }
 
   return spheres;
 }

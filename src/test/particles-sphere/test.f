@@ -11,7 +11,6 @@ module API
 
   public :: OBDS_Sphere_t
   public :: sphere_t
-  public :: limiter
   public :: updater
   public :: c_malloc
   public :: c_free
@@ -40,8 +39,8 @@ module API
 
   type, bind(c) :: sphere_t
     type(c_ptr) :: props
+    type(c_ptr) :: prng
     type(c_funptr) :: update
-    type(c_funptr) :: limit
     type(c_funptr) :: log
   end type
 
@@ -75,19 +74,13 @@ module API
   end interface
 
   interface
-    subroutine limiter (spheres)
+    function updater (spheres) result(stat)
+      use, intrinsic :: iso_c_binding, only: c_int
       import sphere_t
       implicit none
       type(sphere_t), intent(inout) :: spheres
-    end subroutine
-  end interface
-
-  interface
-    subroutine updater (spheres)
-      import sphere_t
-      implicit none
-      type(sphere_t), intent(inout) :: spheres
-    end subroutine
+      integer(kind = c_int) :: stat
+    end function
   end interface
 
 end module API
@@ -101,7 +94,6 @@ module OBDS
   use, intrinsic :: iso_c_binding, only: c_size_t
   use, intrinsic :: iso_fortran_env, only: int32
   use API, only: c_sphere_t => sphere_t
-  use API, only: c_limiter => limiter
   use API, only: c_updater => updater
   use API, only: c_malloc
   use API, only: c_free
@@ -112,7 +104,6 @@ module OBDS
   type, abstract, public :: particle_t
     contains
       procedure(updater), deferred, public :: update
-      procedure(limiter), deferred, public :: limit
   end type
 
   type, extends(particle_t), public :: sphere_t
@@ -120,28 +111,20 @@ module OBDS
     type(c_ptr) :: workspace = c_null_ptr
     type(c_sphere_t), pointer :: c_spheres => null()
     procedure(c_updater), pointer, nopass :: c_update => null()
-    procedure(c_limiter), pointer, nopass :: c_limit => null()
     contains
       private
       procedure, public :: update
-      procedure, public :: limit
       final :: destructor
   end type
 
   interface
-    subroutine updater (this)
+    function updater (this) result(stat)
+      use, intrinsic :: iso_fortran_env, only: int32
       import particle_t
       implicit none
       class(particle_t), intent(inout) :: this
-    end subroutine
-  end interface
-
-  interface
-    subroutine limiter (this)
-      import particle_t
-      implicit none
-      class(particle_t), intent(inout) :: this
-    end subroutine
+      integer(kind = int32) :: stat
+    end function
   end interface
 
   interface sphere_t
@@ -157,9 +140,17 @@ contains
     integer(kind = c_size_t), parameter :: size_sphere_t = 32_c_size_t
     integer(kind = c_size_t), parameter :: size_OBDS_Sphere_t = 128_c_size_t
     integer(kind = c_size_t), parameter :: size_prop_t = 8_c_size_t
+    integer(kind = c_size_t), parameter :: size_random_t = 16_c_size_t
+    integer(kind = c_size_t), parameter :: size_generator_t = 32_c_size_t
+    integer(kind = c_size_t), parameter :: size_double = 8_c_size_t
+    integer(kind = c_size_t), parameter :: size_uint64_t = 8_c_size_t
     integer(kind = c_size_t), parameter :: sz = size_sphere_t + &
                                               & size_OBDS_Sphere_t + &
-                                              & 16_c_size_t * numel * size_prop_t
+                                              & 16_c_size_t * numel * size_prop_t + &
+                                              & size_random_t + &
+                                              & size_generator_t + &
+                                              & size_double + &
+                                              & size_uint64_t
     integer(kind = int32) :: mstat
     character(*), parameter :: errmsg = "constructor(): memory allocation error"
 
@@ -177,27 +168,19 @@ contains
 
     ptr = c_init(spheres % workspace, 0)
     call c_f_pointer(ptr, spheres % c_spheres)
-    call c_f_procpointer(spheres % c_spheres % limit, spheres % c_limit)
     call c_f_procpointer(spheres % c_spheres % update, spheres % c_update)
 
     return
   end function constructor
 
-  subroutine update (this)
+  function update (this) result(stat)
     class(sphere_t), intent(inout) :: this
+    integer(kind = int32) :: stat
 
-    call this % c_update(this % c_spheres)
+    stat = this % c_update(this % c_spheres)
 
     return
-  end subroutine update
-
-  subroutine limit (this)
-    class(sphere_t), intent(inout) :: this
-
-    call this % c_limit(this % c_spheres)
-
-    return
-  end subroutine limit
+  end function update
 
   subroutine destructor (spheres)
     type(sphere_t), intent(inout) :: spheres
@@ -223,12 +206,13 @@ program main
   use, intrinsic :: iso_c_binding, only: c_f_procpointer
   use, intrinsic :: iso_c_binding, only: c_f_pointer
   use, intrinsic :: iso_c_binding, only: c_null_ptr
+  use, intrinsic :: iso_fortran_env, only: int32
   use API, only: OBDS_Sphere_t
   use API, only: sphere_t
-  use API, only: limiter
   use API, only: c_malloc
   use API, only: c_free
   use API, only: c_init
+  use API, only: updater
   use OBDS, only: f_sphere_t => sphere_t
   implicit none
 
@@ -239,7 +223,7 @@ program main
   type(sphere_t), pointer :: spheres => null()
   type(OBDS_Sphere_t), pointer :: props => null()
   type(f_sphere_t), pointer :: f_spheres => null()
-  procedure(limiter), pointer :: limit => null()
+  procedure(updater), pointer :: update => null()
   real(kind = c_double), pointer, contiguous :: x(:) => null()
   real(kind = c_double), pointer, contiguous :: y(:) => null()
   real(kind = c_double), pointer, contiguous :: z(:) => null()
@@ -248,11 +232,21 @@ program main
   integer(kind = c_size_t), parameter :: size_sphere_t = 32_c_size_t
   integer(kind = c_size_t), parameter :: size_OBDS_Sphere_t = 128_c_size_t
   integer(kind = c_size_t), parameter :: size_prop_t = 8_c_size_t
+  integer(kind = c_size_t), parameter :: size_random_t = 16_c_size_t
+  integer(kind = c_size_t), parameter :: size_generator_t = 32_c_size_t
+  integer(kind = c_size_t), parameter :: size_double = 8_c_size_t
+  integer(kind = c_size_t), parameter :: size_uint64_t = 8_c_size_t
   integer(kind = c_size_t), parameter :: sz = size_sphere_t + &
                                             & size_OBDS_Sphere_t + &
-                                            & 16_c_size_t * numel * size_prop_t
+                                            & 16_c_size_t * numel * size_prop_t + &
+                                            & size_random_t + &
+                                            & size_generator_t + &
+                                            & size_double + &
+                                            & size_uint64_t
+
   logical(kind = c_bool) :: failed = .false.
   integer(kind = c_size_t) :: i
+  integer(kind = int32) :: stat
 
   ! performs runtime checks (that are more like reminders that these are C types)
 
@@ -271,7 +265,7 @@ program main
   call c_f_pointer(props % x, x, [numel])       ! binds to the x positions of the spheres
   call c_f_pointer(props % y, y, [numel])       ! binds to the y positions of the spheres
   call c_f_pointer(props % z, z, [numel])       ! binds to the z positions of the spheres
-  call c_f_procpointer(spheres % limit, limit)  ! binds to the type-bound limit() method
+  call c_f_procpointer(spheres % update, update)! binds to the type-bound update() method
 
   ! puts the particles outside the box (we can afford particle overlapping in this test)
 
@@ -279,7 +273,13 @@ program main
   y = 1.0009765625_c_double * syslim
   z = 1.0009765625_c_double * syslim
 
-  call limit(spheres)                           ! applies periodic boundary conditions
+  stat = update(spheres)                        ! applies periodic boundary conditions
+
+  if (stat /= 0) then
+    call c_free(workspace)                      ! frees workspace from memory
+    workspace = c_null_ptr                      ! nullifies pointer to workspace
+    error stop "main(): ERROR"
+  end if
 
   ! we can afford not to break the loops right away since the computing cost is just O(N)
   do i = 1, numel
@@ -300,7 +300,7 @@ program main
     end if
   end do
 
-  ! checks if the limit() method failed to limit the particles to the system box
+  ! checks if the update() method failed to limit the particles to the system box
 
   write (*, '(A)', advance = 'no') 'test-sphere[0]: '
   if (failed) then
@@ -313,8 +313,11 @@ program main
   workspace = c_null_ptr                        ! nullifies pointer to workspace
 
   f_spheres => f_sphere_t()                     ! instantiates OBDS f_sphere_t object
-  call f_spheres % update()                     ! updates the positions of the spheres
-  call f_spheres % limit()                      ! applies periodic boundary conditions
+  stat = f_spheres % update()                   ! updates the positions of the spheres
+  if (stat /= 0) then
+    deallocate(f_spheres)
+    error stop "main(): ERROR"
+  end if
   deallocate(f_spheres)                         ! invokes the OBDS f_sphere_t finalizer
 
 end program main
@@ -325,7 +328,7 @@ end program main
 !   author: @misael-diaz
 !
 !   Synopsis:
-!   Tests the limiter method which applies the periodic boundary conditions.
+!   Tests the updater method which applies the periodic boundary conditions.
 !
 !   Copyright (C) 2023 Misael Diaz-Maldonado
 !
