@@ -959,16 +959,19 @@ static int logger (const sphere_t* spheres, size_t const step)
   const double* f_x = &(spheres -> props -> f_x -> data);
   const double* f_y = &(spheres -> props -> f_y -> data);
   const double* f_z = &(spheres -> props -> f_z -> data);
+  const uint64_t* pid = &(spheres -> props -> id -> bin);
   for (size_t i = 0; i != NUMEL; ++i)
   {
     const char fmt [] = "%+.16e %+.16e %+.16e "
 			"%+.16e %+.16e %+.16e "
 			"%+.16e %+.16e %+.16e "
-			"%+.16e %+.16e %+.16e\n";
+			"%+.16e %+.16e %+.16e "
+			"%lu\n";
     fprintf(file, fmt,   x[i],   y[i],   z[i],
 		       r_x[i], r_y[i], r_z[i],
 		       a_x[i], a_y[i], a_z[i],
-		       f_x[i], f_y[i], f_z[i]);
+		       f_x[i], f_y[i], f_z[i],
+		       pid[i]);
   }
 
   fclose(file);
