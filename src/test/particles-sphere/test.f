@@ -6,6 +6,7 @@
 module API
   use, intrinsic :: iso_c_binding, only: c_ptr
   use, intrinsic :: iso_c_binding, only: c_funptr
+  use, intrinsic :: iso_c_binding, only: c_int64_t
   implicit none
   private
 
@@ -25,16 +26,32 @@ module API
     type(c_ptr) :: r_x
     type(c_ptr) :: r_y
     type(c_ptr) :: r_z
+    type(c_ptr) :: udx
+    type(c_ptr) :: udy
+    type(c_ptr) :: udz
     type(c_ptr) :: a_x
     type(c_ptr) :: a_y
     type(c_ptr) :: a_z
+    type(c_ptr) :: d_x
+    type(c_ptr) :: d_y
+    type(c_ptr) :: d_z
     type(c_ptr) :: f_x
     type(c_ptr) :: f_y
     type(c_ptr) :: f_z
     type(c_ptr) :: t_x
     type(c_ptr) :: t_y
     type(c_ptr) :: t_z
+    type(c_ptr) :: tmp
+    type(c_ptr) :: temp
+    type(c_ptr) :: bitmask
+    type(c_ptr) :: list
     type(c_ptr) :: id
+    integer(kind = c_int64_t) :: pad1
+    integer(kind = c_int64_t) :: pad2
+    integer(kind = c_int64_t) :: pad3
+    integer(kind = c_int64_t) :: pad4
+    integer(kind = c_int64_t) :: pad5
+    integer(kind = c_int64_t) :: pad6
   end type
 
   type, bind(c) :: sphere_t
@@ -138,7 +155,7 @@ contains
     type(sphere_t), pointer :: spheres
     integer(kind = c_size_t), parameter :: numel = int(NUMEL, kind = c_size_t)
     integer(kind = c_size_t), parameter :: size_sphere_t = 32_c_size_t
-    integer(kind = c_size_t), parameter :: size_OBDS_Sphere_t = 128_c_size_t
+    integer(kind = c_size_t), parameter :: size_OBDS_Sphere_t = 256_c_size_t
     integer(kind = c_size_t), parameter :: size_prop_t = 8_c_size_t
     integer(kind = c_size_t), parameter :: size_random_t = 16_c_size_t
     integer(kind = c_size_t), parameter :: size_generator_t = 32_c_size_t
@@ -146,7 +163,7 @@ contains
     integer(kind = c_size_t), parameter :: size_uint64_t = 8_c_size_t
     integer(kind = c_size_t), parameter :: sz = size_sphere_t + &
                                               & size_OBDS_Sphere_t + &
-                                              & 16_c_size_t * numel * size_prop_t + &
+                                              & 26_c_size_t * numel * size_prop_t + &
                                               & size_random_t + &
                                               & size_generator_t + &
                                               & size_double + &
@@ -230,7 +247,7 @@ program main
   real(kind = c_double), parameter :: syslim = real(LIMIT, kind = c_double)
   integer(kind = c_size_t), parameter :: numel = int(NUMEL, kind = c_size_t)
   integer(kind = c_size_t), parameter :: size_sphere_t = 32_c_size_t
-  integer(kind = c_size_t), parameter :: size_OBDS_Sphere_t = 128_c_size_t
+  integer(kind = c_size_t), parameter :: size_OBDS_Sphere_t = 256_c_size_t
   integer(kind = c_size_t), parameter :: size_prop_t = 8_c_size_t
   integer(kind = c_size_t), parameter :: size_random_t = 16_c_size_t
   integer(kind = c_size_t), parameter :: size_generator_t = 32_c_size_t
@@ -238,7 +255,7 @@ program main
   integer(kind = c_size_t), parameter :: size_uint64_t = 8_c_size_t
   integer(kind = c_size_t), parameter :: sz = size_sphere_t + &
                                             & size_OBDS_Sphere_t + &
-                                            & 16_c_size_t * numel * size_prop_t + &
+                                            & 26_c_size_t * numel * size_prop_t + &
                                             & size_random_t + &
                                             & size_generator_t + &
                                             & size_double + &
@@ -254,7 +271,7 @@ program main
     error stop "test(): expects size of sphere_t to be 32 bytes"
   end if
 
-  if (c_sizeof(c_OBDS_Sphere_t) /= 128) then
+  if (c_sizeof(c_OBDS_Sphere_t) /= 256) then
     error stop "test(): expects size of OBDS_Sphere_t to be 128 bytes"
   end if
 
