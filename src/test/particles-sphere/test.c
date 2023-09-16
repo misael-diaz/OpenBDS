@@ -15,7 +15,7 @@
 #define TSTEP ( (double) ( __OBDS_TIME_STEP__ ) )
 #define STEPS ( 256LU * ( (size_t) (1.0 / TSTEP) ) )
 #define NUMEL ( (size_t) ( __OBDS_NUM_SPHERES__ ) )
-#define PROPS ( (size_t) ( 16 * ( NUMEL ) ) )
+#define PROPS ( (size_t) ( 26LU * ( NUMEL ) ) )
 #define DEFAULT SPH_LOG_LEVEL_DEFAULT
 #define VERBOSE SPH_LOG_LEVEL_VERBOSE
 #define LOG(x) ( (bool) ( ( x ) % ( (size_t) ( 0.001953125 / TSTEP ) ) == 0 ) )
@@ -25,7 +25,7 @@ void test1(void);
 
 int main ()
 {
-//test();
+  test();
   test1();
   return 0;
 }
@@ -35,7 +35,7 @@ int main ()
 void test (void)
 {
   static_assert(sizeof(sphere_t) == 32);
-  static_assert(sizeof(OBDS_Sphere_t) == 128);
+  static_assert(sizeof(OBDS_Sphere_t) == 256);
   static_assert(sizeof(prop_t) == 8);
   constexpr size_t sz = sizeof(sphere_t) +
 			sizeof(OBDS_Sphere_t) +
@@ -133,7 +133,7 @@ void test (void)
 void test (void)
 {
   _Static_assert(sizeof(sphere_t) == 32);
-  _Static_assert(sizeof(OBDS_Sphere_t) == 128);
+  _Static_assert(sizeof(OBDS_Sphere_t) == 256);
   _Static_assert(sizeof(prop_t) == 8);
   size_t const sz = sizeof(sphere_t) +
 		    sizeof(OBDS_Sphere_t) +
@@ -234,7 +234,7 @@ void test (void)
 void test1 (void)
 {
   static_assert(sizeof(sphere_t) == 32);
-  static_assert(sizeof(OBDS_Sphere_t) == 128);
+  static_assert(sizeof(OBDS_Sphere_t) == 256);
   static_assert(sizeof(prop_t) == 8);
   constexpr size_t sz = sizeof(sphere_t) +
 			sizeof(OBDS_Sphere_t) +
@@ -345,7 +345,7 @@ void test1 (void)
 void test1 (void)
 {
   _Static_assert(sizeof(sphere_t) == 32);
-  _Static_assert(sizeof(OBDS_Sphere_t) == 128);
+  _Static_assert(sizeof(OBDS_Sphere_t) == 256);
   _Static_assert(sizeof(prop_t) == 8);
   size_t const sz = sizeof(sphere_t) +
 		    sizeof(OBDS_Sphere_t) +

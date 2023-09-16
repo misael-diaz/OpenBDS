@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <endian.h>
 #include <errno.h>
 #include <float.h>
 #include <math.h>
@@ -904,10 +905,13 @@ static int updater (sphere_t* spheres)
   prop_t* f_x = spheres -> props -> f_x;
   prop_t* f_y = spheres -> props -> f_y;
   prop_t* f_z = spheres -> props -> f_z;
-  // uses (for now) these properties as temporary placeholders
-  prop_t* tmp = spheres -> props -> t_x;
-  prop_t* temp = spheres -> props -> t_y;
-  prop_t* bitmask = spheres -> props -> t_z;
+  prop_t* t_x = spheres -> props -> t_x;
+  prop_t* t_y = spheres -> props -> t_y;
+  prop_t* t_z = spheres -> props -> t_z;
+  // uses these properties as temporary placeholders
+  prop_t* tmp = spheres -> props -> tmp;
+  prop_t* temp = spheres -> props -> temp;
+  prop_t* bitmask = spheres -> props -> bitmask;
   random_t* random = spheres -> prng;
   zeroes(f_x, f_y, f_z);
   resultants(x, y, z, f_x, f_y, f_z, tmp, temp, bitmask);
@@ -921,9 +925,6 @@ static int updater (sphere_t* spheres)
   stochastic_shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   stochastic_shifts(x, y, z, f_x, f_y, f_z);
 
-  prop_t* t_x = spheres -> props -> t_x;
-  prop_t* t_y = spheres -> props -> t_y;
-  prop_t* t_z = spheres -> props -> t_z;
   if (stochastic_forces(random, t_x, t_y, t_z) == FAILURE)
   {
     return FAILURE;
@@ -959,10 +960,14 @@ static int logger (const sphere_t* spheres, size_t const step)
   const double* f_x = &(spheres -> props -> f_x -> data);
   const double* f_y = &(spheres -> props -> f_y -> data);
   const double* f_z = &(spheres -> props -> f_z -> data);
+  const double* t_x = &(spheres -> props -> t_x -> data);
+  const double* t_y = &(spheres -> props -> t_y -> data);
+  const double* t_z = &(spheres -> props -> t_z -> data);
   const uint64_t* pid = &(spheres -> props -> id -> bin);
   for (size_t i = 0; i != NUMEL; ++i)
   {
     const char fmt [] = "%+.16e %+.16e %+.16e "
+			"%+.16e %+.16e %+.16e "
 			"%+.16e %+.16e %+.16e "
 			"%+.16e %+.16e %+.16e "
 			"%+.16e %+.16e %+.16e "
@@ -971,6 +976,7 @@ static int logger (const sphere_t* spheres, size_t const step)
 		       r_x[i], r_y[i], r_z[i],
 		       a_x[i], a_y[i], a_z[i],
 		       f_x[i], f_y[i], f_z[i],
+		       t_x[i], t_y[i], t_z[i],
 		       pid[i]);
   }
 
@@ -1021,10 +1027,12 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   // compile-time sane checks:
 
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  static_assert( __BYTE_ORDER == __LITTLE_ENDIAN );
+  static_assert( __FLOAT_WORD_ORDER == __LITTLE_ENDIAN );
   static_assert(sizeof(NUMEL) == 8);
   static_assert(sizeof(RADIUS) == 8);
   static_assert(sizeof(CONTACT) == 8);
-  static_assert(sizeof(OBDS_Sphere_t) == 128);
+  static_assert(sizeof(OBDS_Sphere_t) == 256);
   static_assert(sizeof(size_t) == sizeof(uint64_t));
   static_assert(sizeof(sphere_t) == 32);
   static_assert(sizeof(prop_t) == 8);
@@ -1040,10 +1048,12 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   static_assert(CONTACT == 2.0);
   static_assert(RADIUS == 1.0);
 #else
+  _Static_assert( __BYTE_ORDER == __LITTLE_ENDIAN );
+  _Static_assert( __FLOAT_WORD_ORDER == __LITTLE_ENDIAN );
   _Static_assert(sizeof(NUMEL) == 8);
   _Static_assert(sizeof(RADIUS) == 8);
   _Static_assert(sizeof(CONTACT) == 8);
-  _Static_assert(sizeof(OBDS_Sphere_t) == 128);
+  _Static_assert(sizeof(OBDS_Sphere_t) == 256);
   _Static_assert(sizeof(size_t) == sizeof(uint64_t));
   _Static_assert(sizeof(sphere_t) == 32);
   _Static_assert(sizeof(prop_t) == 8);
@@ -1100,11 +1110,25 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   spheres -> props -> r_z = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
 
+  spheres -> props -> _dx = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> _dy = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> _dz = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+
   spheres -> props -> a_x = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
   spheres -> props -> a_y = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
   spheres -> props -> a_z = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+
+  spheres -> props -> d_x = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> d_y = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> d_z = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
 
   spheres -> props -> f_x = (prop_t*) iter;
@@ -1119,6 +1143,16 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   spheres -> props -> t_y = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
   spheres -> props -> t_z = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+
+  spheres -> props -> tmp = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> temp = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> bitmask = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+
+  spheres -> props -> list = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
 
   spheres -> props -> id = (prop_t*) iter;
@@ -1150,15 +1184,25 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   prop_t* r_x = spheres -> props -> r_x;
   prop_t* r_y = spheres -> props -> r_y;
   prop_t* r_z = spheres -> props -> r_z;
+  prop_t* _dx = spheres -> props -> _dx;
+  prop_t* _dy = spheres -> props -> _dy;
+  prop_t* _dz = spheres -> props -> _dz;
   prop_t* a_x = spheres -> props -> a_x;
   prop_t* a_y = spheres -> props -> a_y;
   prop_t* a_z = spheres -> props -> a_z;
+  prop_t* d_x = spheres -> props -> d_x;
+  prop_t* d_y = spheres -> props -> d_y;
+  prop_t* d_z = spheres -> props -> d_z;
   prop_t* f_x = spheres -> props -> f_x;
   prop_t* f_y = spheres -> props -> f_y;
   prop_t* f_z = spheres -> props -> f_z;
   prop_t* t_x = spheres -> props -> t_x;
   prop_t* t_y = spheres -> props -> t_y;
   prop_t* t_z = spheres -> props -> t_z;
+  prop_t* tmp = spheres -> props -> tmp;
+  prop_t* temp = spheres -> props -> temp;
+  prop_t* bitmask = spheres -> props -> bitmask;
+  prop_t* list = spheres -> props -> list;
   prop_t* id = spheres -> props -> id;
 
   // initializations:
@@ -1169,16 +1213,27 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   zeros(r_x);
   zeros(r_y);
   zeros(r_z);
+  zeros(_dx);
+  zeros(_dy);
+  zeros(_dz);
   zeros(a_x);
   zeros(a_y);
   zeros(a_z);
+  zeros(d_x);
+  zeros(d_y);
+  zeros(d_z);
   zeros(f_x);
   zeros(f_y);
   zeros(f_z);
   zeros(t_x);
   zeros(t_y);
   zeros(t_z);
+  zeros(tmp);
+  zeros(temp);
+  zeros(bitmask);
+  iota(list);
   iota(id);
+  ones(d_z);
 
   grid(x, y, z);
 
