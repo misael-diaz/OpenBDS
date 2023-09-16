@@ -27,7 +27,7 @@ $(FEST): $(FEST_O)
 $(TEST_O): $(DEPS_O) $(TEST_C)
 	$(CC) $(INC) $(CCOPT) -c $(TEST_C) -o $(TEST_O)
 
-$(FEST_O): $(TEST_F)
+$(FEST_O): $(DEPS_O) $(TEST_F)
 	$(FC) $(INC) $(FCOPT) -c $(TEST_F) -o $(FEST_O)
 
 clean:

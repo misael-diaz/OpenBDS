@@ -18,7 +18,7 @@ include make-inc
 
 all: $(BOX_O)
 
-$(BOX_O): $(SYSTEM_H) $(BOX_H) $(BOX_C)
+$(BOX_O): $(HEADERS) $(BOX_C)
 	$(CC) $(INC) $(CCOPT) -c $(BOX_C) -o $(BOX_O)
 
 clean:
