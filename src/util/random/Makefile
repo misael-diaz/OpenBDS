@@ -18,7 +18,7 @@ include make-inc
 
 all: $(RANDOM_O)
 
-$(RANDOM_O): $(RANDOM_H) $(RANDOM_C)
+$(RANDOM_O): $(HEADERS) $(RANDOM_C)
 	$(CC) $(INC) $(CCOPT) -c $(RANDOM_C) -o $(RANDOM_O)
 
 clean:

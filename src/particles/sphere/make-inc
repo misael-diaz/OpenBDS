@@ -17,9 +17,36 @@
 INC = -I../../../inc
 
 # headers
+FCONFG_H = ../../../inc/fconfig.h
+CONFIG_H = ../../../inc/config.h
+
+BDS_TYPES_H = ../../../inc/bds/types.h
+
+SYSBOX_PARAMS_H = ../../../inc/system/box/params.h
+SYSBOX_UTILS_H = ../../../inc/system/box/utils.h
 SYSBOX_H = ../../../inc/system/box.h
-SPHERE_H = ../../../inc/particles/sphere.h
+
+SYSTEM_PARAMS_H = ../../../inc/system/params.h
+SYSTEM_H = ../../../inc/system.h
+
 ARRAYS_H = ../../../inc/util/arrays.h
+
+RNDERR_H = ../../../inc/util/random/err.h
+RANDTP_H = ../../../inc/util/random/type.h
+RANDOM_H = ../../../inc/util/random.h
+
+UTILTP_H = ../../../inc/util/type.h
+UTIL_H = ../../../inc/util.h
+
+SPHERE_TYPE_H = ../../../inc/particles/sphere/type.h
+SPHERE_PARAMS_H = ../../../inc/particles/sphere/params.h
+SPHERE_UTILS_H = ../../../inc/particles/sphere/utils.h
+SPHERE_H = ../../../inc/particles/sphere.h
+
+HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(SYSBOX_PARAMS_H) $(SYSBOX_UTILS_H)\
+	  $(SYSBOX_H) $(SYSTEM_PARAMS_H) $(SYSTEM_H) $(ARRAYS_H) $(RNDERR_H) $(RANDTP_H)\
+	  $(RANDOM_H) $(UTILTP_H) $(UTIL_H) $(SPHERE_TYPE_H) $(SPHERE_PARAMS_H)\
+	  $(SPHERE_UTILS_H) $(SPHERE_H)
 
 # sources
 SPHERE_C = sphere.c

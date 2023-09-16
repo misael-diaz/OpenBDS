@@ -18,7 +18,7 @@ include make-inc
 
 all: $(TYPE_O)
 
-$(TYPE_O): $(TYPE_H) $(TYPE_C)
+$(TYPE_O): $(HEADERS) $(TYPE_C)
 	$(CC) $(INC) $(CCOPT) -c $(TYPE_C) -o $(TYPE_O)
 
 clean:

@@ -17,8 +17,16 @@
 INC = -I../../../inc
 
 # headers
-SYSTEM_H = ../../../inc/system.h
+FCONFG_H = ../../../inc/fconfig.h
+CONFIG_H = ../../../inc/config.h
+
+BDS_TYPES_H = ../../../inc/bds/types.h
+
+SYSTEM_PARAMS_H = ../../../inc/system/params.h
+
 ARRAYS_H = ../../../inc/util/arrays.h
+
+HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(SYSTEM_PARAMS_H) $(ARRAYS_H)
 
 # sources
 ARRAYS_C = arrays.c

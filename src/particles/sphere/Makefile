@@ -18,7 +18,7 @@ include make-inc
 
 all: $(SPHERE_O)
 
-$(SPHERE_O): $(SYSBOX_H) $(ARRAYS_H) $(SPHERE_H) $(SPHERE_C)
+$(SPHERE_O): $(HEADERS) $(SPHERE_C)
 	$(CC) $(INC) $(CCOPT) -c $(SPHERE_C) -o $(SPHERE_O)
 
 clean:

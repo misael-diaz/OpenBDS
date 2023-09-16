@@ -17,7 +17,12 @@
 INC = -I../../../inc
 
 # headers
+RANDTP_H = ../../../inc/util/random/type.h
+RANDOM_H = ../../../inc/util/random.h
+
 TYPE_H = ../../../inc/util/type.h
+
+HEADERS = $(RANDTP_H) $(RANDOM_H) $(TYPE_H)
 
 # sources
 TYPE_C = type.c

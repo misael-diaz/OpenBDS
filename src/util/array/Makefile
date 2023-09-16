@@ -18,7 +18,7 @@ include make-inc
 
 all: $(ARRAYS_O)
 
-$(ARRAYS_O): $(SYSTEM_H) $(ARRAYS_H) $(ARRAYS_C)
+$(ARRAYS_O): $(HEADERS) $(ARRAYS_C)
 	$(CC) $(INC) $(CCOPT) -c $(ARRAYS_C) -o $(ARRAYS_O)
 
 clean:
