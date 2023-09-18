@@ -8,7 +8,8 @@
 #define __OBDS_INV_TIME_STEP__ (__OBDS_INV_SQRT_TIME_STEP__ * __OBDS_INV_SQRT_TIME_STEP__)
 #define __OBDS_TIME_STEP__ ( 1.0 / ( (double) ( __OBDS_INV_TIME_STEP__ ) ) )
 
-#define __OBDS_NUM_PARTICLES__ ( (size_t) ( CONF_NUM_PARTICLES ) )
+#define __OBDS_LOG_NUM_PARTICLES__ ( (size_t) ( FCONF_LOG_NUM_PARTICLES ) )
+#define __OBDS_NUM_PARTICLES__ ( (size_t) ( 1 << ( __OBDS_LOG_NUM_PARTICLES__ ) ) )
 
 #endif
 

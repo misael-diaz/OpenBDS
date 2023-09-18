@@ -20,6 +20,7 @@
 #define SIZED ( (double) ( __OBDS_NUM_SPHERES__ ) )
 #define TSTEP ( (double) ( __OBDS_TIME_STEP__ ) )
 #define NUMEL ( (size_t) ( __OBDS_NUM_SPHERES__ ) )
+#define LOG_NUMEL ( (size_t) ( __OBDS_LOG_NUM_SPHERES__ ) )
 #define EPSILON ( (double) ( __OBDS_SPH_EPSILON__ ) )
 #define RADIUS ( (double) ( __OBDS_SPH_RADIUS__ ) )
 #define CONTACT ( (double) ( __OBDS_SPH_CONTACT__ ) )
@@ -890,6 +891,18 @@ static void pbcs (prop_t* restrict x,
 }
 
 
+// sums `src' and `dst' vectors (elementwise), stores the result in `dst'
+static void vsum (prop_t* dest, const prop_t* source)
+{
+  double* dst = &dest[0].data;
+  const double* src = &source[0].data;
+  for (size_t i = 0; i != (3 * NUMEL); ++i)
+  {
+    dst[i] += src[i];
+  }
+}
+
+
 // updates the positions of the particles due to the forces acting on them
 static int updater (sphere_t* spheres)
 {
@@ -912,18 +925,22 @@ static int updater (sphere_t* spheres)
   prop_t* tmp = spheres -> props -> tmp;
   prop_t* temp = spheres -> props -> temp;
   prop_t* bitmask = spheres -> props -> bitmask;
+  prop_t* list = spheres -> props -> list;
   random_t* random = spheres -> prng;
   zeroes(f_x, f_y, f_z);
   resultants(x, y, z, f_x, f_y, f_z, tmp, temp, bitmask);
   clamps(f_x, f_y, f_z, tmp, temp, bitmask);
   shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   shifts(x, y, z, f_x, f_y, f_z);
+  // we want to store the deterministic forces temporarily for logging purposes
+  memcpy(list, f_x, 3LU * NUMEL * sizeof(prop_t));
   if (stochastic_forces(random, f_x, f_y, f_z) == FAILURE)
   {
     return FAILURE;
   }
   stochastic_shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   stochastic_shifts(x, y, z, f_x, f_y, f_z);
+  vsum(f_x, list);
 
   if (stochastic_forces(random, t_x, t_y, t_z) == FAILURE)
   {
@@ -1029,6 +1046,7 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
   static_assert( __BYTE_ORDER == __LITTLE_ENDIAN );
   static_assert( __FLOAT_WORD_ORDER == __LITTLE_ENDIAN );
+  static_assert( __OBDS_LOG_NUM_SPHERES__ > 4LU );
   static_assert(sizeof(NUMEL) == 8);
   static_assert(sizeof(RADIUS) == 8);
   static_assert(sizeof(CONTACT) == 8);
@@ -1050,6 +1068,7 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 #else
   _Static_assert( __BYTE_ORDER == __LITTLE_ENDIAN );
   _Static_assert( __FLOAT_WORD_ORDER == __LITTLE_ENDIAN );
+  _Static_assert( __OBDS_LOG_NUM_SPHERES__ > 4LU );
   _Static_assert(sizeof(NUMEL) == 8);
   _Static_assert(sizeof(RADIUS) == 8);
   _Static_assert(sizeof(CONTACT) == 8);
@@ -1153,7 +1172,7 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   iter += NUMEL * sizeof(prop_t);
 
   spheres -> props -> list = (prop_t*) iter;
-  iter += NUMEL * sizeof(prop_t);
+  iter += (NUMEL * LOG_NUMEL) * sizeof(prop_t);
 
   spheres -> props -> id = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
