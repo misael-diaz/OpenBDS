@@ -8,6 +8,7 @@
 *.png
 *.o
 *backup*
+*TODO*
 # old
 old/TODO.txt
 old/Vector.for-flipped
