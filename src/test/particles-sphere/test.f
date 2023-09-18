@@ -189,6 +189,13 @@ contains
     end if
 
     ptr = c_init(spheres % workspace, 0)
+
+    if ( .not. c_associated(ptr) ) then
+      call c_free(spheres % workspace)
+      spheres % workspace = c_null_ptr
+      error stop "constructor(): ERROR"
+    end if
+
     call c_f_pointer(ptr, spheres % c_spheres)
     call c_f_procpointer(spheres % c_spheres % update, spheres % c_update)
 
@@ -286,6 +293,13 @@ program main
 
   workspace = c_malloc(sz)                      ! allocates workspace on the heap
   c_spheres = c_init(workspace, 0)              ! initializes the sphere properties
+
+  if ( .not. c_associated(c_spheres) ) then
+    call c_free(workspace)                      ! frees workspace from memory
+    workspace = c_null_ptr                      ! nullifies pointer to workspace
+    error stop "test(): ERROR"
+  end if
+
   call c_f_pointer(c_spheres, spheres)          ! binds to the C spheres container
   call c_f_pointer(spheres % props, props)      ! binds to the sphere properties
   call c_f_pointer(props % x, x, [numel])       ! binds to the x positions of the spheres
