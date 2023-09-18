@@ -14,6 +14,7 @@
 #define __OBDS_SPH_EPSILON__ ( (double) 1.0 )
 
 #define __OBDS_NUM_SPHERES__ ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
+#define __OBDS_LOG_NUM_SPHERES__ ( (size_t) ( __OBDS_LOG_NUM_PARTICLES__ ) )
 
 #endif
 

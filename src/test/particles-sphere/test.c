@@ -15,7 +15,9 @@
 #define TSTEP ( (double) ( __OBDS_TIME_STEP__ ) )
 #define STEPS ( 256LU * ( (size_t) (1.0 / TSTEP) ) )
 #define NUMEL ( (size_t) ( __OBDS_NUM_SPHERES__ ) )
-#define PROPS ( (size_t) ( 26LU * ( NUMEL ) ) )
+#define LOG_NUMEL ( (size_t) ( __OBDS_LOG_NUM_SPHERES__ ) )
+#define SIZE_LIST ( (size_t) ( (NUMEL) * (LOG_NUMEL) ) )
+#define PROPS ( (size_t) ( 25LU * ( NUMEL ) ) )
 #define DEFAULT SPH_LOG_LEVEL_DEFAULT
 #define VERBOSE SPH_LOG_LEVEL_VERBOSE
 #define LOG(x) ( (bool) ( ( x ) % ( (size_t) ( 0.001953125 / TSTEP ) ) == 0 ) )
@@ -40,6 +42,7 @@ void test (void)
   constexpr size_t sz = sizeof(sphere_t) +
 			sizeof(OBDS_Sphere_t) +
 			PROPS * sizeof(prop_t) +
+			SIZE_LIST * sizeof(prop_t) +
 			sizeof(random_t) +
 			sizeof(generator_t) +
 			sizeof(double) +
@@ -138,6 +141,7 @@ void test (void)
   size_t const sz = sizeof(sphere_t) +
 		    sizeof(OBDS_Sphere_t) +
 		    PROPS * sizeof(prop_t) +
+		    SIZE_LIST * sizeof(prop_t) +
 		    sizeof(random_t) +
 		    sizeof(generator_t) +
 		    sizeof(double) +
@@ -239,6 +243,7 @@ void test1 (void)
   constexpr size_t sz = sizeof(sphere_t) +
 			sizeof(OBDS_Sphere_t) +
 			PROPS * sizeof(prop_t) +
+			SIZE_LIST * sizeof(prop_t) +
 			sizeof(random_t) +
 			sizeof(generator_t) +
 			sizeof(double) +
@@ -350,6 +355,7 @@ void test1 (void)
   size_t const sz = sizeof(sphere_t) +
 		    sizeof(OBDS_Sphere_t) +
 		    PROPS * sizeof(prop_t) +
+		    SIZE_LIST * sizeof(prop_t) +
 		    sizeof(random_t) +
 		    sizeof(generator_t) +
 		    sizeof(double) +

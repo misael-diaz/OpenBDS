@@ -1,7 +1,7 @@
 #include "fconfig.h"
 
 #define LIMIT FCONF_LIMIT
-#define NUMEL FCONF_NUM_PARTICLES
+#define LOG_NUMEL FCONF_LOG_NUM_PARTICLES
 
 module API
   use, intrinsic :: iso_c_binding, only: c_ptr
@@ -108,6 +108,7 @@ module OBDS
   use, intrinsic :: iso_c_binding, only: c_associated
   use, intrinsic :: iso_c_binding, only: c_f_procpointer
   use, intrinsic :: iso_c_binding, only: c_f_pointer
+  use, intrinsic :: iso_c_binding, only: c_double
   use, intrinsic :: iso_c_binding, only: c_size_t
   use, intrinsic :: iso_fortran_env, only: int32
   use API, only: c_sphere_t => sphere_t
@@ -153,7 +154,9 @@ contains
   function constructor () result(spheres)
     type(c_ptr) :: ptr = c_null_ptr
     type(sphere_t), pointer :: spheres
-    integer(kind = c_size_t), parameter :: numel = int(NUMEL, kind = c_size_t)
+    integer(kind = c_size_t), parameter :: log_numel = LOG_NUMEL
+    real(kind = c_double), parameter :: dnumel = 2.0_c_double ** (log_numel)
+    integer(kind = c_size_t), parameter :: numel = int(dnumel, kind = c_size_t)
     integer(kind = c_size_t), parameter :: size_sphere_t = 32_c_size_t
     integer(kind = c_size_t), parameter :: size_OBDS_Sphere_t = 256_c_size_t
     integer(kind = c_size_t), parameter :: size_prop_t = 8_c_size_t
@@ -161,9 +164,11 @@ contains
     integer(kind = c_size_t), parameter :: size_generator_t = 32_c_size_t
     integer(kind = c_size_t), parameter :: size_double = 8_c_size_t
     integer(kind = c_size_t), parameter :: size_uint64_t = 8_c_size_t
+    integer(kind = c_size_t), parameter :: numel_list = (numel * log_numel)
     integer(kind = c_size_t), parameter :: sz = size_sphere_t + &
                                               & size_OBDS_Sphere_t + &
-                                              & 26_c_size_t * numel * size_prop_t + &
+                                              & 25_c_size_t * numel * size_prop_t + &
+                                              & numel_list * size_prop_t + &
                                               & size_random_t + &
                                               & size_generator_t + &
                                               & size_double + &
@@ -244,8 +249,10 @@ program main
   real(kind = c_double), pointer, contiguous :: x(:) => null()
   real(kind = c_double), pointer, contiguous :: y(:) => null()
   real(kind = c_double), pointer, contiguous :: z(:) => null()
+  integer(kind = c_size_t), parameter :: log_numel = LOG_NUMEL
+  real(kind = c_double), parameter :: dnumel = 2.0_c_double ** (log_numel)
+  integer(kind = c_size_t), parameter :: numel = int(dnumel, kind = c_size_t)
   real(kind = c_double), parameter :: syslim = real(LIMIT, kind = c_double)
-  integer(kind = c_size_t), parameter :: numel = int(NUMEL, kind = c_size_t)
   integer(kind = c_size_t), parameter :: size_sphere_t = 32_c_size_t
   integer(kind = c_size_t), parameter :: size_OBDS_Sphere_t = 256_c_size_t
   integer(kind = c_size_t), parameter :: size_prop_t = 8_c_size_t
@@ -253,9 +260,11 @@ program main
   integer(kind = c_size_t), parameter :: size_generator_t = 32_c_size_t
   integer(kind = c_size_t), parameter :: size_double = 8_c_size_t
   integer(kind = c_size_t), parameter :: size_uint64_t = 8_c_size_t
+  integer(kind = c_size_t), parameter :: numel_list = (numel * log_numel)
   integer(kind = c_size_t), parameter :: sz = size_sphere_t + &
                                             & size_OBDS_Sphere_t + &
-                                            & 26_c_size_t * numel * size_prop_t + &
+                                            & 25_c_size_t * numel * size_prop_t + &
+                                            & numel_list * size_prop_t + &
                                             & size_random_t + &
                                             & size_generator_t + &
                                             & size_double + &
