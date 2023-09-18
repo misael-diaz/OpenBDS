@@ -7,7 +7,7 @@ source: genpovs.py
 author: @misael-diaz
 
 Synopsis:
-Generates a povray file for each simulation step produced by the equilibration run.
+Generates a povray file for each simulation step produced by the OBDS code.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published
@@ -32,7 +32,7 @@ def getBDSParams():
   Note that the parameters in the file are stored in a dictionary fashion for convenience.
   '''
   params = {}
-  fname = 'params-bds.txt'
+  fname = 'run/bds/params/params-bds.txt'
   with open(fname, 'r') as f:
 
     for line in f:
@@ -82,10 +82,10 @@ header = (
     f'cylinder {{<{+lim},{+lim},{-lim}>, <{+lim},{+lim},{+lim}> {t} pigment {{White}}}}\n'
 )
 
-run = 'run/equilibration/data/positions/'
-out = 'run/equilibration/render/frames/'
+run = 'run/bds/data/positions/'
+out = 'run/bds/render/frames/'
 # generates a povray file for each datafile (storing the particle positions) nested in run
-for datafile in glob('run/equilibration/data/positions/*.txt'):
+for datafile in glob('run/bds/data/positions/*.txt'):
 
   fname, ext = datafile.split('.')
   _, fname = fname.split(run)
@@ -97,10 +97,22 @@ for datafile in glob('run/equilibration/data/positions/*.txt'):
     positions = loadtxt(datafile)
     for position in positions:
 
-      x, y, z = position
+      x, y, z, _, _, _, _, _, _, d_x, d_y, d_z, _, _, _, _, _, _, _ = position
       sphere = (
         f'sphere {{ < {x}, {y}, {z} > 1 ' +
         f'texture {{ pigment {{ color Gray transmit 0 }} }} }}\n'
+      )
+
+      f.write(sphere)
+
+      # offsets the sphere's position along the director to render a Janus particle
+
+      x += 0.0625 * d_x
+      y += 0.0625 * d_y
+      z += 0.0625 * d_z
+      sphere = (
+        f'sphere {{ < {x}, {y}, {z} > 1 ' +
+        f'texture {{ pigment {{ color Red transmit 0 }} }} }}\n'
       )
 
       f.write(sphere)
