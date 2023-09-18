@@ -5,6 +5,7 @@
 
 void copy (const prop_t* restrict src, prop_t* restrict dst);
 void zeros (prop_t* x);
+void ones (prop_t* x);
 void iota (prop_t* x);
 
 #endif

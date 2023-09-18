@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <endian.h>
 #include <errno.h>
 #include <float.h>
 #include <math.h>
@@ -19,6 +20,7 @@
 #define SIZED ( (double) ( __OBDS_NUM_SPHERES__ ) )
 #define TSTEP ( (double) ( __OBDS_TIME_STEP__ ) )
 #define NUMEL ( (size_t) ( __OBDS_NUM_SPHERES__ ) )
+#define LOG_NUMEL ( (size_t) ( __OBDS_LOG_NUM_SPHERES__ ) )
 #define EPSILON ( (double) ( __OBDS_SPH_EPSILON__ ) )
 #define RADIUS ( (double) ( __OBDS_SPH_RADIUS__ ) )
 #define CONTACT ( (double) ( __OBDS_SPH_CONTACT__ ) )
@@ -771,6 +773,7 @@ static void stochastic_shift (prop_t* restrict prop_x, const prop_t* restrict pr
 }
 
 
+// stores the change in the Euler angle `x'
 static void stochastic_rotation (prop_t* restrict prop_x, const prop_t* restrict prop_T_x)
 {
   double* x = &prop_x[0].data;
@@ -778,7 +781,7 @@ static void stochastic_rotation (prop_t* restrict prop_x, const prop_t* restrict
   double const angular_stochastic_mobility = ANGULAR_BROWNIAN_MOBILITY;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    x[i] += (angular_stochastic_mobility * T_x[i]);
+    x[i] = (angular_stochastic_mobility * T_x[i]);
   }
 }
 
@@ -810,16 +813,157 @@ static void stochastic_shifts (prop_t* restrict x,
 }
 
 
-static void stochastic_rotations (prop_t* restrict x,
+// kinematics (x, y, z, _dx, _dy, _dz, d_x, d_y, d_z)
+//
+// Synopsis:
+// Obtains the new director (or the orientation vector) via the kinematic equation.
+//
+// Parameters:
+// x, y, z		components of the new director (at time t + dt)
+// _dx, _dy, _dz	components of the angular displacement vector
+// d_x, d_y, d_z	components of the current director (at time t)
+
+
+static void kinematics (prop_t* restrict p_x,
+			prop_t* restrict p_y,
+			prop_t* restrict p_z,
+			const prop_t* restrict p_dx,
+			const prop_t* restrict p_dy,
+			const prop_t* restrict p_dz,
+			const prop_t* restrict p_d_x,
+			const prop_t* restrict p_d_y,
+			const prop_t* restrict p_d_z)
+
+{
+  double* x = &p_x[0].data;
+  double* y = &p_y[0].data;
+  double* z = &p_z[0].data;
+  const double* _dx = &p_dx[0].data;
+  const double* _dy = &p_dy[0].data;
+  const double* _dz = &p_dz[0].data;
+  const double* d_x = &p_d_x[0].data;
+  const double* d_y = &p_d_y[0].data;
+  const double* d_z = &p_d_z[0].data;
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    x[i] = d_x[i] + (_dy[i] * d_z[i] - _dz[i] * d_y[i]);
+    y[i] = d_y[i] + (_dz[i] * d_x[i] - _dx[i] * d_z[i]);
+    z[i] = d_z[i] + (_dx[i] * d_y[i] - _dy[i] * d_x[i]);
+  }
+}
+
+
+// normalizes the vector (makes unit vector) whose components are x, y, and z
+static void normalize (prop_t* restrict p_x,
+		       prop_t* restrict p_y,
+		       prop_t* restrict p_z,
+		       prop_t* restrict p_v,
+		       prop_t* restrict p_t)
+{
+  double* x = &p_x[0].data;
+  double* y = &p_y[0].data;
+  double* z = &p_z[0].data;
+  double* v = &p_v[0].data;
+  double* t = &p_t[0].data;
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    v[i] = (x[i] * x[i]) + (y[i] * y[i]) + (z[i] * z[i]);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    t[i] = sqrt(v[i]);
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    v[i] = 1.0 / t[i];
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    x[i] *= v[i];
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    y[i] *= v[i];
+  }
+
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    z[i] *= v[i];
+  }
+}
+
+
+// updates the Euler angle `x' with the angular displacement stored in `_dx'
+static void update_Euler_angle (prop_t* restrict prop_x, const prop_t* restrict prop_dx)
+{
+  double* x = &prop_x[0].data;
+  const double* _dx = &prop_dx[0].data;
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    x[i] += _dx[i];
+  }
+}
+
+
+// void stochastic_rotations (a_x, a_y, a_z,
+// 			      d_x, d_y, d_z,
+// 			        x,   y,   z,
+// 			      _dx, _dy, _dz, tmp,
+// 			      t_x, t_y, t_z)
+//
+// Synopsis:
+// Updates the Euler angles and the director (or orientation vector).
+//
+// Parameters:
+// a_x, a_y, a_z	components of the Euler angles
+// d_x, d_y, d_z	components of the director
+// x, y, z		placeholders for storing the new director
+// _dx, _dy, _dz	placeholders for storing the change in the Euler angles
+// tmp			general purpose placeholder
+// t_x, t_y, t_z	components of the torque
+
+
+static void stochastic_rotations (prop_t* restrict a_x,
+				  prop_t* restrict a_y,
+				  prop_t* restrict a_z,
+				  prop_t* restrict d_x,
+				  prop_t* restrict d_y,
+				  prop_t* restrict d_z,
+				  prop_t* restrict x,
 				  prop_t* restrict y,
 				  prop_t* restrict z,
+				  prop_t* restrict _dx,
+				  prop_t* restrict _dy,
+				  prop_t* restrict _dz,
+				  prop_t* restrict tmp,
 				  const prop_t* restrict t_x,
 				  const prop_t* restrict t_y,
 				  const prop_t* restrict t_z)
 {
-  stochastic_rotation(x, t_x);
-  stochastic_rotation(y, t_y);
-  stochastic_rotation(z, t_z);
+  // updates the Euler angles:
+
+  stochastic_rotation(_dx, t_x);
+  update_Euler_angle(a_x, _dx);
+  stochastic_rotation(_dy, t_y);
+  update_Euler_angle(a_y, _dy);
+  stochastic_rotation(_dz, t_z);
+  update_Euler_angle(a_z, _dz);
+
+  // updates the director:
+
+  kinematics(x, y, z, _dx, _dy, _dz, d_x, d_y, d_z);
+
+  // normalizes the director:
+
+  prop_t* v = _dx;
+  normalize(x, y, z, v, tmp);
+  copy(x, d_x);
+  copy(y, d_y);
+  copy(z, d_z);
 }
 
 
@@ -889,6 +1033,18 @@ static void pbcs (prop_t* restrict x,
 }
 
 
+// sums `src' and `dst' vectors (elementwise), stores the result in `dst'
+static void vsum (prop_t* restrict dest, const prop_t* restrict source)
+{
+  double* dst = &dest[0].data;
+  const double* src = &source[0].data;
+  for (size_t i = 0; i != (3 * NUMEL); ++i)
+  {
+    dst[i] += src[i];
+  }
+}
+
+
 // updates the positions of the particles due to the forces acting on them
 static int updater (sphere_t* spheres)
 {
@@ -901,34 +1057,58 @@ static int updater (sphere_t* spheres)
   prop_t* a_x = spheres -> props -> a_x;
   prop_t* a_y = spheres -> props -> a_y;
   prop_t* a_z = spheres -> props -> a_z;
+  prop_t* d_x = spheres -> props -> d_x;
+  prop_t* d_y = spheres -> props -> d_y;
+  prop_t* d_z = spheres -> props -> d_z;
   prop_t* f_x = spheres -> props -> f_x;
   prop_t* f_y = spheres -> props -> f_y;
   prop_t* f_z = spheres -> props -> f_z;
-  // uses (for now) these properties as temporary placeholders
-  prop_t* tmp = spheres -> props -> t_x;
-  prop_t* temp = spheres -> props -> t_y;
-  prop_t* bitmask = spheres -> props -> t_z;
+  prop_t* t_x = spheres -> props -> t_x;
+  prop_t* t_y = spheres -> props -> t_y;
+  prop_t* t_z = spheres -> props -> t_z;
+  // uses these properties as temporary placeholders
+  prop_t* tmp = spheres -> props -> tmp;
+  prop_t* temp = spheres -> props -> temp;
+  prop_t* bitmask = spheres -> props -> bitmask;
+  prop_t* list = spheres -> props -> list;
   random_t* random = spheres -> prng;
   zeroes(f_x, f_y, f_z);
   resultants(x, y, z, f_x, f_y, f_z, tmp, temp, bitmask);
   clamps(f_x, f_y, f_z, tmp, temp, bitmask);
   shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   shifts(x, y, z, f_x, f_y, f_z);
+  // we want to store the deterministic forces temporarily for logging purposes
+  memcpy(list, f_x, 3LU * NUMEL * sizeof(prop_t));
   if (stochastic_forces(random, f_x, f_y, f_z) == FAILURE)
   {
     return FAILURE;
   }
   stochastic_shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   stochastic_shifts(x, y, z, f_x, f_y, f_z);
+  vsum(f_x, list);
 
-  prop_t* t_x = spheres -> props -> t_x;
-  prop_t* t_y = spheres -> props -> t_y;
-  prop_t* t_z = spheres -> props -> t_z;
   if (stochastic_forces(random, t_x, t_y, t_z) == FAILURE)
   {
     return FAILURE;
   }
-  stochastic_rotations(a_x, a_y, a_z, t_x, t_y, t_z);
+
+  prop_t* _x = tmp;
+  prop_t* _y = temp;
+  prop_t* _z = bitmask;
+  prop_t* iter = list;
+  prop_t* _dx = iter;
+  iter += NUMEL;
+  prop_t* _dy = iter;
+  iter += NUMEL;
+  prop_t* _dz = iter;
+  iter += NUMEL;
+  prop_t* t = iter;
+  iter += NUMEL;
+  stochastic_rotations(a_x, a_y, a_z,
+		       d_x, d_y, d_z,
+		        _x,  _y,  _z,
+		       _dx, _dy, _dz, t,
+		       t_x, t_y, t_z);
 
   pbcs(x, y, z, tmp, temp, bitmask);
   return SUCCESS;
@@ -956,19 +1136,32 @@ static int logger (const sphere_t* spheres, size_t const step)
   const double* a_x = &(spheres -> props -> a_x -> data);
   const double* a_y = &(spheres -> props -> a_y -> data);
   const double* a_z = &(spheres -> props -> a_z -> data);
+  const double* d_x = &(spheres -> props -> d_x -> data);
+  const double* d_y = &(spheres -> props -> d_y -> data);
+  const double* d_z = &(spheres -> props -> d_z -> data);
   const double* f_x = &(spheres -> props -> f_x -> data);
   const double* f_y = &(spheres -> props -> f_y -> data);
   const double* f_z = &(spheres -> props -> f_z -> data);
+  const double* t_x = &(spheres -> props -> t_x -> data);
+  const double* t_y = &(spheres -> props -> t_y -> data);
+  const double* t_z = &(spheres -> props -> t_z -> data);
+  const uint64_t* pid = &(spheres -> props -> id -> bin);
   for (size_t i = 0; i != NUMEL; ++i)
   {
     const char fmt [] = "%+.16e %+.16e %+.16e "
 			"%+.16e %+.16e %+.16e "
 			"%+.16e %+.16e %+.16e "
-			"%+.16e %+.16e %+.16e\n";
+			"%+.16e %+.16e %+.16e "
+			"%+.16e %+.16e %+.16e "
+			"%+.16e %+.16e %+.16e "
+			"%lu\n";
     fprintf(file, fmt,   x[i],   y[i],   z[i],
 		       r_x[i], r_y[i], r_z[i],
 		       a_x[i], a_y[i], a_z[i],
-		       f_x[i], f_y[i], f_z[i]);
+		       d_x[i], d_y[i], d_z[i],
+		       f_x[i], f_y[i], f_z[i],
+		       t_x[i], t_y[i], t_z[i],
+		       pid[i]);
   }
 
   fclose(file);
@@ -1018,10 +1211,13 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   // compile-time sane checks:
 
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  static_assert( __BYTE_ORDER == __LITTLE_ENDIAN );
+  static_assert( __FLOAT_WORD_ORDER == __LITTLE_ENDIAN );
+  static_assert( __OBDS_LOG_NUM_SPHERES__ >= 8LU );
   static_assert(sizeof(NUMEL) == 8);
   static_assert(sizeof(RADIUS) == 8);
   static_assert(sizeof(CONTACT) == 8);
-  static_assert(sizeof(OBDS_Sphere_t) == 128);
+  static_assert(sizeof(OBDS_Sphere_t) == 256);
   static_assert(sizeof(size_t) == sizeof(uint64_t));
   static_assert(sizeof(sphere_t) == 32);
   static_assert(sizeof(prop_t) == 8);
@@ -1037,10 +1233,13 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   static_assert(CONTACT == 2.0);
   static_assert(RADIUS == 1.0);
 #else
+  _Static_assert( __BYTE_ORDER == __LITTLE_ENDIAN );
+  _Static_assert( __FLOAT_WORD_ORDER == __LITTLE_ENDIAN );
+  _Static_assert( __OBDS_LOG_NUM_SPHERES__ >= 8LU );
   _Static_assert(sizeof(NUMEL) == 8);
   _Static_assert(sizeof(RADIUS) == 8);
   _Static_assert(sizeof(CONTACT) == 8);
-  _Static_assert(sizeof(OBDS_Sphere_t) == 128);
+  _Static_assert(sizeof(OBDS_Sphere_t) == 256);
   _Static_assert(sizeof(size_t) == sizeof(uint64_t));
   _Static_assert(sizeof(sphere_t) == 32);
   _Static_assert(sizeof(prop_t) == 8);
@@ -1097,11 +1296,25 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   spheres -> props -> r_z = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
 
+  spheres -> props -> _dx = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> _dy = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> _dz = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+
   spheres -> props -> a_x = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
   spheres -> props -> a_y = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
   spheres -> props -> a_z = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+
+  spheres -> props -> d_x = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> d_y = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> d_z = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
 
   spheres -> props -> f_x = (prop_t*) iter;
@@ -1117,6 +1330,16 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   iter += NUMEL * sizeof(prop_t);
   spheres -> props -> t_z = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
+
+  spheres -> props -> tmp = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> temp = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+  spheres -> props -> bitmask = (prop_t*) iter;
+  iter += NUMEL * sizeof(prop_t);
+
+  spheres -> props -> list = (prop_t*) iter;
+  iter += (NUMEL * LOG_NUMEL) * sizeof(prop_t);
 
   spheres -> props -> id = (prop_t*) iter;
   iter += NUMEL * sizeof(prop_t);
@@ -1147,15 +1370,25 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   prop_t* r_x = spheres -> props -> r_x;
   prop_t* r_y = spheres -> props -> r_y;
   prop_t* r_z = spheres -> props -> r_z;
+  prop_t* _dx = spheres -> props -> _dx;
+  prop_t* _dy = spheres -> props -> _dy;
+  prop_t* _dz = spheres -> props -> _dz;
   prop_t* a_x = spheres -> props -> a_x;
   prop_t* a_y = spheres -> props -> a_y;
   prop_t* a_z = spheres -> props -> a_z;
+  prop_t* d_x = spheres -> props -> d_x;
+  prop_t* d_y = spheres -> props -> d_y;
+  prop_t* d_z = spheres -> props -> d_z;
   prop_t* f_x = spheres -> props -> f_x;
   prop_t* f_y = spheres -> props -> f_y;
   prop_t* f_z = spheres -> props -> f_z;
   prop_t* t_x = spheres -> props -> t_x;
   prop_t* t_y = spheres -> props -> t_y;
   prop_t* t_z = spheres -> props -> t_z;
+  prop_t* tmp = spheres -> props -> tmp;
+  prop_t* temp = spheres -> props -> temp;
+  prop_t* bitmask = spheres -> props -> bitmask;
+  prop_t* list = spheres -> props -> list;
   prop_t* id = spheres -> props -> id;
 
   // initializations:
@@ -1166,16 +1399,27 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   zeros(r_x);
   zeros(r_y);
   zeros(r_z);
+  zeros(_dx);
+  zeros(_dy);
+  zeros(_dz);
   zeros(a_x);
   zeros(a_y);
   zeros(a_z);
+  zeros(d_x);
+  zeros(d_y);
+  zeros(d_z);
   zeros(f_x);
   zeros(f_y);
   zeros(f_z);
   zeros(t_x);
   zeros(t_y);
   zeros(t_z);
+  zeros(tmp);
+  zeros(temp);
+  zeros(bitmask);
+  iota(list);
   iota(id);
+  ones(d_z);
 
   grid(x, y, z);
 

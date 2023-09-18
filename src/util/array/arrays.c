@@ -23,6 +23,15 @@ void zeros (prop_t* x)
   }
 }
 
+void ones (prop_t* x)
+{
+  double* data = &x[0].data;
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    data[i] = 1.0;
+  }
+}
+
 void iota (prop_t* ID)
 {
   uint64_t* id = &ID[0].bin;
