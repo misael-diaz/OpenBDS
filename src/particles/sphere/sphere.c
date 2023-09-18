@@ -1115,6 +1115,28 @@ static int updater (sphere_t* spheres)
 }
 
 
+// dumps BDS parameters to a plain txt file (usually for and post-proccesing)
+static int info ()
+{
+  const char fname[] = "run/bds/data/params/params-bds.txt";
+  FILE* file = fopen(fname, "w");
+  if (file == NULL)
+  {
+    const char errmsg[] = "info(): IO ERROR with file %s: %s\n";
+    fprintf(stderr, errmsg, fname, strerror(errno));
+    return FAILURE;
+  }
+
+  fprintf(file, "LIMIT:       %.16e\n", LIMIT);
+  fprintf(file, "LENGTH:      %.16e\n", LENGTH);
+  fprintf(file, "TIME_STEP:   %.16e\n", TSTEP);
+  fprintf(file, "NUM_SPHERES: %lu\n",   NUMEL);
+
+  fclose(file);
+  return SUCCESS;
+}
+
+
 // logs some properties of interest such as the positions of the particles
 static int logger (const sphere_t* spheres, size_t const step)
 {
@@ -1272,6 +1294,19 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
     return NULL;
 #endif
   }
+
+
+  // attemps to dump BDS parameters to a plain text file as a runtime check
+  if (info() == FAILURE)
+  {
+    fprintf(stderr, "sphere-initializer(): ERROR\n");
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+    return nullptr;
+#else
+    return NULL;
+#endif
+  }
+
 
   // bindinds:
 
