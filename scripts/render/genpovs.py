@@ -83,13 +83,14 @@ header = (
 )
 
 run = 'run/bds/data/positions/'
-out = 'run/bds/render/frames/'
+out = 'run/bds/render/frames/spheres-'
+pre = 'run/bds/data/positions/spheres-'
 # generates a povray file for each datafile (storing the particle positions) nested in run
 for datafile in glob('run/bds/data/positions/*.txt'):
 
   fname, ext = datafile.split('.')
-  _, fname = fname.split(run)
-  povfile = f'{out}{fname}.pov'
+  _, step = fname.split(pre)
+  povfile = f'{out}{int(step):032d}.pov'
   with open(povfile, 'w') as f:
 
     f.write(header)
