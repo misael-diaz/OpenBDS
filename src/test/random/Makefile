@@ -19,9 +19,9 @@ include make-inc
 all: $(TEST)
 
 $(TEST): $(TEST_O)
-	$(CC) $(INC) $(CCOPT) $(TYPE_O) $(RANDOM_O) $(TEST_O) -o $(TEST) $(LIBS)
+	$(CC) $(INC) $(CCOPT) $(RANDOM_O) $(TEST_O) -o $(TEST) $(LIBS)
 
-$(TEST_O): $(RANDOM_H) $(RANDOM_O) $(TYPE_O) $(TEST_C)
+$(TEST_O): $(RANDOM_H) $(RANDOM_O) $(TEST_C)
 	$(CC) $(INC) $(CCOPT) -c $(TEST_C) -o $(TEST_O)
 
 clean:

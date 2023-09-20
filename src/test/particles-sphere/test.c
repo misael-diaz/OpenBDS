@@ -135,9 +135,9 @@ void test (void)
 #else
 void test (void)
 {
-  _Static_assert(sizeof(sphere_t) == 32);
-  _Static_assert(sizeof(OBDS_Sphere_t) == 256);
-  _Static_assert(sizeof(prop_t) == 8);
+  _Static_assert(sizeof(sphere_t) == 32, "expects 32 bytes");
+  _Static_assert(sizeof(OBDS_Sphere_t) == 256, "expects 256 bytes");
+  _Static_assert(sizeof(prop_t) == 8, "expects 8 bytes");
   size_t const sz = sizeof(sphere_t) +
 		    sizeof(OBDS_Sphere_t) +
 		    PROPS * sizeof(prop_t) +
@@ -349,9 +349,9 @@ void test1 (void)
 #else
 void test1 (void)
 {
-  _Static_assert(sizeof(sphere_t) == 32);
-  _Static_assert(sizeof(OBDS_Sphere_t) == 256);
-  _Static_assert(sizeof(prop_t) == 8);
+  _Static_assert(sizeof(sphere_t) == 32, "expects 32 bytes");
+  _Static_assert(sizeof(OBDS_Sphere_t) == 256, "expects 256 bytes");
+  _Static_assert(sizeof(prop_t) == 8, "expects 8 bytes");
   size_t const sz = sizeof(sphere_t) +
 		    sizeof(OBDS_Sphere_t) +
 		    PROPS * sizeof(prop_t) +
