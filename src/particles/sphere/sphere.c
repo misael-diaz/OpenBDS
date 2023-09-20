@@ -1233,8 +1233,10 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   // compile-time sane checks:
 
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
-  static_assert( __BYTE_ORDER == __LITTLE_ENDIAN );
-  static_assert( __FLOAT_WORD_ORDER == __LITTLE_ENDIAN );
+  static_assert(BYTE_ORDER == LITTLE_ENDIAN);
+#if defined(FLOAT_WORD_ORDER)
+  static_assert(FLOAT_WORD_ORDER == LITTLE_ENDIAN);
+#endif
   static_assert( __OBDS_LOG_NUM_SPHERES__ >= 8LU );
   static_assert(sizeof(NUMEL) == 8);
   static_assert(sizeof(RADIUS) == 8);
@@ -1255,8 +1257,10 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   static_assert(CONTACT == 2.0);
   static_assert(RADIUS == 1.0);
 #else
-  _Static_assert( __BYTE_ORDER == __LITTLE_ENDIAN );
-  _Static_assert( __FLOAT_WORD_ORDER == __LITTLE_ENDIAN );
+  _Static_assert(BYTE_ORDER == LITTLE_ENDIAN);
+#if defined(FLOAT_WORD_ORDER)
+  _Static_assert(FLOAT_WORD_ORDER == LITTLE_ENDIAN);
+#endif
   _Static_assert( __OBDS_LOG_NUM_SPHERES__ >= 8LU );
   _Static_assert(sizeof(NUMEL) == 8);
   _Static_assert(sizeof(RADIUS) == 8);
