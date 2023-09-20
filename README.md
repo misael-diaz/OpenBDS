@@ -47,7 +47,7 @@ mkdir -p run/bds/data/positions
 
 The test just spawns the particles in the system box, tests the computation of the
 interparticle forces, the application of the periodic boundaries, among other things.
-It is not by any means a full fledged BDS code, in fact, it only executes one step
+It is not by any means a fully fledged BDS code, in fact, it only executes one step
 and exits.
 
 OBDS Test Code can be executed from the src directory via:
