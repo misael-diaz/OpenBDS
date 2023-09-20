@@ -3,7 +3,7 @@
 
 #include "bds/types.h"
 
-void copy (const prop_t* restrict src, prop_t* restrict dst);
+void copy (const prop_t* __restrict__ src, prop_t* __restrict__ dst);
 void zeros (prop_t* x);
 void ones (prop_t* x);
 void iota (prop_t* x);

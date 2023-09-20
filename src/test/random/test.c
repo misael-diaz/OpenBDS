@@ -20,8 +20,6 @@
 #define TOL 0.001953125
 #define LOG false
 
-extern struct util const util;
-
 void test();
 
 int main ()
@@ -65,11 +63,11 @@ void test ()
   static_assert(sizeof(double) == 8);
   static_assert(SIZE == 64);
 #else
-  _Static_assert(sizeof(struct random) == 16);
-  _Static_assert(sizeof(struct generator) == 32);
-  _Static_assert(sizeof(uint64_t) == 8);
-  _Static_assert(sizeof(double) == 8);
-  _Static_assert(SIZE == 64);
+  _Static_assert(sizeof(struct random) == 16, "expects 16 bytes");
+  _Static_assert(sizeof(struct generator) == 32, "expects 32 bytes");
+  _Static_assert(sizeof(uint64_t) == 8, "expects 8 bytes");
+  _Static_assert(sizeof(double) == 8, "expects 8 bytes");
+  _Static_assert(SIZE == 64, "expects 64 bytes");
 #endif
 
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
@@ -106,6 +104,9 @@ void test ()
   random -> generator -> state = (uint64_t*) iter;
   iter += sizeof(uint64_t);
 
+  extern int util_random_initializer(random_t*, enum PRNG);
+  iPRNG_t const irandom = { .initializer = util_random_initializer };
+  util_t const util = { .random = irandom };
   int const stat = util.random.initializer(random, NRAND);
   if (stat != 0)
   {
