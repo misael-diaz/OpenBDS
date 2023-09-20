@@ -13,14 +13,25 @@
 # (at your option) any later version.
 #
 
-# FORTRAN compiler
+# FORTRAN compilers
+# Intel FORTRAN Compiler
+FC = ifort
+# GNU FORTRAN Compiler
+FC = gfortran-11
 FC = gfortran-10
 FC = gfortran
 
-# clang compiler
+# clang compilers
+# Intel C Compiler
+CC = icc
+# GNU C Compiler
+CC = gcc-11
 CC = gcc-10
 CC = gcc
 
+# MAC OS X Intel FORTRAN Compiler Options
+FCOPT = -cpp -free -warn all -g -O0
+# Linux GNU FORTRAN Compiler Options
 FCOPT = -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form\
 	-ffree-line-length-none
 FCOPT = -O2 -mavx -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form\
@@ -31,6 +42,16 @@ FCOPT = -g -Wall -Wextra -Waliasing -Wsurprising -Warray-bounds -Warray-temporar
 	-fcheck=all -O0 -cpp -ffree-form -ffree-line-length-none
 
 # clang options
+# MAC OS X Intel C Compiler Options
+CCOPT = -g -Wall -O0 -std=c18\
+        -I/opt/intel/oneapi/compiler/2021.1.1/mac/compiler/include/icc\
+        -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include\
+        -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/machine
+# MAC OS X GNU C Compiler Options
+CCOPT = -std=gnu2x -g -Wall -Wextra -O0\
+        -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include\
+        -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/machine
+# Linux GNU C Compiler Options
 CCOPT = -std=gnu2x -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log
 CCOPT = -std=gnu2x -O2 -mavx2 -ftree-vectorize -fopt-info-optimized=opts.log
 CCOPT = -std=gnu2x -g -Wall -Wextra -O0
