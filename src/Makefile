@@ -22,7 +22,7 @@ export CCOPT
 export FCOPT
 export LIBS
 
-all: $(TESTS) utils system-utils particle-utils tests
+all: utils system-utils particle-utils tests
 
 $(MAIN_BIN): $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ)
 	$(FC) $(FCOPT) $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ) -o $(MAIN_BIN)
