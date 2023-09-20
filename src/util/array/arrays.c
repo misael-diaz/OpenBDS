@@ -4,7 +4,7 @@
 
 #define NUMEL ( (size_t) __OBDS_NUM_PARTICLES__ )
 
-void copy (const prop_t* restrict source, prop_t* restrict dest)
+void copy (const prop_t* __restrict__ source, prop_t* __restrict__ dest)
 {
   double* dst = &dest[0].data;
   const double* src = &source[0].data;

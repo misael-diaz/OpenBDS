@@ -30,7 +30,7 @@ static uint32_t xor ()	// XORs the current time and the process ID for seeding t
 #if ( ( __GNUC__ > 12 ) && (__STDC_VERSION__ > STDC17 ) )
   static_assert(sizeof(time_t) == 8);
 #else
-  _Static_assert(sizeof(time_t) == 8);
+  _Static_assert(sizeof(time_t) == 8, "xor() expects `time_t' to be 8 bytes");
 #endif
   // if the underlying type of `time_t' is 64-bits, then use both the low and high bits
   time_t const t = time(NULL);
@@ -54,7 +54,8 @@ static uint32_t genseed () // generates seed by fetching /dev/urandom or fallsba
 #if ( ( __GNUC__ > 12 ) && (__STDC_VERSION__ > STDC17 ) )
   static_assert(sizeof(uint32_t) == sizeof(unsigned int));
 #else
-  _Static_assert(sizeof(uint32_t) == sizeof(unsigned int));
+  _Static_assert(sizeof(uint32_t) == sizeof(unsigned int),
+		 "genseed() expects 4 bytes size");
 #endif
   uint32_t prn = 0xffffffff;
   if (getrandom(&prn, sizeof(uint32_t), GRND_NONBLOCK) == -1)
@@ -72,7 +73,8 @@ static uint32_t genseed ()
 #if ( ( __GNUC__ > 12 ) && (__STDC_VERSION__ > STDC17 ) )
   static_assert(sizeof(uint32_t) == sizeof(unsigned int));
 #else
-  _Static_assert(sizeof(uint32_t) == sizeof(unsigned int));
+  _Static_assert(sizeof(uint32_t) == sizeof(unsigned int),
+		 "genseed() expects 4 bytes size");
 #endif
 
   int devurand = open("/dev/urandom", O_RDONLY);
@@ -105,7 +107,7 @@ static int seeder (generator_t* generator)
 #if ( ( __GNUC__ > 12 ) && (__STDC_VERSION__ > STDC17 ) )
   static_assert(sizeof(int) == 4);
 #else
-  _Static_assert(sizeof(int) == 4);
+  _Static_assert(sizeof(int) == 4, "seeder() expects `int's of 4 bytes");
 #endif
   uint64_t const seed = genseed();
   if ( (seed == 0) || (seed & 0x0000000000000001) )

@@ -26,7 +26,7 @@ ARRAYS_O = ../../util/array/arrays.o
 RANDOM_O = ../../util/random/random.o
 UTILTP_O = ../../util/type/type.o
 SPHERE_O = ../../particles/sphere/sphere.o
-DEPS_O = $(SYSBOX_O) $(ARRAYS_O) $(RANDOM_O) $(UTILTP_O) $(SPHERE_O)
+DEPS_O = $(SYSBOX_O) $(ARRAYS_O) $(RANDOM_O) $(SPHERE_O)
 TEST_O = test.o
 FEST_O = fest.o
 

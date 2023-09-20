@@ -59,7 +59,7 @@ static uint64_t unlimited (uint64_t const x)
 
 
 // masks particles beyond the system limits with a binary pattern of ones, otherwise zeros
-static void mask (const prop_t* restrict x, prop_t* restrict bitmask)
+static void mask (const prop_t* __restrict__ x, prop_t* __restrict__ bitmask)
 {
   uint64_t* b = &bitmask[0].bin;
   const uint64_t* fp = &x[0].bin;
@@ -95,9 +95,9 @@ static void rescale (prop_t* x)
 
 
 // sets the offset on the particles according to the bitmask and their positions (signbit)
-static void offset (const prop_t* restrict x,
-		    const prop_t* restrict bitmask,
-		    prop_t* restrict offset)
+static void offset (const prop_t* __restrict__ x,
+		    const prop_t* __restrict__ bitmask,
+		    prop_t* __restrict__ offset)
 {
   double const length = 2.0;
   uint64_t* o = &offset[0].bin;
@@ -113,7 +113,7 @@ static void offset (const prop_t* restrict x,
 
 
 // shifts x, y, or z-axis coordinates by the offset
-static void shift (prop_t* restrict x, const prop_t* restrict offset)
+static void shift (prop_t* __restrict__ x, const prop_t* __restrict__ offset)
 {
   double* data = &x[0].data;
   const double* o = &offset[0].data;
@@ -125,7 +125,9 @@ static void shift (prop_t* restrict x, const prop_t* restrict offset)
 
 
 // applies periodic boundary conditions to the particles
-void pbc (prop_t* restrict x, prop_t* restrict distance, prop_t* restrict bitmask)
+void pbc (prop_t* __restrict__ x,
+	  prop_t* __restrict__ distance,
+	  prop_t* __restrict__ bitmask)
 {
   // applies required pre-scaling:
 

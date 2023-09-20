@@ -85,7 +85,7 @@ static uint64_t nexp (uint64_t const x)
 // 		for non-interacting pairs
 
 
-static void inrange (const prop_t* restrict dist, prop_t* restrict bitmask)
+static void inrange (const prop_t* __restrict__ dist, prop_t* __restrict__ bitmask)
 {
   uint64_t* b = &bitmask[0].bin;
   const uint64_t* r = &dist[0].bin;
@@ -97,7 +97,9 @@ static void inrange (const prop_t* restrict dist, prop_t* restrict bitmask)
 
 
 // zeroes the x, y, and z components of the force
-static void zeroes (prop_t* restrict f_x, prop_t* restrict f_y, prop_t* restrict f_z)
+static void zeroes (prop_t* __restrict__ f_x,
+		    prop_t* __restrict__ f_y,
+		    prop_t* __restrict__ f_z)
 {
   zeros(f_x);
   zeros(f_y);
@@ -176,7 +178,9 @@ static double min (const prop_t* vectors)
 //              computation of the bitmask to the inrange method().
 
 
-static void SLJ (prop_t* restrict dist, prop_t* restrict force, prop_t* restrict  bitmask)
+static void SLJ (prop_t* __restrict__ dist,
+		 prop_t* __restrict__ force,
+		 prop_t* __restrict__  bitmask)
 {
 
   // scales the interparticle distance (as required by the inrange() method):
@@ -271,15 +275,15 @@ static void pairs (size_t const i,
 		   double const offset_x,
 		   double const offset_y,
 		   double const offset_z,
-		   const prop_t* restrict p_x,
-		   const prop_t* restrict p_y,
-		   const prop_t* restrict p_z,
-		   prop_t* restrict p_F_x,
-		   prop_t* restrict p_F_y,
-		   prop_t* restrict p_F_z,
-		   prop_t* restrict p_f,
-		   prop_t* restrict p_d,
-		   prop_t* restrict p_bitmask)
+		   const prop_t* __restrict__ p_x,
+		   const prop_t* __restrict__ p_y,
+		   const prop_t* __restrict__ p_z,
+		   prop_t* __restrict__ p_F_x,
+		   prop_t* __restrict__ p_F_y,
+		   prop_t* __restrict__ p_F_z,
+		   prop_t* __restrict__ p_f,
+		   prop_t* __restrict__ p_d,
+		   prop_t* __restrict__ p_bitmask)
 {
   // computes the interparticle distance between the ith and jth particles:
 
@@ -389,15 +393,15 @@ static void pairs (size_t const i,
 // mask		array of size NUMEL used for storing intermediate results
 
 
-static void resultants (const prop_t* restrict x,
-		        const prop_t* restrict y,
-		        const prop_t* restrict z,
-		        prop_t* restrict F_x,
-		        prop_t* restrict F_y,
-		        prop_t* restrict F_z,
-		        prop_t* restrict tmp,
-		        prop_t* restrict temp,
-		        prop_t* restrict mask)
+static void resultants (const prop_t* __restrict__ x,
+		        const prop_t* __restrict__ y,
+		        const prop_t* __restrict__ z,
+		        prop_t* __restrict__ F_x,
+		        prop_t* __restrict__ F_y,
+		        prop_t* __restrict__ F_z,
+		        prop_t* __restrict__ tmp,
+		        prop_t* __restrict__ temp,
+		        prop_t* __restrict__ mask)
 {
   for (size_t i = 0; i != NUMEL; ++i)
   {
@@ -636,10 +640,10 @@ static void resultants (const prop_t* restrict x,
 
 // clamps forces larger than CLAMP to CLAMP; in other words, this method makes sure that
 // there is no force (component) larger than the value represented by the CLAMP MACRO.
-static void clamp (prop_t* restrict p_force,
-		   prop_t* restrict p_tmp,
-		   prop_t* restrict p_temp,
-		   prop_t* restrict p_bitmask)
+static void clamp (prop_t* __restrict__ p_force,
+		   prop_t* __restrict__ p_tmp,
+		   prop_t* __restrict__ p_temp,
+		   prop_t* __restrict__ p_bitmask)
 {
   double* temp = &p_temp[0].data;
   double* force = &p_force[0].data;
@@ -684,12 +688,12 @@ static void clamp (prop_t* restrict p_force,
 
 
 // clamps the x, y, and z components of the force
-static void clamps (prop_t* restrict f_x,
-		    prop_t* restrict f_y,
-		    prop_t* restrict f_z,
-		    prop_t* restrict tmp,
-		    prop_t* restrict temp,
-		    prop_t* restrict bitmask)
+static void clamps (prop_t* __restrict__ f_x,
+		    prop_t* __restrict__ f_y,
+		    prop_t* __restrict__ f_z,
+		    prop_t* __restrict__ tmp,
+		    prop_t* __restrict__ temp,
+		    prop_t* __restrict__ bitmask)
 {
   clamp(f_x, tmp, temp, bitmask);
   clamp(f_y, tmp, temp, bitmask);
@@ -749,7 +753,7 @@ static int stochastic_forces (random_t* random, prop_t* f_x, prop_t* f_y, prop_t
 
 
 // shifts the particles along the x, y, or z axis due to deterministic force effects
-static void shift (prop_t* restrict prop_x, const prop_t* restrict prop_F_x)
+static void shift (prop_t* __restrict__ prop_x, const prop_t* __restrict__ prop_F_x)
 {
   double const dt = TSTEP;
   double* x = &prop_x[0].data;
@@ -761,7 +765,8 @@ static void shift (prop_t* restrict prop_x, const prop_t* restrict prop_F_x)
 }
 
 
-static void stochastic_shift (prop_t* restrict prop_x, const prop_t* restrict prop_F_x)
+static void stochastic_shift (prop_t* __restrict__ prop_x,
+			      const prop_t* __restrict__ prop_F_x)
 {
   double* x = &prop_x[0].data;
   const double* F_x = &prop_F_x[0].data;
@@ -774,7 +779,8 @@ static void stochastic_shift (prop_t* restrict prop_x, const prop_t* restrict pr
 
 
 // stores the change in the Euler angle `x'
-static void stochastic_rotation (prop_t* restrict prop_x, const prop_t* restrict prop_T_x)
+static void stochastic_rotation (prop_t* __restrict__ prop_x,
+				 const prop_t* __restrict__ prop_T_x)
 {
   double* x = &prop_x[0].data;
   const double* T_x = &prop_T_x[0].data;
@@ -787,12 +793,12 @@ static void stochastic_rotation (prop_t* restrict prop_x, const prop_t* restrict
 
 
 // shifts the particles along the axes owing to the net deterministic forces
-static void shifts (prop_t* restrict x,
-		    prop_t* restrict y,
-		    prop_t* restrict z,
-		    const prop_t* restrict f_x,
-		    const prop_t* restrict f_y,
-		    const prop_t* restrict f_z)
+static void shifts (prop_t* __restrict__ x,
+		    prop_t* __restrict__ y,
+		    prop_t* __restrict__ z,
+		    const prop_t* __restrict__ f_x,
+		    const prop_t* __restrict__ f_y,
+		    const prop_t* __restrict__ f_z)
 {
   shift(x, f_x);
   shift(y, f_y);
@@ -800,12 +806,12 @@ static void shifts (prop_t* restrict x,
 }
 
 
-static void stochastic_shifts (prop_t* restrict x,
-			       prop_t* restrict y,
-			       prop_t* restrict z,
-			       const prop_t* restrict f_x,
-			       const prop_t* restrict f_y,
-			       const prop_t* restrict f_z)
+static void stochastic_shifts (prop_t* __restrict__ x,
+			       prop_t* __restrict__ y,
+			       prop_t* __restrict__ z,
+			       const prop_t* __restrict__ f_x,
+			       const prop_t* __restrict__ f_y,
+			       const prop_t* __restrict__ f_z)
 {
   stochastic_shift(x, f_x);
   stochastic_shift(y, f_y);
@@ -824,15 +830,15 @@ static void stochastic_shifts (prop_t* restrict x,
 // d_x, d_y, d_z	components of the current director (at time t)
 
 
-static void kinematics (prop_t* restrict p_x,
-			prop_t* restrict p_y,
-			prop_t* restrict p_z,
-			const prop_t* restrict p_dx,
-			const prop_t* restrict p_dy,
-			const prop_t* restrict p_dz,
-			const prop_t* restrict p_d_x,
-			const prop_t* restrict p_d_y,
-			const prop_t* restrict p_d_z)
+static void kinematics (prop_t* __restrict__ p_x,
+			prop_t* __restrict__ p_y,
+			prop_t* __restrict__ p_z,
+			const prop_t* __restrict__ p_dx,
+			const prop_t* __restrict__ p_dy,
+			const prop_t* __restrict__ p_dz,
+			const prop_t* __restrict__ p_d_x,
+			const prop_t* __restrict__ p_d_y,
+			const prop_t* __restrict__ p_d_z)
 
 {
   double* x = &p_x[0].data;
@@ -854,11 +860,11 @@ static void kinematics (prop_t* restrict p_x,
 
 
 // normalizes the vector (makes unit vector) whose components are x, y, and z
-static void normalize (prop_t* restrict p_x,
-		       prop_t* restrict p_y,
-		       prop_t* restrict p_z,
-		       prop_t* restrict p_v,
-		       prop_t* restrict p_t)
+static void normalize (prop_t* __restrict__ p_x,
+		       prop_t* __restrict__ p_y,
+		       prop_t* __restrict__ p_z,
+		       prop_t* __restrict__ p_v,
+		       prop_t* __restrict__ p_t)
 {
   double* x = &p_x[0].data;
   double* y = &p_y[0].data;
@@ -898,7 +904,8 @@ static void normalize (prop_t* restrict p_x,
 
 
 // updates the Euler angle `x' with the angular displacement stored in `_dx'
-static void update_Euler_angle (prop_t* restrict prop_x, const prop_t* restrict prop_dx)
+static void update_Euler_angle (prop_t* __restrict__ prop_x,
+				const prop_t* __restrict__ prop_dx)
 {
   double* x = &prop_x[0].data;
   const double* _dx = &prop_dx[0].data;
@@ -927,22 +934,22 @@ static void update_Euler_angle (prop_t* restrict prop_x, const prop_t* restrict 
 // t_x, t_y, t_z	components of the torque
 
 
-static void stochastic_rotations (prop_t* restrict a_x,
-				  prop_t* restrict a_y,
-				  prop_t* restrict a_z,
-				  prop_t* restrict d_x,
-				  prop_t* restrict d_y,
-				  prop_t* restrict d_z,
-				  prop_t* restrict x,
-				  prop_t* restrict y,
-				  prop_t* restrict z,
-				  prop_t* restrict _dx,
-				  prop_t* restrict _dy,
-				  prop_t* restrict _dz,
-				  prop_t* restrict tmp,
-				  const prop_t* restrict t_x,
-				  const prop_t* restrict t_y,
-				  const prop_t* restrict t_z)
+static void stochastic_rotations (prop_t* __restrict__ a_x,
+				  prop_t* __restrict__ a_y,
+				  prop_t* __restrict__ a_z,
+				  prop_t* __restrict__ d_x,
+				  prop_t* __restrict__ d_y,
+				  prop_t* __restrict__ d_z,
+				  prop_t* __restrict__ x,
+				  prop_t* __restrict__ y,
+				  prop_t* __restrict__ z,
+				  prop_t* __restrict__ _dx,
+				  prop_t* __restrict__ _dy,
+				  prop_t* __restrict__ _dz,
+				  prop_t* __restrict__ tmp,
+				  const prop_t* __restrict__ t_x,
+				  const prop_t* __restrict__ t_y,
+				  const prop_t* __restrict__ t_z)
 {
   // updates the Euler angles:
 
@@ -968,7 +975,9 @@ static void stochastic_rotations (prop_t* restrict a_x,
 
 
 // places the spheres in a grid (or lattice) like structure for system initialization
-static void grid (prop_t* restrict xprop, prop_t* restrict yprop, prop_t* restrict zprop)
+static void grid (prop_t* __restrict__ xprop,
+		  prop_t* __restrict__ yprop,
+		  prop_t* __restrict__ zprop)
 {
   // gets the number of spheres (at contact) that can be fitted along any dimension:
 
@@ -1020,12 +1029,12 @@ static void grid (prop_t* restrict xprop, prop_t* restrict yprop, prop_t* restri
 }
 
 
-static void pbcs (prop_t* restrict x,
-		  prop_t* restrict y,
-		  prop_t* restrict z,
-		  prop_t* restrict tmp,
-		  prop_t* restrict temp,
-		  prop_t* restrict mask)
+static void pbcs (prop_t* __restrict__ x,
+		  prop_t* __restrict__ y,
+		  prop_t* __restrict__ z,
+		  prop_t* __restrict__ tmp,
+		  prop_t* __restrict__ temp,
+		  prop_t* __restrict__ mask)
 {
   pbc(x, tmp, temp);
   pbc(y, tmp, temp);
@@ -1034,7 +1043,7 @@ static void pbcs (prop_t* restrict x,
 
 
 // sums `src' and `dst' vectors (elementwise), stores the result in `dst'
-static void vsum (prop_t* restrict dest, const prop_t* restrict source)
+static void vsum (prop_t* __restrict__ dest, const prop_t* __restrict__ source)
 {
   double* dst = &dest[0].data;
   const double* src = &source[0].data;
@@ -1257,32 +1266,65 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   static_assert(CONTACT == 2.0);
   static_assert(RADIUS == 1.0);
 #else
-  _Static_assert(BYTE_ORDER == LITTLE_ENDIAN);
+  _Static_assert(BYTE_ORDER == LITTLE_ENDIAN, "expects little-endian byte-order");
 #if defined(FLOAT_WORD_ORDER)
-  _Static_assert(FLOAT_WORD_ORDER == LITTLE_ENDIAN);
+  _Static_assert(FLOAT_WORD_ORDER == LITTLE_ENDIAN, "expects little-endian byte-order");
 #endif
-  _Static_assert( __OBDS_LOG_NUM_SPHERES__ >= 8LU );
-  _Static_assert(sizeof(NUMEL) == 8);
-  _Static_assert(sizeof(RADIUS) == 8);
-  _Static_assert(sizeof(CONTACT) == 8);
-  _Static_assert(sizeof(OBDS_Sphere_t) == 256);
-  _Static_assert(sizeof(size_t) == sizeof(uint64_t));
-  _Static_assert(sizeof(sphere_t) == 32);
-  _Static_assert(sizeof(prop_t) == 8);
-  _Static_assert(sizeof(random_t) == 16);
-  _Static_assert(sizeof(generator_t) == 32);
-  _Static_assert(sizeof(uint64_t) == 8);
-  _Static_assert(sizeof(double) == 8);
-  _Static_assert(NUMEL != 0);
-  _Static_assert(NUMEL % 2 == 0);
-  _Static_assert(SIZE_MAX == UINT64_MAX);
-  _Static_assert(NUMEL <= 0x7fffffffffffffff);
-  _Static_assert( SIZED * (RADIUS * RADIUS * RADIUS) < (LIMIT * LIMIT * LIMIT) );
-  _Static_assert(CONTACT == 2.0);
-  _Static_assert(RADIUS == 1.0);
+  _Static_assert( __OBDS_LOG_NUM_SPHERES__ >= 8LU, "expects log2(NUM_SPHERES) >= 8" );
+  _Static_assert(sizeof(NUMEL) == 8, "expects 8 bytes");
+  _Static_assert(sizeof(RADIUS) == 8, "expects 8 bytes");
+  _Static_assert(sizeof(CONTACT) == 8, "expects 8 bytes");
+  _Static_assert(sizeof(OBDS_Sphere_t) == 256, "expects 256 bytes");
+  _Static_assert(sizeof(size_t) == sizeof(uint64_t), "expects equal size");
+  _Static_assert(sizeof(sphere_t) == 32, "expects 32 bytes");
+  _Static_assert(sizeof(prop_t) == 8, "expects 8 bytes");
+  _Static_assert(sizeof(random_t) == 16, "expects 16 bytes");
+  _Static_assert(sizeof(generator_t) == 32, "expects 32 bytes");
+  _Static_assert(sizeof(uint64_t) == 8, "expects 8 bytes");
+  _Static_assert(sizeof(double) == 8, "expects 8 bytes");
+  _Static_assert(NUMEL != 0, "expects non-zero value for NUM_SPHERES");
+  _Static_assert(NUMEL % 2 == 0, "expects NUM_SPHERES to be even");
+  _Static_assert(SIZE_MAX == UINT64_MAX, "expects equal range");
+  _Static_assert(NUMEL <= 0x7fffffffffffffff, "expects fewer NUM_SPHERES");
 #endif
 
   // runtime sane checks:
+
+  if (RADIUS != 1.0)
+  {
+    errno = EINVAL;
+    char err[] = "sphere-initializer() expects unit spheres: %s\n";
+    fprintf(stderr, err, strerror(errno));
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+    return nullptr;
+#else
+    return NULL;
+#endif
+  }
+
+  if (CONTACT != 2.0)
+  {
+    errno = EINVAL;
+    char err[] = "sphere-initializer() expects unit spheres: %s\n";
+    fprintf(stderr, err, strerror(errno));
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+    return nullptr;
+#else
+    return NULL;
+#endif
+  }
+
+  if ( SIZED * (RADIUS * RADIUS * RADIUS) >= (LIMIT * LIMIT * LIMIT) )
+  {
+    errno = EINVAL;
+    char err[] = "sphere-initializer() expects smaller volume fractions: %s\n";
+    fprintf(stderr, err, strerror(errno));
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+    return nullptr;
+#else
+    return NULL;
+#endif
+  }
 
   prop_t const dt = { .data = TSTEP };
   uint64_t const bin = dt.bin;
@@ -1462,6 +1504,9 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 
   grid(x, y, z);
 
+  extern int util_random_initializer(random_t*, enum PRNG);
+  iPRNG_t const irandom = { .initializer = util_random_initializer };
+  util_t const util = { .random = irandom };
   if (util.random.initializer(spheres -> prng, NRAND) == FAILURE)
   {
     fprintf(stderr, "particles.sphere.initializer(): PRNG ERROR\n");

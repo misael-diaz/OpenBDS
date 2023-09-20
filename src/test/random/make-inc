@@ -24,7 +24,6 @@ TYPE_H = ../../../inc/util/type.h
 TEST_C = test.c
 
 # objects
-TYPE_O = ../../util/type/type.o
 RANDOM_O = ../../util/random/random.o
 TEST_O = test.o
 
