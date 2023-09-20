@@ -9,7 +9,8 @@ This is a work in progress, contributions are welcomed.
 
 ## Compilation
 
-Instructions to compile the source code with GNU Make.
+Instructions to compile the source code with GNU Make. Some degree of familiarity with the
+command line is assumed.
 
 Compilation requirements: GNU Make, GCC 10 (or higher), and a POSIX compliant OS
 (Linux or Mac OS X).
