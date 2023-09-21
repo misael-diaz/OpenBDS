@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <fcntl.h>
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 #include <endian.h>
 #include <errno.h>
 #include <float.h>
@@ -1150,11 +1152,20 @@ static int info ()
 static int logger (const sphere_t* spheres, size_t const step)
 {
   char log[80];
+  char tmp[80];
   sprintf(log, "run/bds/data/positions/spheres-%zu.txt", step);
-  FILE* file = fopen(log, "w");
+  sprintf(tmp, "run/bds/data/positions/spheres-%zu.tmp-XXXXXX", step);
+  int fd = mkstemp(tmp);
+  if (fd == FAILURE)
+  {
+    fprintf(stderr, "logger(): IO ERROR with file %s: %s\n", tmp, strerror(errno));
+    return FAILURE;
+  }
+
+  FILE* file = fdopen(fd, "w+");
   if (file == NULL)
   {
-    fprintf(stderr, "log-positions(): IO ERROR with file %s: %s\n", log, strerror(errno));
+    fprintf(stderr, "logger(): IO ERROR with file %s: %s\n", tmp, strerror(errno));
     return FAILURE;
   }
 
@@ -1196,6 +1207,13 @@ static int logger (const sphere_t* spheres, size_t const step)
   }
 
   fclose(file);
+
+  if (rename(tmp, log) == FAILURE)
+  {
+    fprintf(stderr, "logger(): ERROR: %s\n", strerror(errno));
+    return FAILURE;
+  }
+
   return SUCCESS;
 }
 

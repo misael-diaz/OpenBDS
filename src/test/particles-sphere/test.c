@@ -65,6 +65,14 @@ void test (void)
     return;
   }
 
+  if (spheres -> log(spheres, 0) == IOERR)
+  {
+    free(workspace);
+    workspace = nullptr;
+    fprintf(stderr, "test() ERROR\n");
+    return;
+  }
+
   double* x = &(spheres -> props -> x -> data);
   for (size_t i = 0; i != NUMEL; ++i)
   {
@@ -163,6 +171,13 @@ void test (void)
     return;
   }
 
+  if (spheres -> log(spheres, 0) == IOERR)
+  {
+    free(workspace);
+    workspace = NULL;
+    fprintf(stderr, "test() ERROR\n");
+    return;
+  }
 
   double* x = &(spheres -> props -> x -> data);
   for (size_t i = 0; i != NUMEL; ++i)
