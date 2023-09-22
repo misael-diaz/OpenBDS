@@ -215,8 +215,9 @@ static int reset (random_t* random)
 
 static double fetcher (random_t* random)
 {
+  double const period = ( (double) PERIOD );
   double const count = *(random -> generator -> count);
-  if (count >= PERIOD)
+  if (count >= period)
   {
     if (reset(random) == FAILURE)
     {
