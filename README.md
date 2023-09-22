@@ -15,17 +15,20 @@ command line is assumed.
 Compilation requirements: GNU Make, GCC 10 (or higher), and a POSIX compliant OS
 (Linux or Mac OS X).
 
-You can compile the OBDS code from the source directory src:
+You can compile the OBDS code by issuing the following commands on the terminal (at the
+top level of the repository):
 
 ```sh
 make clean && make
 ```
 
-It would be a great idea to edit src/make-inc, especially if you want to enable compiler
-optimizations (for these are turned off by default) or use a different compiler.
+It would be a great idea to edit make-inc, the one at the top level of the repository,
+especially if you want to enable compiler optimizations (for these are turned off by
+default) or use a different compiler.
 
-The OBDS code has been successfully built with GCC and the Intel Compiler in Linux and
-Mac OS X.
+The OBDS code has been successfully built with the GNU C and FORTRAN Compilers `gcc` and
+`gfortran`, the LLVM C Compiler `clang`, and the Intel C and FORTRAN Compilers `icc` and
+`ifort` in both GNU/Linux and Mac OS X.
 
 ## Set Up the Execution Environment
 
@@ -43,20 +46,22 @@ mkdir -p run/bds/data/positions
 mkdir -p run/render/frames
 ```
 
+Note that these directories must be present in your current working directory.
+
 ## Executing the OBDS app
 
 To execute the OBDS app issue the following command on the terminal:
 
 ```sh
-./bds/fortran/OpenBDS.bin
+./src/bds/fortran/OpenBDS.bin
 ```
 
 ## Running OBDS tests
 
-Minimal OBDS FORTRAN Test Code can be executed from the src directory via:
+Minimal OBDS FORTRAN Test Code can be executed from the top level of the repository:
 
 ```sh
-./test/particles-sphere/fortran-test-particles-sphere.bin
+./src/test/particles-sphere/fortran-test-particles-sphere.bin
 ```
 
 The test just spawns the particles in the system box, tests the computation of the
@@ -64,10 +69,10 @@ interparticle forces, the application of the periodic boundaries, among other th
 It is not by any means a fully fledged BDS code, in fact, it only executes one step
 and exits.
 
-OBDS Test Code can be executed from the src directory via:
+OBDS Test Code can be executed from the top level of the repository:
 
 ```sh
-./test/particles-sphere/test-particles-sphere.bin
+./src/test/particles-sphere/test-particles-sphere.bin
 ```
 
 This test code can be used to perform Brownian Dynamics Simulations.
