@@ -14,26 +14,18 @@
 # (at your option) any later version.
 #
 
-all: tests OBDS
+include make-inc
 
-utils:
-	@$(MAKE) -C util
+export CC
+export FC
+export CCOPT
+export FCOPT
+export LIBS
 
-system-utils:
-	@$(MAKE) -C system
+all: OpenBDS
 
-particle-utils: utils system-utils
-	@$(MAKE) -C particles
-
-tests: particle-utils
-	@$(MAKE) -C test
-
-OBDS: particle-utils
-	@$(MAKE) -C bds
+OpenBDS:
+	@$(MAKE) -C src
 
 clean:
-	@$(MAKE) -C util clean
-	@$(MAKE) -C system clean
-	@$(MAKE) -C particles clean
-	@$(MAKE) -C test clean
-	@$(MAKE) -C bds clean
+	@$(MAKE) -C src clean
