@@ -19,6 +19,7 @@ FC = ifort
 # GNU FORTRAN Compiler
 FC = gfortran-11
 FC = gfortran-10
+FC = gfortran-9
 FC = gfortran
 
 # clang compilers
@@ -27,6 +28,7 @@ CC = icc
 # GNU C Compiler
 CC = gcc-11
 CC = gcc-10
+CC = gcc-9
 CC = gcc
 
 # MAC OS X Intel FORTRAN Compiler Options
