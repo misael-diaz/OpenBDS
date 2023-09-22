@@ -27,16 +27,9 @@ optimizations (for these are turned off by default) or use a different compiler.
 The OBDS code has been successfully built with GCC and the Intel Compiler in Linux and
 Mac OS X.
 
-## Running OBDS tests
+## Setup the Execution Environment
 
-Minimal OBDS FORTRAN Test Code can be executed from the src directory via:
-
-```sh
-./test/particles-sphere/fortran-test-particles-sphere.bin
-```
-
-The code might complain if the run directory is missing, to create it issue the following
-commands:
+Create the output directories that the OBDS app expects:
 
 ```sh
 mkdir -p run/bds/data/params
@@ -44,6 +37,26 @@ mkdir -p run/bds/data/params
 
 ```sh
 mkdir -p run/bds/data/positions
+```
+
+```sh
+mkdir -p run/render/frames
+```
+
+## Executing the OBDS app
+
+To execute the OBDS app issue the following command on the terminal:
+
+```sh
+./bds/fortran/OpenBDS.bin
+```
+
+## Running OBDS tests
+
+Minimal OBDS FORTRAN Test Code can be executed from the src directory via:
+
+```sh
+./test/particles-sphere/fortran-test-particles-sphere.bin
 ```
 
 The test just spawns the particles in the system box, tests the computation of the
