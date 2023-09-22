@@ -27,7 +27,7 @@ optimizations (for these are turned off by default) or use a different compiler.
 The OBDS code has been successfully built with GCC and the Intel Compiler in Linux and
 Mac OS X.
 
-## Setup the Execution Environment
+## Set Up the Execution Environment
 
 Create the output directories that the OBDS app expects:
 
