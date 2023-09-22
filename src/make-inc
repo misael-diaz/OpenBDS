@@ -67,27 +67,3 @@ CCOPT = -std=gnu2x -g -Wall -Wextra -O0
 LIBS = -lm -lrt
 # otherwise just link against C's math library
 LIBS = -lm
-
-# headers
-SYSTEM_H = system.h
-SPHERE_H = sphere.h
-UTIL_H = util.h
-FMACROS_H = fmacros.h
-
-# sources
-MAIN_SRC = main.f
-TEST_SRC = test.c
-UTIL_SRC = util.c
-SPHERE_SRC = sphere.c
-
-# objects
-MAIN_OBJ = main.o
-TEST_OBJ = test.o
-UTIL_OBJ = util.o
-SPHERE_OBJ = sphere.o
-
-# binaries
-TEST_BIN = test.bin
-MAIN_BIN = OpenBDS.bin
-
-TESTS = $(MAIN_BIN) $(TEST_BIN)

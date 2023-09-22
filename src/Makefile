@@ -22,25 +22,7 @@ export CCOPT
 export FCOPT
 export LIBS
 
-all: utils system-utils particle-utils tests OBDS
-
-$(MAIN_BIN): $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ)
-	$(FC) $(FCOPT) $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ) -o $(MAIN_BIN)
-
-$(TEST_BIN): $(UTIL_OBJ) $(SPHERE_OBJ) $(TEST_OBJ)
-	$(CC) $(CCOPT) $(UTIL_OBJ) $(SPHERE_OBJ) $(TEST_OBJ) -o $(TEST_BIN) $(LIBS)
-
-$(UTIL_OBJ): $(SYSTEM_H) $(UTIL_H) $(UTIL_SRC)
-	$(CC) $(CCOPT) -c $(UTIL_SRC) -o $(UTIL_OBJ)
-
-$(SPHERE_OBJ): $(SPHERE_H) $(UTIL_OBJ) $(SPHERE_SRC)
-	$(CC) $(CCOPT) -c $(SPHERE_SRC) -o $(SPHERE_OBJ)
-
-$(TEST_OBJ): $(UTIL_OBJ) $(SPHERE_OBJ) $(TEST_SRC)
-	$(CC) $(CCOPT) -c $(TEST_SRC) -o $(TEST_OBJ)
-
-$(MAIN_OBJ): $(FMACROS_H) $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_SRC)
-	$(FC) $(FCOPT) -c $(MAIN_SRC) -o $(MAIN_OBJ)
+all: tests OBDS
 
 utils:
 	@$(MAKE) -C util
@@ -48,17 +30,16 @@ utils:
 system-utils:
 	@$(MAKE) -C system
 
-particle-utils: utils
+particle-utils: utils system-utils
 	@$(MAKE) -C particles
 
-tests: utils
+tests: particle-utils
 	@$(MAKE) -C test
 
-OBDS: utils
+OBDS: particle-utils
 	@$(MAKE) -C bds
 
 clean:
-	/bin/rm -rf *.o *.log *.mod *.bin
 	@$(MAKE) -C util clean
 	@$(MAKE) -C system clean
 	@$(MAKE) -C particles clean
