@@ -22,7 +22,7 @@ export CCOPT
 export FCOPT
 export LIBS
 
-all: utils system-utils particle-utils tests
+all: utils system-utils particle-utils tests OBDS
 
 $(MAIN_BIN): $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ)
 	$(FC) $(FCOPT) $(UTIL_OBJ) $(SPHERE_OBJ) $(MAIN_OBJ) -o $(MAIN_BIN)
@@ -54,9 +54,13 @@ particle-utils: utils
 tests: utils
 	@$(MAKE) -C test
 
+OBDS: utils
+	@$(MAKE) -C bds
+
 clean:
 	/bin/rm -rf *.o *.log *.mod *.bin
 	@$(MAKE) -C util clean
 	@$(MAKE) -C system clean
 	@$(MAKE) -C particles clean
 	@$(MAKE) -C test clean
+	@$(MAKE) -C bds clean
