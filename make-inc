@@ -47,20 +47,20 @@ FCOPT = -g -Wall -Wextra -Waliasing -Wsurprising -Warray-bounds -Warray-temporar
 
 # clang options
 # MAC OS X Intel C Compiler Options
-CCOPT = -g -Wall -O0 -std=c18\
+CCOPT = -g -Wall -O0 -std=c18 -fPIC\
         -I/opt/intel/oneapi/compiler/2021.1.1/mac/compiler/include/icc\
         -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include\
         -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/machine
 # MAC OS X GNU C Compiler Options
-CCOPT = -std=gnu2x -g -Wall -Wextra -O0\
+CCOPT = -std=gnu2x -g -Wall -Wextra -O0 -fPIC\
         -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include\
         -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/machine
 # Linux LLVM C Compiler (clang) Options
-CCOPT = -std=gnu17 -g -Wall -O0
+CCOPT = -std=gnu17 -g -Wall -O0 -fPIC
 # Linux GNU C Compiler Options
-CCOPT = -std=gnu2x -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log
-CCOPT = -std=gnu2x -O2 -mavx2 -ftree-vectorize -fopt-info-optimized=opts.log
-CCOPT = -std=gnu2x -g -Wall -Wextra -O0
+CCOPT = -fPIC -std=gnu2x -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log
+CCOPT = -fPIC -std=gnu2x -O2 -mavx2 -ftree-vectorize -fopt-info-optimized=opts.log
+CCOPT = -fPIC -std=gnu2x -g -Wall -Wextra -O0
 
 # libraries
 # if the glibc version is older than 2.17, you will need these libraries

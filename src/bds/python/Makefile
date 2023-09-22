@@ -14,14 +14,12 @@
 # (at your option) any later version.
 #
 
-all: FORTRAN Python
+include make-inc
 
-FORTRAN:
-	@$(MAKE) -C fortran
+all: $(LOBDS_SO)
 
-Python:
-	@$(MAKE) -C python
+$(LOBDS_SO): $(OBJECTS)
+	$(CC) $(INC) $(CCOPT) -shared $(OBJECTS) -o $(LOBDS_SO)
 
 clean:
-	@$(MAKE) -C fortran clean
-	@$(MAKE) -C python clean
+	/bin/rm -f *.o *.so *.log *.mod *.bin
