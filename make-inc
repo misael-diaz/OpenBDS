@@ -1,0 +1,69 @@
+#
+# OpenBDS						July 19, 2023
+#
+# source: make-inc
+# author: @misael-diaz
+#
+# Synopsis:
+# Defines the include file for building the program with GNU make.
+#
+# Copyright (c) 2023 Misael Diaz-Maldonado
+# This file is released under the GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+
+# FORTRAN compilers
+# Intel FORTRAN Compiler
+FC = ifort
+# GNU FORTRAN Compiler
+FC = gfortran-11
+FC = gfortran-10
+FC = gfortran-9
+FC = gfortran
+
+# clang compilers
+# Intel C Compiler
+CC = icc
+# Linux LLVM C Compiler (clang) Options
+CC = clang-12
+# GNU C Compiler
+CC = gcc-11
+CC = gcc-10
+CC = gcc-9
+CC = gcc
+
+# MAC OS X Intel FORTRAN Compiler Options
+FCOPT = -cpp -free -warn all -g -O0
+# Linux GNU FORTRAN Compiler Options
+FCOPT = -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form\
+	-ffree-line-length-none
+FCOPT = -O2 -mavx -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form\
+	-ffree-line-length-none
+FCOPT = -g -Wall -Wextra -Waliasing -Wsurprising -Warray-bounds -Warray-temporaries\
+	-Wcharacter-truncation -Wconversion-extra -Wimplicit-interface\
+	-Wimplicit-procedure -Wuse-without-only -Wrealloc-lhs -Wrealloc-lhs-all\
+	-fcheck=all -O0 -cpp -ffree-form -ffree-line-length-none
+
+# clang options
+# MAC OS X Intel C Compiler Options
+CCOPT = -g -Wall -O0 -std=c18\
+        -I/opt/intel/oneapi/compiler/2021.1.1/mac/compiler/include/icc\
+        -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include\
+        -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/machine
+# MAC OS X GNU C Compiler Options
+CCOPT = -std=gnu2x -g -Wall -Wextra -O0\
+        -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include\
+        -I/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/usr/include/machine
+# Linux LLVM C Compiler (clang) Options
+CCOPT = -std=gnu17 -g -Wall -O0
+# Linux GNU C Compiler Options
+CCOPT = -std=gnu2x -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log
+CCOPT = -std=gnu2x -O2 -mavx2 -ftree-vectorize -fopt-info-optimized=opts.log
+CCOPT = -std=gnu2x -g -Wall -Wextra -O0
+
+# libraries
+# if the glibc version is older than 2.17, you will need these libraries
+LIBS = -lm -lrt
+# otherwise just link against C's math library
+LIBS = -lm
