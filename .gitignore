@@ -6,6 +6,7 @@
 *.bin
 *.pov
 *.png
+*.so
 *.o
 *backup*
 *TODO*
