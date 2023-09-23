@@ -38,6 +38,10 @@ LOBDS = './libOBDS.so'
 libc = ctypes.cdll.LoadLibrary(GLIBC)
 lOBDS = ctypes.cdll.LoadLibrary(LOBDS)
 
+def c_associated(c_ptr):
+
+  return bool(c_ptr)
+
 class Sphere:
 
   # defines sizes for OBDS types found in headers
@@ -72,14 +76,17 @@ class Sphere:
     libc.malloc.restype = ctypes.c_void_p
     this.c_ptr_workspace = libc.malloc(ctypes.c_size_t(Sphere.SIZE))
 
+    if not c_associated(this.c_ptr_workspace):
+      errmsg = 'C MALLOC ERROR'
+      raise RuntimeError(errmsg)
+
     # initializes the OBDS workspace
     lOBDS.particles_sphere_initializer.restype = ctypes.POINTER(c_sphere_t)
     this.c_ptr_spheres = lOBDS.particles_sphere_initializer(
       ctypes.c_void_p(this.c_ptr_workspace), 0
     )
 
-    associated = bool(this.c_ptr_spheres)
-    if not associated:
+    if not c_associated(this.c_ptr_spheres):
       libc.free(ctypes.c_void_p(this.c_ptr_workspace))
       errmsg = 'C OBDS Sphere Initializer ERROR'
       raise RuntimeError(errmsg)
