@@ -36,7 +36,12 @@ from sphere import c_prop_t
 GLIBC = 'libc.so.6'
 LOBDS = './libOBDS.so'
 libc = ctypes.cdll.LoadLibrary(GLIBC)
-lOBDS = ctypes.cdll.LoadLibrary(LOBDS)
+
+try:
+  lOBDS = ctypes.cdll.LoadLibrary(LOBDS)
+except OSError as e:
+  errmsg = 'compile the source code via: make && make clean'
+  raise Exception(errmsg) from e
 
 def c_associated(c_ptr):
 
