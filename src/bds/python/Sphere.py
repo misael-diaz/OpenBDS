@@ -24,6 +24,7 @@ References:
 [1] https://docs.python.org/3/library/ctypes.html
 """
 
+import os
 import sys
 import ctypes
 from numpy import log2
@@ -32,6 +33,10 @@ from PRNG import c_generator_t
 from sphere import c_OBDS_Sphere_t
 from sphere import c_sphere_t
 from sphere import c_prop_t
+
+if os.name != 'posix':
+  errmsg = 'the Operative System OS must be POSIX compliant to be able run this code'
+  raise OSError(errmsg)
 
 GLIBC = 'libc.so.6'
 LOBDS = './libOBDS.so'
