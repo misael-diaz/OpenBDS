@@ -27,6 +27,7 @@ References:
 import os
 import sys
 import ctypes
+import platform
 from numpy import log2
 from PRNG import c_random_t
 from PRNG import c_generator_t
@@ -38,10 +39,17 @@ if os.name != 'posix':
   errmsg = 'the Operative System OS must be POSIX compliant to be able run this code'
   raise OSError(errmsg)
 
-GLIBC = 'libc.so.6'
-LOBDS = './libOBDS.so'
-libc = ctypes.cdll.LoadLibrary(GLIBC)
+if platform.system() == 'Linux':
+  GLIBC = 'libc.so.6'
+  libc = ctypes.cdll.LoadLibrary(GLIBC)
+elif platform.system() == 'Darwin':
+  LIBC = 'libc.dylib'
+  libc = ctypes.cdll.LoadLibrary(LIBC)
+else:
+  LIBC = 'libc.so.6'
+  libc = ctypes.cdll.LoadLibrary(LIBC)
 
+LOBDS = './libOBDS.so'
 try:
   lOBDS = ctypes.cdll.LoadLibrary(LOBDS)
 except OSError as e:
