@@ -30,9 +30,9 @@ import ctypes
 from numpy import log2
 from PRNG import c_random_t
 from PRNG import c_generator_t
-from sphere import c_OBDS_Sphere_t
-from sphere import c_sphere_t
-from sphere import c_prop_t
+from OBDS_sphere import c_OBDS_Sphere_t
+from OBDS_sphere import c_sphere_t
+from OBDS_sphere import c_prop_t
 
 if os.name != 'posix':
   errmsg = 'the Operative System OS must be POSIX compliant to be able run this code'
