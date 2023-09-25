@@ -90,6 +90,10 @@ class Sphere:
     assert(ctypes.sizeof(c_sphere_t) == Sphere.size_c_sphere_t)
     assert(ctypes.sizeof(c_prop_t) == Sphere.size_c_prop_t)
 
+    os.makedirs('run/bds/data/params', mode=0o777, exist_ok=True)
+    os.makedirs('run/bds/data/positions', mode=0o777, exist_ok=True)
+    os.makedirs('run/render/frames', mode=0o777, exist_ok=True)
+
     # allocates the workspace
     libc.malloc.restype = ctypes.c_void_p
     this.c_ptr_workspace = libc.malloc(ctypes.c_size_t(Sphere.SIZE))
