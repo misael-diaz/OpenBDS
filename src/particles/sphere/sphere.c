@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <string.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <endian.h>
 #include <errno.h>
@@ -1196,7 +1197,7 @@ static int logger (const sphere_t* spheres, size_t const step)
 			"%+.16e %+.16e %+.16e "
 			"%+.16e %+.16e %+.16e "
 			"%+.16e %+.16e %+.16e "
-			"%lu\n";
+			"%" PRIu64 "\n";
     fprintf(file, fmt,   x[i],   y[i],   z[i],
 		       r_x[i], r_y[i], r_z[i],
 		       a_x[i], a_y[i], a_z[i],
