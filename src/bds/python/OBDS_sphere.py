@@ -3,7 +3,7 @@
 """
 OpenBDS                                             September 22, 2023
 
-source: sphere.py
+source: OBDS_sphere.py
 author: @misael-diaz
 
 Synopsis:

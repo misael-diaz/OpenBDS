@@ -14,12 +14,12 @@
 # (at your option) any later version.
 #
 
-all: FORTRAN Python
+all: OBDS-FORTRAN OBDS-Python
 
-FORTRAN:
+OBDS-FORTRAN:
 	@$(MAKE) -C fortran
 
-Python:
+OBDS-Python:
 	@$(MAKE) -C python
 
 clean:

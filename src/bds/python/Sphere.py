@@ -24,19 +24,37 @@ References:
 [1] https://docs.python.org/3/library/ctypes.html
 """
 
+import os
 import sys
 import ctypes
+import platform
 from numpy import log2
 from PRNG import c_random_t
 from PRNG import c_generator_t
-from sphere import c_OBDS_Sphere_t
-from sphere import c_sphere_t
-from sphere import c_prop_t
+from OBDS_sphere import c_OBDS_Sphere_t
+from OBDS_sphere import c_sphere_t
+from OBDS_sphere import c_prop_t
 
-GLIBC = 'libc.so.6'
+if os.name != 'posix':
+  errmsg = 'the Operative System OS must be POSIX compliant to be able run this code'
+  raise OSError(errmsg)
+
+if platform.system() == 'Linux':
+  GLIBC = 'libc.so.6'
+  libc = ctypes.cdll.LoadLibrary(GLIBC)
+elif platform.system() == 'Darwin':
+  LIBC = 'libc.dylib'
+  libc = ctypes.cdll.LoadLibrary(LIBC)
+else:
+  LIBC = 'libc.so.6'
+  libc = ctypes.cdll.LoadLibrary(LIBC)
+
 LOBDS = './libOBDS.so'
-libc = ctypes.cdll.LoadLibrary(GLIBC)
-lOBDS = ctypes.cdll.LoadLibrary(LOBDS)
+try:
+  lOBDS = ctypes.cdll.LoadLibrary(LOBDS)
+except OSError as e:
+  errmsg = 'compile the source code via: make && make clean'
+  raise Exception(errmsg) from e
 
 def c_associated(c_ptr):
 
@@ -71,6 +89,10 @@ class Sphere:
     assert(ctypes.sizeof(c_OBDS_Sphere_t) == Sphere.size_c_OBDS_Sphere_t)
     assert(ctypes.sizeof(c_sphere_t) == Sphere.size_c_sphere_t)
     assert(ctypes.sizeof(c_prop_t) == Sphere.size_c_prop_t)
+
+    os.makedirs('run/bds/data/params', mode=0o777, exist_ok=True)
+    os.makedirs('run/bds/data/positions', mode=0o777, exist_ok=True)
+    os.makedirs('run/render/frames', mode=0o777, exist_ok=True)
 
     # allocates the workspace
     libc.malloc.restype = ctypes.c_void_p
