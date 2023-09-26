@@ -6,10 +6,11 @@
 #include <errno.h>
 
 #include "bds/types.h"
+#include "bds/params.h"
 #include "system/params.h"
 
-#define SUCCESS ( (int) 0x00000000 )
-#define FAILURE ( (int) 0xffffffff )
+#define SUCCESS ( (int) ( __OBDS_SUCCESS__ ) )
+#define FAILURE ( (int) ( __OBDS_FAILURE__ ) )
 #define NUMEL ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
 
 // logs the particle properties (position, orientation, id, etc.) to a plain text file

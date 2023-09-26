@@ -18,10 +18,11 @@ INC = -I../../../inc
 
 # headers
 BDS_TYPES_H = ../../../inc/bds/types.h
+BDS_PARAMS_H = ../../../inc/bds/params.h
 SYSTEM_PARAMS_H = ../../../inc/system/params.h
 LOGGER_H = ../../../inc/io/logger.h
 
-HEADERS = $(BDS_TYPES_H) $(SYSTEM_PARAMS_H) $(LOGGER_H)
+HEADERS = $(BDS_TYPES_H) $(BDS_PARAMS_H) $(SYSTEM_PARAMS_H) $(LOGGER_H)
 
 # sources
 LOGGER_C = logger.c

@@ -12,11 +12,12 @@
 #include <time.h>	// provides system time(), see man time(2)
 #include <math.h>	// for generating normally distributed pseudo-random numbers
 
+#include "bds/params.h"
 #include "util/random.h"
 
 #define STDC17 201710L
-#define FAILURE ( (int) 0xffffffff )
-#define SUCCESS ( (int) 0x00000000 )
+#define FAILURE ( (int) ( __OBDS_FAILURE__ ) )
+#define SUCCESS ( (int) ( __OBDS_SUCCESS__ ) )
 #define MSBMASK ( (int64_t) 0x8000000000000000 )
 #define PERIOD ( (uint64_t) 0xffffffffffffffff )
 #define SCALING ( 1.0 / ( (double) MSBMASK ) )
