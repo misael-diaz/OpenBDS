@@ -3,10 +3,10 @@
 
 #include "bds/types.h"
 
-void copy (const prop_t* __restrict__ src, prop_t* __restrict__ dst);
-void zeros (prop_t* x);
-void ones (prop_t* x);
-void iota (prop_t* x);
+void util_array_copy (const prop_t* __restrict__ src, prop_t* __restrict__ dst);
+void util_array_zeros (prop_t* x);
+void util_array_ones (prop_t* x);
+void util_array_iota (prop_t* x);
 
 #endif
 

@@ -4,7 +4,7 @@
 
 #define NUMEL ( (size_t) __OBDS_NUM_PARTICLES__ )
 
-void copy (const prop_t* __restrict__ source, prop_t* __restrict__ dest)
+void util_array_copy (const prop_t* __restrict__ source, prop_t* __restrict__ dest)
 {
   double* dst = &dest[0].data;
   const double* src = &source[0].data;
@@ -14,7 +14,7 @@ void copy (const prop_t* __restrict__ source, prop_t* __restrict__ dest)
   }
 }
 
-void zeros (prop_t* x)
+void util_array_zeros (prop_t* x)
 {
   double* data = &x[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
@@ -23,7 +23,7 @@ void zeros (prop_t* x)
   }
 }
 
-void ones (prop_t* x)
+void util_array_ones (prop_t* x)
 {
   double* data = &x[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
@@ -32,7 +32,7 @@ void ones (prop_t* x)
   }
 }
 
-void iota (prop_t* ID)
+void util_array_iota (prop_t* ID)
 {
   uint64_t* id = &ID[0].bin;
   for (size_t i = 0; i != NUMEL; ++i)
