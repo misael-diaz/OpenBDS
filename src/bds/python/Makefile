@@ -22,4 +22,4 @@ $(LOBDS_SO): $(OBJECTS)
 	$(CC) $(INC) $(CCOPT) -shared $(OBJECTS) -o $(LOBDS_SO)
 
 clean:
-	/bin/rm -f *.o *.so *.log *.mod *.bin
+	/bin/rm -r -f *.o *.so *.log *.mod *.bin *pycache*
