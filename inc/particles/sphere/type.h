@@ -13,55 +13,8 @@ enum SPHLOG
 
 typedef enum SPHLOG SPHLOG;
 
-// defines the underlying properties of the sphere type:
-struct __OBDS_SPHERE_TYPE__
-{
-  // position vector subject to periodic boundaries:
-  prop_t* x;
-  prop_t* y;
-  prop_t* z;
-  // absolute position vector:
-  prop_t* r_x;
-  prop_t* r_y;
-  prop_t* r_z;
-  // displacement vector:
-  prop_t* _dx;
-  prop_t* _dy;
-  prop_t* _dz;
-  // angular position vector:
-  prop_t* a_x;
-  prop_t* a_y;
-  prop_t* a_z;
-  // director (or orientation vector):
-  prop_t* d_x;
-  prop_t* d_y;
-  prop_t* d_z;
-  // force:
-  prop_t* f_x;
-  prop_t* f_y;
-  prop_t* f_z;
-  // torque:
-  prop_t* t_x;
-  prop_t* t_y;
-  prop_t* t_z;
-  // placeholders:
-  prop_t* tmp;
-  prop_t* temp;
-  prop_t* bitmask;
-  // neighbor-list:
-  prop_t* list;
-  // identifier:
-  prop_t* id;
-  // padding:
-  uint64_t: 64;
-  uint64_t: 64;
-  uint64_t: 64;
-  uint64_t: 64;
-  uint64_t: 64;
-  uint64_t: 64;
-};
-
-typedef struct __OBDS_SPHERE_TYPE__ OBDS_Sphere_t;
+typedef struct __OBDS_PARTICLE_TYPE__ __OBDS_SPHERE_TYPE__ ;
+typedef __OBDS_SPHERE_TYPE__ OBDS_Sphere_t;
 
 struct sphere
 {

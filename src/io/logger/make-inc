@@ -13,13 +13,18 @@
 # (at your option) any later version.
 #
 
-# objects
-LOGGER_O = ../../io/logger/logger.o
-SYSBOX_O = ../../system/box/box.o
-ARRAYS_O = ../../util/array/arrays.o
-RANDOM_O = ../../util/random/random.o
-SPHERE_O = ../../particles/sphere/sphere.o
-OBJECTS = $(LOGGER_O) $(SYSBOX_O) $(ARRAYS_O) $(RANDOM_O) $(SPHERE_O)
+# include
+INC = -I../../../inc
 
-# shared objects
-LOBDS_SO = libOBDS.so
+# headers
+BDS_TYPES_H = ../../../inc/bds/types.h
+SYSTEM_PARAMS_H = ../../../inc/system/params.h
+LOGGER_H = ../../../inc/io/logger.h
+
+HEADERS = $(BDS_TYPES_H) $(SYSTEM_PARAMS_H) $(LOGGER_H)
+
+# sources
+LOGGER_C = logger.c
+
+# objects
+LOGGER_O = logger.o

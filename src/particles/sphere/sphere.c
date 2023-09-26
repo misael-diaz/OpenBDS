@@ -1,14 +1,12 @@
 #include <stdio.h>
-#include <fcntl.h>
 #include <assert.h>
 #include <string.h>
-#include <inttypes.h>
-#include <stdlib.h>
 #include <endian.h>
 #include <errno.h>
 #include <float.h>
 #include <math.h>
 
+#include "io/logger.h"
 #include "system/box.h"
 #include "particles/sphere/params.h"
 #include "particles/sphere/type.h"
@@ -1153,69 +1151,9 @@ static int info ()
 static int logger (const sphere_t* spheres, size_t const step)
 {
   char log[80];
-  char tmp[80];
-  sprintf(log, "run/bds/data/positions/spheres-%zu.txt", step);
-  sprintf(tmp, "run/bds/data/positions/spheres-%zu.tmp-XXXXXX", step);
-  int fd = mkstemp(tmp);
-  if (fd == FAILURE)
-  {
-    fprintf(stderr, "logger(): IO ERROR with file %s: %s\n", tmp, strerror(errno));
-    return FAILURE;
-  }
-
-  FILE* file = fdopen(fd, "w+");
-  if (file == NULL)
-  {
-    fprintf(stderr, "logger(): IO ERROR with file %s: %s\n", tmp, strerror(errno));
-    return FAILURE;
-  }
-
-  const double* x = &(spheres -> props -> x -> data);
-  const double* y = &(spheres -> props -> y -> data);
-  const double* z = &(spheres -> props -> z -> data);
-  const double* r_x = &(spheres -> props -> r_x -> data);
-  const double* r_y = &(spheres -> props -> r_y -> data);
-  const double* r_z = &(spheres -> props -> r_z -> data);
-  const double* a_x = &(spheres -> props -> a_x -> data);
-  const double* a_y = &(spheres -> props -> a_y -> data);
-  const double* a_z = &(spheres -> props -> a_z -> data);
-  const double* d_x = &(spheres -> props -> d_x -> data);
-  const double* d_y = &(spheres -> props -> d_y -> data);
-  const double* d_z = &(spheres -> props -> d_z -> data);
-  const double* f_x = &(spheres -> props -> f_x -> data);
-  const double* f_y = &(spheres -> props -> f_y -> data);
-  const double* f_z = &(spheres -> props -> f_z -> data);
-  const double* t_x = &(spheres -> props -> t_x -> data);
-  const double* t_y = &(spheres -> props -> t_y -> data);
-  const double* t_z = &(spheres -> props -> t_z -> data);
-  const uint64_t* pid = &(spheres -> props -> id -> bin);
-  for (size_t i = 0; i != NUMEL; ++i)
-  {
-    const char fmt [] = "%+.16e %+.16e %+.16e "
-			"%+.16e %+.16e %+.16e "
-			"%+.16e %+.16e %+.16e "
-			"%+.16e %+.16e %+.16e "
-			"%+.16e %+.16e %+.16e "
-			"%+.16e %+.16e %+.16e "
-			"%" PRIu64 "\n";
-    fprintf(file, fmt,   x[i],   y[i],   z[i],
-		       r_x[i], r_y[i], r_z[i],
-		       a_x[i], a_y[i], a_z[i],
-		       d_x[i], d_y[i], d_z[i],
-		       f_x[i], f_y[i], f_z[i],
-		       t_x[i], t_y[i], t_z[i],
-		       pid[i]);
-  }
-
-  fclose(file);
-
-  if (rename(tmp, log) == FAILURE)
-  {
-    fprintf(stderr, "logger(): ERROR: %s\n", strerror(errno));
-    return FAILURE;
-  }
-
-  return SUCCESS;
+  sprintf(log, "run/bds/data/positions/spheres-%zu", step);
+  const particle_t* particles = spheres -> props;
+  return io_logger_log(particles, log);
 }
 
 

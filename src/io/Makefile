@@ -14,30 +14,10 @@
 # (at your option) any later version.
 #
 
-all: tests OBDS
+all: logging
 
-utils:
-	@$(MAKE) -C util
-
-input-output:
-	@$(MAKE) -C io
-
-system-utils:
-	@$(MAKE) -C system
-
-particle-utils: utils input-output system-utils
-	@$(MAKE) -C particles
-
-tests: particle-utils
-	@$(MAKE) -C test
-
-OBDS: particle-utils
-	@$(MAKE) -C bds
+logging:
+	@$(MAKE) -C logger
 
 clean:
-	@$(MAKE) -C io clean
-	@$(MAKE) -C util clean
-	@$(MAKE) -C system clean
-	@$(MAKE) -C particles clean
-	@$(MAKE) -C test clean
-	@$(MAKE) -C bds clean
+	@$(MAKE) -C logger clean
