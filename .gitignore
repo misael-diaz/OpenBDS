@@ -9,6 +9,7 @@
 *.so
 *.o
 *backup*
+*pycache*
 *TODO*
 # old
 old/TODO.txt
