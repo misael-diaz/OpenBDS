@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include "io/logger.h"
+#include "bds/params.h"
 #include "system/box.h"
 #include "particles/sphere/params.h"
 #include "particles/sphere/type.h"
@@ -14,8 +15,8 @@
 #include "util/type.h"
 
 #define STDC17 201710L
-#define SUCCESS ( (int) 0x00000000 )
-#define FAILURE ( (int) 0xffffffff )
+#define SUCCESS ( (int) ( __OBDS_SUCCESS__ ) )
+#define FAILURE ( (int) ( __OBDS_FAILURE__ ) )
 #define LIMIT ( (double) ( __OBDS_LIMIT__ ) )
 #define LENGTH ( (double) ( __OBDS_LENGTH__ ) )
 #define SIZED ( (double) ( __OBDS_NUM_SPHERES__ ) )
