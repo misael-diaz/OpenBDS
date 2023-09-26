@@ -38,7 +38,25 @@
 #define EXP(x) ( ( ( (x) >> 52) & 0x7ff ) )
 #define CLAMP (0.0625 / TSTEP)
 
-extern util_t const util;
+static void copy (const prop_t* __restrict__ src, prop_t* __restrict__ dst)
+{
+  util_array_copy(src, dst);
+}
+
+static void zeros (prop_t* x)
+{
+  util_array_zeros(x);
+}
+
+static void ones (prop_t* x)
+{
+  util_array_ones(x);
+}
+
+static void iota (prop_t* id)
+{
+  util_array_iota(id);
+}
 
 // static uint64_t nexp (uint64_t const x)
 //
