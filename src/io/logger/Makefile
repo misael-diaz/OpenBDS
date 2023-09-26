@@ -14,30 +14,12 @@
 # (at your option) any later version.
 #
 
-all: tests OBDS
+include make-inc
 
-utils:
-	@$(MAKE) -C util
+all: $(LOGGER_O)
 
-input-output:
-	@$(MAKE) -C io
-
-system-utils:
-	@$(MAKE) -C system
-
-particle-utils: utils input-output system-utils
-	@$(MAKE) -C particles
-
-tests: particle-utils
-	@$(MAKE) -C test
-
-OBDS: particle-utils
-	@$(MAKE) -C bds
+$(LOGGER_O): $(HEADERS) $(LOGGER_C)
+	$(CC) $(INC) $(CCOPT) -c $(LOGGER_C) -o $(LOGGER_O)
 
 clean:
-	@$(MAKE) -C io clean
-	@$(MAKE) -C util clean
-	@$(MAKE) -C system clean
-	@$(MAKE) -C particles clean
-	@$(MAKE) -C test clean
-	@$(MAKE) -C bds clean
+	/bin/rm -f *.log *.o
