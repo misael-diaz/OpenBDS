@@ -17,11 +17,12 @@
 INC = -I../../../inc
 
 # headers
+BDSPRM_H = ../../../inc/bds/params.h
 RNDERR_H = ../../../inc/util/random/err.h
 RANDTP_H = ../../../inc/util/random/type.h
 RANDOM_H = ../../../inc/util/random.h
 
-HEADERS = $(RNDERR_H) $(RANDTP_H) $(RANDOM_H)
+HEADERS = $(BDSPRM_H) $(RNDERR_H) $(RANDTP_H) $(RANDOM_H)
 
 # sources
 RANDOM_C = random.c
