@@ -11,6 +11,7 @@
 #include "system/box.h"
 #include "particles/sphere/params.h"
 #include "particles/sphere/type.h"
+#include "util/particle.h"
 #include "util/arrays.h"
 #include "util/type.h"
 
@@ -1049,6 +1050,7 @@ static void grid (prop_t* __restrict__ xprop,
 }
 
 
+/*
 static void pbcs (prop_t* __restrict__ x,
 		  prop_t* __restrict__ y,
 		  prop_t* __restrict__ z,
@@ -1060,6 +1062,7 @@ static void pbcs (prop_t* __restrict__ x,
   pbc(y, tmp, temp);
   pbc(z, tmp, mask);
 }
+*/
 
 
 // sums `src' and `dst' vectors (elementwise), stores the result in `dst'
@@ -1139,7 +1142,9 @@ static int updater (sphere_t* spheres)
 		       _dx, _dy, _dz, t,
 		       t_x, t_y, t_z);
 
-  pbcs(x, y, z, tmp, temp, bitmask);
+//pbcs(x, y, z, tmp, temp, bitmask);
+  particle_t* particles = spheres -> props;
+  util_particle_pbcs(particles);
   return SUCCESS;
 }
 
