@@ -1,0 +1,41 @@
+#
+# OpenBDS						July 19, 2023
+#
+# source: make-inc
+# author: @misael-diaz
+#
+# Synopsis:
+# Defines the include file for building the program with GNU make.
+#
+# Copyright (c) 2023 Misael Diaz-Maldonado
+# This file is released under the GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+
+# include
+INC = -I../../../inc
+
+# headers
+FCONFG_H = ../../../inc/fconfig.h
+CONFIG_H = ../../../inc/config.h
+
+BDS_TYPES_H = ../../../inc/bds/types.h
+
+SYSBOX_PARAMS_H = ../../../inc/system/box/params.h
+SYSBOX_UTILS_H = ../../../inc/system/box/utils.h
+SYSBOX_H = ../../../inc/system/box.h
+
+SYSTEM_PARAMS_H = ../../../inc/system/params.h
+SYSTEM_H = ../../../inc/system.h
+
+UTIL_PARTICLE_H = ../../../inc/util/particle.h
+
+HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(SYSBOX_PARAMS_H) $(SYSBOX_UTILS_H)\
+	  $(SYSBOX_H) $(SYSTEM_PARAMS_H) $(SYSTEM_H) $(UTIL_PARTICLE_H)
+
+# sources
+PARTICLE_C = particle.c
+
+# objects
+PARTICLE_O = particle.o

@@ -14,19 +14,12 @@
 # (at your option) any later version.
 #
 
-all: arrays PRNGs particles types
+include make-inc
 
-arrays:
-	@$(MAKE) -C array
-PRNGs:
-	@$(MAKE) -C random
-particles:
-	@$(MAKE) -C particle
-types: PRNGs
-	@$(MAKE) -C type
+all: $(PARTICLE_O)
+
+$(PARTICLE_O): $(HEADERS) $(PARTICLE_C)
+	$(CC) $(INC) $(CCOPT) -c $(PARTICLE_C) -o $(PARTICLE_O)
 
 clean:
-	@$(MAKE) -C array clean
-	@$(MAKE) -C random clean
-	@$(MAKE) -C particle clean
-	@$(MAKE) -C type clean
+	/bin/rm -f *.log *.o
