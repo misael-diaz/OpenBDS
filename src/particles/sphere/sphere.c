@@ -1050,21 +1050,6 @@ static void grid (prop_t* __restrict__ xprop,
 }
 
 
-/*
-static void pbcs (prop_t* __restrict__ x,
-		  prop_t* __restrict__ y,
-		  prop_t* __restrict__ z,
-		  prop_t* __restrict__ tmp,
-		  prop_t* __restrict__ temp,
-		  prop_t* __restrict__ mask)
-{
-  pbc(x, tmp, temp);
-  pbc(y, tmp, temp);
-  pbc(z, tmp, mask);
-}
-*/
-
-
 // sums `src' and `dst' vectors (elementwise), stores the result in `dst'
 static void vsum (prop_t* __restrict__ dest, const prop_t* __restrict__ source)
 {
@@ -1142,7 +1127,6 @@ static int updater (sphere_t* spheres)
 		       _dx, _dy, _dz, t,
 		       t_x, t_y, t_z);
 
-//pbcs(x, y, z, tmp, temp, bitmask);
   particle_t* particles = spheres -> props;
   util_particle_pbcs(particles);
   return SUCCESS;
