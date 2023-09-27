@@ -384,6 +384,26 @@ static void pairs (size_t const i,
 }
 
 
+// defines the callback required by the method that computes the interparticle forces
+static void callback (particle_t* particles,
+		      size_t const i,
+		      double const offset_x,
+		      double const offset_y,
+		      double const offset_z)
+{
+  const prop_t* x = particles -> x;
+  const prop_t* y = particles -> y;
+  const prop_t* z = particles -> z;
+  prop_t* f_x = particles -> f_x;
+  prop_t* f_y = particles -> f_y;
+  prop_t* f_z = particles -> f_z;
+  prop_t* tmp = particles -> tmp;
+  prop_t* temp = particles -> temp;
+  prop_t* bitmask = particles -> bitmask;
+  pairs(i, offset_x, offset_y, offset_z, x, y, z, f_x, f_y, f_z, tmp, temp, bitmask);
+}
+
+
 // void resultants(x, y, z, F_x, F_y, F_z, tmp, temp, mask)
 //
 // Synopsis:
@@ -414,6 +434,7 @@ static void pairs (size_t const i,
 // mask		array of size NUMEL used for storing intermediate results
 
 
+/*
 static void resultants (const prop_t* __restrict__ x,
 		        const prop_t* __restrict__ y,
 		        const prop_t* __restrict__ z,
@@ -657,6 +678,7 @@ static void resultants (const prop_t* __restrict__ x,
     pairs(i, offset_x, offset_y, offset_z, x, y, z, F_x, F_y, F_z, tmp, temp, mask);
   }
 }
+*/
 
 
 // clamps forces larger than CLAMP to CLAMP; in other words, this method makes sure that
@@ -1090,7 +1112,14 @@ static int updater (sphere_t* spheres)
   prop_t* list = spheres -> props -> list;
   random_t* random = spheres -> prng;
   zeroes(f_x, f_y, f_z);
-  resultants(x, y, z, f_x, f_y, f_z, tmp, temp, bitmask);
+  void (*cb) (particle_t* particles,
+	      size_t const i,
+	      double const offset_x,
+	      double const offset_y,
+	      double const offset_z) = callback;
+  particle_t* particles = spheres -> props;
+  util_particle_brute_force(particles, cb);
+//resultants(x, y, z, f_x, f_y, f_z, tmp, temp, bitmask);
   clamps(f_x, f_y, f_z, tmp, temp, bitmask);
   shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   shifts(x, y, z, f_x, f_y, f_z);
@@ -1127,7 +1156,6 @@ static int updater (sphere_t* spheres)
 		       _dx, _dy, _dz, t,
 		       t_x, t_y, t_z);
 
-  particle_t* particles = spheres -> props;
   util_particle_pbcs(particles);
   return SUCCESS;
 }
