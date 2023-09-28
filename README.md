@@ -12,8 +12,12 @@ This is a work in progress, contributions are welcomed.
 Instructions to compile the source code with GNU Make. Some degree of familiarity with the
 command line is assumed.
 
-Compilation requirements: GNU Make, GCC 10 (or higher), and a POSIX compliant OS
-(Linux or Mac OS X).
+Compilation requirements: GNU [Make](https://www.gnu.org/software/make/),
+[GCC](https://gcc.gnu.org/) 10 (or higher), and a
+[POSIX](https://www.opengroup.org/austin/papers/backgrounder.html) compliant Operative
+System OS. The code has been tested in GNU/Linux and Mac OS X. It might be possible to
+compile the source in Windows under [Cygwin](https://www.cygwin.com/) but have yet to
+test it myself.
 
 You can compile the OBDS code by issuing the following commands on the terminal (at the
 top level of the repository):
