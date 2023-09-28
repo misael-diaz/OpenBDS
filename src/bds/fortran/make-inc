@@ -25,7 +25,7 @@ SYSBOX_O = ../../system/box/box.o
 ARRAYS_O = ../../util/array/arrays.o
 UPRTCL_O = ../../util/particle/particle.o
 RANDOM_O = ../../util/random/random.o
-SPHERE_O = ../../particles/sphere/sphere.o
+SPHERE_O = ../../particle/sphere/sphere.o
 DEPS_O = $(LOGGER_O) $(SYSBOX_O) $(ARRAYS_O) $(RANDOM_O) $(UPRTCL_O) $(SPHERE_O)
 OBDS_O = OBDS.o
 

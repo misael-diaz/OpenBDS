@@ -23,9 +23,9 @@ util-system-box:
 	@$(MAKE) -C system-box
 
 spheres:
-	@$(MAKE) -C particles-sphere
+	@$(MAKE) -C particle-sphere
 
 clean:
 	@$(MAKE) -C random clean
 	@$(MAKE) -C system-box clean
-	@$(MAKE) -C particles-sphere clean
+	@$(MAKE) -C particle-sphere clean

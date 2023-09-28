@@ -1,21 +1,20 @@
-#ifndef GUARD_OPENBDS_PARTICLES_SPHERE_UTILS_H
-#define GUARD_OPENBDS_PARTICLES_SPHERE_UTILS_H
+#ifndef GUARD_OPENBDS_PARTICLE_SPHERE_H
+#define GUARD_OPENBDS_PARTICLE_SPHERE_H
 
-#include "particles/sphere/type.h"
-
-sphere_t* particles_sphere_initializer(void*, SPHLOG);
+#include "particle/sphere/params.h"
+#include "particle/sphere/type.h"
 
 #endif
 
 /*
 
-OpenBDS							September 07, 2023
+OpenBDS							September 05, 2023
 
-source: particles/sphere/utils.h
+source: particle/sphere.h
 author: @misael-diaz
 
 Synopsis:
-Defines an interface for the sphere utilities.
+Bundles the sphere type, properties, and parameters.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

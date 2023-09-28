@@ -1,5 +1,5 @@
-#ifndef GUARD_OPENBDS_PARTICLES_SPHERE_PARAMS_H
-#define GUARD_OPENBDS_PARTICLES_SPHERE_PARAMS_H
+#ifndef GUARD_OPENBDS_PARTICLE_SPHERE_PARAMS_H
+#define GUARD_OPENBDS_PARTICLE_SPHERE_PARAMS_H
 
 #include "system/params.h"
 
@@ -22,7 +22,7 @@
 
 OpenBDS							September 05, 2023
 
-source: particles/sphere/params.h
+source: particle/sphere/params.h
 author: @misael-diaz
 
 Synopsis:
