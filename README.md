@@ -56,6 +56,20 @@ To execute the OBDS app issue the following command on the terminal:
 ./src/bds/fortran/OpenBDS.bin
 ```
 
+If you prefer to execute the OBDS code from Python change your working directory via
+
+```sh
+cd src/bds/python
+```
+
+and then execute the code with the Python 3 interpreter:
+
+```sh
+python3 OpenBDS.py
+```
+
+contrary to its FORTRAN counterpart this one prepares the execution environment for you.
+
 ## Running OBDS tests
 
 Minimal OBDS FORTRAN Test Code can be executed from the top level of the repository:
