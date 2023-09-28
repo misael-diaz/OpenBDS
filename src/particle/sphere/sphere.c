@@ -961,6 +961,7 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 #if defined(FLOAT_WORD_ORDER)
   static_assert(FLOAT_WORD_ORDER == LITTLE_ENDIAN);
 #endif
+  static_assert( __OBDS_SPH__ );
   static_assert( __OBDS_LOG_NUM_SPHERES__ >= 8LU );
   static_assert(sizeof(NUMEL) == 8);
   static_assert(sizeof(RADIUS) == 8);
@@ -985,6 +986,7 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 #if defined(FLOAT_WORD_ORDER)
   _Static_assert(FLOAT_WORD_ORDER == LITTLE_ENDIAN, "expects little-endian byte-order");
 #endif
+  _Static_assert( __OBDS_SPH__, "configuration error, non-isotropic resistance" );
   _Static_assert( __OBDS_LOG_NUM_SPHERES__ >= 8LU, "expects log2(NUM_SPHERES) >= 8" );
   _Static_assert(sizeof(NUMEL) == 8, "expects 8 bytes");
   _Static_assert(sizeof(RADIUS) == 8, "expects 8 bytes");
