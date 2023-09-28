@@ -1,5 +1,5 @@
-#ifndef GUARD_OPENBDS_PARTICLES_SPHERE_TYPE_H
-#define GUARD_OPENBDS_PARTICLES_SPHERE_TYPE_H
+#ifndef GUARD_OPENBDS_PARTICLE_SPHERE_TYPE_H
+#define GUARD_OPENBDS_PARTICLE_SPHERE_TYPE_H
 
 #include "bds/types.h"
 #include "util/random/type.h"
@@ -32,7 +32,7 @@ typedef struct sphere sphere_t;
 
 OpenBDS							September 05, 2023
 
-source: particles/sphere/type.h
+source: particle/sphere/type.h
 author: @misael-diaz
 
 Synopsis:

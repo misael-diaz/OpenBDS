@@ -6,8 +6,8 @@
 #include <stdio.h>
 
 #include "system/box/params.h"
-#include "particles/sphere/params.h"
-#include "particles/sphere/utils.h"
+#include "particle/sphere/params.h"
+#include "particle/sphere/utils.h"
 
 #define STDC17 201710L
 #define IOERR ( (int) 0xffffffff )
