@@ -3,8 +3,16 @@
 
 #include "system/params.h"
 
-#define __OBDS_SPH_LIN_BROWNIAN_MOBILITY__ (1.4142135623730951 * __OBDS_SQRT_TIME_STEP__)
-#define __OBDS_SPH_ANG_BROWNIAN_MOBILITY__ (1.2247448713915890 * __OBDS_SQRT_TIME_STEP__)
+#define __OBDS_SPH_SQRT_OF_TWO__ 1.4142135623730951
+#define __OBDS_SPH_SQRT_OF_THREE_HALVES__ 1.2247448713915890
+#define __OBDS_SPH_LIN_BROWNIAN_MOBILITY__ (\
+	( (double) ( __OBDS_SPH_SQRT_OF_TWO__ ) ) *\
+	( (double) ( __OBDS_SQRT_TIME_STEP__ ) )\
+	)
+#define __OBDS_SPH_ANG_BROWNIAN_MOBILITY__ (\
+	( (double) ( __OBDS_SPH_SQRT_OF_THREE_HALVES__ ) ) *\
+	( (double) ( __OBDS_SQRT_TIME_STEP__ ) )\
+	)
 #define __OBDS_SPH_LIN_MOBILITY__  ( (double) ( __OBDS_TIME_STEP__ ) )
 
 #define __OBDS_SPH_RADIUS__ ( (double) 1.0 )
