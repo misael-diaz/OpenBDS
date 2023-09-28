@@ -4,6 +4,12 @@
 #include "bds/types.h"
 
 void util_particle_pbcs(particle_t*);
+void util_particle_brute_force(particle_t* particles,
+			       void (*callback)(particle_t* particles,
+						size_t const id,
+						double const offset_x,
+						double const offset_y,
+						double const offset_z));
 
 #endif
 
