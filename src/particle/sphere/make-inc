@@ -40,10 +40,10 @@ RANDOM_H = ../../../inc/util/random.h
 UTILTP_H = ../../../inc/util/type.h
 UTIL_H = ../../../inc/util.h
 
-SPHERE_TYPE_H = ../../../inc/particles/sphere/type.h
-SPHERE_PARAMS_H = ../../../inc/particles/sphere/params.h
-SPHERE_UTILS_H = ../../../inc/particles/sphere/utils.h
-SPHERE_H = ../../../inc/particles/sphere.h
+SPHERE_TYPE_H = ../../../inc/particle/sphere/type.h
+SPHERE_PARAMS_H = ../../../inc/particle/sphere/params.h
+SPHERE_UTILS_H = ../../../inc/particle/sphere/utils.h
+SPHERE_H = ../../../inc/particle/sphere.h
 
 HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(BDS_PARAMS_H) $(SYSBOX_PARAMS_H)\
 	  $(SYSBOX_UTILS_H) $(SYSBOX_H) $(SYSTEM_PARAMS_H) $(SYSTEM_H) $(ARRAYS_H)\

@@ -25,19 +25,19 @@ input-output:
 system-utils:
 	@$(MAKE) -C system
 
-particle-utils: utils input-output system-utils
-	@$(MAKE) -C particles
+particles: utils input-output system-utils
+	@$(MAKE) -C particle
 
-tests: particle-utils
+tests: particles
 	@$(MAKE) -C test
 
-OBDS: particle-utils
+OBDS: particles
 	@$(MAKE) -C bds
 
 clean:
 	@$(MAKE) -C io clean
 	@$(MAKE) -C util clean
 	@$(MAKE) -C system clean
-	@$(MAKE) -C particles clean
+	@$(MAKE) -C particle clean
 	@$(MAKE) -C test clean
 	@$(MAKE) -C bds clean
