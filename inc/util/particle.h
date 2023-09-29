@@ -3,6 +3,7 @@
 
 #include "bds/types.h"
 
+void util_particle_translate(particle_t*);
 void util_particle_pbcs(particle_t*);
 void util_particle_brute_force(particle_t* particles,
 			       void (*callback)(particle_t* particles,

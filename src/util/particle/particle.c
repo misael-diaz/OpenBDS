@@ -2,8 +2,84 @@
 #include "system/box/utils.h"
 #include "system/params.h"
 
+#define STDC17 201710L
+#define TSTEP ( (double) ( __OBDS_TIME_STEP__ ) )
 #define NUMEL ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
 #define LENGTH ( (double) ( __OBDS_LENGTH__ ) )
+#define ISOTROPIC_RESISTANCE ( FCONF_ISOTROPIC_HYDRODYNAMIC_RESISTANCE_PARTICLE )
+#define ISOTROPIC ( (bool) ( __OBDS_ISOTROPIC_HYDRODYNAMIC_RESISTANCE__ ) )
+#define ANISOTROPIC ( (bool) ( !(ISOTROPIC) ) )
+
+#if (ISOTROPIC_RESISTANCE == 0x00000001)
+
+// translates the particles by updating the respective component of the position vectors
+static void translate (double* __restrict__ x, const double* __restrict__ F_x)
+{
+#define LINEAR_MOBILITY ( (double) __OBDS_TIME_STEP__ )
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  constexpr double linear_mobility = LINEAR_MOBILITY;
+#else
+  double const linear_mobility = LINEAR_MOBILITY;
+#endif
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    x[i] += linear_mobility * F_x[i];
+  }
+}
+
+// translates the particles in the x, y, and z directions
+static void translate_isotropic (particle_t* particles)
+{
+  double* x = &(particles -> x -> data);
+  double* y = &(particles -> y -> data);
+  double* z = &(particles -> z -> data);
+  double* r_x = &(particles -> r_x -> data);
+  double* r_y = &(particles -> r_y -> data);
+  double* r_z = &(particles -> r_z -> data);
+  const double* f_x = &(particles -> f_x -> data);
+  const double* f_y = &(particles -> f_y -> data);
+  const double* f_z = &(particles -> f_z -> data);
+  // updates the position vectors subjected to the periodicity of the system box
+  translate(x, f_x);
+  translate(y, f_y);
+  translate(z, f_z);
+  // updates the ``absolute'' position vectors
+  translate(r_x, f_x);
+  translate(r_y, f_y);
+  translate(r_z, f_z);
+}
+
+// delegates the task of translating the isotropic resistance particles (or spheres)
+void util_particle_translate (particle_t* particles)
+{
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  static_assert(ISOTROPIC, "configuration error");
+#else
+  _Static_assert(ISOTROPIC, "configuration error");
+#endif
+  translate_isotropic(particles);
+}
+
+#else
+
+static void translate (particle_t* particles)
+{
+  _Static_assert(ANISOTROPIC, "configuration error");
+}
+
+static void translate_anisotropic (particle_t* particles)
+{
+  _Static_assert(ANISOTROPIC, "configuration error");
+  translate(particles);
+}
+
+void util_particle_translate (particle_t* particles)
+{
+  _Static_assert(ANISOTROPIC, "unimplemented error");
+  translate_anisotropic(particles);
+}
+
+#endif
 
 // void util_particle_bruteforce(particles, callback)
 //
