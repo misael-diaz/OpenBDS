@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdbool.h>
 
 #include "system/params.h"
 #include "system/box/params.h"

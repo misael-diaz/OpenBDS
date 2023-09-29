@@ -519,6 +519,7 @@ static int stochastic_forces (random_t* random, prop_t* f_x, prop_t* f_y, prop_t
 
 
 // shifts the particles along the x, y, or z axis due to deterministic force effects
+/*
 static void shift (prop_t* __restrict__ prop_x, const prop_t* __restrict__ prop_F_x)
 {
   double const dt = TSTEP;
@@ -529,6 +530,7 @@ static void shift (prop_t* __restrict__ prop_x, const prop_t* __restrict__ prop_
     x[i] += (dt * F_x[i]);
   }
 }
+*/
 
 
 static void stochastic_shift (prop_t* __restrict__ prop_x,
@@ -559,6 +561,7 @@ static void stochastic_rotation (prop_t* __restrict__ prop_x,
 
 
 // shifts the particles along the axes owing to the net deterministic forces
+/*
 static void shifts (prop_t* __restrict__ x,
 		    prop_t* __restrict__ y,
 		    prop_t* __restrict__ z,
@@ -570,6 +573,7 @@ static void shifts (prop_t* __restrict__ x,
   shift(y, f_y);
   shift(z, f_z);
 }
+*/
 
 
 static void stochastic_shifts (prop_t* __restrict__ x,
@@ -843,8 +847,11 @@ static int updater (sphere_t* spheres)
   particle_t* particles = spheres -> props;
   util_particle_brute_force(particles, cb);
   clamps(f_x, f_y, f_z, tmp, temp, bitmask);
+  /*
   shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   shifts(x, y, z, f_x, f_y, f_z);
+  */
+  util_particle_translate(particles);
   // we want to store the deterministic forces temporarily for logging purposes
   memcpy(list, f_x, 3LU * NUMEL * sizeof(prop_t));
   if (stochastic_forces(random, f_x, f_y, f_z) == FAILURE)
