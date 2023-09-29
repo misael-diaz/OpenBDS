@@ -1,7 +1,13 @@
 #ifndef GUARD_OPENBDS_SYSTEM_PARAMS_H
 #define GUARD_OPENBDS_SYSTEM_PARAMS_H
 
+#include <stdbool.h>
+
 #include "config.h"
+
+#define __OBDS_ISOTROPIC_HYDRODYNAMIC_RESISTANCE__ (\
+	(bool) ( FCONF_ISOTROPIC_HYDRODYNAMIC_RESISTANCE_PARTICLE )\
+)
 
 #define __OBDS_INV_SQRT_TIME_STEP__ ( (size_t) 0x100 )
 #define __OBDS_SQRT_TIME_STEP__ ( 1.0 / ( (double) ( __OBDS_INV_SQRT_TIME_STEP__ ) ) )
