@@ -27,6 +27,7 @@
 #define EPSILON ( (double) ( __OBDS_SPH_EPSILON__ ) )
 #define RADIUS ( (double) ( __OBDS_SPH_RADIUS__ ) )
 #define CONTACT ( (double) ( __OBDS_SPH_CONTACT__ ) )
+#define SUPPLY_MOBILITY_CALLBACK 0
 #define LINEAR_BROWNIAN_MOBILITY ( (double) ( __OBDS_SPH_LIN_BROWNIAN_MOBILITY__ ) )
 #define ANGULAR_BROWNIAN_MOBILITY ( (double) ( __OBDS_SPH_ANG_BROWNIAN_MOBILITY__ ) )
 #define CONTACT2 ( (double) ( ( CONTACT ) * ( CONTACT ) ) )
@@ -402,6 +403,22 @@ static void callback (particle_t* particles,
   prop_t* bitmask = particles -> bitmask;
   pairs(i, offset_x, offset_y, offset_z, x, y, z, f_x, f_y, f_z, tmp, temp, bitmask);
 }
+
+
+#if (SUPPLY_MOBILITY_CALLBACK == 1)
+// defines callback for computing the ``effective'' mobility of a sphere
+static void sphere_mobility_callback (particle_t* particles)
+{
+#define LINEAR_DETERMINISTIC_MOBILITY ( (double) ( __OBDS_TIME_STEP__ ) )
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  constexpr double linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
+#else
+  double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
+#endif
+  double* mobilities = &(particles -> bitmask -> data);
+  mobilities[0] = linear_mobility;
+}
+#endif
 
 
 // clamps forces larger than CLAMP to CLAMP; in other words, this method makes sure that
@@ -851,7 +868,11 @@ static int updater (sphere_t* spheres)
   shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   shifts(x, y, z, f_x, f_y, f_z);
   */
+#if (SUPPLY_MOBILITY_CALLBACK == 1)
+  util_particle_translate(particles, sphere_mobility_callback);
+#else
   util_particle_translate(particles);
+#endif
   // we want to store the deterministic forces temporarily for logging purposes
   memcpy(list, f_x, 3LU * NUMEL * sizeof(prop_t));
   if (stochastic_forces(random, f_x, f_y, f_z) == FAILURE)
@@ -968,6 +989,7 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 #if defined(FLOAT_WORD_ORDER)
   static_assert(FLOAT_WORD_ORDER == LITTLE_ENDIAN);
 #endif
+  // this assertion shall be removed once we add minimal code for anisotropic particles
   static_assert( __OBDS_SPH__ );
   static_assert( __OBDS_LOG_NUM_SPHERES__ >= 8LU );
   static_assert(sizeof(NUMEL) == 8);
@@ -993,6 +1015,7 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 #if defined(FLOAT_WORD_ORDER)
   _Static_assert(FLOAT_WORD_ORDER == LITTLE_ENDIAN, "expects little-endian byte-order");
 #endif
+  // this assertion shall be removed once we add minimal code for anisotropic particles
   _Static_assert( __OBDS_SPH__, "configuration error, non-isotropic resistance" );
   _Static_assert( __OBDS_LOG_NUM_SPHERES__ >= 8LU, "expects log2(NUM_SPHERES) >= 8" );
   _Static_assert(sizeof(NUMEL) == 8, "expects 8 bytes");
