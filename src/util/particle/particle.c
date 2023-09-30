@@ -1,6 +1,7 @@
 #include "system/box/params.h"
 #include "system/box/utils.h"
 #include "system/params.h"
+#include "util/particle.h"
 
 #define STDC17 201710L
 #define TSTEP ( (double) ( __OBDS_TIME_STEP__ ) )
@@ -10,17 +11,27 @@
 #define ISOTROPIC ( (bool) ( __OBDS_ISOTROPIC_HYDRODYNAMIC_RESISTANCE__ ) )
 #define ANISOTROPIC ( (bool) ( !(ISOTROPIC) ) )
 
+// defines the default callback for computing the ``effective'' mobility of spheres
+static void default_particle_mobility_callback (particle_t* particles)
+{
+#define LINEAR_DETERMINISTIC_MOBILITY ( (double) ( __OBDS_TIME_STEP__ ) )
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  constexpr double linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
+#else
+  double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
+#endif
+  double* mobilities = &(particles -> bitmask -> data);
+  mobilities[0] = linear_mobility;
+  mobilities[1] = linear_mobility;
+}
+
 #if (ISOTROPIC_RESISTANCE == 0x00000001)
 
 // translates the particles by updating the respective component of the position vectors
-static void translate (double* __restrict__ x, const double* __restrict__ F_x)
+static void translate (double* __restrict__ x,
+		       const double* __restrict__ F_x,
+		       double const linear_mobility)
 {
-#define LINEAR_MOBILITY ( (double) __OBDS_TIME_STEP__ )
-#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
-  constexpr double linear_mobility = LINEAR_MOBILITY;
-#else
-  double const linear_mobility = LINEAR_MOBILITY;
-#endif
   for (size_t i = 0; i != NUMEL; ++i)
   {
     x[i] += linear_mobility * F_x[i];
@@ -28,7 +39,7 @@ static void translate (double* __restrict__ x, const double* __restrict__ F_x)
 }
 
 // translates the particles in the x, y, and z directions
-static void translate_isotropic (particle_t* particles)
+static void translate_isotropic (particle_t* particles, void (*cb)(particle_t* particles))
 {
   double* x = &(particles -> x -> data);
   double* y = &(particles -> y -> data);
@@ -39,44 +50,95 @@ static void translate_isotropic (particle_t* particles)
   const double* f_x = &(particles -> f_x -> data);
   const double* f_y = &(particles -> f_y -> data);
   const double* f_z = &(particles -> f_z -> data);
+  void (*callback)(particle_t*) = cb;
+  callback(particles);
+  const double* mobilities = &(particles -> bitmask -> data);
+  double const linear_mobility = mobilities[0];
   // updates the position vectors subjected to the periodicity of the system box
-  translate(x, f_x);
-  translate(y, f_y);
-  translate(z, f_z);
+  translate(x, f_x, linear_mobility);
+  translate(y, f_y, linear_mobility);
+  translate(z, f_z, linear_mobility);
   // updates the ``absolute'' position vectors
-  translate(r_x, f_x);
-  translate(r_y, f_y);
-  translate(r_z, f_z);
+  translate(r_x, f_x, linear_mobility);
+  translate(r_y, f_y, linear_mobility);
+  translate(r_z, f_z, linear_mobility);
 }
 
 // delegates the task of translating the isotropic resistance particles (or spheres)
-void util_particle_translate (particle_t* particles)
+static void util_particle_translate_base (particle_t* particles,
+					  void (*callback)(particle_t*))
 {
-#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
-  static_assert(ISOTROPIC, "configuration error");
-#else
-  _Static_assert(ISOTROPIC, "configuration error");
-#endif
-  translate_isotropic(particles);
+  translate_isotropic(particles, callback);
+}
+
+// variadic particle translation function, for the callback is an optional argument
+void util_particle_translate_varg (particle_t* particles, struct mobility mobility)
+{
+  void (*default_cb) (particle_t*) = default_particle_mobility_callback;
+  void (*callback) (particle_t*) = (mobility.callback)? mobility.callback : default_cb;
+  util_particle_translate_base(particles, callback);
 }
 
 #else
 
-static void translate (particle_t* particles)
+// NOTE: not really implemented (we are treating the anisotropic particles as spheres)
+static void translate (double* __restrict__ x,
+		       const double* __restrict__ F_x,
+		       double const linear_parallel_mobility,
+		       double const linear_orthogonal_mobility)
 {
-  _Static_assert(ANISOTROPIC, "configuration error");
+  double const parallel = linear_parallel_mobility;
+  double const orthogonal = linear_orthogonal_mobility;
+  double const linear_mobility = ( parallel + (0 * orthogonal) );
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    x[i] += linear_mobility * F_x[i];
+  }
 }
 
-static void translate_anisotropic (particle_t* particles)
+// translates the anisotropic resistance particles in the x, y, and z directions
+static void translate_anisotropic (particle_t* particles,
+				   void (*cb)(particle_t* particles))
 {
-  _Static_assert(ANISOTROPIC, "configuration error");
-  translate(particles);
+  double* x = &(particles -> x -> data);
+  double* y = &(particles -> y -> data);
+  double* z = &(particles -> z -> data);
+  double* r_x = &(particles -> r_x -> data);
+  double* r_y = &(particles -> r_y -> data);
+  double* r_z = &(particles -> r_z -> data);
+  const double* f_x = &(particles -> f_x -> data);
+  const double* f_y = &(particles -> f_y -> data);
+  const double* f_z = &(particles -> f_z -> data);
+  void (*callback)(particle_t*) = cb;
+  callback(particles);
+  const double* mobilities = &(particles -> bitmask -> data);
+  double const linear_parallel_mobility = mobilities[0];
+  double const linear_orthogonal_mobility = mobilities[1];
+  // updates the position vectors subjected to the periodicity of the system box
+  translate(x, f_x, linear_parallel_mobility, linear_orthogonal_mobility);
+  translate(y, f_y, linear_parallel_mobility, linear_orthogonal_mobility);
+  translate(z, f_z, linear_parallel_mobility, linear_orthogonal_mobility);
+  // updates the ``absolute'' position vectors
+  translate(r_x, f_x, linear_parallel_mobility, linear_orthogonal_mobility);
+  translate(r_y, f_y, linear_parallel_mobility, linear_orthogonal_mobility);
+  translate(r_z, f_z, linear_parallel_mobility, linear_orthogonal_mobility);
 }
 
-void util_particle_translate (particle_t* particles)
+// delegates the task of translating the anisotropic resistance particles
+static void util_particle_translate_base (particle_t* particles,
+					  void (*callback)(particle_t*))
 {
+  // we shall remove this safe guard once we add minimal code for anisotropic particles
   _Static_assert(ANISOTROPIC, "unimplemented error");
-  translate_anisotropic(particles);
+  translate_anisotropic(particles, callback);
+}
+
+// variadic particle translation function, for the callback is an optional argument
+void util_particle_translate_varg (particle_t* particles, struct mobility mobility)
+{
+  void (*default_cb) (particle_t*) = default_particle_mobility_callback;
+  void (*callback)(particle_t*) = (mobility.callback)? mobility.callback : default_cb;
+  util_particle_translate_base(particles, callback);
 }
 
 #endif
@@ -379,5 +441,6 @@ References:
 [0] A Koenig and B Moo, Accelerated C++ Practical Programming by Example.
 [1] MP Allen and DJ Tildesley, Computer Simulation of Liquids.
 [2] S Kim and S Karrila, Microhydrodynamics: Principles and Selected Applications.
+[3] https://stackoverflow.com/questions/1472138/c-default-arguments/2926165#2926165
 
 */
