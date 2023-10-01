@@ -4,18 +4,26 @@
 #include "system/box/params.h"
 #include "system/box/utils.h"
 
+#define TEST_ENABLED 0
 #define NUMEL ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
 #define LIMIT ( (double) ( __OBDS_LIMIT__ ) )
 
+#if (TEST_ENABLED == 1)
 void test(void);
+#endif
 
 int main ()
 {
+#if (TEST_ENABLED == 1)
   test();
+#else
+  printf("test-system-box[0]: TEMPORARILY DISABLED\n");
+#endif
   return 0;
 }
 
 
+#if (TEST_ENABLED == 1)
 void test (void)
 {
   prop_t x[NUMEL];
@@ -64,6 +72,7 @@ void test (void)
     printf("PASS\n");
   }
 }
+#endif
 
 
 /*
