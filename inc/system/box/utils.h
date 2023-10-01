@@ -3,7 +3,7 @@
 
 #include "bds/types.h"
 
-void pbc(prop_t* restrict x, prop_t* restrict offset, prop_t* restrict bitmask);
+void system_box_apply_periodic_boundary_conditions(particle_t* particles);
 
 #endif
 
