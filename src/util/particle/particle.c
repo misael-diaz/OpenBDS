@@ -403,20 +403,13 @@ void util_particle_brute_force (particle_t* particles,
   }
 }
 
-
+// forwards the task of applying boundary conditions
 static void pbcs (particle_t* particles)
 {
-  prop_t* x = particles -> x;
-  prop_t* y = particles -> y;
-  prop_t* z = particles -> z;
-  prop_t* offset = particles -> tmp;
-  prop_t* bitmask = particles -> bitmask;
-  pbc(x, offset, bitmask);
-  pbc(y, offset, bitmask);
-  pbc(z, offset, bitmask);
+  system_box_apply_periodic_boundary_conditions(particles);
 }
 
-// applies periodic boundary conditions on the particles
+// user-interface to the method that applies periodic boundary conditions on the particles
 void util_particle_pbcs (particle_t* particles)
 {
   pbcs(particles);
