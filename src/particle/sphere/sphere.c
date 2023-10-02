@@ -487,7 +487,7 @@ static void clamps (prop_t* __restrict__ f_x,
   clamp(f_z, tmp, temp, bitmask);
 }
 
-
+/*
 static int status (double const status)
 {
   prop_t const error = { .data = status };
@@ -499,8 +499,10 @@ static int status (double const status)
 
   return SUCCESS;
 }
+*/
 
 
+/*
 static int stochastic_force (random_t* random, prop_t* p_F_x)
 {
   double* F_x = &p_F_x[0].data;
@@ -516,8 +518,9 @@ static int stochastic_force (random_t* random, prop_t* p_F_x)
 
   return SUCCESS;
 }
+*/
 
-
+/*
 static int stochastic_forces (random_t* random, prop_t* f_x, prop_t* f_y, prop_t* f_z)
 {
   if (stochastic_force(random, f_x) == FAILURE)
@@ -537,6 +540,7 @@ static int stochastic_forces (random_t* random, prop_t* f_x, prop_t* f_y, prop_t
 
   return SUCCESS;
 }
+*/
 
 
 // shifts the particles along the x, y, or z axis due to deterministic force effects
@@ -879,15 +883,31 @@ static int updater (sphere_t* spheres)
 #endif
   // we want to store the deterministic forces temporarily for logging purposes
   memcpy(list, f_x, 3LU * NUMEL * sizeof(prop_t));
+
+  /*
   if (stochastic_forces(random, f_x, f_y, f_z) == FAILURE)
   {
     return FAILURE;
   }
+  */
+
+  if (util_particle_stochastic_forces(random, particles) == FAILURE)
+  {
+    return FAILURE;
+  }
+
   stochastic_shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   stochastic_shifts(x, y, z, f_x, f_y, f_z);
   vsum(f_x, list);
 
+  /*
   if (stochastic_forces(random, t_x, t_y, t_z) == FAILURE)
+  {
+    return FAILURE;
+  }
+  */
+
+  if (util_particle_stochastic_torques(random, particles) == FAILURE)
   {
     return FAILURE;
   }
