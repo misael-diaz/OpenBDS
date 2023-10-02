@@ -2,6 +2,7 @@
 #define GUARD_OPENBDS_UTIL_PARTICLE_H
 
 #include "bds/types.h"
+#include "util/random/type.h"
 
 #define util_particle_translate(particles, ...)\
 	util_particle_translate_varg(particles, (struct mobility) { __VA_ARGS__ })
@@ -13,6 +14,8 @@ struct mobility
 
 void util_particle_translate_varg(particle_t*, struct mobility);
 void util_particle_pbcs(particle_t*);
+int util_particle_stochastic_forces(random_t* random, particle_t* particles);
+int util_particle_stochastic_torques(random_t* random, particle_t* particles);
 void util_particle_brute_force(particle_t* particles,
 			       void (*callback)(particle_t* particles,
 						size_t const id,

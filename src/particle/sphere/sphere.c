@@ -410,13 +410,17 @@ static void callback (particle_t* particles,
 static void sphere_mobility_callback (particle_t* particles)
 {
 #define LINEAR_DETERMINISTIC_MOBILITY ( (double) ( __OBDS_TIME_STEP__ ) )
+#define ANGULAR_DETERMINISTIC_MOBILITY ( 0.75 * ( (double) ( __OBDS_TIME_STEP__ ) ) )
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
   constexpr double linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
+  constexpr double angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
 #else
   double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
+  double const angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
 #endif
   double* mobilities = &(particles -> bitmask -> data);
   mobilities[0] = linear_mobility;
+  mobilities[1] = angular_mobility;
 }
 #endif
 
@@ -484,72 +488,6 @@ static void clamps (prop_t* __restrict__ f_x,
 }
 
 
-static int status (double const status)
-{
-  prop_t const error = { .data = status };
-  uint64_t const err = error.bin;
-  if (err == OBDS_ERR_PRNG)
-  {
-    return FAILURE;
-  }
-
-  return SUCCESS;
-}
-
-
-static int stochastic_force (random_t* random, prop_t* p_F_x)
-{
-  double* F_x = &p_F_x[0].data;
-  for (size_t i = 0; i != NUMEL; ++i)
-  {
-    double const rand = random -> fetch(random);
-    if (status(rand) == FAILURE)
-    {
-      return FAILURE;
-    }
-    F_x[i] = rand;
-  }
-
-  return SUCCESS;
-}
-
-
-static int stochastic_forces (random_t* random, prop_t* f_x, prop_t* f_y, prop_t* f_z)
-{
-  if (stochastic_force(random, f_x) == FAILURE)
-  {
-    return FAILURE;
-  }
-
-  if (stochastic_force(random, f_y) == FAILURE)
-  {
-    return FAILURE;
-  }
-
-  if (stochastic_force(random, f_z) == FAILURE)
-  {
-    return FAILURE;
-  }
-
-  return SUCCESS;
-}
-
-
-// shifts the particles along the x, y, or z axis due to deterministic force effects
-/*
-static void shift (prop_t* __restrict__ prop_x, const prop_t* __restrict__ prop_F_x)
-{
-  double const dt = TSTEP;
-  double* x = &prop_x[0].data;
-  const double* F_x = &prop_F_x[0].data;
-  for (size_t i = 0; i != NUMEL; ++i)
-  {
-    x[i] += (dt * F_x[i]);
-  }
-}
-*/
-
-
 static void stochastic_shift (prop_t* __restrict__ prop_x,
 			      const prop_t* __restrict__ prop_F_x)
 {
@@ -575,22 +513,6 @@ static void stochastic_rotation (prop_t* __restrict__ prop_x,
     x[i] = (angular_stochastic_mobility * T_x[i]);
   }
 }
-
-
-// shifts the particles along the axes owing to the net deterministic forces
-/*
-static void shifts (prop_t* __restrict__ x,
-		    prop_t* __restrict__ y,
-		    prop_t* __restrict__ z,
-		    const prop_t* __restrict__ f_x,
-		    const prop_t* __restrict__ f_y,
-		    const prop_t* __restrict__ f_z)
-{
-  shift(x, f_x);
-  shift(y, f_y);
-  shift(z, f_z);
-}
-*/
 
 
 static void stochastic_shifts (prop_t* __restrict__ x,
@@ -864,10 +786,6 @@ static int updater (sphere_t* spheres)
   particle_t* particles = spheres -> props;
   util_particle_brute_force(particles, cb);
   clamps(f_x, f_y, f_z, tmp, temp, bitmask);
-  /*
-  shifts(r_x, r_y, r_z, f_x, f_y, f_z);
-  shifts(x, y, z, f_x, f_y, f_z);
-  */
 #if (SUPPLY_MOBILITY_CALLBACK == 1)
   util_particle_translate(particles, sphere_mobility_callback);
 #else
@@ -875,15 +793,17 @@ static int updater (sphere_t* spheres)
 #endif
   // we want to store the deterministic forces temporarily for logging purposes
   memcpy(list, f_x, 3LU * NUMEL * sizeof(prop_t));
-  if (stochastic_forces(random, f_x, f_y, f_z) == FAILURE)
+
+  if (util_particle_stochastic_forces(random, particles) == FAILURE)
   {
     return FAILURE;
   }
+
   stochastic_shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   stochastic_shifts(x, y, z, f_x, f_y, f_z);
   vsum(f_x, list);
 
-  if (stochastic_forces(random, t_x, t_y, t_z) == FAILURE)
+  if (util_particle_stochastic_torques(random, particles) == FAILURE)
   {
     return FAILURE;
   }

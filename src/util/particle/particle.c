@@ -1,9 +1,13 @@
+#include "util/random/err.h"
 #include "system/box/params.h"
 #include "system/box/utils.h"
 #include "system/params.h"
 #include "util/particle.h"
+#include "bds/params.h"
 
 #define STDC17 201710L
+#define SUCCESS ( (int) ( __OBDS_SUCCESS__ ) )
+#define FAILURE ( (int) ( __OBDS_FAILURE__ ) )
 #define TSTEP ( (double) ( __OBDS_TIME_STEP__ ) )
 #define NUMEL ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
 #define LENGTH ( (double) ( __OBDS_LENGTH__ ) )
@@ -15,14 +19,17 @@
 static void default_particle_mobility_callback (particle_t* particles)
 {
 #define LINEAR_DETERMINISTIC_MOBILITY ( (double) ( __OBDS_TIME_STEP__ ) )
+#define ANGULAR_DETERMINISTIC_MOBILITY ( 0.75 * ( (double) ( __OBDS_TIME_STEP__ ) ) )
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
   constexpr double linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
+  constexpr double angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
 #else
   double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
+  double const angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
 #endif
   double* mobilities = &(particles -> bitmask -> data);
   mobilities[0] = linear_mobility;
-  mobilities[1] = linear_mobility;
+  mobilities[1] = angular_mobility;
 }
 
 #if (ISOTROPIC_RESISTANCE == 0x00000001)
@@ -142,6 +149,100 @@ void util_particle_translate_varg (particle_t* particles, struct mobility mobili
 }
 
 #endif
+
+
+// checks the underlying status code in the binary pattern of the floating-point number
+// `status' to determine if an error related to the generation of pseudo-random numbers
+// has occurred
+static int status (double const status)
+{
+  prop_t const error = { .data = status };
+  uint64_t const err = error.bin;
+  if (err == OBDS_ERR_PRNG)
+  {
+    return FAILURE;
+  }
+
+  return SUCCESS;
+}
+
+
+// computes the `x' component of the stochastic (or random) force vector
+static int stochastic_force (random_t* random, double* f_x)
+{
+  for (size_t i = 0; i != NUMEL; ++i)
+  {
+    double const rand = random -> fetch(random);
+    if (status(rand) == FAILURE)
+    {
+      return FAILURE;
+    }
+    f_x[i] = rand;
+  }
+
+  return SUCCESS;
+}
+
+
+// computes the `x' component of the stochastic (or random) torque vector
+static int stochastic_torque (random_t* random, double* t_x)
+{
+  // we can afford to use the same function because both the stochastic forces and torques
+  // are non-dimensional but share the same statistical properties of zero mean and unit
+  // variance
+  return stochastic_force(random, t_x);
+}
+
+
+// updates the components of the stochastic force vector
+int util_particle_stochastic_forces (random_t* random, particle_t* particles)
+{
+  double* f_x = &(particles -> f_x -> data);
+  double* f_y = &(particles -> f_y -> data);
+  double* f_z = &(particles -> f_z -> data);
+  if (stochastic_force(random, f_x) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  if (stochastic_force(random, f_y) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  if (stochastic_force(random, f_z) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  return SUCCESS;
+}
+
+
+// updates the components of the stochastic torque vector
+int util_particle_stochastic_torques (random_t* random, particle_t* particles)
+{
+  double* t_x = &(particles -> t_x -> data);
+  double* t_y = &(particles -> t_y -> data);
+  double* t_z = &(particles -> t_z -> data);
+  if (stochastic_torque(random, t_x) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  if (stochastic_torque(random, t_y) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  if (stochastic_torque(random, t_z) == FAILURE)
+  {
+    return FAILURE;
+  }
+
+  return SUCCESS;
+}
+
 
 // void util_particle_bruteforce(particles, callback)
 //
