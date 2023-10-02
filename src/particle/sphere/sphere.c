@@ -410,13 +410,17 @@ static void callback (particle_t* particles,
 static void sphere_mobility_callback (particle_t* particles)
 {
 #define LINEAR_DETERMINISTIC_MOBILITY ( (double) ( __OBDS_TIME_STEP__ ) )
+#define ANGULAR_DETERMINISTIC_MOBILITY ( 0.75 * ( (double) ( __OBDS_TIME_STEP__ ) ) )
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
   constexpr double linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
+  constexpr double angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
 #else
   double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
+  double const angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
 #endif
   double* mobilities = &(particles -> bitmask -> data);
   mobilities[0] = linear_mobility;
+  mobilities[1] = angular_mobility;
 }
 #endif
 
