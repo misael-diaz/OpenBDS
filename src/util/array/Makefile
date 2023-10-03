@@ -16,10 +16,10 @@
 
 include make-inc
 
-all: $(ARRAYS_O)
+all: $(ARRAY_O)
 
-$(ARRAYS_O): $(HEADERS) $(ARRAYS_C)
-	$(CC) $(INC) $(CCOPT) -c $(ARRAYS_C) -o $(ARRAYS_O)
+$(ARRAY_O): $(HEADERS) $(ARRAY_C)
+	$(CC) $(INC) $(CCOPT) -c $(ARRAY_C) -o $(ARRAY_O)
 
 clean:
 	/bin/rm -f *.log *.o
