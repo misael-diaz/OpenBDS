@@ -1,7 +1,9 @@
 #ifndef GUARD_OPENBDS_UTIL_RANDOM_ERR_H
 #define GUARD_OPENBDS_UTIL_RANDOM_ERR_H
 
-#define OBDS_ERR_PRNG ( (uint64_t) 0xfff0000000000000 )
+#include "bds/params.h"
+
+#define OBDS_ERR_PRNG __OBDS_ERR_PRNG__
 
 #endif
 
