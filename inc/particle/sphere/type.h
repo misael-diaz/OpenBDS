@@ -2,7 +2,6 @@
 #define GUARD_OPENBDS_PARTICLE_SPHERE_TYPE_H
 
 #include "bds/types.h"
-#include "util/random/type.h"
 
 // defines enum for selecting the logging level
 enum SPHLOG
@@ -16,10 +15,13 @@ typedef enum SPHLOG SPHLOG;
 typedef struct __OBDS_PARTICLE_TYPE__ __OBDS_SPHERE_TYPE__ ;
 typedef __OBDS_SPHERE_TYPE__ OBDS_Sphere_t;
 
+// forward declares the underlying type of the Pseudo Random Number Generator `random_t'
+struct random;
+
 struct sphere
 {
   OBDS_Sphere_t* props;			// properties
-  random_t* prng;			// Pseudo Random Number Generator PRNG
+  struct random* prng;			// Pseudo Random Number Generator PRNG
   int (*update) (struct sphere*);	// updates the particles position and orientation
   int (*log) (const struct sphere* spheres, size_t const step);	// logs the positions
 };

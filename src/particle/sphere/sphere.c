@@ -11,6 +11,7 @@
 #include "system/box.h"
 #include "particle/sphere/params.h"
 #include "particle/sphere/type.h"
+#include "util/random/type.h"
 #include "util/particle.h"
 #include "util/arrays.h"
 #include "util/type.h"
