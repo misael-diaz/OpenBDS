@@ -5,7 +5,9 @@
 
 #include "fconfig.h"
 
+// defines the total number of particles in the system
 #define CONF_NUM_PARTICLES ( (size_t) FCONF_NUM_PARTICLES )
+// defines the system box limits, x = y = z = -LIMIT, +LIMIT
 #define CONF_LIMIT ( (double) FCONF_LIMIT )
 
 #endif
