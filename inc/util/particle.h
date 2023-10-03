@@ -4,18 +4,29 @@
 #include "bds/types.h"
 #include "util/random/type.h"
 
+// translates particles by the conservative forces acting on them, variadic, optional
+// callback for spheres (all the other particle types must supply it)
 #define util_particle_translate(particles, ...)\
 	util_particle_translate_varg(particles, (struct mobility) { __VA_ARGS__ })
 
+// callback for computing the particle mobility
 struct mobility
 {
   void (*callback) (particle_t*);
 };
 
+// forwards the task of translating the particles, defines optional mobility
 void util_particle_translate_varg(particle_t*, struct mobility);
+// applies periodic boundary conditions on the position vectors of the particles
 void util_particle_pbcs(particle_t*);
+// samples the stochastic forces from the Gausian PRNG
 int util_particle_stochastic_forces(random_t* random, particle_t* particles);
+// samples the stochastic torques from the Gausian PRNG
 int util_particle_stochastic_torques(random_t* random, particle_t* particles);
+// uses brute-force to obtain the resultant determintic force acting on the particles,
+// the callback implements interaction between pairs of virtual particles; the `offsets'
+// are used to consider interactions with the virtual particles (when the `offsets' are
+// zero actual particles are considered)
 void util_particle_brute_force(particle_t* particles,
 			       void (*callback)(particle_t* particles,
 						size_t const id,

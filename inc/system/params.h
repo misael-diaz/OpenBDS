@@ -5,16 +5,26 @@
 
 #include "config.h"
 
+// true if we have isotropic particles (spheres), false if we have anisotropic particles;
+// we use this MACRO to check if the OBDS has been configured in a consistent manner
 #define __OBDS_ISOTROPIC_HYDRODYNAMIC_RESISTANCE__ (\
 	(bool) ( FCONF_ISOTROPIC_HYDRODYNAMIC_RESISTANCE_PARTICLE )\
 )
 
+// defines 1 / sqrt(dt), where `dt' is the non-dimensional time-step; by design the code
+// expects this to be a power of two (at this point it is not necessary for the user to
+// modify it, this is why it is defined here)
 #define __OBDS_INV_SQRT_TIME_STEP__ ( (size_t) 0x100 )
+// calculates sqrt(dt)
 #define __OBDS_SQRT_TIME_STEP__ ( 1.0 / ( (double) ( __OBDS_INV_SQRT_TIME_STEP__ ) ) )
+// calculates 1 / dt
 #define __OBDS_INV_TIME_STEP__ (__OBDS_INV_SQRT_TIME_STEP__ * __OBDS_INV_SQRT_TIME_STEP__)
+// calculates dt
 #define __OBDS_TIME_STEP__ ( 1.0 / ( (double) ( __OBDS_INV_TIME_STEP__ ) ) )
 
+// defines log2(N), where `N' is the number of particles
 #define __OBDS_LOG_NUM_PARTICLES__ ( (size_t) ( FCONF_LOG_NUM_PARTICLES ) )
+// calculates the number of particles `N'
 #define __OBDS_NUM_PARTICLES__ ( (size_t) ( 1 << ( __OBDS_LOG_NUM_PARTICLES__ ) ) )
 
 #endif

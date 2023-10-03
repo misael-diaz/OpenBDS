@@ -3,6 +3,7 @@
 
 #include "bds/params.h"
 
+// defines alias for the OBDS Pseudo-Random Number Generator PRNG
 #define OBDS_ERR_PRNG __OBDS_ERR_PRNG__
 
 #endif
