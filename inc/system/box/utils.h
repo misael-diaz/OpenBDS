@@ -3,6 +3,8 @@
 
 #include "bds/types.h"
 
+// applies periodic boundary conditions on the position vectors of the particles, that is,
+// after this call the components of the position vector are bounded to [-LIMIT, +LIMIT]
 void system_box_apply_periodic_boundary_conditions(particle_t* particles);
 
 #endif

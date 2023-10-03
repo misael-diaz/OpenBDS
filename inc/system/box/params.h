@@ -3,7 +3,9 @@
 
 #include "config.h"
 
+// defines the system box limits, x = y = z = -LIMIT and +LIMIT
 #define __OBDS_LIMIT__ ( (double) ( CONF_LIMIT ) )
+// defines the system box length
 #define __OBDS_LENGTH__ ( (double) ( 2.0 * ( __OBDS_LIMIT__ ) ) )
 
 #endif
