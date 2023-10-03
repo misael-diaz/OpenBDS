@@ -3,11 +3,13 @@
 
 #include "random.h"
 
+// we no longer use this, shall be removed in a future commit
 struct util
 {
   iPRNG_t random;		// PRNG initializer
 };
 
+// we no longer use this, shall be removed in a future commit
 typedef struct util util_t;
 
 #endif

@@ -3,32 +3,34 @@
 
 #include <stdint.h>
 
-enum PRNG {		// Pseudo Random Number Generator
-  URAND,		// Uniform PRNG
-  NRAND			// Normal PRNG
+enum PRNG {				// Pseudo Random Number Generator PRNG
+  URAND,				// Uniform PRNG
+  NRAND					// Normal PRNG
 };
 
 struct generator {
-  double* count;
-  uint64_t* state;
-  int (*seed) (struct generator*);
-  double (*fetch) (struct generator*);
+  double* count;			// count of generated pseudo-random numbers
+  uint64_t* state;			// internal state of the PRNG
+  int (*seed) (struct generator*);	// seeds the PRNG via OS resources
+  double (*fetch) (struct generator*);	// fetches a new pseudo-random number
 };
 
 typedef struct generator generator_t;
 
 struct random
 {
-  generator_t* generator;
-  double (*fetch) (struct random*);
+  generator_t* generator;		// the PRNG
+  double (*fetch) (struct random*);	// provides simpler interface to PRNG fetch()
 };
 
 typedef struct random random_t;
 
+// not used, shall be removed in a future commit
 struct iPRNG {
   int (*initializer) (struct random*, enum PRNG);
 };
 
+// not used, shall be removed in a future commit
 typedef struct iPRNG iPRNG_t;
 
 #endif

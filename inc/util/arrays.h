@@ -3,9 +3,16 @@
 
 #include "bds/types.h"
 
+// copies source `src' into destination `dst' array
 void util_array_copy (const prop_t* __restrict__ src, prop_t* __restrict__ dst);
+
+// numpy-like utils:
+
+// fills array `x' with zeros, numel(x) = `N' where `N' is the number of particles
 void util_array_zeros (prop_t* x);
+// as zeros but fills array with ones
 void util_array_ones (prop_t* x);
+// fills array with values in the asymmetric range [0, `N'] (based on C++ std::iota)
 void util_array_iota (prop_t* x);
 
 #endif

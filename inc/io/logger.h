@@ -3,6 +3,7 @@
 
 #include "bds/types.h"
 
+// logs the vectors of position, orientation, force, torque, etc., and the particle IDs
 int io_logger_log(const particle_t*, const char*);
 
 #endif
