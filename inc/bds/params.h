@@ -3,6 +3,7 @@
 
 #define __OBDS_SUCCESS__ ( (int) 0x00000000 )
 #define __OBDS_FAILURE__ ( (int) 0xffffffff )
+#define __OBDS_ERR_PRNG__ ( (uint64_t) 0xfff0000000000000 )
 
 #endif
 
