@@ -1,5 +1,5 @@
-#ifndef GUARD_OPENBDS_UTIL_ARRAYS_H
-#define GUARD_OPENBDS_UTIL_ARRAYS_H
+#ifndef GUARD_OPENBDS_UTIL_ARRAY_H
+#define GUARD_OPENBDS_UTIL_ARRAY_H
 
 #include "bds/types.h"
 
@@ -21,7 +21,7 @@ void util_array_iota (prop_t* x);
 
 OpenBDS							September 05, 2023
 
-source: util/arrays.h
+source: util/array.h
 author: @misael-diaz
 
 Synopsis:

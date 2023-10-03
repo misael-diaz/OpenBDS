@@ -22,7 +22,7 @@ OBDS_F = OpenBDS.f
 # objects
 LOGGER_O = ../../io/logger/logger.o
 SYSBOX_O = ../../system/box/box.o
-ARRAYS_O = ../../util/array/arrays.o
+ARRAYS_O = ../../util/array/array.o
 UPRTCL_O = ../../util/particle/particle.o
 RANDOM_O = ../../util/random/random.o
 SPHERE_O = ../../particle/sphere/sphere.o

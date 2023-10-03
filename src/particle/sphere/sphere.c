@@ -13,7 +13,7 @@
 #include "particle/sphere/type.h"
 #include "util/random/type.h"
 #include "util/particle.h"
-#include "util/arrays.h"
+#include "util/array.h"
 #include "util/type.h"
 
 #define STDC17 201710L
