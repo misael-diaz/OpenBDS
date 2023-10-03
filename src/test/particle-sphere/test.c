@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "system/box/params.h"
+#include "util/random/type.h"
 #include "particle/sphere/params.h"
 #include "particle/sphere/utils.h"
 
