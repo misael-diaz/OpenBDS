@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+// we take advantage of this union to reuse data placeholders and for writing vectorizable
+// for-loops that would not be otherwise optimized by the GCC compiler
 union __OBDS_PROP_TYPE__
 {
   double data;
@@ -11,6 +13,7 @@ union __OBDS_PROP_TYPE__
 
 typedef union __OBDS_PROP_TYPE__ prop_t;
 
+// defines ``base class'' for the particles (in the Object-Oriented Programming OOP sense)
 struct __OBDS_PARTICLE_TYPE__
 {
   // position vector subject to periodic boundaries:

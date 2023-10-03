@@ -1,8 +1,14 @@
 #ifndef GUARD_OPENBDS_BDS_PARAMS_H
 #define GUARD_OPENBDS_BDS_PARAMS_H
 
+// defines the OBDS success `0' and error `-1' codes, these are returned by some functions
+// to signal the caller that an error has occurred so that the caller can handle the error
+// or signal its caller; this is done until we have reached a point in the OBDS code where
+// the error can be properly handled
 #define __OBDS_SUCCESS__ ( (int) 0x00000000 )
 #define __OBDS_FAILURE__ ( (int) 0xffffffff )
+// defines the OBDS Pseudo-Random Number Generator PRNG Error; upon failure the PRNG
+// returns the binary floating-point representation of negative infinity by design
 #define __OBDS_ERR_PRNG__ ( (uint64_t) 0xfff0000000000000 )
 
 #endif
