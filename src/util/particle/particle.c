@@ -1,4 +1,5 @@
 #include "util/random/err.h"
+#include "util/random/type.h"
 #include "system/box/params.h"
 #include "system/box/utils.h"
 #include "system/params.h"
