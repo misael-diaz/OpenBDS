@@ -30,7 +30,7 @@ SYSBOX_H = ../../../inc/system/box.h
 SYSTEM_PARAMS_H = ../../../inc/system/params.h
 SYSTEM_H = ../../../inc/system.h
 
-ARRAYS_H = ../../../inc/util/arrays.h
+ARRAYS_H = ../../../inc/util/array.h
 UPRTCL_H = ../../../inc/util/particle.h
 
 RNDERR_H = ../../../inc/util/random/err.h

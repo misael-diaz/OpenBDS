@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include "util/arrays.h"
+#include "util/array.h"
 #include "system/params.h"
 
 #define NUMEL ( (size_t) __OBDS_NUM_PARTICLES__ )

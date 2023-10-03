@@ -23,7 +23,7 @@ TEST_F = test.f
 # objects
 LOGGER_O = ../../io/logger/logger.o
 SYSBOX_O = ../../system/box/box.o
-ARRAYS_O = ../../util/array/arrays.o
+ARRAYS_O = ../../util/array/array.o
 RANDOM_O = ../../util/random/random.o
 UPRTCL_O = ../../util/particle/particle.o
 UTILTP_O = ../../util/type/type.o

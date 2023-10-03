@@ -24,12 +24,12 @@ BDS_TYPES_H = ../../../inc/bds/types.h
 
 SYSTEM_PARAMS_H = ../../../inc/system/params.h
 
-ARRAYS_H = ../../../inc/util/arrays.h
+ARRAY_H = ../../../inc/util/array.h
 
-HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(SYSTEM_PARAMS_H) $(ARRAYS_H)
+HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(SYSTEM_PARAMS_H) $(ARRAY_H)
 
 # sources
-ARRAYS_C = arrays.c
+ARRAY_C = array.c
 
 # objects
-ARRAYS_O = arrays.o
+ARRAY_O = array.o
