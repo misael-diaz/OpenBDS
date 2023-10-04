@@ -13,6 +13,7 @@
 #include <math.h>	// for generating normally distributed pseudo-random numbers
 
 #include "bds/params.h"
+#include "util/random/initializer.h"
 #include "util/random.h"
 
 #define STDC17 201710L

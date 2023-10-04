@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include "util/random.h"
+#include "util/random/initializer.h"
 
 #define STDC17 201710L
 #define ABS(x) ( (x < 0)? -x : x )
