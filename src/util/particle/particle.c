@@ -169,7 +169,7 @@ static int status (double const status)
 
 
 // computes the `x' component of the stochastic (or random) force vector
-static int stochastic_force (random_t* random, double* f_x)
+static int BrownianForce (random_t* random, double* f_x)
 {
   for (size_t i = 0; i != NUMEL; ++i)
   {
@@ -186,32 +186,32 @@ static int stochastic_force (random_t* random, double* f_x)
 
 
 // computes the `x' component of the stochastic (or random) torque vector
-static int stochastic_torque (random_t* random, double* t_x)
+static int BrownianTorque (random_t* random, double* t_x)
 {
   // we can afford to use the same function because both the stochastic forces and torques
   // are non-dimensional but share the same statistical properties of zero mean and unit
   // variance
-  return stochastic_force(random, t_x);
+  return BrownianForce(random, t_x);
 }
 
 
 // updates the components of the stochastic force vector
-int util_particle_stochastic_forces (random_t* random, particle_t* particles)
+int util_particle_BrownianForces (random_t* random, particle_t* particles)
 {
   double* f_x = &(particles -> f_x -> data);
   double* f_y = &(particles -> f_y -> data);
   double* f_z = &(particles -> f_z -> data);
-  if (stochastic_force(random, f_x) == FAILURE)
+  if (BrownianForce(random, f_x) == FAILURE)
   {
     return FAILURE;
   }
 
-  if (stochastic_force(random, f_y) == FAILURE)
+  if (BrownianForce(random, f_y) == FAILURE)
   {
     return FAILURE;
   }
 
-  if (stochastic_force(random, f_z) == FAILURE)
+  if (BrownianForce(random, f_z) == FAILURE)
   {
     return FAILURE;
   }
@@ -221,22 +221,22 @@ int util_particle_stochastic_forces (random_t* random, particle_t* particles)
 
 
 // updates the components of the stochastic torque vector
-int util_particle_stochastic_torques (random_t* random, particle_t* particles)
+int util_particle_BrownianTorques (random_t* random, particle_t* particles)
 {
   double* t_x = &(particles -> t_x -> data);
   double* t_y = &(particles -> t_y -> data);
   double* t_z = &(particles -> t_z -> data);
-  if (stochastic_torque(random, t_x) == FAILURE)
+  if (BrownianTorque(random, t_x) == FAILURE)
   {
     return FAILURE;
   }
 
-  if (stochastic_torque(random, t_y) == FAILURE)
+  if (BrownianTorque(random, t_y) == FAILURE)
   {
     return FAILURE;
   }
 
-  if (stochastic_torque(random, t_z) == FAILURE)
+  if (BrownianTorque(random, t_z) == FAILURE)
   {
     return FAILURE;
   }
@@ -245,7 +245,7 @@ int util_particle_stochastic_torques (random_t* random, particle_t* particles)
 }
 
 
-// void util_particle_bruteforce(particles, callback)
+// void util_particle_bruteForce(particles, callback)
 //
 // Synopsis:
 // Uses brute force to compute the resultant (deterministic) forces on all the particles,
@@ -264,12 +264,12 @@ int util_particle_stochastic_torques (random_t* random, particle_t* particles)
 // particles	particle property placeholder (position, orientation, ids, etc.)
 // callback	method that implements the particle force computation
 
-void util_particle_brute_force (particle_t* particles,
-				void (*callback) (particle_t* particles,
-						  size_t const i,
-						  double const offset_x,
-						  double const offset_y,
-						  double const offset_z))
+void util_particle_bruteForce (particle_t* particles,
+			       void (*callback) (particle_t* particles,
+						 size_t const i,
+						 double const offset_x,
+						 double const offset_y,
+						 double const offset_z))
 {
   for (size_t i = 0; i != NUMEL; ++i)
   {

@@ -18,20 +18,20 @@ struct mobility
 void util_particle_translate_varg(particle_t*, struct mobility);
 // applies periodic boundary conditions on the position vectors of the particles
 void util_particle_pbcs(particle_t*);
-// samples the stochastic forces from the Gausian PRNG
-int util_particle_stochastic_forces(struct random* random, particle_t* particles);
-// samples the stochastic torques from the Gausian PRNG
-int util_particle_stochastic_torques(struct random* random, particle_t* particles);
+// samples the Brownian (or stochastic) forces from the Gausian PRNG
+int util_particle_BrownianForces(struct random* random, particle_t* particles);
+// samples the Brownian (or stochastic) torques from the Gausian PRNG
+int util_particle_BrownianTorques(struct random* random, particle_t* particles);
 // uses brute-force to obtain the resultant determintic force acting on the particles,
 // the callback implements interaction between pairs of virtual particles; the `offsets'
 // are used to consider interactions with the virtual particles (when the `offsets' are
 // zero actual particles are considered)
-void util_particle_brute_force(particle_t* particles,
-			       void (*callback)(particle_t* particles,
-						size_t const id,
-						double const offset_x,
-						double const offset_y,
-						double const offset_z));
+void util_particle_bruteForce(particle_t* particles,
+		              void (*callback) (particle_t* particles,
+					        size_t const id,
+					        double const offset_x,
+					        double const offset_y,
+					        double const offset_z));
 
 #endif
 
