@@ -1,21 +1,26 @@
-#ifndef GUARD_OPENBDS_UTIL_RANDOM_H
-#define GUARD_OPENBDS_UTIL_RANDOM_H
+#ifndef GUARD_OPENBDS_UTIL_RANDOM_INITIALIZER_H
+#define GUARD_OPENBDS_UTIL_RANDOM_INITIALIZER_H
 
-#include "util/random/err.h"
-#include "util/random/initializer.h"
-#include "util/random/type.h"
+// forward declarations:
+
+enum PRNG;
+struct random;
+
+// utils:
+
+int util_random_initializer(struct random*, enum PRNG);
 
 #endif
 
 /*
 
-OpenBDS							September 05, 2023
+OpenBDS							October 04, 2023
 
-source: util/random.h
+source: util/random/initializer.h
 author: @misael-diaz
 
 Synopsis:
-Defines the Pseudo Random Number Generator PRNG Utility.
+Provides prototype for the Pseudo Random Number Generator PRNG initializer.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

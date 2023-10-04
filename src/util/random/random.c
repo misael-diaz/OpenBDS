@@ -13,17 +13,17 @@
 #include <math.h>	// for generating normally distributed pseudo-random numbers
 
 #include "bds/params.h"
-#include "util/random.h"
+#include "util/random/err.h"
+#include "util/random/initializer.h"
+#include "util/random/type.h"
 
 #define STDC17 201710L
 #define FAILURE ( (int) ( __OBDS_FAILURE__ ) )
 #define SUCCESS ( (int) ( __OBDS_SUCCESS__ ) )
-#define MSBMASK ( (int64_t) 0x8000000000000000 )
 #define PERIOD ( (uint64_t) 0xffffffffffffffff )
-#define SCALING ( 1.0 / ( (double) MSBMASK ) )
 // 64-bit binary floatint-poing representation of 2^N
 #define BIAS ( (uint64_t) 1023 )
-#define EXP(N) ( (N + BIAS) << 52 )
+#define EXP(N) ( (N) << 52 )
 
 
 static uint32_t xor ()	// XORs the current time and the process ID for seeding the PRNG
@@ -125,38 +125,18 @@ static int seeder (generator_t* generator)
 }
 
 
-// double sxorshift64(int64_t* state)
+// double xorshift64(generator)
 //
 // Synopsis:
 // Implements Marsaglia's 64-bit xorshift Pseudo Random Number Generator PRNG.
 // Yields uniformly distributed pseudo-random numbers in [0, 1).
-// This implementation uses signed 64-bit integer for interoperability with FORTRAN.
 //
-// Input:
-// state	initial state of the pseudo-random number generator
+// Parameters:
+// generator	(intent inout) the pseudo-random number generator PRNG
 //
-// Output:
-// state	updated state
-//
-// Return:
+// Returns:
 // prn		uniformly distributed pseudo-random number in [0, 1)
 
-
-double sxorshift64 (int64_t* state)
-{
-  int64_t x = *state;
-  x ^= (x << 13);
-  x ^= (x >> 7);
-  x ^= (x << 17);
-  *state = x;
-
-  double const c = SCALING;
-  double const r = c * x;
-  return ( 0.5 * (r + 1.0) );
-}
-
-
-// as sxorshift64() but uses unsigned 64-bit integers to update the PRNG state
 static double xorshift64 (generator_t* generator)
 {
   uint64_t x = *(generator -> state);
@@ -166,9 +146,16 @@ static double xorshift64 (generator_t* generator)
   *(generator -> state) = x;
   ++( *(generator -> count) );
 
-  // hardcodes the binary floating-point representation of 2^(-64) for quick scaling
-  uint64_t const n = -64;
-  union { uint64_t bin; double data; } const c = { .bin = EXP(n) };
+  union alias { uint64_t bin; double data; };
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  constexpr uint64_t bias = BIAS;
+  constexpr uint64_t n = ( (-64) + bias );
+  constexpr union alias c = { .bin = EXP(n) };
+#else
+  uint64_t const bias = BIAS;
+  uint64_t const n = ( (-64) + bias );
+  union alias const c = { .bin = EXP(n) };
+#endif
   double const data = c.data;
   double const prn = ( data * ( (double) x ) );
   return prn;
