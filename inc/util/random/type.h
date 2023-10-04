@@ -25,8 +25,6 @@ struct random
 
 typedef struct random random_t;
 
-int util_random_initializer(random_t*, enum PRNG);
-
 #endif
 
 /*
