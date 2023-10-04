@@ -73,7 +73,7 @@ static void translate_isotropic (particle_t* particles, void (*cb)(particle_t* p
 }
 
 // delegates the task of translating the isotropic resistance particles (or spheres)
-static void util_particle_translate_base (particle_t* particles,
+static void translate_base (particle_t* particles,
 					  void (*callback)(particle_t*))
 {
   translate_isotropic(particles, callback);
@@ -84,7 +84,7 @@ void util_particle_translate_varg (particle_t* particles, struct mobility mobili
 {
   void (*default_cb) (particle_t*) = default_particle_mobility_callback;
   void (*callback) (particle_t*) = (mobility.callback)? mobility.callback : default_cb;
-  util_particle_translate_base(particles, callback);
+  translate_base(particles, callback);
 }
 
 #else
@@ -133,7 +133,7 @@ static void translate_anisotropic (particle_t* particles,
 }
 
 // delegates the task of translating the anisotropic resistance particles
-static void util_particle_translate_base (particle_t* particles,
+static void translate_base (particle_t* particles,
 					  void (*callback)(particle_t*))
 {
   // we shall remove this safe guard once we add minimal code for anisotropic particles
@@ -146,7 +146,7 @@ void util_particle_translate_varg (particle_t* particles, struct mobility mobili
 {
   void (*default_cb) (particle_t*) = default_particle_mobility_callback;
   void (*callback)(particle_t*) = (mobility.callback)? mobility.callback : default_cb;
-  util_particle_translate_base(particles, callback);
+  translate_base(particles, callback);
 }
 
 #endif
@@ -196,7 +196,7 @@ static int BrownianTorque (random_t* random, double* t_x)
 
 
 // updates the components of the stochastic force vector
-int util_particle_BrownianForces (random_t* random, particle_t* particles)
+static int BrownianForces (random_t* random, particle_t* particles)
 {
   double* f_x = &(particles -> f_x -> data);
   double* f_y = &(particles -> f_y -> data);
@@ -221,7 +221,7 @@ int util_particle_BrownianForces (random_t* random, particle_t* particles)
 
 
 // updates the components of the stochastic torque vector
-int util_particle_BrownianTorques (random_t* random, particle_t* particles)
+static int BrownianTorques (random_t* random, particle_t* particles)
 {
   double* t_x = &(particles -> t_x -> data);
   double* t_y = &(particles -> t_y -> data);
@@ -245,7 +245,7 @@ int util_particle_BrownianTorques (random_t* random, particle_t* particles)
 }
 
 
-// void util_particle_bruteForce(particles, callback)
+// void bruteForce(particles, callback)
 //
 // Synopsis:
 // Uses brute force to compute the resultant (deterministic) forces on all the particles,
@@ -264,12 +264,14 @@ int util_particle_BrownianTorques (random_t* random, particle_t* particles)
 // particles	particle property placeholder (position, orientation, ids, etc.)
 // callback	method that implements the particle force computation
 
-void util_particle_bruteForce (particle_t* particles,
-			       void (*callback) (particle_t* particles,
-						 size_t const i,
-						 double const offset_x,
-						 double const offset_y,
-						 double const offset_z))
+
+static void bruteForce (particle_t* particles,
+			void (*callback) (particle_t* particles,
+					  size_t const i,
+					  double const offset_x,
+					  double const offset_y,
+					  double const offset_z))
+
 {
   for (size_t i = 0; i != NUMEL; ++i)
   {
@@ -505,17 +507,46 @@ void util_particle_bruteForce (particle_t* particles,
   }
 }
 
+
 // forwards the task of applying boundary conditions
 static void pbcs (particle_t* particles)
 {
   system_box_apply_periodic_boundary_conditions(particles);
 }
 
+
 // user-interface to the method that applies periodic boundary conditions on the particles
 void util_particle_pbcs (particle_t* particles)
 {
   pbcs(particles);
 }
+
+
+// user-interface to the method that computes the Brownian forces
+int util_particle_BrownianForces (random_t* random, particle_t* particles)
+{
+  return BrownianForces(random, particles);
+}
+
+
+// user-interface to the method that computes the Brownian torques
+int util_particle_BrownianTorques (random_t* random, particle_t* particles)
+{
+  return BrownianTorques(random, particles);
+}
+
+
+// user-interface to the method that computes the resultant deterministic forces
+void util_particle_bruteForce (particle_t* particles,
+			       void (*callback) (particle_t* particles,
+						 size_t const i,
+						 double const offset_x,
+						 double const offset_y,
+						 double const offset_z))
+{
+  bruteForce(particles, callback);
+}
+
 
 /*
 
