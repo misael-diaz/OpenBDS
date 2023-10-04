@@ -13,8 +13,9 @@
 #include <math.h>	// for generating normally distributed pseudo-random numbers
 
 #include "bds/params.h"
+#include "util/random/err.h"
 #include "util/random/initializer.h"
-#include "util/random.h"
+#include "util/random/type.h"
 
 #define STDC17 201710L
 #define FAILURE ( (int) ( __OBDS_FAILURE__ ) )
