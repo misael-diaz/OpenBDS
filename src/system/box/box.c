@@ -145,7 +145,7 @@ static void pbc (prop_t* __restrict__ x,
 }
 
 // applies periodic boundary conditions at x = y = z = -LIMIT and +LIMIT
-void system_box_apply_periodic_boundary_conditions (particle_t* particles)
+void system_box_applyPeriodicBoundaryConditions (particle_t* particles)
 {
   prop_t* x = particles -> x;
   prop_t* y = particles -> y;
