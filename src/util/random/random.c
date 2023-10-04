@@ -20,9 +20,7 @@
 #define STDC17 201710L
 #define FAILURE ( (int) ( __OBDS_FAILURE__ ) )
 #define SUCCESS ( (int) ( __OBDS_SUCCESS__ ) )
-#define MSBMASK ( (int64_t) 0x8000000000000000 )
 #define PERIOD ( (uint64_t) 0xffffffffffffffff )
-#define SCALING ( 1.0 / ( (double) MSBMASK ) )
 // 64-bit binary floatint-poing representation of 2^N
 #define BIAS ( (uint64_t) 1023 )
 #define EXP(N) ( (N + BIAS) << 52 )
@@ -127,38 +125,18 @@ static int seeder (generator_t* generator)
 }
 
 
-// double sxorshift64(int64_t* state)
+// double xorshift64(generator)
 //
 // Synopsis:
 // Implements Marsaglia's 64-bit xorshift Pseudo Random Number Generator PRNG.
 // Yields uniformly distributed pseudo-random numbers in [0, 1).
-// This implementation uses signed 64-bit integer for interoperability with FORTRAN.
 //
-// Input:
-// state	initial state of the pseudo-random number generator
+// Parameters:
+// generator	(intent inout) the pseudo-random number generator PRNG
 //
-// Output:
-// state	updated state
-//
-// Return:
+// Returns:
 // prn		uniformly distributed pseudo-random number in [0, 1)
 
-
-double sxorshift64 (int64_t* state)
-{
-  int64_t x = *state;
-  x ^= (x << 13);
-  x ^= (x >> 7);
-  x ^= (x << 17);
-  *state = x;
-
-  double const c = SCALING;
-  double const r = c * x;
-  return ( 0.5 * (r + 1.0) );
-}
-
-
-// as sxorshift64() but uses unsigned 64-bit integers to update the PRNG state
 static double xorshift64 (generator_t* generator)
 {
   uint64_t x = *(generator -> state);
