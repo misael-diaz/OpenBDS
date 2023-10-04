@@ -23,7 +23,7 @@
 #define PERIOD ( (uint64_t) 0xffffffffffffffff )
 // 64-bit binary floatint-poing representation of 2^N
 #define BIAS ( (uint64_t) 1023 )
-#define EXP(N) ( (N + BIAS) << 52 )
+#define EXP(N) ( (N) << 52 )
 
 
 static uint32_t xor ()	// XORs the current time and the process ID for seeding the PRNG
@@ -146,9 +146,16 @@ static double xorshift64 (generator_t* generator)
   *(generator -> state) = x;
   ++( *(generator -> count) );
 
-  // hardcodes the binary floating-point representation of 2^(-64) for quick scaling
-  uint64_t const n = -64;
-  union { uint64_t bin; double data; } const c = { .bin = EXP(n) };
+  union alias { uint64_t bin; double data; };
+#if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+  constexpr uint64_t bias = BIAS;
+  constexpr uint64_t n = ( (-64) + bias );
+  constexpr union alias c = { .bin = EXP(n) };
+#else
+  uint64_t const bias = BIAS;
+  uint64_t const n = ( (-64) + bias );
+  union alias const c = { .bin = EXP(n) };
+#endif
   double const data = c.data;
   double const prn = ( data * ( (double) x ) );
   return prn;
