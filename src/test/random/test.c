@@ -7,7 +7,6 @@
 #include <math.h>
 
 #include "util/random.h"
-#include "util/type.h"
 
 #define STDC17 201710L
 #define ABS(x) ( (x < 0)? -x : x )
@@ -104,10 +103,7 @@ void test ()
   random -> generator -> state = (uint64_t*) iter;
   iter += sizeof(uint64_t);
 
-  extern int util_random_initializer(random_t*, enum PRNG);
-  iPRNG_t const irandom = { .initializer = util_random_initializer };
-  util_t const util = { .random = irandom };
-  int const stat = util.random.initializer(random, NRAND);
+  int const stat = util_random_initializer(random, NRAND);
   if (stat != 0)
   {
     free(data);
