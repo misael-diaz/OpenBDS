@@ -14,7 +14,6 @@
 #include "util/random/type.h"
 #include "util/particle.h"
 #include "util/array.h"
-#include "util/type.h"
 
 #define STDC17 201710L
 #define SUCCESS ( (int) ( __OBDS_SUCCESS__ ) )
@@ -1172,10 +1171,7 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 
   grid(x, y, z);
 
-  extern int util_random_initializer(random_t*, enum PRNG);
-  iPRNG_t const irandom = { .initializer = util_random_initializer };
-  util_t const util = { .random = irandom };
-  if (util.random.initializer(spheres -> prng, NRAND) == FAILURE)
+  if (util_random_initializer(spheres -> prng, NRAND) == FAILURE)
   {
     fprintf(stderr, "particles.sphere.initializer(): PRNG ERROR\n");
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )

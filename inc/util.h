@@ -3,7 +3,6 @@
 
 #include "util/arrays.h"
 #include "util/random.h"
-#include "util/type.h"
 
 #endif
 

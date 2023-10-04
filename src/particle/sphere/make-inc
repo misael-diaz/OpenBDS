@@ -37,9 +37,6 @@ RNDERR_H = ../../../inc/util/random/err.h
 RANDTP_H = ../../../inc/util/random/type.h
 RANDOM_H = ../../../inc/util/random.h
 
-UTILTP_H = ../../../inc/util/type.h
-UTIL_H = ../../../inc/util.h
-
 SPHERE_TYPE_H = ../../../inc/particle/sphere/type.h
 SPHERE_PARAMS_H = ../../../inc/particle/sphere/params.h
 SPHERE_UTILS_H = ../../../inc/particle/sphere/utils.h
@@ -47,8 +44,8 @@ SPHERE_H = ../../../inc/particle/sphere.h
 
 HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(BDS_PARAMS_H) $(SYSBOX_PARAMS_H)\
 	  $(SYSBOX_UTILS_H) $(SYSBOX_H) $(SYSTEM_PARAMS_H) $(SYSTEM_H) $(ARRAYS_H)\
-	  $(RNDERR_H) $(RANDTP_H) $(RANDOM_H) $(UTILTP_H) $(UTIL_H) $(SPHERE_TYPE_H)\
-	  $(UPRTCL_H) $(SPHERE_PARAMS_H) $(SPHERE_UTILS_H) $(SPHERE_H)
+	  $(RNDERR_H) $(RANDTP_H) $(RANDOM_H) $(SPHERE_TYPE_H) $(UPRTCL_H)\
+	  $(SPHERE_PARAMS_H) $(SPHERE_UTILS_H) $(SPHERE_H)
 
 # sources
 SPHERE_C = sphere.c
