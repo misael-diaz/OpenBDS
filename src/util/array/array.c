@@ -4,7 +4,7 @@
 
 #define NUMEL ( (size_t) __OBDS_NUM_PARTICLES__ )
 
-void util_array_copy (const prop_t* __restrict__ source, prop_t* __restrict__ dest)
+static void copy (const prop_t* __restrict__ source, prop_t* __restrict__ dest)
 {
   double* dst = &dest[0].data;
   const double* src = &source[0].data;
@@ -14,7 +14,7 @@ void util_array_copy (const prop_t* __restrict__ source, prop_t* __restrict__ de
   }
 }
 
-void util_array_zeros (prop_t* x)
+static void zeros (prop_t* x)
 {
   double* data = &x[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
@@ -23,7 +23,7 @@ void util_array_zeros (prop_t* x)
   }
 }
 
-void util_array_ones (prop_t* x)
+static void ones (prop_t* x)
 {
   double* data = &x[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
@@ -32,13 +32,33 @@ void util_array_ones (prop_t* x)
   }
 }
 
-void util_array_iota (prop_t* ID)
+static void iota (prop_t* ID)
 {
   uint64_t* id = &ID[0].bin;
   for (size_t i = 0; i != NUMEL; ++i)
   {
     id[i] = i;
   }
+}
+
+void util_array_copy (const prop_t* __restrict__ src, prop_t* __restrict__ dst)
+{
+  copy(src, dst);
+}
+
+void util_array_zeros (prop_t* x)
+{
+  zeros(x);
+}
+
+void util_array_ones (prop_t* x)
+{
+  ones(x);
+}
+
+void util_array_iota (prop_t* x)
+{
+  iota(x);
 }
 
 /*

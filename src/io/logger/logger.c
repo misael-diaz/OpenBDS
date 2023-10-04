@@ -14,7 +14,7 @@
 #define NUMEL ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
 
 // logs the particle properties (position, orientation, id, etc.) to a plain text file
-int io_logger_log (const particle_t* particles, const char* log)
+static int property_logger (const particle_t* particles, const char* log)
 {
   char txt[80];
   char tmp[80];
@@ -82,6 +82,12 @@ int io_logger_log (const particle_t* particles, const char* log)
   }
 
   return SUCCESS;
+}
+
+// user-interface to the logger
+int io_logger_log (const particle_t* particles, const char* log)
+{
+  return property_logger(particles, log);
 }
 
 /*

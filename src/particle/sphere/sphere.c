@@ -784,7 +784,7 @@ static int updater (sphere_t* spheres)
 	      double const offset_y,
 	      double const offset_z) = callback;
   particle_t* particles = spheres -> props;
-  util_particle_brute_force(particles, cb);
+  util_particle_bruteForce(particles, cb);
   clamps(f_x, f_y, f_z, tmp, temp, bitmask);
 #if (SUPPLY_MOBILITY_CALLBACK == 1)
   util_particle_translate(particles, sphere_mobility_callback);
@@ -794,7 +794,7 @@ static int updater (sphere_t* spheres)
   // we want to store the deterministic forces temporarily for logging purposes
   memcpy(list, f_x, 3LU * NUMEL * sizeof(prop_t));
 
-  if (util_particle_stochastic_forces(random, particles) == FAILURE)
+  if (util_particle_BrownianForces(random, particles) == FAILURE)
   {
     return FAILURE;
   }
@@ -803,7 +803,7 @@ static int updater (sphere_t* spheres)
   stochastic_shifts(x, y, z, f_x, f_y, f_z);
   vsum(f_x, list);
 
-  if (util_particle_stochastic_torques(random, particles) == FAILURE)
+  if (util_particle_BrownianTorques(random, particles) == FAILURE)
   {
     return FAILURE;
   }
