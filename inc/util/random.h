@@ -2,6 +2,7 @@
 #define GUARD_OPENBDS_UTIL_RANDOM_H
 
 #include "util/random/err.h"
+#include "util/random/initializer.h"
 #include "util/random/type.h"
 
 #endif
