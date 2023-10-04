@@ -232,7 +232,7 @@ static double fetcher (random_t* random)
 
 
 // initial version of the PRNG initializer, state seeding and binding
-int util_random_initializer (random_t* random, enum PRNG PRNG)
+static int initializer (random_t* random, enum PRNG PRNG)
 {
   generator_t* generator = random -> generator;
   generator -> seed = seeder;
@@ -249,6 +249,12 @@ int util_random_initializer (random_t* random, enum PRNG PRNG)
   return stat;
 }
 
+
+// user-interface to the PRNG initializer
+int util_random_initializer (random_t* random, enum PRNG PRNG)
+{
+  return initializer(random, PRNG);
+}
 
 /*
 
