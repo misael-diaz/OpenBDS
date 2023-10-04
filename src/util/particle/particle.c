@@ -511,7 +511,7 @@ static void bruteForce (particle_t* particles,
 // forwards the task of applying boundary conditions
 static void pbcs (particle_t* particles)
 {
-  system_box_apply_periodic_boundary_conditions(particles);
+  system_box_applyPeriodicBoundaryConditions(particles);
 }
 
 
