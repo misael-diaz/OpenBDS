@@ -14,7 +14,7 @@
 # (at your option) any later version.
 #
 
-all: arrays PRNGs particles types
+all: arrays PRNGs particles
 
 arrays:
 	@$(MAKE) -C array
@@ -22,11 +22,8 @@ PRNGs:
 	@$(MAKE) -C random
 particles:
 	@$(MAKE) -C particle
-types: PRNGs
-	@$(MAKE) -C type
 
 clean:
 	@$(MAKE) -C array clean
 	@$(MAKE) -C random clean
 	@$(MAKE) -C particle clean
-	@$(MAKE) -C type clean

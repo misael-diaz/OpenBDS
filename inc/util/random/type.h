@@ -25,13 +25,7 @@ struct random
 
 typedef struct random random_t;
 
-// not used, shall be removed in a future commit
-struct iPRNG {
-  int (*initializer) (struct random*, enum PRNG);
-};
-
-// not used, shall be removed in a future commit
-typedef struct iPRNG iPRNG_t;
+int util_random_initializer(random_t*, enum PRNG);
 
 #endif
 
