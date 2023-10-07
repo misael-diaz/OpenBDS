@@ -2,62 +2,72 @@
 #include "util/array.h"
 #include "system/params.h"
 
-#define NUMEL ( (size_t) __OBDS_NUM_PARTICLES__ )
+// hardcoded number of elements `numel' of the arrays
+#define NUMEL ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
 
-static void copy (const prop_t* __restrict__ source, prop_t* __restrict__ dest)
+// copies the `numel' elements of the source array `src' into the destination array `dst'
+static void copy (const double* __restrict__ src, double* __restrict__ dst)
 {
-  double* dst = &dest[0].data;
-  const double* src = &source[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
   {
     dst[i] = src[i];
   }
 }
 
-static void zeros (prop_t* x)
+// fills array `x' with zeros, numpy-like zeros
+static void zeros (double* x)
 {
-  double* data = &x[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    data[i] = 0.0;
+    x[i] = 0.0;
   }
 }
 
-static void ones (prop_t* x)
+// fills array `x' with ones, numpy-like ones
+static void ones (double* x)
 {
-  double* data = &x[0].data;
   for (size_t i = 0; i != NUMEL; ++i)
   {
-    data[i] = 1.0;
+    x[i] = 1.0;
   }
 }
 
-static void iota (prop_t* ID)
+// fills array `x' with the sequence in the asymmetric range [0, NUMEL)
+static void iota (uint64_t* x)
 {
-  uint64_t* id = &ID[0].bin;
-  for (size_t i = 0; i != NUMEL; ++i)
+  uint64_t const numel = NUMEL;
+  for (uint64_t i = 0; i != numel; ++i)
   {
-    id[i] = i;
+    x[i] = i;
   }
 }
 
-void util_array_copy (const prop_t* __restrict__ src, prop_t* __restrict__ dst)
+// array copy utility
+void util_array_copy (const prop_t* __restrict__ source, prop_t* __restrict__ destination)
 {
+  double* dst = &(destination[0].data);
+  const double* src = &(source[0].data);
   copy(src, dst);
 }
 
-void util_array_zeros (prop_t* x)
+// numpy-like zeros utility
+void util_array_zeros (prop_t* properties)
 {
+  double* x = &(properties[0].data);
   zeros(x);
 }
 
-void util_array_ones (prop_t* x)
+// numpy-like ones utility
+void util_array_ones (prop_t* properties)
 {
+  double* x = &(properties[0].data);
   ones(x);
 }
 
-void util_array_iota (prop_t* x)
+// C++ std::iota like utility
+void util_array_iota (prop_t* properties)
 {
+  uint64_t* x = &(properties[0].bin);
   iota(x);
 }
 
