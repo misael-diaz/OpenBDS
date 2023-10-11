@@ -419,8 +419,8 @@ static void sphere_mobility_callback (particle_t* particles)
   double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
   double const angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
 #endif
-  prop_t* bitmask = particles -> bitmask;
-  double* mobilities = &(bitmask[0].data);
+  prop_t* placeholder = particles -> bitmask;
+  double* mobilities = &(placeholder[0].data);
   mobilities[0] = linear_mobility;
   mobilities[1] = angular_mobility;
 }
