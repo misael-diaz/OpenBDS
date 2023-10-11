@@ -28,7 +28,8 @@ static void default_particle_mobility_callback (particle_t* particles)
   double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
   double const angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
 #endif
-  double* mobilities = &(particles -> bitmask -> data);
+  prop_t* placeholder = particles -> bitmask;
+  double* mobilities = &(placeholder[0].data);
   mobilities[0] = linear_mobility;
   mobilities[1] = angular_mobility;
 }
@@ -49,18 +50,32 @@ static void translate (double* __restrict__ x,
 // translates the particles in the x, y, and z directions
 static void translate_isotropic (particle_t* particles, void (*cb)(particle_t* particles))
 {
-  double* x = &(particles -> x -> data);
-  double* y = &(particles -> y -> data);
-  double* z = &(particles -> z -> data);
-  double* r_x = &(particles -> r_x -> data);
-  double* r_y = &(particles -> r_y -> data);
-  double* r_z = &(particles -> r_z -> data);
-  const double* f_x = &(particles -> f_x -> data);
-  const double* f_y = &(particles -> f_y -> data);
-  const double* f_z = &(particles -> f_z -> data);
+  // destructures the particles object to obtain the properties
+  prop_t* prop_x = particles -> x;
+  prop_t* prop_y = particles -> y;
+  prop_t* prop_z = particles -> z;
+  prop_t* prop_r_x = particles -> r_x;
+  prop_t* prop_r_y = particles -> r_y;
+  prop_t* prop_r_z = particles -> r_z;
+  const prop_t* prop_f_x = particles -> f_x;
+  const prop_t* prop_f_y = particles -> f_y;
+  const prop_t* prop_f_z = particles -> f_z;
+  // destructures the particle properties to obtain the underlying data
+  double* x = &(prop_x[0].data);
+  double* y = &(prop_y[0].data);
+  double* z = &(prop_z[0].data);
+  double* r_x = &(prop_r_x[0].data);
+  double* r_y = &(prop_r_y[0].data);
+  double* r_z = &(prop_r_z[0].data);
+  const double* f_x = &(prop_f_x[0].data);
+  const double* f_y = &(prop_f_y[0].data);
+  const double* f_z = &(prop_f_z[0].data);
+  // writes the particle ``mobilities'' to the designated placeholder
   void (*callback)(particle_t*) = cb;
   callback(particles);
-  const double* mobilities = &(particles -> bitmask -> data);
+  // gets the particle translational mobility when subjected to deterministic forces
+  const prop_t* placeholder = particles -> bitmask;
+  const double* mobilities = &(placeholder[0].data);
   double const linear_mobility = mobilities[0];
   // updates the position vectors subjected to the periodicity of the system box
   translate(x, f_x, linear_mobility);
@@ -108,18 +123,33 @@ static void translate (double* __restrict__ x,
 static void translate_anisotropic (particle_t* particles,
 				   void (*cb)(particle_t* particles))
 {
-  double* x = &(particles -> x -> data);
-  double* y = &(particles -> y -> data);
-  double* z = &(particles -> z -> data);
-  double* r_x = &(particles -> r_x -> data);
-  double* r_y = &(particles -> r_y -> data);
-  double* r_z = &(particles -> r_z -> data);
-  const double* f_x = &(particles -> f_x -> data);
-  const double* f_y = &(particles -> f_y -> data);
-  const double* f_z = &(particles -> f_z -> data);
+  // destructures the particles object to obtain the properties
+  prop_t* prop_x = particles -> x;
+  prop_t* prop_y = particles -> y;
+  prop_t* prop_z = particles -> z;
+  prop_t* prop_r_x = particles -> r_x;
+  prop_t* prop_r_y = particles -> r_y;
+  prop_t* prop_r_z = particles -> r_z;
+  const prop_t* prop_f_x = particles -> f_x;
+  const prop_t* prop_f_y = particles -> f_y;
+  const prop_t* prop_f_z = particles -> f_z;
+  // destructures the particle properties to obtain the underlying data
+  double* x = &(prop_x[0].data);
+  double* y = &(prop_y[0].data);
+  double* z = &(prop_z[0].data);
+  double* r_x = &(prop_r_x[0].data);
+  double* r_y = &(prop_r_y[0].data);
+  double* r_z = &(prop_r_z[0].data);
+  const double* f_x = &(prop_f_x[0].data);
+  const double* f_y = &(prop_f_y[0].data);
+  const double* f_z = &(prop_f_z[0].data);
+  // writes the particle ``mobilities'' to the designated placeholder
   void (*callback)(particle_t*) = cb;
   callback(particles);
-  const double* mobilities = &(particles -> bitmask -> data);
+  // gets the particle translational mobility when subjected to deterministic forces
+  const prop_t* placeholder = particles -> bitmask;
+  const double* mobilities = &(placeholder[0].data);
+  // gets the particle translational mobility when subjected to deterministic forces
   double const linear_parallel_mobility = mobilities[0];
   double const linear_orthogonal_mobility = mobilities[1];
   // updates the position vectors subjected to the periodicity of the system box

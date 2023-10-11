@@ -208,7 +208,7 @@ static void SLJ (prop_t* __restrict__ dist,
 
   // scales the interparticle distance (as required by the inrange() method):
 
-  double* r = &dist[0].data;
+  double* r = &(dist[0].data);
   for (size_t j = 0; j != NUMEL; ++j)
   {
     double const c = (1.0 / RANGE);
@@ -229,7 +229,7 @@ static void SLJ (prop_t* __restrict__ dist,
 
   // computes the "point-force" contribution of the SLJ interaction:
 
-  double* frc = &force[0].data;
+  double* frc = &(force[0].data);
   for (size_t j = 0; j != NUMEL; ++j)
   {
     // radius of cutoff
@@ -310,10 +310,10 @@ static void pairs (size_t const i,
 {
   // computes the interparticle distance between the ith and jth particles:
 
-  double* d = &p_d[0].data;
-  const double* x = &p_x[0].data;
-  const double* y = &p_y[0].data;
-  const double* z = &p_z[0].data;
+  double*       d = &(p_d[0].data);
+  const double* x = &(p_x[0].data);
+  const double* y = &(p_y[0].data);
+  const double* z = &(p_z[0].data);
   for (size_t j = 0; j != NUMEL; ++j)
   {
     double const d_x = ( x[i] - (x[j] + offset_x) );
@@ -339,14 +339,14 @@ static void pairs (size_t const i,
     d[j] = ( x[i] - (x[j] + offset_x) );
   }
 
-  const double* f = &p_f[0].data;
-  double* force = &p_bitmask[0].data;
+  const double* f = &(p_f[0].data);
+  double* force = &(p_bitmask[0].data);
   for (size_t j = 0; j != NUMEL; ++j)
   {
     force[j] = f[j] * d[j];
   }
 
-  double* F_x = &p_F_x[0].data;
+  double* F_x = &(p_F_x[0].data);
   for (size_t j = 0; j != NUMEL; ++j)
   {
     F_x[i] += force[j];
@@ -362,7 +362,7 @@ static void pairs (size_t const i,
     force[j] = f[j] * d[j];
   }
 
-  double* F_y = &p_F_y[0].data;
+  double* F_y = &(p_F_y[0].data);
   for (size_t j = 0; j != NUMEL; ++j)
   {
     F_y[i] += force[j];
@@ -378,7 +378,7 @@ static void pairs (size_t const i,
     force[j] = f[j] * d[j];
   }
 
-  double* F_z = &p_F_z[0].data;
+  double* F_z = &(p_F_z[0].data);
   for (size_t j = 0; j != NUMEL; ++j)
   {
     F_z[i] += force[j];
@@ -419,7 +419,8 @@ static void sphere_mobility_callback (particle_t* particles)
   double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
   double const angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
 #endif
-  double* mobilities = &(particles -> bitmask -> data);
+  prop_t* placeholder = particles -> bitmask;
+  double* mobilities = &(placeholder[0].data);
   mobilities[0] = linear_mobility;
   mobilities[1] = angular_mobility;
 }
@@ -433,8 +434,8 @@ static void clamp (prop_t* __restrict__ p_force,
 		   prop_t* __restrict__ p_temp,
 		   prop_t* __restrict__ p_bitmask)
 {
-  double* temp = &p_temp[0].data;
-  double* force = &p_force[0].data;
+  double* temp = &(p_temp[0].data);
+  double* force = &(p_force[0].data);
   // stores the scaled force in the temporary (required for masking)
   for (size_t i = 0; i != NUMEL; ++i)
   {
@@ -466,7 +467,7 @@ static void clamp (prop_t* __restrict__ p_force,
     a[i] = ( ( f[i] & MSB ) | ( max & (~b[i]) ) );
   }
 
-  double* tmp = &p_tmp[0].data;
+  double* tmp = &(p_tmp[0].data);
   // addes the stored forces to finalize the clamping
   for (size_t i = 0; i != NUMEL; ++i)
   {
@@ -492,8 +493,8 @@ static void clamps (prop_t* __restrict__ f_x,
 static void stochastic_shift (prop_t* __restrict__ prop_x,
 			      const prop_t* __restrict__ prop_F_x)
 {
-  double* x = &prop_x[0].data;
-  const double* F_x = &prop_F_x[0].data;
+  double* x = &(prop_x[0].data);
+  const double* F_x = &(prop_F_x[0].data);
   double const linear_stochastic_mobility = LINEAR_BROWNIAN_MOBILITY;
   for (size_t i = 0; i != NUMEL; ++i)
   {
@@ -506,8 +507,8 @@ static void stochastic_shift (prop_t* __restrict__ prop_x,
 static void stochastic_rotation (prop_t* __restrict__ prop_x,
 				 const prop_t* __restrict__ prop_T_x)
 {
-  double* x = &prop_x[0].data;
-  const double* T_x = &prop_T_x[0].data;
+  double* x = &(prop_x[0].data);
+  const double* T_x = &(prop_T_x[0].data);
   double const angular_stochastic_mobility = ANGULAR_BROWNIAN_MOBILITY;
   for (size_t i = 0; i != NUMEL; ++i)
   {
@@ -551,15 +552,15 @@ static void kinematics (prop_t* __restrict__ p_x,
 			const prop_t* __restrict__ p_d_z)
 
 {
-  double* x = &p_x[0].data;
-  double* y = &p_y[0].data;
-  double* z = &p_z[0].data;
-  const double* _dx = &p_dx[0].data;
-  const double* _dy = &p_dy[0].data;
-  const double* _dz = &p_dz[0].data;
-  const double* d_x = &p_d_x[0].data;
-  const double* d_y = &p_d_y[0].data;
-  const double* d_z = &p_d_z[0].data;
+  double* x = &(p_x[0].data);
+  double* y = &(p_y[0].data);
+  double* z = &(p_z[0].data);
+  const double* _dx = &(p_dx[0].data);
+  const double* _dy = &(p_dy[0].data);
+  const double* _dz = &(p_dz[0].data);
+  const double* d_x = &(p_d_x[0].data);
+  const double* d_y = &(p_d_y[0].data);
+  const double* d_z = &(p_d_z[0].data);
   for (size_t i = 0; i != NUMEL; ++i)
   {
     x[i] = d_x[i] + (_dy[i] * d_z[i] - _dz[i] * d_y[i]);
@@ -576,11 +577,11 @@ static void normalize (prop_t* __restrict__ p_x,
 		       prop_t* __restrict__ p_v,
 		       prop_t* __restrict__ p_t)
 {
-  double* x = &p_x[0].data;
-  double* y = &p_y[0].data;
-  double* z = &p_z[0].data;
-  double* v = &p_v[0].data;
-  double* t = &p_t[0].data;
+  double* x = &(p_x[0].data);
+  double* y = &(p_y[0].data);
+  double* z = &(p_z[0].data);
+  double* v = &(p_v[0].data);
+  double* t = &(p_t[0].data);
   for (size_t i = 0; i != NUMEL; ++i)
   {
     v[i] = (x[i] * x[i]) + (y[i] * y[i]) + (z[i] * z[i]);
@@ -617,8 +618,8 @@ static void normalize (prop_t* __restrict__ p_x,
 static void update_Euler_angle (prop_t* __restrict__ prop_x,
 				const prop_t* __restrict__ prop_dx)
 {
-  double* x = &prop_x[0].data;
-  const double* _dx = &prop_dx[0].data;
+  double* x = &(prop_x[0].data);
+  const double* _dx = &(prop_dx[0].data);
   for (size_t i = 0; i != NUMEL; ++i)
   {
     x[i] += _dx[i];
@@ -696,7 +697,7 @@ static void grid (prop_t* __restrict__ xprop,
 
   // sets particles at grid locations:
 
-  double* x = &xprop[0].data;
+  double* x = &(xprop[0].data);
   for (size_t n = 0; n != NUMEL; ++n)
   {
     size_t const i = (n % count);
@@ -704,7 +705,7 @@ static void grid (prop_t* __restrict__ xprop,
     x[n] = pos;
   }
 
-  double* y = &yprop[0].data;
+  double* y = &(yprop[0].data);
   for (size_t n = 0; n != NUMEL; ++n)
   {
     size_t const i = (n % count2) / count;
@@ -712,7 +713,7 @@ static void grid (prop_t* __restrict__ xprop,
     y[n] = pos;
   }
 
-  double* z = &zprop[0].data;
+  double* z = &(zprop[0].data);
   for (size_t n = 0; n != NUMEL; ++n)
   {
     size_t const i = (n / count2);
@@ -742,8 +743,8 @@ static void grid (prop_t* __restrict__ xprop,
 // sums `src' and `dst' vectors (elementwise), stores the result in `dst'
 static void vsum (prop_t* __restrict__ dest, const prop_t* __restrict__ source)
 {
-  double* dst = &dest[0].data;
-  const double* src = &source[0].data;
+  double* dst = &(dest[0].data);
+  const double* src = &(source[0].data);
   for (size_t i = 0; i != (3 * NUMEL); ++i)
   {
     dst[i] += src[i];
