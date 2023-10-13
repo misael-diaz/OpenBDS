@@ -4,6 +4,7 @@
 #if ( (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 25) )
 #include <sys/random.h>	// for seeding the PRNG with getrandom()
 #endif
+#include <stdlib.h>	// for seeding our PRNG with GLIBC's PRNG `random()'
 #include <unistd.h>	// required by getpid(), see man getpid
 #include <assert.h>	// for performing assertions at compile time via static_assert()
 #include <string.h>	// for logging errors on the standard error stream
@@ -103,23 +104,44 @@ static uint32_t genseed ()
 #endif
 
 
+// initializes glibc's pseudo-random number generator PRNG
+static int glibc_prng_initializer ()
+{
+#if ( ( __GNUC__ > 12 ) && (__STDC_VERSION__ > STDC17 ) )
+  static_assert(sizeof(unsigned int) == 4);
+#else
+  _Static_assert(sizeof(unsigned int) == 4, "seeder() expects `int's of 4 bytes");
+#endif
+  uint32_t const seed = genseed();
+  if ( (seed == 0) || (seed & 0x00000001) )
+  {
+    fprintf(stderr, "GLIBC-PRNG-Initializer(): ERROR\n");
+    return FAILURE;
+  }
+  srandom(seed);
+  return SUCCESS;
+}
+
+
+// seeds our pseudo-random number generator PRNG via glibc's PRNG
 static int seeder (generator_t* generator)
 {
 #if ( ( __GNUC__ > 12 ) && (__STDC_VERSION__ > STDC17 ) )
+// we expect `long int' to be 64-bits wide, if not, we would like to know at compile-time
   static_assert(sizeof(int) == 4);
+  static_assert(sizeof(long int) == sizeof(uint64_t));
 #else
   _Static_assert(sizeof(int) == 4, "seeder() expects `int's of 4 bytes");
+  _Static_assert(sizeof(long int) == sizeof(uint64_t),
+		 "seeder() expects `long int' to be 8 bytes");
 #endif
-  uint64_t const seed = genseed();
-  if ( (seed == 0) || (seed & 0x0000000000000001) )
+  uint64_t const seed = ( (uint64_t) random() );
+  if (seed == 0)
   {
     fprintf(stderr, "seed(): ERROR\n");
     return FAILURE;
   }
-  uint64_t const hi = 0xffffffff00000000;
-  uint64_t const lo = 0x00000000ffffffff;
-  // using the bitwise AND to be explicit about the bits (un)set
-  *generator -> state = ( ( (seed << 32) & hi ) | (seed & lo) );
+  *generator -> state = seed;
   *generator -> count = 0;
   return SUCCESS;
 }
@@ -231,6 +253,12 @@ static int initializer (random_t* random, enum PRNG PRNG)
   {
     generator -> fetch = nrand;
   }
+
+  if (glibc_prng_initializer() == FAILURE)
+  {
+    return FAILURE;
+  }
+
   int const stat = generator -> seed(generator);
   random -> fetch = fetcher;
   return stat;
@@ -264,8 +292,3 @@ References:
 [2] S Kim and S Karrila, Microhydrodynamics: Principles and Selected Applications.
 
 */
-
-
-// TODO:
-// [ ] use either stdlib's getrandom() or read /dev/urandom to seed the PRNG
-// [ ] fallback to XORing if the /dev/urandom does not have enough entropy
