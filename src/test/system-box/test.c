@@ -1,8 +1,6 @@
 #include <stdio.h>
 
-#include "system/params.h"
-#include "system/box/params.h"
-#include "system/box/utils.h"
+#include "system.h"
 
 #define TEST_ENABLED 0
 #define NUMEL ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )
