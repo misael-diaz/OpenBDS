@@ -3,6 +3,7 @@
 
 #include "particle/sphere/params.h"
 #include "particle/sphere/type.h"
+#include "particle/sphere/utils.h"
 
 #endif
 
