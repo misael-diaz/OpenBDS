@@ -1,7 +1,7 @@
 #ifndef GUARD_OPENBDS_UTIL_H
 #define GUARD_OPENBDS_UTIL_H
 
-#include "util/arrays.h"
+#include "util/array.h"
 #include "util/random.h"
 
 #endif

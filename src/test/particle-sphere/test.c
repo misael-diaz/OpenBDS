@@ -4,10 +4,9 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include "system/box/params.h"
-#include "util/random/type.h"
-#include "particle/sphere/params.h"
-#include "particle/sphere/utils.h"
+#include "system.h"
+#include "util.h"
+#include "particle/sphere.h"
 
 #define STDC17 201710L
 #define IOERR ( (int) 0xffffffff )
