@@ -1,6 +1,8 @@
 #ifndef GUARD_OPENBDS_BDS_PARAMS_H
 #define GUARD_OPENBDS_BDS_PARAMS_H
 
+#include <stdint.h>
+
 // defines the OBDS success `0' and error `-1' codes, these are returned by some functions
 // to signal the caller that an error has occurred so that the caller can handle the error
 // or signal its caller; this is done until we have reached a point in the OBDS code where
