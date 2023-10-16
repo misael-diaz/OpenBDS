@@ -24,11 +24,13 @@ TEST_F = test.f
 LOGGER_O = ../../io/logger/logger.o
 SYSBOX_O = ../../system/box/box.o
 ARRAYS_O = ../../util/array/array.o
+VECTOR_O = ../../util/vector/vector.o
 RANDOM_O = ../../util/random/random.o
 UPRTCL_O = ../../util/particle/particle.o
 UTILTP_O = ../../util/type/type.o
 SPHERE_O = ../../particle/sphere/sphere.o
-DEPS_O = $(LOGGER_O) $(SYSBOX_O) $(ARRAYS_O) $(RANDOM_O) $(UPRTCL_O) $(SPHERE_O)
+DEPS_O = $(LOGGER_O) $(SYSBOX_O) $(ARRAYS_O) $(VECTOR_O) $(RANDOM_O) $(UPRTCL_O)\
+	 $(SPHERE_O)
 TEST_O = test.o
 FEST_O = fest.o
 

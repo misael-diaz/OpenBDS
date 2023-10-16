@@ -20,7 +20,9 @@ INC = -I../../../inc
 FCONFG_H = ../../../inc/fconfig.h
 CONFIG_H = ../../../inc/config.h
 
-BDS_TYPES_H = ../../../inc/bds/types.h
+BDS_TYPES_H = ../../../inc/bds/types/property.h\
+	      ../../../inc/bds/types/particle.h\
+	      ../../../inc/bds/types.h
 
 SYSBOX_PARAMS_H = ../../../inc/system/box/params.h
 SYSBOX_UTILS_H = ../../../inc/system/box/utils.h

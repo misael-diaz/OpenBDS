@@ -11,6 +11,8 @@
 #include "system/box.h"
 #include "particle/sphere/params.h"
 #include "particle/sphere/type.h"
+#include "util/vector/type.h"
+#include "util/vector/util.h"
 #include "util/random/initializer.h"
 #include "util/random/type.h"
 #include "util/particle.h"
@@ -120,6 +122,7 @@ static void inrange (const prop_t* __restrict__ dist, prop_t* __restrict__ bitma
 
 
 // zeroes the x, y, and z components of the force
+/*
 static void zeroes (prop_t* __restrict__ f_x,
 		    prop_t* __restrict__ f_y,
 		    prop_t* __restrict__ f_z)
@@ -128,6 +131,7 @@ static void zeroes (prop_t* __restrict__ f_x,
   zeros(f_y);
   zeros(f_z);
 }
+*/
 
 
 // static double max (vectors)
@@ -144,7 +148,7 @@ static void zeroes (prop_t* __restrict__ f_x,
 // pass a pointer to the `x' component array and traverse the other two arrays in one
 // sweep since we know their sizes at compile-time.
 
-
+/*
 static double max (const prop_t* vectors)
 {
   double max = 0;
@@ -178,6 +182,7 @@ static double min (const prop_t* vectors)
   }
   return min;
 }
+*/
 
 
 // void SLJ (dist, force, bitmask)
@@ -741,6 +746,7 @@ static void grid (prop_t* __restrict__ xprop,
 
 
 // sums `src' and `dst' vectors (elementwise), stores the result in `dst'
+/*
 static void vsum (prop_t* __restrict__ dest, const prop_t* __restrict__ source)
 {
   double* dst = &(dest[0].data);
@@ -750,6 +756,7 @@ static void vsum (prop_t* __restrict__ dest, const prop_t* __restrict__ source)
     dst[i] += src[i];
   }
 }
+*/
 
 
 // updates the positions of the particles due to the forces acting on them
@@ -779,7 +786,10 @@ static int updater (sphere_t* spheres)
   prop_t* bitmask = spheres -> props -> bitmask;
   prop_t* list = spheres -> props -> list;
   random_t* random = spheres -> prng;
+  /*
   zeroes(f_x, f_y, f_z);
+  */
+  util_vector_zeros(f_x);
   void (*cb) (particle_t* particles,
 	      size_t const i,
 	      double const offset_x,
@@ -803,7 +813,10 @@ static int updater (sphere_t* spheres)
 
   stochastic_shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   stochastic_shifts(x, y, z, f_x, f_y, f_z);
+  /*
   vsum(f_x, list);
+  */
+  util_vector_sum(f_x, list);
 
   if (util_particle_BrownianTorques(random, particles) == FAILURE)
   {
@@ -887,9 +900,14 @@ static int logger_verbose (const sphere_t* spheres, size_t const step)
     return FAILURE;
   }
 
+  /*
   const prop_t* force = spheres -> props -> f_x;
   double const f_min = min(force);
   double const f_max = max(force);
+  */
+  const vector_t* force = spheres -> props -> f_x;
+  double const f_min = util_vector_min(force);
+  double const f_max = util_vector_max(force);
   if (f_max == CLAMP)
   {
     fprintf(stdout, "logger(): clamping detected in step %zu\n", step);

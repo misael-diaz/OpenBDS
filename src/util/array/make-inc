@@ -20,7 +20,8 @@ INC = -I../../../inc
 FCONFG_H = ../../../inc/fconfig.h
 CONFIG_H = ../../../inc/config.h
 
-BDS_TYPES_H = ../../../inc/bds/types.h
+BDS_TYPES_H = ../../../inc/bds/types/property.h\
+	      ../../../inc/bds/types.h
 
 SYSTEM_PARAMS_H = ../../../inc/system/params.h
 
