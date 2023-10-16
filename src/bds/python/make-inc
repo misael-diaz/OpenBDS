@@ -17,10 +17,12 @@
 LOGGER_O = ../../io/logger/logger.o
 SYSBOX_O = ../../system/box/box.o
 ARRAYS_O = ../../util/array/array.o
+VECTOR_O = ../../util/vector/vector.o
 UPRTCL_O = ../../util/particle/particle.o
 RANDOM_O = ../../util/random/random.o
 SPHERE_O = ../../particle/sphere/sphere.o
-OBJECTS = $(LOGGER_O) $(SYSBOX_O) $(ARRAYS_O) $(RANDOM_O) $(UPRTCL_O) $(SPHERE_O)
+OBJECTS = $(LOGGER_O) $(SYSBOX_O) $(ARRAYS_O) $(VECTOR_O) $(RANDOM_O) $(UPRTCL_O)\
+	  $(SPHERE_O)
 
 # shared objects
 LOBDS_SO = libOBDS.so

@@ -1,16 +1,25 @@
-#ifndef GUARD_OPENBDS_BDS_TYPES_H
-#define GUARD_OPENBDS_BDS_TYPES_H
+#ifndef GUARD_OPENBDS_BDS_TYPES_PROPERTY_TYPE_H
+#define GUARD_OPENBDS_BDS_TYPES_PROPERTY_TYPE_H
 
-#include "types/property.h"
-#include "types/particle.h"
+#include <stdint.h>
+
+// we take advantage of this union to reuse data placeholders and for writing vectorizable
+// for-loops that would not be otherwise optimized by the GCC compiler
+union __OBDS_PROP_TYPE__
+{
+  double data;
+  uint64_t bin;
+};
+
+typedef union __OBDS_PROP_TYPE__ prop_t;
 
 #endif
 
 /*
 
-OpenBDS							September 07, 2023
+OpenBDS							October 15, 2023
 
-source: bds/types.h
+source: bds/types/property.h
 author: @misael-diaz
 
 Synopsis:
