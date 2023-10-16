@@ -24,25 +24,14 @@ BDS_TYPES_H = ../../../inc/bds/types/property.h\
 	      ../../../inc/bds/types/particle.h\
 	      ../../../inc/bds/types.h
 
-BDS_PARAMS_H = ../../../inc/bds/params.h
-
-SYSBOX_PARAMS_H = ../../../inc/system/box/params.h
-SYSBOX_UTILS_H = ../../../inc/system/box/utils.h
-SYSBOX_H = ../../../inc/system/box.h
-
 SYSTEM_PARAMS_H = ../../../inc/system/params.h
-SYSTEM_H = ../../../inc/system.h
 
-UTIL_RANDOM_TYPE_H = ../../../inc/util/random/type.h
-UTIL_RANDOM_ERR_H = ../../../inc/util/random/err.h
-UTIL_PARTICLE_H = ../../../inc/util/particle.h
+VECTOR_H = ../../../inc/util/vector.h
 
-HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_PARAMS) $(BDS_TYPES_H) $(SYSBOX_PARAMS_H)\
-	  $(SYSBOX_UTILS_H) $(SYSBOX_H) $(SYSTEM_PARAMS_H) $(SYSTEM_H)\
-	  $(UTIL_RANDOM_ERR_H) $(UTIL_RANDOM_TYPE_H) $(UTIL_PARTICLE_H)
+HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(SYSTEM_PARAMS_H) $(VECTOR_H)
 
 # sources
-PARTICLE_C = particle.c
+VECTOR_C = vector.c
 
 # objects
-PARTICLE_O = particle.o
+VECTOR_O = vector.o

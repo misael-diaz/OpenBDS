@@ -1,21 +1,20 @@
-#ifndef GUARD_OPENBDS_BDS_TYPES_H
-#define GUARD_OPENBDS_BDS_TYPES_H
+#ifndef GUARD_OPENBDS_UTIL_VECTOR_H
+#define GUARD_OPENBDS_UTIL_VECTOR_H
 
-#include "types/property.h"
-#include "types/particle.h"
+#include "util/vector/util.h"
+#include "util/vector/type.h"
 
 #endif
 
 /*
 
-OpenBDS							September 07, 2023
+OpenBDS							September 05, 2023
 
-source: bds/types.h
+source: util/vector.h
 author: @misael-diaz
 
 Synopsis:
-Defines the OpenBDS property type.
-Sometimes we operate on floats as if they were integers so this definition is quite handy.
+Bundles headers for the vector type.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published
