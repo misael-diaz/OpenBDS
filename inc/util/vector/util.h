@@ -1,21 +1,21 @@
 #ifndef GUARD_OPENBDS_UTIL_VECTOR_UTIL_H
 #define GUARD_OPENBDS_UTIL_VECTOR_UTIL_H
 
-// includes the vector type
-#include "type.h"
+// forward declares the OBDS property type
+union __OBDS_PROP_TYPE__ ;
 
 // returns the smallest, absolute-valued, element of vector `vec', min( abs(vec[:]) )
-double util_vector_min (const vector_t* __restrict__ vec);
+double util_vector_min (const union __OBDS_PROP_TYPE__ * __restrict__ vec);
 
 // returns the largest,  absolute-valued, element of vector `vec', max( abs(vec[:]) )
-double util_vector_max (const vector_t* __restrict__ vec);
+double util_vector_max (const union __OBDS_PROP_TYPE__ * __restrict__ vec);
 
 // fills vector `vec' with zeros
-void util_vector_zeros (vector_t* __restrict__ vec);
+void util_vector_zeros (union __OBDS_PROP_TYPE__ * __restrict__ vec);
 
 // sums the vectors `dst' and `src', the result is stored in `dst'
-void util_vector_sum (vector_t* __restrict__ dst,
-		      const vector_t* __restrict__ src);
+void util_vector_sum (union __OBDS_PROP_TYPE__ * __restrict__ dst,
+		      const union __OBDS_PROP_TYPE__ * __restrict__ src);
 
 #endif
 

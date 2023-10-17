@@ -17,41 +17,42 @@
 INC = -I../../../inc
 
 # headers
-FCONFG_H = ../../../inc/fconfig.h
-CONFIG_H = ../../../inc/config.h
+CONFIG_H = ../../../inc/config/fconfig.h\
+	   ../../../inc/config/config.h\
+	   ../../../inc/config.h
 
-BDS_TYPES_H = ../../../inc/bds/types/property.h\
-	      ../../../inc/bds/types/particle.h\
-	      ../../../inc/bds/types.h
-BDS_PARAMS_H = ../../../inc/bds/params.h
+BDS_H = ../../../inc/bds/types/property.h\
+	../../../inc/bds/types/particle.h\
+	../../../inc/bds/types.h\
+	../../../inc/bds/params.h\
+	../../../inc/bds.h
 
-SYSBOX_PARAMS_H = ../../../inc/system/box/params.h
-SYSBOX_UTILS_H = ../../../inc/system/box/utils.h
-SYSBOX_H = ../../../inc/system/box.h
+SYSTEM_H = ../../../inc/system/box/params.h\
+	   ../../../inc/system/box/utils.h\
+	   ../../../inc/system/box.h\
+	   ../../../inc/system/params.h\
+	   ../../../inc/system.h
 
-SYSTEM_PARAMS_H = ../../../inc/system/params.h
-SYSTEM_H = ../../../inc/system.h
+UTIL_H = ../../../inc/util/vector/type.h\
+	 ../../../inc/util/vector/util.h\
+	 ../../../inc/util/vector.h\
+	 ../../../inc/util/random/err.h\
+	 ../../../inc/util/random/type.h\
+	 ../../../inc/util/random/initializer.h\
+	 ../../../inc/util/random.h\
+	 ../../../inc/util/array.h\
+	 ../../../inc/util/particle.h\
+	 ../../../inc/util.h
 
-VECTOR_H = ../../../inc/util/vector/type.h\
-	   ../../../inc/util/vector/util.h\
-	   ../../../inc/util/vector.h
-ARRAYS_H = ../../../inc/util/array.h
-UPRTCL_H = ../../../inc/util/particle.h
+IO_H = ../../../inc/io/logger.h\
+       ../../../inc/io.h
 
-RNDERR_H = ../../../inc/util/random/err.h
-RANDTP_H = ../../../inc/util/random/type.h
-RANDIN_H = ../../../inc/util/random/initializer.h
-RANDOM_H = ../../../inc/util/random.h
+SPHERE_H = ../../../inc/particle/sphere/params.h\
+	   ../../../inc/particle/sphere/type.h\
+	   ../../../inc/particle/sphere/utils.h\
+	   ../../../inc/particle/sphere.h
 
-SPHERE_TYPE_H = ../../../inc/particle/sphere/type.h
-SPHERE_PARAMS_H = ../../../inc/particle/sphere/params.h
-SPHERE_UTILS_H = ../../../inc/particle/sphere/utils.h
-SPHERE_H = ../../../inc/particle/sphere.h
-
-HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(BDS_PARAMS_H) $(SYSBOX_PARAMS_H)\
-	  $(SYSBOX_UTILS_H) $(SYSBOX_H) $(SYSTEM_PARAMS_H) $(SYSTEM_H) $(ARRAYS_H)\
-	  $(VECTOR_H) $(RNDERR_H) $(RANDTP_H) $(RANDIN_H) $(RANDOM_H) $(SPHERE_TYPE_H)\
-	  $(UPRTCL_H) $(SPHERE_PARAMS_H) $(SPHERE_UTILS_H) $(SPHERE_H)
+HEADERS = $(CONFIG_H) $(BDS_H) $(SYSTEM_H) $(UTIL_H) $(IO_H) $(SPHERE_H)
 
 # sources
 SPHERE_C = sphere.c

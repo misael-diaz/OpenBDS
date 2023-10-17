@@ -19,9 +19,9 @@ include make-inc
 all: $(TEST)
 
 $(TEST): $(TEST_O)
-	$(CC) $(INC) $(CCOPT) $(BOX_O) $(TEST_O) -o $(TEST) $(LIBS)
+	$(CC) $(INC) $(CCOPT) $(SYSTEM_O) $(TEST_O) -o $(TEST) $(LIBS)
 
-$(TEST_O): $(SYSTEM_H) $(BOX_H) $(BOX_O) $(TEST_C)
+$(TEST_O): $(HEADERS) $(SYSTEM_O) $(TEST_C)
 	$(CC) $(INC) $(CCOPT) -c $(TEST_C) -o $(TEST_O)
 
 clean:

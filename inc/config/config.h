@@ -1,9 +1,14 @@
-#ifndef GUARD_OPENBDS_FORTRAN_CONFIG_H
-#define GUARD_OPENBDS_FORTRAN_CONFIG_H
+#ifndef GUARD_OPENBDS_CONFIG_CONFIG_H
+#define GUARD_OPENBDS_CONFIG_CONFIG_H
 
-#define FCONF_ISOTROPIC_HYDRODYNAMIC_RESISTANCE_PARTICLE 1
-#define FCONF_LOG_NUM_PARTICLES 8
-#define FCONF_LIMIT 8.0
+#include <stddef.h>
+
+#include "fconfig.h"
+
+// defines the total number of particles in the system
+#define CONF_NUM_PARTICLES ( (size_t) FCONF_NUM_PARTICLES )
+// defines the system box limits, x = y = z = -LIMIT, +LIMIT
+#define CONF_LIMIT ( (double) FCONF_LIMIT )
 
 #endif
 
@@ -11,12 +16,12 @@
 
 OpenBDS                                                 September 07, 2023
 
-source: fconfig.h
+source: config.h
 author: @misael-diaz
 
 Synopsis:
-FORTRAN configuration file for the Brownian Dynamics Simulations.
-Defines the number of particles and the system (cubic) box limit.
+Defines some parameters for configuring the Brownian Dynamics Simulations BDS.
+Do not edit this header file manually, edit the FORTRAN fconfig.h instead.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

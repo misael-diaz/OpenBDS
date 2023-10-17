@@ -17,17 +17,17 @@
 INC = -I../../../inc
 
 # headers
-FCONFG_H = ../../../inc/fconfig.h
-CONFIG_H = ../../../inc/config.h
+CONFIG_H = ../../../inc/config/fconfig.h\
+	   ../../../inc/config/config.h\
+	   ../../../inc/config.h
 
-BDS_TYPES_H = ../../../inc/bds/types/property.h\
-	      ../../../inc/bds/types.h
+BDS_H = ../../../inc/bds/types/property.h
 
-SYSTEM_PARAMS_H = ../../../inc/system/params.h
+SYSTEM_H = ../../../inc/system/params.h
 
-ARRAY_H = ../../../inc/util/array.h
+UTIL_H = ../../../inc/util/array.h
 
-HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(SYSTEM_PARAMS_H) $(ARRAY_H)
+HEADERS = $(CONFIG_H) $(BDS_H) $(SYSTEM_H) $(UTIL_H)
 
 # sources
 ARRAY_C = array.c

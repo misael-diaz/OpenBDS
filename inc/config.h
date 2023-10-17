@@ -1,14 +1,8 @@
 #ifndef GUARD_OPENBDS_CONFIG_H
 #define GUARD_OPENBDS_CONFIG_H
 
-#include <stddef.h>
-
-#include "fconfig.h"
-
-// defines the total number of particles in the system
-#define CONF_NUM_PARTICLES ( (size_t) FCONF_NUM_PARTICLES )
-// defines the system box limits, x = y = z = -LIMIT, +LIMIT
-#define CONF_LIMIT ( (double) FCONF_LIMIT )
+#include "config/fconfig.h"
+#include "config/config.h"
 
 #endif
 
@@ -20,8 +14,7 @@ source: config.h
 author: @misael-diaz
 
 Synopsis:
-Defines some parameters for configuring the Brownian Dynamics Simulations BDS.
-Do not edit this header file manually, edit the FORTRAN fconfig.h instead.
+Bundles configuration headers.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

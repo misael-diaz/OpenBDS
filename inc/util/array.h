@@ -1,19 +1,21 @@
 #ifndef GUARD_OPENBDS_UTIL_ARRAY_H
 #define GUARD_OPENBDS_UTIL_ARRAY_H
 
-#include "bds/types.h"
+// forward declares the OBDS property type
+union __OBDS_PROP_TYPE__ ;
 
 // copies source `src' into destination `dst' array
-void util_array_copy (const prop_t* __restrict__ src, prop_t* __restrict__ dst);
+void util_array_copy (const union __OBDS_PROP_TYPE__ * __restrict__ src,
+		      union __OBDS_PROP_TYPE__ * __restrict__ dst);
 
 // numpy-like utils:
 
 // fills array `x' with zeros, numel(x) = `N' where `N' is the number of particles
-void util_array_zeros (prop_t* x);
+void util_array_zeros (union __OBDS_PROP_TYPE__ * x);
 // as zeros but fills array with ones
-void util_array_ones (prop_t* x);
+void util_array_ones (union __OBDS_PROP_TYPE__ * x);
 // fills array with values in the asymmetric range [0, `N'] (based on C++ std::iota)
-void util_array_iota (prop_t* x);
+void util_array_iota (union __OBDS_PROP_TYPE__ * x);
 
 #endif
 

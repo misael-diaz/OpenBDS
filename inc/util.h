@@ -2,7 +2,9 @@
 #define GUARD_OPENBDS_UTIL_H
 
 #include "util/array.h"
+#include "util/vector.h"
 #include "util/random.h"
+#include "util/particle.h"
 
 #endif
 

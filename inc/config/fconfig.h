@@ -1,23 +1,22 @@
-#ifndef GUARD_OPENBDS_IO_LOGGER_H
-#define GUARD_OPENBDS_IO_LOGGER_H
+#ifndef GUARD_OPENBDS_CONFIG_FORTRAN_CONFIG_H
+#define GUARD_OPENBDS_CONFIG_FORTRAN_CONFIG_H
 
-// forward declares the OBDS particle type
-struct __OBDS_PARTICLE_TYPE__ ;
-
-// logs the vectors of position, orientation, force, torque, etc., and the particle IDs
-int io_logger_log(const struct __OBDS_PARTICLE_TYPE__*, const char*);
+#define FCONF_ISOTROPIC_HYDRODYNAMIC_RESISTANCE_PARTICLE 1
+#define FCONF_LOG_NUM_PARTICLES 8
+#define FCONF_LIMIT 8.0
 
 #endif
 
 /*
 
-OpenBDS							September 05, 2023
+OpenBDS                                                 September 07, 2023
 
-source: io/logger.h
+source: fconfig.h
 author: @misael-diaz
 
 Synopsis:
-Provides a prototype for the OBDS logger.
+FORTRAN configuration file for the Brownian Dynamics Simulations.
+Defines the number of particles and the system (cubic) box limit.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published
