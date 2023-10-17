@@ -17,15 +17,21 @@
 INC = -I../../../inc
 
 # headers
-FCONFG_H = ../../../inc/fconfig.h
-CONFIG_H = ../../../inc/config.h
-BDS_TYPES_H = ../../../inc/bds/types.h
-BDS_PARAMS_H = ../../../inc/bds/params.h
-SYSTEM_PARAMS_H = ../../../inc/system/params.h
-LOGGER_H = ../../../inc/io/logger.h
+CONFIG_H = ../../../inc/config/fconfig.h\
+	   ../../../inc/config/config.h\
+	   ../../../inc/config.h
 
-HEADERS = $(FCONFG_H) $(CONFIG_H) $(BDS_TYPES_H) $(BDS_PARAMS_H) $(SYSTEM_PARAMS_H)\
-	  $(LOGGER_H)
+BDS_H = ../../../inc/bds/types/property.h\
+	../../../inc/bds/types/particle.h\
+	../../../inc/bds/types.h\
+	../../../inc/bds/params.h\
+	../../../inc/bds.h
+
+SYSTEM_H = ../../../inc/system/params.h
+
+IO_H = ../../../inc/io/logger.h
+
+HEADERS = $(CONFIG_H) $(BDS_H) $(SYSTEM_H) $(IO_H)
 
 # sources
 LOGGER_C = logger.c

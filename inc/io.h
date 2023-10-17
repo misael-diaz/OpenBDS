@@ -1,11 +1,7 @@
-#ifndef GUARD_OPENBDS_IO_LOGGER_H
-#define GUARD_OPENBDS_IO_LOGGER_H
+#ifndef GUARD_OPENBDS_IO_H
+#define GUARD_OPENBDS_IO_H
 
-// forward declares the OBDS particle type
-struct __OBDS_PARTICLE_TYPE__ ;
-
-// logs the vectors of position, orientation, force, torque, etc., and the particle IDs
-int io_logger_log(const struct __OBDS_PARTICLE_TYPE__*, const char*);
+#include "io/logger.h"
 
 #endif
 
@@ -13,11 +9,11 @@ int io_logger_log(const struct __OBDS_PARTICLE_TYPE__*, const char*);
 
 OpenBDS							September 05, 2023
 
-source: io/logger.h
+source: io.h
 author: @misael-diaz
 
 Synopsis:
-Provides a prototype for the OBDS logger.
+Bundles OBDS Input-Output IO methods.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

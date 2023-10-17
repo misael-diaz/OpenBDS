@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#include "config.h"
+#include "config/config.h"
 
 // true if we have isotropic particles (spheres), false if we have anisotropic particles;
 // we use this MACRO to check if the OBDS has been configured in a consistent manner

@@ -1,4 +1,4 @@
-#include "fconfig.h"
+#include "config/fconfig.h"
 
 #define LIMIT FCONF_LIMIT
 #define LOG_NUMEL FCONF_LOG_NUM_PARTICLES
