@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include "util/array.h"
 #include "system/params.h"
+#include "bds/types/property.h"
 
 // hardcoded number of elements `numel' of the arrays
 #define NUMEL ( (size_t) ( __OBDS_NUM_PARTICLES__ ) )

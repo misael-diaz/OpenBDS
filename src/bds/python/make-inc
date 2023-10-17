@@ -14,15 +14,18 @@
 #
 
 # objects
-LOGGER_O = ../../io/logger/logger.o
-SYSBOX_O = ../../system/box/box.o
-ARRAYS_O = ../../util/array/array.o
-VECTOR_O = ../../util/vector/vector.o
-UPRTCL_O = ../../util/particle/particle.o
-RANDOM_O = ../../util/random/random.o
-SPHERE_O = ../../particle/sphere/sphere.o
-OBJECTS = $(LOGGER_O) $(SYSBOX_O) $(ARRAYS_O) $(VECTOR_O) $(RANDOM_O) $(UPRTCL_O)\
-	  $(SPHERE_O)
+IO_O = ../../io/logger/logger.o
+
+SYSTEM_O = ../../system/box/box.o
+
+UTIL_O = ../../util/array/array.o\
+	 ../../util/vector/vector.o\
+	 ../../util/particle/particle.o\
+	 ../../util/random/random.o
+
+PARTICLE_O = ../../particle/sphere/sphere.o
+
+OBJECTS = $(IO_O) $(SYSTEM_O) $(UTIL_O) $(PARTICLE_O)
 
 # shared objects
 LOBDS_SO = libOBDS.so

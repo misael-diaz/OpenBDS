@@ -21,7 +21,7 @@ all: $(TEST)
 $(TEST): $(TEST_O)
 	$(CC) $(INC) $(CCOPT) $(RANDOM_O) $(TEST_O) -o $(TEST) $(LIBS)
 
-$(TEST_O): $(RANDOM_H) $(RANDOM_O) $(TEST_C)
+$(TEST_O): $(HEADERS) $(RANDOM_O) $(TEST_C)
 	$(CC) $(INC) $(CCOPT) -c $(TEST_C) -o $(TEST_O)
 
 clean:

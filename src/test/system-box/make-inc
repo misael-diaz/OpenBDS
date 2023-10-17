@@ -17,14 +17,16 @@
 INC = -I../../../inc
 
 # headers
-SYSTEM_H = ../../../inc/system.h
-BOX_H = ../../../inc/system/box.h
+SYSTEM_H = ../../../inc/system/box.h\
+	   ../../../inc/system.h
+
+HEADERS = $(SYSTEM_H)
 
 # sources
 TEST_C = test.c
 
 # objects
-BOX_O = ../../system/box/box.o
+SYSTEM_O = ../../system/box/box.o
 TEST_O = test.o
 
 #binaries

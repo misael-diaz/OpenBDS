@@ -1,7 +1,7 @@
 #ifndef GUARD_OPENBDS_SYSTEM_BOX_PARAMS_H
 #define GUARD_OPENBDS_SYSTEM_BOX_PARAMS_H
 
-#include "config.h"
+#include "config/config.h"
 
 // defines the system box limits, x = y = z = -LIMIT and +LIMIT
 #define __OBDS_LIMIT__ ( (double) ( CONF_LIMIT ) )
