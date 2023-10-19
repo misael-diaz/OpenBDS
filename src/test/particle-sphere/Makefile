@@ -2,7 +2,7 @@
 #
 # OpenBDS						July 19, 2023
 #
-# source: Makefile
+# source: test/particle-sphere/Makefile
 # author: @misael-diaz
 #
 # Synopsis:
