@@ -47,12 +47,12 @@ UTIL_H = ../../../inc/util/vector/type.h\
 IO_H = ../../../inc/io/logger.h\
        ../../../inc/io.h
 
-SPHERE_H = ../../../inc/particle/sphere/params.h\
-	   ../../../inc/particle/sphere/type.h\
-	   ../../../inc/particle/sphere/utils.h\
-	   ../../../inc/particle/sphere.h
+PARTICLE_H = ../../../inc/particle/sphere/params.h\
+	     ../../../inc/particle/sphere/type.h\
+	     ../../../inc/particle/sphere/utils.h\
+	     ../../../inc/particle/sphere.h
 
-HEADERS = $(CONFIG_H) $(BDS_H) $(SYSTEM_H) $(UTIL_H) $(IO_H) $(SPHERE_H)
+HEADERS = $(CONFIG_H) $(BDS_H) $(SYSTEM_H) $(UTIL_H) $(IO_H) $(PARTICLE_H)
 
 # sources
 SPHERE_C = sphere.c
