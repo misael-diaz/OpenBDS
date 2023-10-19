@@ -2,7 +2,7 @@
 #
 # OpenBDS						July 19, 2023
 #
-# source: Makefile
+# source: util/particle/Makefile
 # author: @misael-diaz
 #
 # Synopsis:
