@@ -35,26 +35,52 @@ static int property_logger (const particle_t* particles, const char* log)
     fprintf(stderr, "io.logger.log(): IO ERROR with file %s: %s\n", tmp, strerror(errno));
     return FAILURE;
   }
+//position vectors (subject to periodic boundary conditions)
+  const prop_t* prop_x = particles -> x;
+  const prop_t* prop_y = particles -> y;
+  const prop_t* prop_z = particles -> z;
+//position vectors
+  const prop_t* prop_r_x = particles -> r_x;
+  const prop_t* prop_r_y = particles -> r_y;
+  const prop_t* prop_r_z = particles -> r_z;
+//Euler angle vectors
+  const prop_t* prop_a_x = particles -> a_x;
+  const prop_t* prop_a_y = particles -> a_y;
+  const prop_t* prop_a_z = particles -> a_z;
+//orientation vectors (or directors)
+  const prop_t* prop_d_x = particles -> d_x;
+  const prop_t* prop_d_y = particles -> d_y;
+  const prop_t* prop_d_z = particles -> d_z;
+//force vectors
+  const prop_t* prop_f_x = particles -> f_x;
+  const prop_t* prop_f_y = particles -> f_y;
+  const prop_t* prop_f_z = particles -> f_z;
+//torque vectors
+  const prop_t* prop_t_x = particles -> t_x;
+  const prop_t* prop_t_y = particles -> t_y;
+  const prop_t* prop_t_z = particles -> t_z;
+//particle identifier IDs
+  const prop_t* prop_id  = particles -> id;
 
-  const double* x = &(particles -> x -> data);
-  const double* y = &(particles -> y -> data);
-  const double* z = &(particles -> z -> data);
-  const double* r_x = &(particles -> r_x -> data);
-  const double* r_y = &(particles -> r_y -> data);
-  const double* r_z = &(particles -> r_z -> data);
-  const double* a_x = &(particles -> a_x -> data);
-  const double* a_y = &(particles -> a_y -> data);
-  const double* a_z = &(particles -> a_z -> data);
-  const double* d_x = &(particles -> d_x -> data);
-  const double* d_y = &(particles -> d_y -> data);
-  const double* d_z = &(particles -> d_z -> data);
-  const double* f_x = &(particles -> f_x -> data);
-  const double* f_y = &(particles -> f_y -> data);
-  const double* f_z = &(particles -> f_z -> data);
-  const double* t_x = &(particles -> t_x -> data);
-  const double* t_y = &(particles -> t_y -> data);
-  const double* t_z = &(particles -> t_z -> data);
-  const uint64_t* pid = &(particles -> id -> bin);
+  const double* x = &(prop_x[0].data);
+  const double* y = &(prop_y[0].data);
+  const double* z = &(prop_z[0].data);
+  const double* r_x = &(prop_r_x[0].data);
+  const double* r_y = &(prop_r_y[0].data);
+  const double* r_z = &(prop_r_z[0].data);
+  const double* a_x = &(prop_a_x[0].data);
+  const double* a_y = &(prop_a_y[0].data);
+  const double* a_z = &(prop_a_z[0].data);
+  const double* d_x = &(prop_d_x[0].data);
+  const double* d_y = &(prop_d_y[0].data);
+  const double* d_z = &(prop_d_z[0].data);
+  const double* f_x = &(prop_f_x[0].data);
+  const double* f_y = &(prop_f_y[0].data);
+  const double* f_z = &(prop_f_z[0].data);
+  const double* t_x = &(prop_t_x[0].data);
+  const double* t_y = &(prop_t_y[0].data);
+  const double* t_z = &(prop_t_z[0].data);
+  const uint64_t* pid = &(prop_id[0].bin);
   for (size_t i = 0; i != NUMEL; ++i)
   {
     const char fmt [] = "%+.16e %+.16e %+.16e "
