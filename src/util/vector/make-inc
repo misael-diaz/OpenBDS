@@ -1,7 +1,7 @@
 #
 # OpenBDS						July 19, 2023
 #
-# source: make-inc
+# source: util/vector/make-inc
 # author: @misael-diaz
 #
 # Synopsis:
