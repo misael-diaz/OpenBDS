@@ -23,6 +23,7 @@ CONFIG_H = ../../../inc/config/fconfig.h\
 
 BDS_H = ../../../inc/bds/types/property.h\
 	../../../inc/bds/types/particle.h\
+	../../../inc/bds/types/force.h\
 	../../../inc/bds/types.h\
 	../../../inc/bds/params.h\
 	../../../inc/bds.h
@@ -33,11 +34,13 @@ SYSTEM_H = ../../../inc/system/box/params.h\
 	   ../../../inc/system/params.h\
 	   ../../../inc/system.h
 
+PARTICLE_H = ../../../inc/particle/params.h
+
 UTIL_H = ../../../inc/util/random/type.h\
 	 ../../../inc/util/random/err.h\
 	 ../../../inc/util/particle.h
 
-HEADERS = $(CONFIG_H) $(BDS_H) $(SYSTEM_H) $(UTIL_H)
+HEADERS = $(CONFIG_H) $(BDS_H) $(SYSTEM_H) $(PARTICLE_H) $(UTIL_H)
 
 # sources
 PARTICLE_C = particle.c

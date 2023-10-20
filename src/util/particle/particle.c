@@ -3,7 +3,9 @@
 #include "system/box/params.h"
 #include "system/box/utils.h"
 #include "system/params.h"
+#include "particle/params.h"
 #include "util/particle.h"
+#include "bds/types/force.h"
 #include "bds/params.h"
 
 #define STDC17 201710L
@@ -21,17 +23,26 @@ static void default_particle_mobility_callback (particle_t* particles)
 {
 #define LINEAR_DETERMINISTIC_MOBILITY ( (double) ( __OBDS_TIME_STEP__ ) )
 #define ANGULAR_DETERMINISTIC_MOBILITY ( 0.75 * ( (double) ( __OBDS_TIME_STEP__ ) ) )
+#define LINEAR_BROWNIAN_MOBILITY (\
+	(double) ( __OBDS_ISOTROPIC_LINEAR_BROWNIAN_MOBILITY__ )\
+)
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
   constexpr double linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
   constexpr double angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
+  constexpr double linear_Brownian_mobility = LINEAR_BROWNIAN_MOBILITY;
+//constexpr double angular_Brownian_mobility = ANGULAR_BROWNIAN_MOBILITY;
 #else
   double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
   double const angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
+  double const linear_Brownian_mobility = LINEAR_BROWNIAN_MOBILITY;
+//double const angular_Brownian_mobility = ANGULAR_BROWNIAN_MOBILITY;
 #endif
   prop_t* placeholder = particles -> bitmask;
   double* mobilities = &(placeholder[0].data);
   mobilities[0] = linear_mobility;
   mobilities[1] = angular_mobility;
+  mobilities[2] = linear_Brownian_mobility;
+//mobilities[3] = angular_Brownian_mobility;
 }
 
 #if (ISOTROPIC_RESISTANCE == 0x00000001)
@@ -48,7 +59,7 @@ static void translate (double* __restrict__ x,
 }
 
 // translates the particles in the x, y, and z directions
-static void translate_isotropic (particle_t* particles, void (*cb)(particle_t* particles))
+static void translate_isotropic (particle_t* particles, double const linear_mobility)
 {
   // destructures the particles object to obtain the properties
   prop_t* prop_x = particles -> x;
@@ -70,13 +81,6 @@ static void translate_isotropic (particle_t* particles, void (*cb)(particle_t* p
   const double* f_x = &(prop_f_x[0].data);
   const double* f_y = &(prop_f_y[0].data);
   const double* f_z = &(prop_f_z[0].data);
-  // writes the particle ``mobilities'' to the designated placeholder
-  void (*callback)(particle_t*) = cb;
-  callback(particles);
-  // gets the particle translational mobility when subjected to deterministic forces
-  const prop_t* placeholder = particles -> bitmask;
-  const double* mobilities = &(placeholder[0].data);
-  double const linear_mobility = mobilities[0];
   // updates the position vectors subjected to the periodicity of the system box
   translate(x, f_x, linear_mobility);
   translate(y, f_y, linear_mobility);
@@ -88,17 +92,29 @@ static void translate_isotropic (particle_t* particles, void (*cb)(particle_t* p
 }
 
 // delegates the task of translating the isotropic resistance particles (or spheres)
-static void translate_base (particle_t* particles, void (*callback)(particle_t*))
+static void translate_base (particle_t* particles,
+			    enum FORCE FORCE,
+			    void (*callback)(particle_t*))
 {
-  translate_isotropic(particles, callback);
+  // writes the particle ``mobilities'' to the designated placeholder
+  callback(particles);
+  // unpacks the linear ``mobilities'' deterministic (default) or Brownian
+  const prop_t* placeholder = particles -> bitmask;
+  const double* mobilities = &(placeholder[0].data);
+  double const default_mobility = mobilities[0];
+  double const Brownian_mobility = mobilities[2];
+  double const mobility = ( (FORCE == BROWNIAN)? Brownian_mobility : default_mobility );
+  translate_isotropic(particles, mobility);
 }
 
 // variadic particle translation function, for the callback is an optional argument
-void util_particle_translate_varg (particle_t* particles, struct mobility mobility)
+void util_particle_translate_varg (particle_t* particles,
+				   enum FORCE FORCE,
+				   struct mobility mobility)
 {
   void (*default_cb) (particle_t*) = default_particle_mobility_callback;
   void (*callback) (particle_t*) = (mobility.callback)? mobility.callback : default_cb;
-  translate_base(particles, callback);
+  translate_base(particles, FORCE, callback);
 }
 
 #else
@@ -162,7 +178,9 @@ static void translate_anisotropic (particle_t* particles,
 }
 
 // delegates the task of translating the anisotropic resistance particles
-static void translate_base (particle_t* particles, void (*callback)(particle_t*))
+static void translate_base (particle_t* particles,
+			    enum FORCE FORCE,
+			    void (*callback)(particle_t*))
 {
   // we shall remove this safe guard once we add minimal code for anisotropic particles
   _Static_assert(ANISOTROPIC, "unimplemented error");
@@ -170,11 +188,13 @@ static void translate_base (particle_t* particles, void (*callback)(particle_t*)
 }
 
 // variadic particle translation function, for the callback is an optional argument
-void util_particle_translate_varg (particle_t* particles, struct mobility mobility)
+void util_particle_translate_varg (particle_t* particles,
+				   enum FORCE FORCE,
+				   struct mobility mobility)
 {
   void (*default_cb) (particle_t*) = default_particle_mobility_callback;
   void (*callback)(particle_t*) = (mobility.callback)? mobility.callback : default_cb;
-  translate_base(particles, callback);
+  translate_base(particles, FORCE, callback);
 }
 
 #endif
