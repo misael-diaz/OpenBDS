@@ -375,14 +375,20 @@ static void sphere_mobility_callback (particle_t* particles)
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
   constexpr double linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
   constexpr double angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
+  constexpr double linear_Brownian_mobility = LINEAR_BROWNIAN_MOBILITY;
+  constexpr double angular_Brownian_mobility = ANGULAR_BROWNIAN_MOBILITY;
 #else
   double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
   double const angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
+  double const linear_Brownian_mobility = LINEAR_BROWNIAN_MOBILITY;
+  double const angular_Brownian_mobility = ANGULAR_BROWNIAN_MOBILITY;
 #endif
   prop_t* placeholder = particles -> bitmask;
   double* mobilities = &(placeholder[0].data);
   mobilities[0] = linear_mobility;
   mobilities[1] = angular_mobility;
+  mobilities[2] = linear_Brownian_mobility;
+  mobilities[3] = angular_Brownian_mobility;
 }
 #endif
 
