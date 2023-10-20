@@ -88,8 +88,7 @@ static void translate_isotropic (particle_t* particles, void (*cb)(particle_t* p
 }
 
 // delegates the task of translating the isotropic resistance particles (or spheres)
-static void translate_base (particle_t* particles,
-					  void (*callback)(particle_t*))
+static void translate_base (particle_t* particles, void (*callback)(particle_t*))
 {
   translate_isotropic(particles, callback);
 }
@@ -163,8 +162,7 @@ static void translate_anisotropic (particle_t* particles,
 }
 
 // delegates the task of translating the anisotropic resistance particles
-static void translate_base (particle_t* particles,
-					  void (*callback)(particle_t*))
+static void translate_base (particle_t* particles, void (*callback)(particle_t*))
 {
   // we shall remove this safe guard once we add minimal code for anisotropic particles
   _Static_assert(ANISOTROPIC, "unimplemented error");
