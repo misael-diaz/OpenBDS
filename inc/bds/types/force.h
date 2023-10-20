@@ -1,22 +1,23 @@
-#ifndef GUARD_OPENBDS_BDS_TYPES_H
-#define GUARD_OPENBDS_BDS_TYPES_H
+#ifndef GUARD_OPENBDS_BDS_TYPES_FORCE_ENUM_H
+#define GUARD_OPENBDS_BDS_TYPES_FORCE_ENUM_H
 
-#include "types/property.h"
-#include "types/particle.h"
-#include "types/force.h"
+enum FORCE
+{
+  DETERMINISTIC,
+  BROWNIAN,
+};
 
 #endif
 
 /*
 
-OpenBDS							September 07, 2023
+OpenBDS							October 20, 2023
 
-source: bds/types.h
+source: bds/types/force.h
 author: @misael-diaz
 
 Synopsis:
-Defines the OpenBDS property type.
-Sometimes we operate on floats as if they were integers so this definition is quite handy.
+Provides a way to differentiate deterministic from Brownian (or stochastic) forces.
 
 Copyright (c) 2023 Misael Diaz-Maldonado
 This file is released under the GNU General Public License as published

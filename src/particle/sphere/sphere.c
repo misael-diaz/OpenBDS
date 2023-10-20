@@ -8,6 +8,7 @@
 
 #include "io/logger.h"
 #include "bds/params.h"
+#include "bds/types/force.h"
 #include "system/box.h"
 #include "particle/sphere/params.h"
 #include "particle/sphere/type.h"
@@ -375,14 +376,20 @@ static void sphere_mobility_callback (particle_t* particles)
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
   constexpr double linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
   constexpr double angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
+  constexpr double linear_Brownian_mobility = LINEAR_BROWNIAN_MOBILITY;
+  constexpr double angular_Brownian_mobility = ANGULAR_BROWNIAN_MOBILITY;
 #else
   double const linear_mobility = LINEAR_DETERMINISTIC_MOBILITY;
   double const angular_mobility = ANGULAR_DETERMINISTIC_MOBILITY;
+  double const linear_Brownian_mobility = LINEAR_BROWNIAN_MOBILITY;
+  double const angular_Brownian_mobility = ANGULAR_BROWNIAN_MOBILITY;
 #endif
   prop_t* placeholder = particles -> bitmask;
   double* mobilities = &(placeholder[0].data);
   mobilities[0] = linear_mobility;
   mobilities[1] = angular_mobility;
+  mobilities[2] = linear_Brownian_mobility;
+  mobilities[3] = angular_Brownian_mobility;
 }
 #endif
 
@@ -450,6 +457,7 @@ static void clamps (prop_t* __restrict__ f_x,
 }
 
 
+/*
 static void stochastic_shift (prop_t* __restrict__ prop_x,
 			      const prop_t* __restrict__ prop_F_x)
 {
@@ -461,6 +469,7 @@ static void stochastic_shift (prop_t* __restrict__ prop_x,
     x[i] += (linear_stochastic_mobility * F_x[i]);
   }
 }
+*/
 
 
 // stores the change in the Euler angle `x'
@@ -477,6 +486,7 @@ static void stochastic_rotation (prop_t* __restrict__ prop_x,
 }
 
 
+/*
 static void stochastic_shifts (prop_t* __restrict__ x,
 			       prop_t* __restrict__ y,
 			       prop_t* __restrict__ z,
@@ -488,6 +498,7 @@ static void stochastic_shifts (prop_t* __restrict__ x,
   stochastic_shift(y, f_y);
   stochastic_shift(z, f_z);
 }
+*/
 
 
 // kinematics (x, y, z, _dx, _dy, _dz, d_x, d_y, d_z)
@@ -706,12 +717,14 @@ static void grid (prop_t* __restrict__ xprop,
 // updates the positions of the particles due to the forces acting on them
 static int updater (sphere_t* spheres)
 {
+/*
   prop_t* x = spheres -> props -> x;
   prop_t* y = spheres -> props -> y;
   prop_t* z = spheres -> props -> z;
   prop_t* r_x = spheres -> props -> r_x;
   prop_t* r_y = spheres -> props -> r_y;
   prop_t* r_z = spheres -> props -> r_z;
+*/
   prop_t* a_x = spheres -> props -> a_x;
   prop_t* a_y = spheres -> props -> a_y;
   prop_t* a_z = spheres -> props -> a_z;
@@ -740,9 +753,9 @@ static int updater (sphere_t* spheres)
   util_particle_bruteForce(particles, cb);
   clamps(f_x, f_y, f_z, tmp, temp, bitmask);
 #if (SUPPLY_MOBILITY_CALLBACK == 1)
-  util_particle_translate(particles, sphere_mobility_callback);
+  util_particle_translate(particles, DETERMINISTIC, sphere_mobility_callback);
 #else
-  util_particle_translate(particles);
+  util_particle_translate(particles, DETERMINISTIC);
 #endif
   // we want to store the deterministic forces temporarily for logging purposes
   memcpy(list, f_x, 3LU * NUMEL * sizeof(prop_t));
@@ -752,8 +765,15 @@ static int updater (sphere_t* spheres)
     return FAILURE;
   }
 
+/*
   stochastic_shifts(r_x, r_y, r_z, f_x, f_y, f_z);
   stochastic_shifts(x, y, z, f_x, f_y, f_z);
+*/
+#if (SUPPLY_MOBILITY_CALLBACK == 1)
+  util_particle_translate(particles, BROWNIAN, sphere_mobility_callback);
+#else
+  util_particle_translate(particles, BROWNIAN);
+#endif
   util_vector_sum(f_x, list);
 
   if (util_particle_BrownianTorques(random, particles) == FAILURE)
