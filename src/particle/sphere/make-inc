@@ -23,6 +23,7 @@ CONFIG_H = ../../../inc/config/fconfig.h\
 
 BDS_H = ../../../inc/bds/types/property.h\
 	../../../inc/bds/types/particle.h\
+	../../../inc/bds/types/force.h\
 	../../../inc/bds/types.h\
 	../../../inc/bds/params.h\
 	../../../inc/bds.h
