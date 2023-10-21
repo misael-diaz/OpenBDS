@@ -14,18 +14,10 @@
 # (at your option) any later version.
 #
 
-include make-inc
+all: OpenBDS
 
-export CC
-export FC
-export CCOPT
-export FCOPT
-export LIBS
-
-all: apis
-
-apis:
-	@$(MAKE) -C api
+OpenBDS:
+	@$(MAKE) -C src
 
 clean:
-	@$(MAKE) -C api clean
+	@$(MAKE) -C src clean

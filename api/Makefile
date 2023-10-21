@@ -14,18 +14,10 @@
 # (at your option) any later version.
 #
 
-include make-inc
+all: api-clang
 
-export CC
-export FC
-export CCOPT
-export FCOPT
-export LIBS
-
-all: apis
-
-apis:
-	@$(MAKE) -C api
+api-clang:
+	@$(MAKE) -C clang
 
 clean:
-	@$(MAKE) -C api clean
+	@$(MAKE) -C clang clean
