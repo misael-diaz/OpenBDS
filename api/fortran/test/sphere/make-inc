@@ -1,0 +1,44 @@
+#
+# OpenBDS					October 22, 2023
+#
+# source: api/fortran/test/sphere/make-inc
+# author: @misael-diaz
+#
+# Synopsis:
+# Defines the Makefile for building the program with GNU make.
+#
+# Copyright (c) 2023 Misael Diaz-Maldonado
+# This file is released under the GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+
+
+# includes
+IMODS = -I../../module/mods
+
+
+# modules
+CONSTANTS_MOD = ../../module/mods/constants.mod
+PARTICLE_MOD  = ../../module/mods/sphere.mod
+
+MODULES = $(CONSTANTS_MOD) $(PARTICLE_MOD)
+
+
+# sources
+TEST_SPHERE_F = tsphere.f
+
+
+# objects
+CONSTANTS_O = ../../module/constants/constants.o
+
+PARTICLE_O = ../../module/particle/particle.o\
+	     ../../module/sphere/sphere.o
+
+OBJS = $(CONSTANTS_O) $(PARTICLE_O)
+
+TEST_SPHERE_O = tsphere.o
+
+
+# binaries
+TEST_SPHERE_BIN = test-sphere.bin
