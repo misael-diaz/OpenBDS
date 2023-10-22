@@ -2,7 +2,7 @@
 #
 # OpenBDS						July 19, 2023
 #
-# source: api/Makefile
+# source: api/fortran/module/Makefile
 # author: @misael-diaz
 #
 # Synopsis:
@@ -14,14 +14,18 @@
 # (at your option) any later version.
 #
 
-all: api-clang api-fortran
+all: OBDS-constants particles spheres
 
-api-clang:
-	@$(MAKE) -C clang
+OBDS-constants:
+	@$(MAKE) -C constants
 
-api-fortran:
-	@$(MAKE) -C fortran
+particles: OBDS-constants
+	@$(MAKE) -C particle
+
+spheres: particles
+	@$(MAKE) -C sphere
 
 clean:
-	@$(MAKE) -C clang clean
-	@$(MAKE) -C fortran clean
+	@$(MAKE) -C constants clean
+	@$(MAKE) -C particle clean
+	@$(MAKE) -C sphere clean

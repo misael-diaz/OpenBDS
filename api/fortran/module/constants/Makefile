@@ -1,8 +1,8 @@
 #!/usr/bin/make
 #
-# OpenBDS						July 19, 2023
+# OpenBDS						October 21, 2023
 #
-# source: api/Makefile
+# source: api/fortran/module/constants/Makefile
 # author: @misael-diaz
 #
 # Synopsis:
@@ -14,14 +14,12 @@
 # (at your option) any later version.
 #
 
-all: api-clang api-fortran
+include make-inc
 
-api-clang:
-	@$(MAKE) -C clang
+all: $(CONSTANTS_O)
 
-api-fortran:
-	@$(MAKE) -C fortran
+$(CONSTANTS_O): $(CONSTANTS_F)
+	$(FC) $(FCOPT) -ffixed-form -c $(CONSTANTS_F) -o $(CONSTANTS_O) -J $(MODS)
 
 clean:
-	@$(MAKE) -C clang clean
-	@$(MAKE) -C fortran clean
+	/bin/rm -f *.o

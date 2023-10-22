@@ -1,8 +1,7 @@
-#!/usr/bin/make
 #
-# OpenBDS						July 19, 2023
+# OpenBDS						October 21, 2023
 #
-# source: api/Makefile
+# source: api/fortran/module/sphere/make-inc
 # author: @misael-diaz
 #
 # Synopsis:
@@ -14,14 +13,15 @@
 # (at your option) any later version.
 #
 
-all: api-clang api-fortran
+# modules
+CONSTANTS_MOD = ../mods/constants.mod
+MODULES = $(CONSTANTS_MOD)
 
-api-clang:
-	@$(MAKE) -C clang
+# sources
+SPHERE_F = sphere.f
 
-api-fortran:
-	@$(MAKE) -C fortran
+# objects
+SPHERE_O = sphere.o
 
-clean:
-	@$(MAKE) -C clang clean
-	@$(MAKE) -C fortran clean
+# output directory the FORTRAN module files *.mod
+MODS = ../mods

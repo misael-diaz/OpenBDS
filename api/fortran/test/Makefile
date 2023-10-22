@@ -2,7 +2,7 @@
 #
 # OpenBDS						July 19, 2023
 #
-# source: api/Makefile
+# source: api/fortran/test/Makefile
 # author: @misael-diaz
 #
 # Synopsis:
@@ -14,14 +14,10 @@
 # (at your option) any later version.
 #
 
-all: api-clang api-fortran
+all: spheres
 
-api-clang:
-	@$(MAKE) -C clang
-
-api-fortran:
-	@$(MAKE) -C fortran
+spheres:
+	@$(MAKE) -C sphere
 
 clean:
-	@$(MAKE) -C clang clean
-	@$(MAKE) -C fortran clean
+	@$(MAKE) -C sphere clean
