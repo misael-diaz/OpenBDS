@@ -1,46 +1,69 @@
-      program test_sphere_type
+      module tests
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
         use :: constants, only: NUM_SPHERES => NUM_PARTICLES
         use :: sphere, only: sphere_t
         implicit none
+        private
+        public :: test_sphere_id
 
-c       collection of spheres
-        type(sphere_t), pointer :: spheres => null()
-c       pointer to the particle IDs
-        real(kind = real64), pointer, contiguous :: id(:) => null()
-c       stores the sum of the sequence [1, NUM_SPHERES]
-        integer(kind = int64), parameter :: total =
-     +  NUM_SPHERES * (NUM_SPHERES + 1_int64) / 2_int64
-c       accumulator
-        integer(kind = int64) :: isum = 0_int64
-c       positional index
-        integer(kind = int64) :: i
+        interface test_sphere_id
+          module procedure ids
+        end interface
 
-c       instantiates the collection of spheres:
-        spheres => sphere_t()
+        contains
 
-c       bindings:
-        id => spheres % id
+          subroutine ids()
 
-c       tests:
-        do i = 1, NUM_SPHERES
-          isum = isum + nint(id(i), kind = int64)
-        end do
+c           collection of spheres
+            type(sphere_t), pointer :: spheres => null()
+c           pointer to the particle IDs
+            real(kind = real64), pointer, contiguous :: id(:) => null()
+c           stores the sum of the sequence [1, NUM_SPHERES]
+            integer(kind = int64), parameter :: total =
+     +      NUM_SPHERES * (NUM_SPHERES + 1_int64) / 2_int64
+c           accumulator
+            integer(kind = int64) :: isum = 0_int64
+c           positional index
+            integer(kind = int64) :: i
 
-        write (*, '(A)', advance='no') 'test-sphere[0]: '
-        if (isum /= total) then
-          print *, 'FAIL'
-        else
-          print *, 'PASS'
-        end if
+c           instantiates the collection of spheres:
+            spheres => sphere_t()
 
-c       call spheres % update()
+c           bindings:
+            id => spheres % id
 
-c       release the memory resources allocated for the spheres
-        deallocate(spheres)
+c           tests:
+            do i = 1, NUM_SPHERES
+              isum = isum + nint(id(i), kind = int64)
+            end do
+
+            write (*, '(A)', advance='no') 'test-sphere[0]: '
+            if (isum /= total) then
+              print *, 'FAIL'
+            else
+              print *, 'PASS'
+            end if
+
+c           call spheres % update()
+
+c           release the memory resources allocated for the spheres
+            deallocate(spheres)
+
+            return
+          end subroutine ids
+
+      end module tests
+
+
+      program test_sphere_type
+        use :: tests, only: test_sphere_id
+        implicit none
+
+        call test_sphere_id()
 
       end program test_sphere_type
+
 
 *   OpenBDS                                             October 22, 2023
 *
