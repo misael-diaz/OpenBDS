@@ -1,11 +1,16 @@
       module constants
         use, intrinsic :: iso_fortran_env, only: int64
-c       use, intrinsic :: iso_fortran_env, only: real64
+        use, intrinsic :: iso_fortran_env, only: real64
         implicit none
         private
         save
+        public :: LIMIT
+        public :: LENGTH
         public :: NUM_PARTICLES
 
+c       system box limits and length
+        real(kind = real64), parameter :: LIMIT = 8.0_real64
+        real(kind = real64), parameter :: LENGTH = (2.0_real64 * LIMIT)
         integer(kind = int64), parameter :: NUM_PARTICLES = 256_int64
 
       end module constants
