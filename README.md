@@ -57,13 +57,13 @@ Note that these directories must be present in your current working directory.
 To execute the OBDS app issue the following command on the terminal:
 
 ```sh
-./src/bds/fortran/OpenBDS.bin
+./api/clang/src/bds/fortran/OpenBDS.bin
 ```
 
 If you prefer to execute the OBDS code from Python change your working directory via
 
 ```sh
-cd src/bds/python
+cd api/clang/src/bds/python
 ```
 
 and then execute the code with the Python 3 interpreter:
@@ -79,7 +79,7 @@ contrary to its FORTRAN counterpart this one prepares the execution environment 
 Minimal OBDS FORTRAN Test Code can be executed from the top level of the repository:
 
 ```sh
-./src/test/particles-sphere/fortran-test-particles-sphere.bin
+./api/clang/src/test/particles-sphere/fortran-test-particles-sphere.bin
 ```
 
 The test just spawns the particles in the system box, tests the computation of the
@@ -90,7 +90,7 @@ and exits.
 OBDS Test Code can be executed from the top level of the repository:
 
 ```sh
-./src/test/particles-sphere/test-particles-sphere.bin
+./api/clang/src/test/particles-sphere/test-particles-sphere.bin
 ```
 
 This test code can be used to perform Brownian Dynamics Simulations.
