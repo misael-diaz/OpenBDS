@@ -1,7 +1,8 @@
+#!/usr/bin/make
 #
 # OpenBDS						October 21, 2023
 #
-# source: api/fortran/module/sphere/make-inc
+# source: api/fortran/module/dynamic/Makefile
 # author: @misael-diaz
 #
 # Synopsis:
@@ -13,15 +14,12 @@
 # (at your option) any later version.
 #
 
-# modules
-CONSTANT_MOD = ../mods/constant.mod
-MODULES = $(CONSTANT_MOD)
+include make-inc
 
-# sources
-SPHERE_F = sphere.f
+all: $(DYNAMIC_O)
 
-# objects
-SPHERE_O = sphere.o
+$(DYNAMIC_O): $(MODULES) $(DYNAMIC_F)
+	$(FC) $(FCOPT) -ffixed-form -c $(DYNAMIC_F) -o $(DYNAMIC_O) -J $(MODS)
 
-# output directory the FORTRAN module files *.mod
-MODS = ../mods
+clean:
+	/bin/rm -f *.o

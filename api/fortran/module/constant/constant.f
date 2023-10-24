@@ -6,11 +6,14 @@
         save
         public :: LIMIT
         public :: LENGTH
+        public :: TIME_STEP
         public :: NUM_PARTICLES
 
 c       system box limits and length
         real(kind = real64), parameter :: LIMIT = 8.0_real64
         real(kind = real64), parameter :: LENGTH = (2.0_real64 * LIMIT)
+c       OBDS time-step
+        real(kind = real64), parameter :: TIME_STEP = 2.0_real64**(-16)
         integer(kind = int64), parameter :: NUM_PARTICLES = 256_int64
 
       end module constant

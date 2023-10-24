@@ -1,7 +1,7 @@
 #
 # OpenBDS						October 21, 2023
 #
-# source: api/fortran/module/sphere/make-inc
+# source: api/fortran/module/dynamic/make-inc
 # author: @misael-diaz
 #
 # Synopsis:
@@ -15,13 +15,15 @@
 
 # modules
 CONSTANT_MOD = ../mods/constant.mod
-MODULES = $(CONSTANT_MOD)
+RANDOM_MOD   = ../mods/random.mod
+PARTICLE_MOD = ../mods/particle.mod
+MODULES = $(CONSTANT_MOD) $(RANDOM_MOD) $(PARTICLE_MOD)
 
 # sources
-SPHERE_F = sphere.f
+DYNAMIC_F = dynamic.f
 
 # objects
-SPHERE_O = sphere.o
+DYNAMIC_O = dynamic.o
 
 # output directory the FORTRAN module files *.mod
 MODS = ../mods
