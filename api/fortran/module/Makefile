@@ -22,10 +22,13 @@ constants:
 PRNGs:
 	@$(MAKE) -C random
 
-particles: constants PRNGs
+particles: constants
 	@$(MAKE) -C particle
 
-dynamics: particles
+forces: constants PRNGs
+	@$(MAKE) -C force
+
+dynamics: forces particles
 	@$(MAKE) -C dynamic
 
 spheres: dynamics
@@ -35,6 +38,7 @@ clean:
 	@$(MAKE) -C constant clean
 	@$(MAKE) -C random clean
 	@$(MAKE) -C particle clean
+	@$(MAKE) -C force clean
 	@$(MAKE) -C dynamic clean
 	@$(MAKE) -C sphere clean
 	rm mods/*.mod
