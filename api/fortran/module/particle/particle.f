@@ -58,207 +58,207 @@ c           updates the particle positions and orientations
           end subroutine
         end interface
 
-        contains
+      contains
 
-          subroutine iota (x)
-c           Synopsis:
-c           implements a std::iota C++ like method
-c           fills array `x' with values in symmetric range [1, numel]
-            integer(kind = int64), parameter :: numel = NUM_PARTICLES
-            real(kind = real64), intent(out) :: x(numel)
-            integer(kind = int64) :: i
+        subroutine iota (x)
+c         Synopsis:
+c         implements a std::iota C++ like method
+c         fills array `x' with values in symmetric range [1, numel]
+          integer(kind = int64), parameter :: numel = NUM_PARTICLES
+          real(kind = real64), intent(out) :: x(numel)
+          integer(kind = int64) :: i
 
-            do i = 1, numel
-              x(i) = real(i, kind = real64)
-            end do
+          do i = 1, numel
+            x(i) = real(i, kind = real64)
+          end do
 
-            return
-          end subroutine iota
+          return
+        end subroutine iota
 
 
-          subroutine initializer (particles)
-c           Synopsis:
-c           Particles Initializer.
-c           In the Object-Oriented Programming OOP sense this subroutine initializes the
-c           core of the particle objects (though bear in mind that we are handling them
-c           as a collection and not as individual objects so that we can ultimately write
-c           loops in a way that the compiler can optimize them via auto-vectorization).
-c           NOTES:
-c           The constructor of the extending classes must invoke this subroutine, as you
-c           would do in C++ or Java.
-            class(particle_t), intent(inout) :: particles
-            real(kind = real64), pointer, contiguous :: id(:) => null()
-            integer(kind = int64), parameter :: N = NUM_PARTICLES
-c           size position vector
-            integer(kind = int64), parameter :: size_x = N
-            integer(kind = int64), parameter :: size_y = N
-            integer(kind = int64), parameter :: size_z = N
-c           size Verlet displacement vector
-            integer(kind = int64), parameter :: size_Vdx = N
-            integer(kind = int64), parameter :: size_Vdy = N
-            integer(kind = int64), parameter :: size_Vdz = N
-c           size absolute position vector
-            integer(kind = int64), parameter :: size_r_x = N
-            integer(kind = int64), parameter :: size_r_y = N
-            integer(kind = int64), parameter :: size_r_z = N
-c           size Euler angle vector
-            integer(kind = int64), parameter :: size_Eax = N
-            integer(kind = int64), parameter :: size_Eay = N
-            integer(kind = int64), parameter :: size_Eaz = N
-c           size director (or orientation) vector
-            integer(kind = int64), parameter :: size_d_x = N
-            integer(kind = int64), parameter :: size_d_y = N
-            integer(kind = int64), parameter :: size_d_z = N
-c           size force vector
-            integer(kind = int64), parameter :: size_f_x = N
-            integer(kind = int64), parameter :: size_f_y = N
-            integer(kind = int64), parameter :: size_f_z = N
-c           size torque vector
-            integer(kind = int64), parameter :: size_t_x = N
-            integer(kind = int64), parameter :: size_t_y = N
-            integer(kind = int64), parameter :: size_t_z = N
-c           size temporary placeholder
-            integer(kind = int64), parameter :: size_tmp = N
-c           size Verlet neighbor-list (NOTE: we shall allocate more later)
-            integer(kind = int64), parameter :: size_Vnl = N
-c           size particle identifiers IDs
-            integer(kind = int64), parameter :: size_id = N
-c           sizes position vector
-            integer(kind = int64), parameter :: size_data = size_x +
-     +                                                      size_y +
-     +                                                      size_z +
-c           sizes Verlet displacement vector
-     +                                                      size_Vdx +
-     +                                                      size_Vdy +
-     +                                                      size_Vdz +
-c           sizes absolute position vector
-     +                                                      size_r_x +
-     +                                                      size_r_y +
-     +                                                      size_r_z +
-c           sizes Euler angle vector
-     +                                                      size_Eax +
-     +                                                      size_Eay +
-     +                                                      size_Eaz +
-c           sizes director (or orientation) vector
-     +                                                      size_d_x +
-     +                                                      size_d_y +
-     +                                                      size_d_z +
-c           sizes force vector
-     +                                                      size_f_x +
-     +                                                      size_f_y +
-     +                                                      size_f_z +
-c           sizes torque vector
-     +                                                      size_t_x +
-     +                                                      size_t_y +
-     +                                                      size_t_z +
-c           sizes temporary placeholder
-     +                                                      size_tmp +
-c           sizes Verlet neighbor-list
-     +                                                      size_Vnl +
-c           sizes particle identifiers IDs
-     +                                                      size_id
-c           memory allocation status
-            integer(kind = int64) :: mstat
-c           size
-            integer(kind = int64) :: sz
+        subroutine initializer (particles)
+c         Synopsis:
+c         Particles Initializer.
+c         In the Object-Oriented Programming OOP sense this subroutine initializes the
+c         core of the particle objects (though bear in mind that we are handling them
+c         as a collection and not as individual objects so that we can ultimately write
+c         loops in a way that the compiler can optimize them via auto-vectorization).
+c         NOTES:
+c         The constructor of the extending classes must invoke this subroutine, as you
+c         would do in C++ or Java.
+          class(particle_t), intent(inout) :: particles
+          real(kind = real64), pointer, contiguous :: id(:) => null()
+          integer(kind = int64), parameter :: N = NUM_PARTICLES
+c         size position vector
+          integer(kind = int64), parameter :: size_x = N
+          integer(kind = int64), parameter :: size_y = N
+          integer(kind = int64), parameter :: size_z = N
+c         size Verlet displacement vector
+          integer(kind = int64), parameter :: size_Vdx = N
+          integer(kind = int64), parameter :: size_Vdy = N
+          integer(kind = int64), parameter :: size_Vdz = N
+c         size absolute position vector
+          integer(kind = int64), parameter :: size_r_x = N
+          integer(kind = int64), parameter :: size_r_y = N
+          integer(kind = int64), parameter :: size_r_z = N
+c         size Euler angle vector
+          integer(kind = int64), parameter :: size_Eax = N
+          integer(kind = int64), parameter :: size_Eay = N
+          integer(kind = int64), parameter :: size_Eaz = N
+c         size director (or orientation) vector
+          integer(kind = int64), parameter :: size_d_x = N
+          integer(kind = int64), parameter :: size_d_y = N
+          integer(kind = int64), parameter :: size_d_z = N
+c         size force vector
+          integer(kind = int64), parameter :: size_f_x = N
+          integer(kind = int64), parameter :: size_f_y = N
+          integer(kind = int64), parameter :: size_f_z = N
+c         size torque vector
+          integer(kind = int64), parameter :: size_t_x = N
+          integer(kind = int64), parameter :: size_t_y = N
+          integer(kind = int64), parameter :: size_t_z = N
+c         size temporary placeholder
+          integer(kind = int64), parameter :: size_tmp = N
+c         size Verlet neighbor-list (NOTE: we shall allocate more later)
+          integer(kind = int64), parameter :: size_Vnl = N
+c         size particle identifiers IDs
+          integer(kind = int64), parameter :: size_id = N
+c         sizes position vector
+          integer(kind = int64), parameter :: size_data = size_x +
+     +                                                    size_y +
+     +                                                    size_z +
+c         sizes Verlet displacement vector
+     +                                                    size_Vdx +
+     +                                                    size_Vdy +
+     +                                                    size_Vdz +
+c         sizes absolute position vector
+     +                                                    size_r_x +
+     +                                                    size_r_y +
+     +                                                    size_r_z +
+c         sizes Euler angle vector
+     +                                                    size_Eax +
+     +                                                    size_Eay +
+     +                                                    size_Eaz +
+c         sizes director (or orientation) vector
+     +                                                    size_d_x +
+     +                                                    size_d_y +
+     +                                                    size_d_z +
+c         sizes force vector
+     +                                                    size_f_x +
+     +                                                    size_f_y +
+     +                                                    size_f_z +
+c         sizes torque vector
+     +                                                    size_t_x +
+     +                                                    size_t_y +
+     +                                                    size_t_z +
+c         sizes temporary placeholder
+     +                                                    size_tmp +
+c         sizes Verlet neighbor-list
+     +                                                    size_Vnl +
+c         sizes particle identifiers IDs
+     +                                                    size_id
+c         memory allocation status
+          integer(kind = int64) :: mstat
+c         size
+          integer(kind = int64) :: sz
 
-c           allocates memory for the particle data
-            allocate(particles % data(size_data), stat = mstat)
-            if (mstat /= 0_int64) then
-              error stop "particle::initializer(): allocation error"
-            end if
+c         allocates memory for the particle data
+          allocate(particles % data(size_data), stat = mstat)
+          if (mstat /= 0_int64) then
+            error stop "particle::initializer(): allocation error"
+          end if
 
-c           initializes the particle data with zeros
-            particles % data = 0.0_real64
+c         initializes the particle data with zeros
+          particles % data = 0.0_real64
 
-c           position vector binding
-            sz = 0_int64
-            particles % x => particles % data(sz + 1:sz + size_x)
+c         position vector binding
+          sz = 0_int64
+          particles % x => particles % data(sz + 1:sz + size_x)
 
-            sz = sz + size_x
-            particles % y => particles % data(sz + 1:sz + size_y)
+          sz = sz + size_x
+          particles % y => particles % data(sz + 1:sz + size_y)
 
-            sz = sz + size_y
-            particles % z => particles % data(sz + 1:sz + size_z)
+          sz = sz + size_y
+          particles % z => particles % data(sz + 1:sz + size_z)
 
-c           Verlet displacement vector binding
-            sz = sz + size_z
-            particles % Vdx => particles % data(sz + 1:sz + size_Vdx)
+c         Verlet displacement vector binding
+          sz = sz + size_z
+          particles % Vdx => particles % data(sz + 1:sz + size_Vdx)
 
-            sz = sz + size_Vdx
-            particles % Vdy => particles % data(sz + 1:sz + size_Vdy)
+          sz = sz + size_Vdx
+          particles % Vdy => particles % data(sz + 1:sz + size_Vdy)
 
-            sz = sz + size_Vdy
-            particles % Vdz => particles % data(sz + 1:sz + size_Vdz)
+          sz = sz + size_Vdy
+          particles % Vdz => particles % data(sz + 1:sz + size_Vdz)
 
-c           absolute position vector binding
-            sz = sz + size_Vdz
-            particles % r_x => particles % data(sz + 1:sz + size_r_x)
+c         absolute position vector binding
+          sz = sz + size_Vdz
+          particles % r_x => particles % data(sz + 1:sz + size_r_x)
 
-            sz = sz + size_r_x
-            particles % r_y => particles % data(sz + 1:sz + size_r_y)
+          sz = sz + size_r_x
+          particles % r_y => particles % data(sz + 1:sz + size_r_y)
 
-            sz = sz + size_r_y
-            particles % r_z => particles % data(sz + 1:sz + size_r_z)
+          sz = sz + size_r_y
+          particles % r_z => particles % data(sz + 1:sz + size_r_z)
 
-c           Euler angles vector binding
-            sz = sz + size_r_z
-            particles % Eax => particles % data(sz + 1:sz + size_Eax)
+c         Euler angles vector binding
+          sz = sz + size_r_z
+          particles % Eax => particles % data(sz + 1:sz + size_Eax)
 
-            sz = sz + size_Eax
-            particles % Eay => particles % data(sz + 1:sz + size_Eay)
+          sz = sz + size_Eax
+          particles % Eay => particles % data(sz + 1:sz + size_Eay)
 
-            sz = sz + size_Eay
-            particles % Eaz => particles % data(sz + 1:sz + size_Eaz)
+          sz = sz + size_Eay
+          particles % Eaz => particles % data(sz + 1:sz + size_Eaz)
 
-c           director (or orientation) vector binding
-            sz = sz + size_Eaz
-            particles % d_x => particles % data(sz + 1:sz + size_d_x)
+c         director (or orientation) vector binding
+          sz = sz + size_Eaz
+          particles % d_x => particles % data(sz + 1:sz + size_d_x)
 
-            sz = sz + size_d_x
-            particles % d_y => particles % data(sz + 1:sz + size_d_y)
+          sz = sz + size_d_x
+          particles % d_y => particles % data(sz + 1:sz + size_d_y)
 
-            sz = sz + size_d_y
-            particles % d_z => particles % data(sz + 1:sz + size_d_z)
+          sz = sz + size_d_y
+          particles % d_z => particles % data(sz + 1:sz + size_d_z)
 
-c           force vector binding
-            sz = sz + size_d_z
-            particles % f_x => particles % data(sz + 1:sz + size_f_x)
+c         force vector binding
+          sz = sz + size_d_z
+          particles % f_x => particles % data(sz + 1:sz + size_f_x)
 
-            sz = sz + size_f_x
-            particles % f_y => particles % data(sz + 1:sz + size_f_y)
+          sz = sz + size_f_x
+          particles % f_y => particles % data(sz + 1:sz + size_f_y)
 
-            sz = sz + size_f_z
-            particles % f_z => particles % data(sz + 1:sz + size_f_z)
+          sz = sz + size_f_z
+          particles % f_z => particles % data(sz + 1:sz + size_f_z)
 
-c           torque vector binding
-            sz = sz + size_f_z
-            particles % t_x => particles % data(sz + 1:sz + size_t_x)
+c         torque vector binding
+          sz = sz + size_f_z
+          particles % t_x => particles % data(sz + 1:sz + size_t_x)
 
-            sz = sz + size_t_x
-            particles % t_y => particles % data(sz + 1:sz + size_t_y)
+          sz = sz + size_t_x
+          particles % t_y => particles % data(sz + 1:sz + size_t_y)
 
-            sz = sz + size_t_y
-            particles % t_z => particles % data(sz + 1:sz + size_t_z)
+          sz = sz + size_t_y
+          particles % t_z => particles % data(sz + 1:sz + size_t_z)
 
-c           temporary placeholder binding
-            sz = sz + size_t_z
-            particles % tmp => particles % data(sz + 1:sz + size_tmp)
+c         temporary placeholder binding
+          sz = sz + size_t_z
+          particles % tmp => particles % data(sz + 1:sz + size_tmp)
 
-c           Verlet neighbor-list binding
-            sz = sz + size_tmp
-            particles % Vnl => particles % data(sz + 1:sz + size_Vnl)
+c         Verlet neighbor-list binding
+          sz = sz + size_tmp
+          particles % Vnl => particles % data(sz + 1:sz + size_Vnl)
 
-c           particle identifier IDs binding
-            sz = sz + size_Vnl
-            particles % id => particles % data(sz + 1:sz + size_id)
+c         particle identifier IDs binding
+          sz = sz + size_Vnl
+          particles % id => particles % data(sz + 1:sz + size_id)
 
-c           assigns unique IDs to the particles
-            id => particles % id
-            call iota(id)
+c         assigns unique IDs to the particles
+          id => particles % id
+          call iota(id)
 
-            return
-          end subroutine initializer
+          return
+        end subroutine initializer
 
       end module particle
 
