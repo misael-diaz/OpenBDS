@@ -7,6 +7,19 @@ else is written in C.
 
 This is a work in progress, contributions are welcomed.
 
+## Motivation
+
+This is a project that I have wanted to develop since I was a student. Back then there
+was just time to write production-ready code in the least amount of time. The aim was to
+obtain results quickly even if the code was not clean or even commented so that others
+could use it for their research.
+
+I am implementing this BDS code from scratch and in an entirely different way from what I
+have done in the propietary codebases that I have contributed.
+
+My main motivation for doing this is to apply in FORTRAN what I have learned from working
+with Java, C/C++, and Python.
+
 ## Compilation
 
 Instructions to compile the source code with GNU Make. Some degree of familiarity with the
