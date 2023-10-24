@@ -25,10 +25,10 @@ PRNGs:
 particles: constants
 	@$(MAKE) -C particle
 
-forces: constants PRNGs
+forces: particles PRNGs
 	@$(MAKE) -C force
 
-dynamics: forces particles
+dynamics: forces
 	@$(MAKE) -C dynamic
 
 spheres: dynamics
