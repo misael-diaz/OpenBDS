@@ -32,10 +32,16 @@ TEST_SPHERE_F = tsphere.f
 # objects
 CONSTANTS_O = ../../module/constant/constant.o
 
+RANDOM_O    = ../../module/random/random.o
+
 PARTICLE_O = ../../module/particle/particle.o\
 	     ../../module/sphere/sphere.o
 
-OBJS = $(CONSTANTS_O) $(PARTICLE_O)
+FORCE_O     = ../../module/force/force.o
+
+DYNAMIC_O   = ../../module/dynamic/dynamic.o
+
+OBJS = $(CONSTANTS_O) $(RANDOM_O) $(PARTICLE_O) $(FORCE_O) $(DYNAMIC_O)
 
 TEST_SPHERE_O = tsphere.o
 
