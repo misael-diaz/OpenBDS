@@ -25,19 +25,23 @@ PRNGs:
 particles: constants
 	@$(MAKE) -C particle
 
+systems: particles
+	@$(MAKE) -C system
+
 forces: particles PRNGs
 	@$(MAKE) -C force
 
 dynamics: forces
 	@$(MAKE) -C dynamic
 
-spheres: dynamics
+spheres: dynamics systems
 	@$(MAKE) -C sphere
 
 clean:
 	@$(MAKE) -C constant clean
 	@$(MAKE) -C random clean
 	@$(MAKE) -C particle clean
+	@$(MAKE) -C system clean
 	@$(MAKE) -C force clean
 	@$(MAKE) -C dynamic clean
 	@$(MAKE) -C sphere clean
