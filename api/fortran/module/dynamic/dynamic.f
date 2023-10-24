@@ -3,48 +3,15 @@
         use :: constant, only: dt => TIME_STEP
         use :: constant, only: N => NUM_PARTICLES
         use :: particle, only: particle_t
-        use :: random, only: fnrand
         implicit none
         private
         public :: dynamic__shifter
-        public :: dynamic__Brownian_force
 
         interface dynamic__shifter
           module procedure shift
         end interface
 
-        interface dynamic__Brownian_force
-          module procedure Brownian_force
-        end interface
-
       contains
-
-        impure elemental subroutine Brownian_force_component (F_x)
-c         Synopsis:
-c         Fills the Brownian force component (elementwise) with normally distributed
-c         pseudo-random numbers.
-          real(kind = real64), intent(out) :: F_x
-
-          F_x = fnrand()
-
-          return
-        end subroutine Brownian_force_component
-
-
-        subroutine Brownian_force (F_x, F_y, F_z)
-c         Synopsis:
-c         Fills the Brownian forces with normally distributed pseudo-random numbers.
-          real(kind = real64), intent(out) :: F_x(N)
-          real(kind = real64), intent(out) :: F_y(N)
-          real(kind = real64), intent(out) :: F_z(N)
-
-          call Brownian_force_component(F_x)
-          call Brownian_force_component(F_y)
-          call Brownian_force_component(F_z)
-
-          return
-        end subroutine Brownian_force
-
 
         subroutine shifter (mobility, x, F_x)
 c         Synopsis:
