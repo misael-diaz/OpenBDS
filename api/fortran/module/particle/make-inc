@@ -14,8 +14,8 @@
 #
 
 # modules
-CONSTANTS_MOD = ../mods/constants.mod
-MODULES = $(CONSTANTS_MOD)
+CONSTANT_MOD = ../mods/constant.mod
+MODULES = $(CONSTANT_MOD)
 
 # sources
 PARTICLE_F = particle.f
