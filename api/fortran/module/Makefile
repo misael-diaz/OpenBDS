@@ -14,22 +14,22 @@
 # (at your option) any later version.
 #
 
-all: OBDS-constants PRNGs particles spheres
+all: constants PRNGs particles spheres
 
-OBDS-constants:
-	@$(MAKE) -C constants
+constants:
+	@$(MAKE) -C constant
 
 PRNGs:
 	@$(MAKE) -C random
 
-particles: OBDS-constants PRNGs
+particles: constants PRNGs
 	@$(MAKE) -C particle
 
 spheres: particles
 	@$(MAKE) -C sphere
 
 clean:
-	@$(MAKE) -C constants clean
+	@$(MAKE) -C constant clean
 	@$(MAKE) -C random clean
 	@$(MAKE) -C particle clean
 	@$(MAKE) -C sphere clean

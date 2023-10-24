@@ -1,7 +1,7 @@
       module particle
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
-        use :: constants, only: NUM_PARTICLES
+        use :: constant, only: NUM_PARTICLES
         implicit none
         private
 
