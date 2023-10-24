@@ -2,7 +2,7 @@
 #
 # OpenBDS						October 21, 2023
 #
-# source: api/fortran/module/constants/Makefile
+# source: api/fortran/module/constant/Makefile
 # author: @misael-diaz
 #
 # Synopsis:

@@ -1,9 +1,9 @@
       module sphere
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
-        use :: constants, only: LIMIT
-        use :: constants, only: LENGTH
-        use :: constants, only: NUM_SPHERES => NUM_PARTICLES
+        use :: constant, only: LIMIT
+        use :: constant, only: LENGTH
+        use :: constant, only: NUM_SPHERES => NUM_PARTICLES
         use :: particle, only: particle_t
         implicit none
         private
@@ -16,7 +16,6 @@ c       sphere radius, diameter, and contact-distance
         real(kind = real64), parameter :: DIAMETER = 2.0_real64 * RADIUS
         real(kind = real64), parameter :: CONTACT = DIAMETER
 
-c       temporary parameters (NOTE: these shall be moved to constants.f)
 
         type, extends(particle_t), public :: sphere_t
           contains

@@ -1,7 +1,7 @@
 #
 # OpenBDS						October 21, 2023
 #
-# source: api/fortran/module/constants/make-inc
+# source: api/fortran/module/constant/make-inc
 # author: @misael-diaz
 #
 # Synopsis:
@@ -14,10 +14,10 @@
 #
 
 # sources
-CONSTANTS_F = constants.f
+CONSTANTS_F = constant.f
 
 # objects
-CONSTANTS_O = constants.o
+CONSTANTS_O = constant.o
 
 # output directory the FORTRAN module files *.mod
 MODS = ../mods

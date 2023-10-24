@@ -1,4 +1,4 @@
-      module constants
+      module constant
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
         implicit none
@@ -13,11 +13,11 @@ c       system box limits and length
         real(kind = real64), parameter :: LENGTH = (2.0_real64 * LIMIT)
         integer(kind = int64), parameter :: NUM_PARTICLES = 256_int64
 
-      end module constants
+      end module constant
 
 *   OpenBDS                                             October 21, 2023
 *
-*   source: api/fortran/module/constants/constants.f
+*   source: api/fortran/module/constant/constant.f
 *   author: @misael-diaz
 *
 *   Synopsis:

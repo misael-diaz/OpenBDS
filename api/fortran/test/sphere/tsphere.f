@@ -1,8 +1,8 @@
       module tests
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
-        use :: constants, only: NUM_SPHERES => NUM_PARTICLES
-        use :: constants, only: LIMIT
+        use :: constant, only: NUM_SPHERES => NUM_PARTICLES
+        use :: constant, only: LIMIT
         use :: sphere, only: sphere_t
         implicit none
         private
