@@ -1,0 +1,29 @@
+#
+# OpenBDS						October 21, 2023
+#
+# source: api/fortran/module/dynamic/make-inc
+# author: @misael-diaz
+#
+# Synopsis:
+# Defines the Makefile for building the program with GNU make.
+#
+# Copyright (c) 2023 Misael Diaz-Maldonado
+# This file is released under the GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+
+# modules
+CONSTANT_MOD = ../mods/constant.mod
+RANDOM_MOD   = ../mods/random.mod
+PARTICLE_MOD = ../mods/particle.mod
+MODULES = $(CONSTANT_MOD) $(RANDOM_MOD) $(PARTICLE_MOD)
+
+# sources
+DYNAMIC_F = dynamic.f
+
+# objects
+DYNAMIC_O = dynamic.o
+
+# output directory the FORTRAN module files *.mod
+MODS = ../mods
