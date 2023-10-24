@@ -4,6 +4,8 @@
         use :: constant, only: LIMIT
         use :: constant, only: LENGTH
         use :: constant, only: NUM_SPHERES => NUM_PARTICLES
+        use :: force, only: force__Brownian_force
+        use :: dynamic, only: dynamic__shifter
         use :: particle, only: particle_t
         implicit none
         private
@@ -157,12 +159,11 @@ c         places the spheres in a grid (or lattice) like structure
 
         subroutine updater (particles)
 c         Synopsis:
-c         Initial implementation so that the compiler won't complain.
+c         Implements non-interacting Brownian spheres.
           class(sphere_t), intent(inout) :: particles
 
-          print *, 'sphere::update(): unimplemented'
-          print *, minval(particles % id)
-          print *, maxval(particles % id)
+          call force__Brownian_force(particles)
+          call dynamic__shifter(particles)
 
           return
         end subroutine updater

@@ -16,7 +16,8 @@
 # modules
 CONSTANT_MOD = ../mods/constant.mod
 RANDOM_MOD = ../mods/random.mod
-MODULES = $(CONSTANT_MOD) $(RANDOM_MOD)
+PARTICLE_MOD = ../mods/particle.mod
+MODULES = $(CONSTANT_MOD) $(RANDOM_MOD) $(PARTICLE_MOD)
 
 # sources
 FORCE_F = force.f

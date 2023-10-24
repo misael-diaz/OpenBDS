@@ -1,13 +1,14 @@
       module force
         use, intrinsic :: iso_fortran_env, only: real64
         use :: constant, only: N => NUM_PARTICLES
+        use :: particle, only: particle_t
         use :: random, only: fnrand
         implicit none
         private
         public :: force__Brownian_force
 
         interface force__Brownian_force
-          module procedure Brownian_force
+          module procedure Brownian_force_base
         end interface
 
       contains
@@ -37,6 +38,24 @@ c         Fills the Brownian forces with normally distributed pseudo-random numb
 
           return
         end subroutine Brownian_force
+
+
+        subroutine Brownian_force_base (particles)
+c         Synopsis:
+c         Updates the force vectors with the Brownian forces.
+          class(particle_t), intent(inout) :: particles
+          real(kind = real64), pointer, contiguous :: F_x(:) => null()
+          real(kind = real64), pointer, contiguous :: F_y(:) => null()
+          real(kind = real64), pointer, contiguous :: F_z(:) => null()
+
+          F_x => particles % F_x
+          F_y => particles % F_y
+          F_z => particles % F_z
+
+          call Brownian_force(F_x, F_y, F_z)
+
+          return
+        end subroutine Brownian_force_base
 
       end module force
 
