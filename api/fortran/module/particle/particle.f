@@ -48,11 +48,11 @@ c         data placeholder
 c           bindings:
             procedure, public :: initialize => initializer
 c           updates the particle positions and orientations
-            procedure(updater), deferred, public :: update
+            procedure(iupdate), deferred, public :: update
         end type particle_t
 
         interface
-          subroutine updater(particles)
+          subroutine iupdate (particles)
             import particle_t
             class(particle_t), intent(inout) :: particles
           end subroutine
