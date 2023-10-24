@@ -51,7 +51,7 @@ c         is equal to zero that means that furand()'s underlying PRNG is bogus.
 
           end do
 
-          r = dsqrt( ( -2.0_real64 * dlog(r) ) / r )
+          r = sqrt( ( -2.0_real64 * log(r) ) / r )
 
           x1 = r * x1
           x2 = r * x2

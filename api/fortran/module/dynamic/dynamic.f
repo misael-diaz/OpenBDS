@@ -74,7 +74,7 @@ c         with a callback, as in the clang API, to handle anisotropic particles.
           real(kind = real64), pointer, contiguous :: F_x(:) => null()
           real(kind = real64), pointer, contiguous :: F_y(:) => null()
           real(kind = real64), pointer, contiguous :: F_z(:) => null()
-          real(kind = real64), parameter :: m = dsqrt(2.0_real64 * dt)
+          real(kind = real64), parameter :: m = sqrt(2.0_real64 * dt)
           real(kind = real64), parameter :: mobility = m
 
           F_x => particles % F_x
