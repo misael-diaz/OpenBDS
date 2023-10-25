@@ -99,6 +99,8 @@ c           number of failures (that is, the number of unbounded spheres)
             tmp => spheres % tmp
             lim => tmp
 
+            call spheres % update()
+
             fails = 0_int64
             call limits(x, lim)
             fails = fails + nint(sum(lim), kind = int64)

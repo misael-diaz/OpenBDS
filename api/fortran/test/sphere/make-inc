@@ -37,11 +37,13 @@ RANDOM_O    = ../../module/random/random.o
 PARTICLE_O = ../../module/particle/particle.o\
 	     ../../module/sphere/sphere.o
 
+SYSTEM_O     = ../../module/system/system.o
+
 FORCE_O     = ../../module/force/force.o
 
 DYNAMIC_O   = ../../module/dynamic/dynamic.o
 
-OBJS = $(CONSTANTS_O) $(RANDOM_O) $(PARTICLE_O) $(FORCE_O) $(DYNAMIC_O)
+OBJS = $(CONSTANTS_O) $(RANDOM_O) $(PARTICLE_O) $(SYSTEM_O) $(FORCE_O) $(DYNAMIC_O)
 
 TEST_SPHERE_O = tsphere.o
 
