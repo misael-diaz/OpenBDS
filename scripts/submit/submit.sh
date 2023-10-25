@@ -18,6 +18,11 @@
 # Submits the OpenBDS OBDS code.
 # Implements auto-scheduling.
 #
+# Copyright (c) 2023 Misael Diaz-Maldonado
+# This file is released under the GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
 
 # loads the (most recent) Python 3 module
 module load python3/3.10.2
