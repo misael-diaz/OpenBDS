@@ -17,113 +17,113 @@
           module procedure positions
         end interface
 
-        contains
+      contains
 
-          subroutine ids()
+        subroutine ids()
 
-c           collection of spheres
-            type(sphere_t), pointer :: spheres => null()
-c           pointer to the particle IDs
-            real(kind = real64), pointer, contiguous :: id(:) => null()
-c           stores the sum of the sequence [1, NUM_SPHERES]
-            integer(kind = int64), parameter :: total =
-     +      NUM_SPHERES * (NUM_SPHERES + 1_int64) / 2_int64
-c           accumulator
-            integer(kind = int64) :: isum = 0_int64
-c           positional index
-            integer(kind = int64) :: i
+c         collection of spheres
+          type(sphere_t), pointer :: spheres => null()
+c         pointer to the particle IDs
+          real(kind = real64), pointer, contiguous :: id(:) => null()
+c         stores the sum of the sequence [1, NUM_SPHERES]
+          integer(kind = int64), parameter :: total =
+     +    NUM_SPHERES * (NUM_SPHERES + 1_int64) / 2_int64
+c         accumulator
+          integer(kind = int64) :: isum = 0_int64
+c         positional index
+          integer(kind = int64) :: i
 
-c           instantiates the collection of spheres:
-            spheres => sphere_t()
+c         instantiates the collection of spheres:
+          spheres => sphere_t()
 
-c           bindings:
-            id => spheres % id
+c         bindings:
+          id => spheres % id
 
-c           tests:
-            do i = 1, NUM_SPHERES
-              isum = isum + nint(id(i), kind = int64)
-            end do
+c         tests:
+          do i = 1, NUM_SPHERES
+            isum = isum + nint(id(i), kind = int64)
+          end do
 
-            write (*, '(A)', advance='no') 'test-sphere[0]: '
-            if (isum /= total) then
-              print *, 'FAIL'
-            else
-              print *, 'PASS'
-            end if
+          write (*, '(A)', advance='no') 'test-sphere[0]: '
+          if (isum /= total) then
+            print *, 'FAIL'
+          else
+            print *, 'PASS'
+          end if
 
-c           call spheres % update()
+c         call spheres % update()
 
-c           release the memory resources allocated for the spheres
-            deallocate(spheres)
+c         release the memory resources allocated for the spheres
+          deallocate(spheres)
 
-            return
-          end subroutine ids
-
-
-          elemental subroutine limits (x, limited)
-c           tests if the `x' coordinate is limited, writes outcome to `limited'.
-            real(kind = real64), intent(in) :: x
-            real(kind = real64), intent(out) :: limited
-
-            if (x < -LIMIT .or. x > +LIMIT) then
-              limited = 0.0_real64
-            else
-              limited = 1.0_real64
-            end if
-
-            return
-          end subroutine limits
+          return
+        end subroutine ids
 
 
-          subroutine positions ()
-c           Synopsis:
-c           Tests that the position of the spheres are bounded to [-LIMIT, +LIMIT].
-c           collection of spheres
-            type(sphere_t), pointer :: spheres => null()
-c           position vector
-            real(kind = real64), pointer, contiguous :: x(:) => null()
-            real(kind = real64), pointer, contiguous :: y(:) => null()
-            real(kind = real64), pointer, contiguous :: z(:) => null()
-c           temporary
-            real(kind = real64), pointer, contiguous :: tmp(:) => null()
-c           alias
-            real(kind = real64), pointer, contiguous :: lim(:) => null()
-c           number of failures (that is, the number of unbounded spheres)
-            integer(kind = int64) :: fails
+        elemental subroutine limits (x, limited)
+c         tests if the `x' coordinate is limited, writes outcome to `limited'.
+          real(kind = real64), intent(in) :: x
+          real(kind = real64), intent(out) :: limited
 
-            spheres => sphere_t()
+          if (x < -LIMIT .or. x > +LIMIT) then
+            limited = 0.0_real64
+          else
+            limited = 1.0_real64
+          end if
 
-            x => spheres % x
-            y => spheres % y
-            z => spheres % z
-            tmp => spheres % tmp
-            lim => tmp
+          return
+        end subroutine limits
 
-            call spheres % update()
 
-            fails = 0_int64
-            call limits(x, lim)
-            fails = fails + nint(sum(lim), kind = int64)
+        subroutine positions ()
+c         Synopsis:
+c         Tests that the position of the spheres are bounded to [-LIMIT, +LIMIT].
+c         collection of spheres
+          type(sphere_t), pointer :: spheres => null()
+c         position vector
+          real(kind = real64), pointer, contiguous :: x(:) => null()
+          real(kind = real64), pointer, contiguous :: y(:) => null()
+          real(kind = real64), pointer, contiguous :: z(:) => null()
+c         temporary
+          real(kind = real64), pointer, contiguous :: tmp(:) => null()
+c         alias
+          real(kind = real64), pointer, contiguous :: lim(:) => null()
+c         number of failures (that is, the number of unbounded spheres)
+          integer(kind = int64) :: fails
 
-            call limits(y, lim)
-            fails = fails + nint(sum(lim), kind = int64)
+          spheres => sphere_t()
 
-            call limits(z, lim)
-            fails = fails + nint(sum(lim), kind = int64)
+          x => spheres % x
+          y => spheres % y
+          z => spheres % z
+          tmp => spheres % tmp
+          lim => tmp
 
-            fails = (3_int64 * NUM_SPHERES - fails)
+          call spheres % update()
 
-            write (*, '(A)', advance='no') 'test-sphere[1]: '
-            if (fails /= 0_int64) then
-              print *, 'FAIL'
-            else
-              print *, 'PASS'
-            end if
+          fails = 0_int64
+          call limits(x, lim)
+          fails = fails + nint(sum(lim), kind = int64)
 
-            deallocate(spheres)
+          call limits(y, lim)
+          fails = fails + nint(sum(lim), kind = int64)
 
-            return
-          end subroutine positions
+          call limits(z, lim)
+          fails = fails + nint(sum(lim), kind = int64)
+
+          fails = (3_int64 * NUM_SPHERES - fails)
+
+          write (*, '(A)', advance='no') 'test-sphere[1]: '
+          if (fails /= 0_int64) then
+            print *, 'FAIL'
+          else
+            print *, 'PASS'
+          end if
+
+          deallocate(spheres)
+
+          return
+        end subroutine positions
 
       end module tests
 
