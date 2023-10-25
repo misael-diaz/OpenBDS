@@ -5,6 +5,7 @@
         use :: constant, only: LENGTH
         use :: constant, only: NUM_SPHERES => NUM_PARTICLES
         use :: force, only: force__Brownian_force
+        use :: system, only: system__PBC
         use :: dynamic, only: dynamic__shifter
         use :: particle, only: particle_t
         implicit none
@@ -162,8 +163,9 @@ c         Synopsis:
 c         Implements non-interacting Brownian spheres.
           class(sphere_t), intent(inout) :: particles
 
-          call force__Brownian_force(particles)
-          call dynamic__shifter(particles)
+          call force__Brownian_force(particles) ! computes Brownian forces
+          call dynamic__shifter(particles)      ! shifts particles Brownianly
+          call system__PBC(particles)           ! applies Periodic Boundary Conditions
 
           return
         end subroutine updater
