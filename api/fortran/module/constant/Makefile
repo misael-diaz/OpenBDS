@@ -19,7 +19,7 @@ include make-inc
 all: $(CONSTANTS_O)
 
 $(CONSTANTS_O): $(CONSTANTS_F)
-	$(FC) $(FCOPT) -ffixed-form -c $(CONSTANTS_F) -o $(CONSTANTS_O) -J $(MODS)
+	$(FC) $(FCOPT) -c $(CONSTANTS_F) -o $(CONSTANTS_O) -J $(MODS)
 
 clean:
 	/bin/rm -f *.o

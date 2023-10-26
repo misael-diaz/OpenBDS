@@ -19,7 +19,7 @@ include make-inc
 all: $(PARTICLE_O)
 
 $(PARTICLE_O): $(MODULES) $(PARTICLE_F)
-	$(FC) $(FCOPT) -ffixed-form -c $(PARTICLE_F) -o $(PARTICLE_O) -J $(MODS)
+	$(FC) $(FCOPT) -c $(PARTICLE_F) -o $(PARTICLE_O) -J $(MODS)
 
 clean:
 	/bin/rm -f *.o

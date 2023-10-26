@@ -19,8 +19,7 @@ include make-inc
 all: $(RANDOM_O)
 
 $(RANDOM_O): $(RANDOM_F)
-	$(FC) $(FCOPT) -ffixed-form -Wno-compare-reals -c $(RANDOM_F) -o\
-		$(RANDOM_O) -J $(MODS)
+	$(FC) $(FCOPT) -c $(RANDOM_F) -o $(RANDOM_O) -J $(MODS)
 
 clean:
 	/bin/rm -f *.o
