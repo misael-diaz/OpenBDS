@@ -19,7 +19,7 @@ include make-inc
 all: $(DYNAMIC_O)
 
 $(DYNAMIC_O): $(MODULES) $(DYNAMIC_F)
-	$(FC) $(FCOPT) -c $(DYNAMIC_F) -o $(DYNAMIC_O) -J $(MODS)
+	$(FC) $(FCOPT) -c $(DYNAMIC_F) -o $(DYNAMIC_O) $(FMOD) $(MODS)
 
 clean:
 	/bin/rm -f *.o

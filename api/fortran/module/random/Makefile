@@ -19,7 +19,7 @@ include make-inc
 all: $(RANDOM_O)
 
 $(RANDOM_O): $(RANDOM_F)
-	$(FC) $(FCOPT) -c $(RANDOM_F) -o $(RANDOM_O) -J $(MODS)
+	$(FC) $(FCOPT) -c $(RANDOM_F) -o $(RANDOM_O) $(FMOD) $(MODS)
 
 clean:
 	/bin/rm -f *.o

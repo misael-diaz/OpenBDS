@@ -19,7 +19,7 @@ include make-inc
 all: $(FORCE_O)
 
 $(FORCE_O): $(MODULES) $(FORCE_F)
-	$(FC) $(FCOPT) -c $(FORCE_F) -o $(FORCE_O) -J $(MODS)
+	$(FC) $(FCOPT) -c $(FORCE_F) -o $(FORCE_O) $(FMOD) $(MODS)
 
 clean:
 	/bin/rm -f *.o

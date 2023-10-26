@@ -19,7 +19,7 @@ include make-inc
 all: $(SPHERE_O)
 
 $(SPHERE_O): $(MODULES) $(SPHERE_F)
-	$(FC) $(FCOPT) -c $(SPHERE_F) -o $(SPHERE_O) -J $(MODS)
+	$(FC) $(FCOPT) -c $(SPHERE_F) -o $(SPHERE_O) $(FMOD) $(MODS)
 
 clean:
 	/bin/rm -f *.o
