@@ -1,3 +1,4 @@
+#define _XOPEN_SOURCE 700
 #include <fcntl.h>	// for reading /dev/urandom
 #include <sys/stat.h>	// for reading /dev/urandom
 #include <sys/types.h>	// required by getpid(), see man getpid

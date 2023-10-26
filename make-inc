@@ -24,7 +24,7 @@ FC = gfortran
 
 # clang compilers
 # Intel C Compiler
-CC = icc
+CC = icx
 # Linux LLVM C Compiler (clang) Options
 CC = clang-12
 # GNU C Compiler

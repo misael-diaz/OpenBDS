@@ -878,9 +878,9 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   // compile-time sane checks:
 
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
-  static_assert(BYTE_ORDER == LITTLE_ENDIAN);
-#if defined(FLOAT_WORD_ORDER)
-  static_assert(FLOAT_WORD_ORDER == LITTLE_ENDIAN);
+  static_assert(__BYTE_ORDER == __LITTLE_ENDIAN);
+#if defined(__FLOAT_WORD_ORDER)
+  static_assert(__FLOAT_WORD_ORDER == __LITTLE_ENDIAN);
 #endif
   // this assertion shall be removed once we add minimal code for anisotropic particles
   static_assert( __OBDS_SPH__ );
@@ -904,9 +904,10 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   static_assert(CONTACT == 2.0);
   static_assert(RADIUS == 1.0);
 #else
-  _Static_assert(BYTE_ORDER == LITTLE_ENDIAN, "expects little-endian byte-order");
-#if defined(FLOAT_WORD_ORDER)
-  _Static_assert(FLOAT_WORD_ORDER == LITTLE_ENDIAN, "expects little-endian byte-order");
+  _Static_assert(__BYTE_ORDER == __LITTLE_ENDIAN, "expects little-endian byte-order");
+#if defined(__FLOAT_WORD_ORDER)
+  _Static_assert(__FLOAT_WORD_ORDER == __LITTLE_ENDIAN,
+		 "expects little-endian byte-order");
 #endif
   // this assertion shall be removed once we add minimal code for anisotropic particles
   _Static_assert( __OBDS_SPH__, "configuration error, non-isotropic resistance" );
