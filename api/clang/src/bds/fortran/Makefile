@@ -23,7 +23,7 @@ $(OBDS): $(OBDS_O)
 
 
 $(OBDS_O): $(DEPS_O) $(OBDS_F)
-	$(FC) $(INC) $(FCOPT) -c $(OBDS_F) -o $(OBDS_O)
+	$(FC) $(INC) $(FCOPT) $(FFREE) -c $(OBDS_F) -o $(OBDS_O)
 
 clean:
 	/bin/rm -f *.o *.log *.mod *.bin

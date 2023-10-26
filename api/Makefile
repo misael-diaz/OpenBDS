@@ -14,8 +14,7 @@
 # (at your option) any later version.
 #
 
-#all: api-clang api-fortran
-all: api-fortran
+all: api-clang api-fortran
 
 api-clang:
 	@$(MAKE) -C clang
