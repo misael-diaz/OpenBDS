@@ -19,7 +19,7 @@ include make-inc
 all: $(SYSTEM_O)
 
 $(SYSTEM_O): $(MODULES) $(SYSTEM_F)
-	$(FC) $(FCOPT) -ffixed-form -c $(SYSTEM_F) -o $(SYSTEM_O) -J $(MODS)
+	$(FC) $(FCOPT) -c $(SYSTEM_F) -o $(SYSTEM_O) $(FMOD) $(MODS)
 
 clean:
 	/bin/rm -f *.o

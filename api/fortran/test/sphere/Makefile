@@ -22,8 +22,7 @@ $(TEST_SPHERE_BIN): $(TEST_SPHERE_O)
 	$(FC) $(FCOPT) $(OBJS) $(TEST_SPHERE_O) -o $(TEST_SPHERE_BIN)
 
 $(TEST_SPHERE_O): $(MODULES) $(OBJS) $(TEST_SPHERE_F)
-	$(FC) $(INC) $(IMODS) $(FCOPT) -ffixed-form -c $(TEST_SPHERE_F) -o\
-		$(TEST_SPHERE_O)
+	$(FC) $(INC) $(IMODS) $(FCOPT) -c $(TEST_SPHERE_F) -o $(TEST_SPHERE_O)
 
 clean:
 	/bin/rm -f *.o *.bin

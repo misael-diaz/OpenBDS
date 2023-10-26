@@ -163,9 +163,12 @@ c         Synopsis:
 c         Implements non-interacting Brownian spheres.
           class(sphere_t), intent(inout) :: particles
 
-          call force__Brownian_force(particles) ! computes Brownian forces
-          call dynamic__shifter(particles)      ! shifts particles Brownianly
-          call system__PBC(particles)           ! applies Periodic Boundary Conditions
+c         computes Brownian forces
+          call force__Brownian_force(particles)
+c         shifts particles Brownianly
+          call dynamic__shifter(particles)
+c         applies Periodic Boundary Conditions
+          call system__PBC(particles)
 
           return
         end subroutine updater

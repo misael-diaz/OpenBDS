@@ -45,4 +45,4 @@ clean:
 	@$(MAKE) -C force clean
 	@$(MAKE) -C dynamic clean
 	@$(MAKE) -C sphere clean
-	rm mods/*.mod
+	rm -f mods/*.mod

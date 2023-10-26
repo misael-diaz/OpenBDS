@@ -34,16 +34,14 @@ CC = gcc-9
 CC = gcc
 
 # MAC OS X Intel FORTRAN Compiler Options
-FCOPT = -cpp -free -warn all -g -O0
+FCOPT = -cpp -fixed -warn all -g -O0
 # Linux GNU FORTRAN Compiler Options
-FCOPT = -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form\
-	-ffree-line-length-none
-FCOPT = -O2 -mavx -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffree-form\
-	-ffree-line-length-none
+FCOPT = -O2 -mavx512vnni -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffixed-form
+FCOPT = -O2 -mavx -ftree-vectorize -fopt-info-optimized=opts.log -cpp -ffixed-form
 FCOPT = -g -Wall -Wextra -Waliasing -Wsurprising -Warray-bounds -Warray-temporaries\
 	-Wcharacter-truncation -Wconversion-extra -Wimplicit-interface\
 	-Wimplicit-procedure -Wuse-without-only -Wrealloc-lhs -Wrealloc-lhs-all\
-	-fcheck=all -O0 -cpp -ffree-form -ffree-line-length-none
+	-fcheck=all -O0 -cpp -ffixed-form
 
 # clang options
 # MAC OS X Intel C Compiler Options

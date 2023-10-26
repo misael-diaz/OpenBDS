@@ -16,10 +16,18 @@
 
 include make-inc
 
+# sets the module flag according to the FORTRAN Compiler FC
+ifeq ($(FC), ifort)
+	FMOD = -module
+else
+	FMOD = -J
+endif
+
 export CC
 export FC
 export CCOPT
 export FCOPT
+export FMOD
 export LIBS
 
 all: apis
