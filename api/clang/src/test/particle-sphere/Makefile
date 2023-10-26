@@ -28,7 +28,7 @@ $(TEST_O): $(DEPS_O) $(TEST_C)
 	$(CC) $(INC) $(CCOPT) -c $(TEST_C) -o $(TEST_O)
 
 $(FEST_O): $(DEPS_O) $(TEST_F)
-	$(FC) $(INC) $(FCOPT) -c $(TEST_F) -o $(FEST_O)
+	$(FC) $(INC) $(FCOPT) $(FFREE) -c $(TEST_F) -o $(FEST_O)
 
 clean:
 	/bin/rm -f *.o *.log *.mod *.bin

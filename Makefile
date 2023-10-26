@@ -23,10 +23,17 @@ else
 	FMOD = -J
 endif
 
+ifeq ($(FC), ifort)
+	FFREE = -free
+else
+	FFREE = -ffree-form -ffree-line-length-none
+endif
+
 export CC
 export FC
 export CCOPT
 export FCOPT
+export FFREE
 export FMOD
 export LIBS
 
