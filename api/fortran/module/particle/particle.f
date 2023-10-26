@@ -44,7 +44,8 @@ c         data placeholder
           real(kind = real64), pointer, contiguous :: data(:) => null()
           contains
             private
-            procedure :: initializer    ! memory allocations and initializations
+c           memory allocations and initializations
+            procedure :: initializer
 c           bindings:
             procedure, public :: initialize => initializer
 c           updates the particle positions and orientations
