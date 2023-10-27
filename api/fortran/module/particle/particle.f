@@ -52,7 +52,7 @@ c           updates the particle positions and orientations
             procedure(iupdate), deferred, public :: update
         end type particle_t
 
-        interface
+        abstract interface
           subroutine iupdate (particles)
             import particle_t
             class(particle_t), intent(inout) :: particles
