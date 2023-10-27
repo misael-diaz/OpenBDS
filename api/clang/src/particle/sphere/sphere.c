@@ -881,7 +881,7 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 
 //checks implicitly for the OS (thus far these sane checks are portable)
 //we are checking the byte order because the methods that perform bitwise operations
-//assume little endianess, if our assumption is wrong we want to know at compile time.
+//assume little endianness, if our assumption is wrong we want to know at compile time.
 #if defined(__BYTE_ORDER) && defined(__LITTLE_ENDIAN)
 //possibly compiling in GNU/Linux because these double underscore MACROS are defined
   static_assert(__BYTE_ORDER == __LITTLE_ENDIAN);
@@ -918,7 +918,7 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
 
 //checks implicitly for the OS (thus far these sane checks are portable)
 //we are checking the byte order because the methods that perform bitwise operations
-//assume little endianess, if our assumption is wrong we want to know at compile time.
+//assume little endianness, if our assumption is wrong we want to know at compile time.
 #if defined(__BYTE_ORDER) && defined(__LITTLE_ENDIAN)
 //possibly compiling in GNU/Linux because these double underscore MACROS are defined
   _Static_assert(__BYTE_ORDER == __LITTLE_ENDIAN, "expects little-endian byte-order");
