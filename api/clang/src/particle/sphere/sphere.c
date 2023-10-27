@@ -878,7 +878,18 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   // compile-time sane checks:
 
 #if ( ( __GNUC__ > 12 ) && ( __STDC_VERSION__ > STDC17 ) )
+
+//checks implicitly for the OS (thus far these sane checks are portable)
+//we are checking the byte order because the methods that perform bitwise operations
+//assume little endianess, if our assumption is wrong we want to know at compile time.
+#if defined(__BYTE_ORDER) && defined(__LITTLE_ENDIAN)
+//possibly compiling in GNU/Linux because these double underscore MACROS are defined
   static_assert(__BYTE_ORDER == __LITTLE_ENDIAN);
+#else
+//if the double underscore MACROS are not defined we might be compiling the code in OSX
+  static_assert(BYTE_ORDER == LITTLE_ENDIAN);
+#endif
+
 #if defined(__FLOAT_WORD_ORDER)
   static_assert(__FLOAT_WORD_ORDER == __LITTLE_ENDIAN);
 #endif
@@ -904,7 +915,18 @@ sphere_t* particles_sphere_initializer (void* workspace, SPHLOG LVL)
   static_assert(CONTACT == 2.0);
   static_assert(RADIUS == 1.0);
 #else
+
+//checks implicitly for the OS (thus far these sane checks are portable)
+//we are checking the byte order because the methods that perform bitwise operations
+//assume little endianess, if our assumption is wrong we want to know at compile time.
+#if defined(__BYTE_ORDER) && defined(__LITTLE_ENDIAN)
+//possibly compiling in GNU/Linux because these double underscore MACROS are defined
   _Static_assert(__BYTE_ORDER == __LITTLE_ENDIAN, "expects little-endian byte-order");
+#else
+//if the double underscore MACROS are not defined we might be compiling the code in OSX
+  _Static_assert(BYTE_ORDER == LITTLE_ENDIAN, "expects little-endian byte-order");
+#endif
+
 #if defined(__FLOAT_WORD_ORDER)
   _Static_assert(__FLOAT_WORD_ORDER == __LITTLE_ENDIAN,
 		 "expects little-endian byte-order");
