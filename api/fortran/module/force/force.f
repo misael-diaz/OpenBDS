@@ -43,7 +43,7 @@ c         Fills the Brownian forces with normally distributed pseudo-random numb
         subroutine Brownian_force_base (particles)
 c         Synopsis:
 c         Updates the force vectors with the Brownian forces.
-          class(particle_t), intent(inout) :: particles
+          class(particle_t), intent(inout), target :: particles
           real(kind = real64), pointer, contiguous :: F_x(:) => null()
           real(kind = real64), pointer, contiguous :: F_y(:) => null()
           real(kind = real64), pointer, contiguous :: F_z(:) => null()
