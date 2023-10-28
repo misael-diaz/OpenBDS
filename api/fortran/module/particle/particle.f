@@ -120,7 +120,7 @@ c         defines the error messages
         end subroutine sane
 
 
-        subroutine iota (x)
+        pure subroutine iota (x)
 c         Synopsis:
 c         implements a std::iota C++ like method
 c         fills array `x' with values in symmetric range [1, numel]
