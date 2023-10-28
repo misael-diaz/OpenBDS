@@ -8,13 +8,25 @@
         public :: LENGTH
         public :: TIME_STEP
         public :: NUM_PARTICLES
+        public :: LOG_NUM_PARTICLES
 
 c       system box limits and length
         real(kind = real64), parameter :: LIMIT = 8.0_real64
         real(kind = real64), parameter :: LENGTH = (2.0_real64 * LIMIT)
 c       OBDS time-step
         real(kind = real64), parameter :: TIME_STEP = 2.0_real64**(-16)
-        integer(kind = int64), parameter :: NUM_PARTICLES = 256_int64
+c       stores log base two of N, log2(N), where `N' is the number of particles
+        integer(kind = int64), parameter :: LOG_NUM_PARTICLES = 8_int64
+c       defines the number of particles in the system (expressed as a power of two)
+c       NOTE:
+c       The number of particles is a power of two by design. Some of the algorithms that
+c       will be implemented expect the number of particles to be expressible exactly as a
+c       power of two. Change this design constraint only if you know what you are doing.
+c       If all that you want is to achieve a certain volume fraction that can be done more
+c       easily by adjusting the system LIMIT. We use constants that can be expressed
+c       as powers of two because these have exact binary floating-point representations.
+        integer(kind = int64), parameter :: NUM_PARTICLES =
+     +  2_int64 ** LOG_NUM_PARTICLES
 
       end module constant
 

@@ -1,6 +1,7 @@
       module particle
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
+        use :: constant, only: LOG_NUM_PARTICLES
         use :: constant, only: NUM_PARTICLES
         implicit none
         private
@@ -90,6 +91,9 @@ c         would do in C++ or Java.
           class(particle_t), intent(inout) :: particles
           real(kind = real64), pointer, contiguous :: id(:) => null()
           integer(kind = int64), parameter :: N = NUM_PARTICLES
+          integer(kind = int64), parameter :: LOG_N = LOG_NUM_PARTICLES
+          logical(kind = int64), parameter :: sane =
+     +    (N == 2_int64 ** LOG_N)
 c         size position vector
           integer(kind = int64), parameter :: size_x = N
           integer(kind = int64), parameter :: size_y = N
@@ -162,6 +166,13 @@ c         memory allocation status
           integer(kind = int64) :: mstat
 c         size
           integer(kind = int64) :: sz
+
+c         complains if someone changes the design in module `constant'
+          if (.not. sane) then
+            error stop "particle::initializer(): " //
+     +                 "IllegalParameterError: the number of " //
+     +                 "particles is not a power of two"
+          end if
 
 c         allocates memory for the particle data
           allocate(particles % data(size_data), stat = mstat)
