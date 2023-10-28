@@ -34,6 +34,160 @@ c       sphere radius, diameter, and contact-distance
 
       contains
 
+        subroutine stackable ()
+c         Synopsis:
+c         Complains if it is not possible to stack the spheres in a grid (or lattice) like
+c         structure without incurring on particle overlaps.
+c         cubic system box length
+          real(kind = real64), parameter :: L = LENGTH
+c         sphere-contact distance
+          real(kind = real64), parameter :: C = CONTACT
+c         maximum number of spheres that can be stacked in one dimension 1D
+          integer(kind = int64), parameter :: max_num_stacked_1d =
+     +    floor(L / C, kind = int64)
+c         maximum number of spheres that can be stacked in two dimensions 3D
+          integer(kind = int64), parameter :: max_num_stacked_3d =
+     +    (max_num_stacked_1d ** 3)
+c         error message
+          character(*), parameter :: errmsg = "sphere::stackable(): "//
+     +    "it is impossible to fit the requested number of spheres " //
+     +    "in a grid (or lattice) like structure without incurring " //
+     +    "in particle overlaps"
+
+          if (NUM_SPHERES > max_num_stacked_3d) then
+            error stop errmsg
+          end if
+
+          return
+        end subroutine stackable
+
+
+        pure subroutine stack_x (x)
+c         Synopsis:
+c         Sets the `x'-coordinates of the spheres so that they are stacked in 1D.
+c         NOTE:
+c         The computed  `x' coordinates RHS increment on each iteration until a stack
+c         is completed, and in that instance the computed `x' coordinate is set to zero.
+c         array of `x'-coordinates of the spheres
+          real(kind = real64), intent(out) :: x(NUM_SPHERES)
+c         uses offset to ensure no particle overlaps across boundaries
+          real(kind = real64), parameter :: offset = RADIUS
+c         cubic system box length
+          real(kind = real64), parameter :: L = LENGTH
+c         sphere-contact distance
+          real(kind = real64), parameter :: C = CONTACT
+c         maximum number of spheres that can be stacked in one dimension 1D
+          integer(kind = int64), parameter :: max_stacked = floor(L / C,
+     +    kind = int64)
+c         particle counter
+          integer(kind = int64) :: counter
+c         particle id
+          integer(kind = int64) :: id
+c         index
+          integer(kind = int64) :: i
+
+c         loop-invariant: so far we have updated the `x' position of `counter' spheres
+          counter = 0_int64
+          do while (counter /= NUM_SPHERES)
+            id = counter + 1_int64
+            i = mod(counter, max_stacked)
+            x(id) = offset + CONTACT * real(i, kind = real64)
+            counter = counter + 1_int64
+          end do
+
+          return
+        end subroutine stack_x
+
+
+        pure subroutine stack_y (y)
+c         Synopsis:
+c         Sets the `y'-coordinates of the spheres so that they are stacked in 2D.
+c         This is because we have already called `stack_x()' that we can say that
+c         the spheres are stacked in 2D.
+c         NOTE:
+c         The computed `y' coordinates RHS increment when a stack is completed, the
+c         `y' coordinate gets reseted upon filling an entire area (in the x-y plane).
+c         array of `y'-coordinates of the spheres
+          real(kind = real64), intent(out) :: y(NUM_SPHERES)
+c         uses offset to ensure no particle overlaps across boundaries
+          real(kind = real64), parameter :: offset = RADIUS
+c         cubic system box length
+          real(kind = real64), parameter :: L = LENGTH
+c         sphere-contact distance
+          real(kind = real64), parameter :: C = CONTACT
+c         maximum number of spheres that can be stacked in one dimension 1D
+          integer(kind = int64), parameter :: max_num_stacked_1d =
+     +    floor(L / C, kind = int64)
+          integer(kind = int64), parameter :: max_num_stacked_2d =
+     +    (max_num_stacked_1d ** 2)
+c         alias
+          integer(kind = int64), parameter :: stacked_1d =
+     +    max_num_stacked_1d
+c         alias
+          integer(kind = int64), parameter :: stacked_2d =
+     +    max_num_stacked_2d
+          integer(kind = int64) :: counter
+c         particle id
+          integer(kind = int64) :: id
+c         index
+          integer(kind = int64) :: i
+
+c         loop-invariant: so far we have updated the `y' position of `counter' spheres
+          counter = 0_int64
+          do while (counter /= NUM_SPHERES)
+            id = counter + 1_int64
+            i = mod(counter, stacked_2d) / stacked_1d
+            y(id) = offset + CONTACT * real(i, kind = real64)
+            counter = counter + 1_int64
+          end do
+
+          return
+        end subroutine stack_y
+
+
+        pure subroutine stack_z (z)
+c         Synopsis:
+c         Sets the `z'-coordinates of the spheres so that they are stacked in 3D.
+c         We can say this because we have already called `stack_x()' and `stack_y()'.
+c         NOTE:
+c         The computed `z' coordinates increment upon filling an area (in the x-y plane).
+c         array of `z'-coordinates of the spheres
+          real(kind = real64), intent(out) :: z(NUM_SPHERES)
+c         uses offset to ensure no particle overlaps across boundaries
+          real(kind = real64), parameter :: offset = RADIUS
+c         cubic system box length
+          real(kind = real64), parameter :: L = LENGTH
+c         sphere-contact distance
+          real(kind = real64), parameter :: C = CONTACT
+c         maximum number of spheres that can be stacked in one dimension 1D
+          integer(kind = int64), parameter :: max_num_stacked_1d =
+     +    floor(L / C, kind = int64)
+c         maximum number of spheres that can be stacked in two dimensions 2D
+          integer(kind = int64), parameter :: max_num_stacked_2d =
+     +    (max_num_stacked_1d ** 2)
+c         alias
+          integer(kind = int64), parameter :: stacked_2d =
+     +    max_num_stacked_2d
+c         particle counter
+          integer(kind = int64) :: counter
+c         particle id
+          integer(kind = int64) :: id
+c         index
+          integer(kind = int64) :: i
+
+c         loop-invariant: so far we have updated the `z' position of `counter' spheres
+          counter = 0_int64
+          do while (counter /= NUM_SPHERES)
+            id = counter + 1_int64
+            i = counter / stacked_2d
+            z(id) = offset + CONTACT * real(i, kind = real64)
+            counter = counter + 1_int64
+          end do
+
+          return
+        end subroutine stack_z
+
+
         subroutine grid (spheres)
 c         Synopsis:
 c         Places the spheres in a grid (or lattice) like structure.
@@ -46,87 +200,30 @@ c         pointers to the position vector components
           real(kind = real64), pointer, contiguous :: x(:) => null()
           real(kind = real64), pointer, contiguous :: y(:) => null()
           real(kind = real64), pointer, contiguous :: z(:) => null()
-c         uses offset to ensure no particle overlaps across boundaries
-          real(kind = real64), parameter :: offset = RADIUS
-c         maximum number of spheres that can be stacked in one dimension 1D
-          integer(kind = int64), parameter :: max_num_sph_stacked_1d =
-     +    floor(LENGTH / CONTACT, kind = int64)
-c         maximum number of spheres that can be stacked in two dimensions 2D
-          integer(kind = int64), parameter :: max_num_sph_stacked_2d =
-     +    (max_num_sph_stacked_1d ** 2)
-c         maximum number of spheres that can be stacked in three dimensions 3D
-          integer(kind = int64), parameter :: max_num_sph_stacked_3d =
-     +    (max_num_sph_stacked_1d ** 3)
-c         alias
-          integer(kind = int64), parameter :: stacked_1d =
-     +    max_num_sph_stacked_1d
-c         alias
-          integer(kind = int64), parameter :: stacked_2d =
-     +    max_num_sph_stacked_2d
-c         particle counter
-          integer(kind = int64) :: counter
-c         particle id
-          integer(kind = int64) :: id
-c         index
-          integer(kind = int64) :: i
-c         error message
-          character(*), parameter :: errmsg = "sphere::grid(): "//
-     +    "it is impossible to fit the requested number of spheres "//
-     +    "in a grid (or lattice) like structure without incurring "//
-     +    "in particle overlaps"
 
-c         complains if it is not possible to place the particles in the grid-like
-c         structure implemented by this procedure
-          if (NUM_SPHERES > max_num_sph_stacked_3d) then
-            error stop errmsg
-          end if
+c         complains if it is not possible to stack the spheres in a grid-like fashion
+          call stackable()
 
           x => spheres % x
 
-          counter = 0_int64
-c         loop-invariant: so far we have updated the `x' position of `counter' spheres
-c         NOTE:
-c         stacks a pile of spheres (at contact) along the x-dimension; the `x'
-c         coordinates increment on each iteration until a pile is completed, and in
-c         that instance the `x' coordinate is reseted to zero.
-          do while (counter /= NUM_SPHERES)
-            id = counter + 1_int64
-            i = mod(counter, max_num_sph_stacked_1d)
-            x(id) = offset + CONTACT * real(i, kind = real64)
-            counter = counter + 1_int64
-          end do
+c         stacks a pile of spheres (at contact) along the x-dimension
+          call stack_x(x)
 
 c         adjusts `x'-coordinates so that they fall in the range [-LIMIT, +LIMIT]
           x = x - LIMIT
 
           y => spheres % y
 
-          counter = 0_int64
-c         loop-invariant: so far we have updated the `y' position of `counter' spheres
-c         NOTE:
-c         The `y' coordinates increment when a pile is completed, the `y' coordinate
-c         gets reseted upon filling an entire area (in the x-y plane).
-          do while (counter /= NUM_SPHERES)
-            id = counter + 1_int64
-            i = mod(counter, stacked_2d) / stacked_1d
-            y(id) = offset + CONTACT * real(i, kind = real64)
-            counter = counter + 1_int64
-          end do
+c         stacks a pile of spheres (at contact) in the y-dimension
+          call stack_y(y)
 
 c         adjusts the `y'-coordinates so that they fall in the range [-LIMIT, +LIMIT]
           y = y - LIMIT
 
           z => spheres % z
 
-          counter = 0_int64
-c         loop-invariant: so far we have updated the `z' position of `counter' spheres
-c         NOTE: The `z' coordinates increment upon filling an area (in the x-y plane).
-          do while (counter /= NUM_SPHERES)
-            id = counter + 1_int64
-            i = counter / max_num_sph_stacked_2d
-            z(id) = offset + CONTACT * real(i, kind = real64)
-            counter = counter + 1_int64
-          end do
+c         stacks a pile of spheres (at contact) in the z-dimension
+          call stack_z(z)
 
 c         adjusts the `z'-coordinates so that they fall in the range [-LIMIT, +LIMIT]
           z = z - LIMIT

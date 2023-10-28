@@ -1,8 +1,13 @@
+#define __PASS__  0_int64
+#define __FAIL__ -1_int64
+
       module particle
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
         use :: constant, only: LOG_NUM_PARTICLES
         use :: constant, only: NUM_PARTICLES
+        use :: constant, only: TIME_STEP
+        use :: constant, only: LIMIT
         implicit none
         private
 
@@ -62,7 +67,60 @@ c           updates the particle positions and orientations
 
       contains
 
-        subroutine iota (x)
+        pure function test (t) result(outcome)
+          logical(kind = int64), intent(in) :: t
+          integer(kind = int64) :: outcome
+
+          if (t) then
+            outcome = __PASS__
+          else
+            outcome = __FAIL__
+          end if
+
+          return
+        end function test
+
+
+        subroutine sane ()
+c         Synopsis:
+c         Complains if the module parameters in `constants` are illegal.
+          integer(kind = int64), parameter :: N = NUM_PARTICLES
+          integer(kind = int64), parameter :: LOG_N = LOG_NUM_PARTICLES
+          integer(kind = int64), parameter :: E = LOG_N ! Exponent
+          real(kind = real64), parameter :: L = LIMIT
+          real(kind = real64), parameter :: T = TIME_STEP
+c         tests that the number of particles is an exact power of two
+          logical(kind = int64), parameter :: t1 = (N == 2_int64 ** E)
+c         tests that the system limit is positive
+          logical(kind = int64), parameter :: t2 = (L > 0.0_real64)
+c         tests that the time-step is positive
+          logical(kind = int64), parameter :: t3 = (T > 0.0_real64)
+c         defines the error messages
+          character(*), parameter :: e1 = "particle::sane(): " //
+     +    "IllegalParameterError: the number of particles is not a " //
+     +    "power of two"
+          character(*), parameter :: e2 = "particle::sane(): " //
+     +    "IllegalParameterError: the system limit must be positive"
+          character(*), parameter :: e3 = "particle::sane(): " //
+     +    "IllegalParameterError: the time-step must be positive"
+
+          if ( test(t1) == __FAIL__ ) then
+            error stop e1
+          end if
+
+          if ( test(t2) == __FAIL__ ) then
+            error stop e2
+          end if
+
+          if ( test(t3) == __FAIL__ ) then
+            error stop e3
+          end if
+
+          return
+        end subroutine sane
+
+
+        pure subroutine iota (x)
 c         Synopsis:
 c         implements a std::iota C++ like method
 c         fills array `x' with values in symmetric range [1, numel]
@@ -91,9 +149,6 @@ c         would do in C++ or Java.
           class(particle_t), intent(inout) :: particles
           real(kind = real64), pointer, contiguous :: id(:) => null()
           integer(kind = int64), parameter :: N = NUM_PARTICLES
-          integer(kind = int64), parameter :: LOG_N = LOG_NUM_PARTICLES
-          logical(kind = int64), parameter :: sane =
-     +    (N == 2_int64 ** LOG_N)
 c         size position vector
           integer(kind = int64), parameter :: size_x = N
           integer(kind = int64), parameter :: size_y = N
@@ -167,12 +222,8 @@ c         memory allocation status
 c         size
           integer(kind = int64) :: sz
 
-c         complains if someone changes the design in module `constant'
-          if (.not. sane) then
-            error stop "particle::initializer(): " //
-     +                 "IllegalParameterError: the number of " //
-     +                 "particles is not a power of two"
-          end if
+c         complains if module `constant' has illegal values
+          call sane()
 
 c         allocates memory for the particle data
           allocate(particles % data(size_data), stat = mstat)
