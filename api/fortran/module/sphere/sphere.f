@@ -138,6 +138,19 @@ c         adjusts the `z'-coordinates so that they fall in the range [-LIMIT, +L
         function constructor () result(spheres)
 c         Synopsis:
 c         Allocates resources and initializes the spheres.
+c         NOTE:
+c         We return a pointer so that we won't need to implement the assigment operator
+c         while still being able to express the instantiation in a Python-like fashion.
+c         (If that's not the reason why the FORTRAN standard has enabled us to do things
+c         as such, then we don't know what is.) We can afford to return a pointer despite
+c         all the advice against the use of pointers in FORTRAN because instantiation
+c         only happens once, and even if the pointer association `=>' is mistaken in the
+c         future with assignment `=' we would know that replacing the assignment operator
+c         with pointer association will fix that bug. We don't like the idea of relying
+c         on the assignment operator that the FORTRAN compiler can synthesize (have done
+c         that and have regretted all the time spent trying to figure out why it does not
+c         work and how to fix it). We are open to reconsider our position if the standard
+c         provides a better solution than our workaround in the future.
           type(sphere_t), pointer :: spheres
           integer(kind = int64) :: mstat
 

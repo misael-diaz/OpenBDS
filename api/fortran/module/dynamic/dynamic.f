@@ -34,7 +34,7 @@ c         Shifts the particles position by the action of the Brownian forces.
 c         NOTE:
 c         This code only applies to spheres. We shall overload this method later
 c         with a callback, as in the clang API, to handle anisotropic particles.
-          class(particle_t), intent(inout) :: particles
+          class(particle_t), intent(inout), target :: particles
           real(kind = real64), pointer, contiguous :: x(:) => null()
           real(kind = real64), pointer, contiguous :: y(:) => null()
           real(kind = real64), pointer, contiguous :: z(:) => null()
