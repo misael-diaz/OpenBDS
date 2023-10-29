@@ -62,6 +62,13 @@ c         error message
         end subroutine stackable
 
 
+        subroutine sane ()
+c         complains if it is not possible to stack the spheres in a grid-like fashion
+          call stackable()
+          return
+        end subroutine sane
+
+
         pure subroutine stack_x (x)
 c         Synopsis:
 c         Sets the `x'-coordinates of the spheres so that they are stacked in 1D.
@@ -201,9 +208,6 @@ c         pointers to the position vector components
           real(kind = real64), pointer, contiguous :: y(:) => null()
           real(kind = real64), pointer, contiguous :: z(:) => null()
 
-c         complains if it is not possible to stack the spheres in a grid-like fashion
-          call stackable()
-
           x => spheres % x
 
 c         stacks a pile of spheres (at contact) along the x-dimension
@@ -250,6 +254,9 @@ c         work and how to fix it). We are open to reconsider our position if the
 c         provides a better solution than our workaround in the future.
           type(sphere_t), pointer :: spheres
           integer(kind = int64) :: mstat
+
+c         performs sane-checks
+          call sane()
 
 c         memory allocations:
           spheres => null()
