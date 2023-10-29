@@ -1,4 +1,4 @@
-      module constant
+      module config
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
         implicit none
@@ -23,7 +23,7 @@ c       The number of particles is a power of two by design. Some of the algorit
 c       will be implemented expect the number of particles to be expressible exactly as a
 c       power of two. Change this design constraint only if you know what you are doing.
 c       If all that you want is to achieve a certain volume fraction that can be done more
-c       easily by adjusting the system LIMIT. We use constants that can be expressed
+c       easily by adjusting the system LIMIT. We use configs that can be expressed
 c       as powers of two because these have exact binary floating-point representations.
         integer(kind = int64), parameter :: NUM_PARTICLES =
      +  2_int64 ** LOG_NUM_PARTICLES
@@ -34,11 +34,11 @@ c       Other reasons for disabling it are code profiling and validating the sta
 c       of the normally-distributed Pseudo Random Number Generator PRNG.
         logical(kind = int64), parameter :: INTERACT_ENABLE = .false.
 
-      end module constant
+      end module config
 
 *   OpenBDS                                             October 21, 2023
 *
-*   source: api/fortran/module/constant/constant.f
+*   source: api/fortran/module/config/config.f
 *   author: @misael-diaz
 *
 *   Synopsis:

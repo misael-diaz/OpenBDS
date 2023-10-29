@@ -16,13 +16,13 @@
 
 all: spheres
 
-constants:
-	@$(MAKE) -C constant
+configs:
+	@$(MAKE) -C config
 
 PRNGs:
 	@$(MAKE) -C random
 
-particles: constants
+particles: configs
 	@$(MAKE) -C particle
 
 systems: particles
@@ -38,7 +38,7 @@ spheres: dynamics systems
 	@$(MAKE) -C sphere
 
 clean:
-	@$(MAKE) -C constant clean
+	@$(MAKE) -C config clean
 	@$(MAKE) -C random clean
 	@$(MAKE) -C particle clean
 	@$(MAKE) -C system clean

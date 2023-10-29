@@ -14,9 +14,9 @@
 #
 
 # modules
-CONSTANT_MOD = ../mods/constant.mod
+CONFIG_MOD   = ../mods/config.mod
 PARTICLE_MOD = ../mods/particle.mod
-MODULES = $(CONSTANT_MOD) $(PARTICLE_MOD)
+MODULES = $(CONFIG_MOD) $(PARTICLE_MOD)
 
 # sources
 SYSTEM_F = system.f

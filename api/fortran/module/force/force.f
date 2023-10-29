@@ -1,6 +1,6 @@
       module force
         use, intrinsic :: iso_fortran_env, only: real64
-        use :: constant, only: N => NUM_PARTICLES
+        use :: config, only: N => NUM_PARTICLES
         use :: particle, only: particle_t
         use :: random, only: fnrand
         implicit none

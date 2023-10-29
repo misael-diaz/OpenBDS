@@ -1,7 +1,8 @@
+#!/usr/bin/make
 #
 # OpenBDS						October 21, 2023
 #
-# source: api/fortran/module/constant/make-inc
+# source: api/fortran/module/config/Makefile
 # author: @misael-diaz
 #
 # Synopsis:
@@ -13,11 +14,12 @@
 # (at your option) any later version.
 #
 
-# sources
-CONSTANT_F = constant.f
+include make-inc
 
-# objects
-CONSTANT_O = constant.o
+all: $(CONFIG_O)
 
-# output directory the FORTRAN module files *.mod
-MODS = ../mods
+$(CONFIG_O): $(CONFIG_F)
+	$(FC) $(FCOPT) -c $(CONFIG_F) -o $(CONFIG_O) $(FMOD) $(MODS)
+
+clean:
+	/bin/rm -f *.o

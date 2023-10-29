@@ -19,10 +19,10 @@ IMODS = -I../module/mods
 
 
 # modules
-CONSTANT_MOD = ../module/mods/constant.mod
+CONFIG_MOD = ../module/mods/config.mod
 PARTICLE_MOD  = ../module/mods/sphere.mod
 
-MODULES = $(CONSTANT_MOD) $(PARTICLE_MOD)
+MODULES = $(CONFIG_MOD) $(PARTICLE_MOD)
 
 
 # sources
@@ -30,7 +30,7 @@ OBDS_F = OpenBDS.f
 
 
 # objects
-CONSTANT_O = ../module/constant/constant.o
+CONFIG_O = ../module/config/config.o
 
 RANDOM_O    = ../module/random/random.o
 
@@ -43,7 +43,7 @@ FORCE_O     = ../module/force/force.o
 
 DYNAMIC_O   = ../module/dynamic/dynamic.o
 
-OBJS = $(CONSTANT_O) $(RANDOM_O) $(PARTICLE_O) $(SYSTEM_O) $(FORCE_O) $(DYNAMIC_O)
+OBJS = $(CONFIG_O) $(RANDOM_O) $(PARTICLE_O) $(SYSTEM_O) $(FORCE_O) $(DYNAMIC_O)
 
 OBDS_O = OpenBDS.o
 

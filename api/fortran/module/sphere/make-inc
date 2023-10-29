@@ -14,8 +14,8 @@
 #
 
 # modules
-CONSTANT_MOD = ../mods/constant.mod
-MODULES = $(CONSTANT_MOD)
+CONFIG_MOD = ../mods/config.mod
+MODULES = $(CONFIG_MOD)
 
 # sources
 SPHERE_F = sphere.f
