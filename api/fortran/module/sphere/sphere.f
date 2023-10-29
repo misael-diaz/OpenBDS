@@ -62,6 +62,17 @@ c         error message
         end subroutine stackable
 
 
+        subroutine sane ()
+c         Synopsis:
+c         Performs runtime sane checks.
+
+c         complains if it is not possible to stack the spheres in a grid-like fashion
+          call stackable()
+
+          return
+        end subroutine sane
+
+
         pure subroutine stack_x (x)
 c         Synopsis:
 c         Sets the `x'-coordinates of the spheres so that they are stacked in 1D.
@@ -188,21 +199,14 @@ c         loop-invariant: so far we have updated the `z' position of `counter' s
         end subroutine stack_z
 
 
-        subroutine grid (spheres)
+        pure subroutine grid (spheres)
 c         Synopsis:
 c         Places the spheres in a grid (or lattice) like structure.
-c         Note:
-c         The intent(in) attribute refers to the pointer only, meaning that the
-c         procedure does not modify its original association; however, the procedure
-c         does modify the position vectors of the spheres.
-          type(sphere_t), pointer, intent(in) :: spheres
+          type(sphere_t), target, intent(inout) :: spheres
 c         pointers to the position vector components
-          real(kind = real64), pointer, contiguous :: x(:) => null()
-          real(kind = real64), pointer, contiguous :: y(:) => null()
-          real(kind = real64), pointer, contiguous :: z(:) => null()
-
-c         complains if it is not possible to stack the spheres in a grid-like fashion
-          call stackable()
+          real(kind = real64), pointer, contiguous :: x(:)
+          real(kind = real64), pointer, contiguous :: y(:)
+          real(kind = real64), pointer, contiguous :: z(:)
 
           x => spheres % x
 
@@ -250,6 +254,9 @@ c         work and how to fix it). We are open to reconsider our position if the
 c         provides a better solution than our workaround in the future.
           type(sphere_t), pointer :: spheres
           integer(kind = int64) :: mstat
+
+c         performs sane-checks
+          call sane()
 
 c         memory allocations:
           spheres => null()
