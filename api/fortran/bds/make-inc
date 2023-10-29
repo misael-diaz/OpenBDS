@@ -1,0 +1,52 @@
+#
+# OpenBDS					October 22, 2023
+#
+# source: api/fortran/bds/make-inc
+# author: @misael-diaz
+#
+# Synopsis:
+# Defines the Makefile for building the program with GNU make.
+#
+# Copyright (c) 2023 Misael Diaz-Maldonado
+# This file is released under the GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+
+
+# includes
+IMODS = -I../module/mods
+
+
+# modules
+CONSTANTS_MOD = ../module/mods/constant.mod
+PARTICLE_MOD  = ../module/mods/sphere.mod
+
+MODULES = $(CONSTANTS_MOD) $(PARTICLE_MOD)
+
+
+# sources
+OBDS_F = OpenBDS.f
+
+
+# objects
+CONSTANTS_O = ../module/constant/constant.o
+
+RANDOM_O    = ../module/random/random.o
+
+PARTICLE_O  = ../module/particle/particle.o\
+	      ../module/sphere/sphere.o
+
+SYSTEM_O    = ../module/system/system.o
+
+FORCE_O     = ../module/force/force.o
+
+DYNAMIC_O   = ../module/dynamic/dynamic.o
+
+OBJS = $(CONSTANTS_O) $(RANDOM_O) $(PARTICLE_O) $(SYSTEM_O) $(FORCE_O) $(DYNAMIC_O)
+
+OBDS_O = OpenBDS.o
+
+
+# binaries
+OBDS_BIN = OpenBDS.bin
