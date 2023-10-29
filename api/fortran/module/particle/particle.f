@@ -4,10 +4,10 @@
       module particle
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
-        use :: constant, only: LOG_NUM_PARTICLES
-        use :: constant, only: NUM_PARTICLES
-        use :: constant, only: TIME_STEP
-        use :: constant, only: LIMIT
+        use :: config, only: LOG_NUM_PARTICLES
+        use :: config, only: NUM_PARTICLES
+        use :: config, only: TIME_STEP
+        use :: config, only: LIMIT
         implicit none
         private
 
@@ -83,7 +83,7 @@ c           updates the particle positions and orientations
 
         subroutine sane ()
 c         Synopsis:
-c         Complains if the module parameters in `constants` are illegal.
+c         Complains if the module parameters in `config` are illegal.
           integer(kind = int64), parameter :: N = NUM_PARTICLES
           integer(kind = int64), parameter :: LOG_N = LOG_NUM_PARTICLES
           integer(kind = int64), parameter :: E = LOG_N ! Exponent
@@ -222,7 +222,7 @@ c         memory allocation status
 c         size
           integer(kind = int64) :: sz
 
-c         complains if module `constant' has illegal values
+c         complains if module `config' has illegal values
           call sane()
 
 c         allocates memory for the particle data

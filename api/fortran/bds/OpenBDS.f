@@ -1,7 +1,7 @@
       program OBDS
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
-        use :: constant, only: dt => TIME_STEP
+        use :: config, only: dt => TIME_STEP
         use :: sphere, only: sphere_t
         implicit none
 c       initializes pointer to collection of spheres

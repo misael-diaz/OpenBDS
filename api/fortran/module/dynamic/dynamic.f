@@ -1,7 +1,7 @@
       module dynamic
         use, intrinsic :: iso_fortran_env, only: real64
-        use :: constant, only: dt => TIME_STEP
-        use :: constant, only: N => NUM_PARTICLES
+        use :: config, only: dt => TIME_STEP
+        use :: config, only: N => NUM_PARTICLES
         use :: particle, only: particle_t
         implicit none
         private

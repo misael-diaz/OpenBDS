@@ -2,7 +2,7 @@
 #
 # OpenBDS						October 21, 2023
 #
-# source: api/fortran/module/constant/Makefile
+# source: api/fortran/module/config/Makefile
 # author: @misael-diaz
 #
 # Synopsis:
@@ -16,10 +16,10 @@
 
 include make-inc
 
-all: $(CONSTANTS_O)
+all: $(CONFIG_O)
 
-$(CONSTANTS_O): $(CONSTANTS_F)
-	$(FC) $(FCOPT) -c $(CONSTANTS_F) -o $(CONSTANTS_O) $(FMOD) $(MODS)
+$(CONFIG_O): $(CONFIG_F)
+	$(FC) $(FCOPT) -c $(CONFIG_F) -o $(CONFIG_O) $(FMOD) $(MODS)
 
 clean:
 	/bin/rm -f *.o

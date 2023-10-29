@@ -1,9 +1,9 @@
       module sphere
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
-        use :: constant, only: LIMIT
-        use :: constant, only: LENGTH
-        use :: constant, only: NUM_SPHERES => NUM_PARTICLES
+        use :: config, only: LIMIT
+        use :: config, only: LENGTH
+        use :: config, only: NUM_SPHERES => NUM_PARTICLES
         use :: force, only: force__Brownian_force
         use :: system, only: system__PBC
         use :: dynamic, only: dynamic__shifter
