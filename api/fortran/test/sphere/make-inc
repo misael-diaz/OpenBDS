@@ -19,8 +19,8 @@ IMODS = -I../../module/mods
 
 
 # modules
-CONFIG_MOD    = ../../module/mods/config.mod
-PARTICLE_MOD  = ../../module/mods/sphere.mod
+CONFIG_MOD   = ../../module/mods/config.mod
+PARTICLE_MOD = ../../module/mods/sphere.mod
 
 MODULES = $(CONFIG_MOD) $(PARTICLE_MOD)
 
@@ -32,16 +32,16 @@ TEST_SPHERE_F = tsphere.f
 # objects
 CONFIG_O   = ../../module/config/config.o
 
-RANDOM_O    = ../../module/random/random.o
+RANDOM_O   = ../../module/random/random.o
 
 PARTICLE_O = ../../module/particle/particle.o\
 	     ../../module/sphere/sphere.o
 
-SYSTEM_O     = ../../module/system/system.o
+SYSTEM_O   = ../../module/system/system.o
 
-FORCE_O     = ../../module/force/force.o
+FORCE_O    = ../../module/force/force.o
 
-DYNAMIC_O   = ../../module/dynamic/dynamic.o
+DYNAMIC_O  = ../../module/dynamic/dynamic.o
 
 OBJS = $(CONFIG_O) $(RANDOM_O) $(PARTICLE_O) $(SYSTEM_O) $(FORCE_O) $(DYNAMIC_O)
 

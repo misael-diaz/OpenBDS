@@ -14,8 +14,8 @@
 #
 
 # modules
-CONFIG_MOD = ../mods/config.mod
-RANDOM_MOD = ../mods/random.mod
+CONFIG_MOD   = ../mods/config.mod
+RANDOM_MOD   = ../mods/random.mod
 PARTICLE_MOD = ../mods/particle.mod
 MODULES = $(CONFIG_MOD) $(RANDOM_MOD) $(PARTICLE_MOD)
 
