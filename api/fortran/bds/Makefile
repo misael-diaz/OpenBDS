@@ -1,8 +1,8 @@
 #!/usr/bin/make
 #
-# OpenBDS						July 19, 2023
+# OpenBDS						October 22, 2023
 #
-# source: api/fortran/Makefile
+# source: api/fortran/bds/Makefile
 # author: @misael-diaz
 #
 # Synopsis:
@@ -14,17 +14,15 @@
 # (at your option) any later version.
 #
 
-all: OBDS modules tests
+include make-inc
 
-modules:
-	@$(MAKE) -C module
+all: $(OBDS_BIN)
 
-OBDS: modules
-	@$(MAKE) -C bds
+$(OBDS_BIN): $(OBDS_O)
+	$(FC) $(FCOPT) $(OBJS) $(OBDS_O) -o $(OBDS_BIN)
 
-tests: modules
-	@$(MAKE) -C test
+$(OBDS_O): $(MODULES) $(OBJS) $(OBDS_F)
+	$(FC) $(INC) $(IMODS) $(FCOPT) -c $(OBDS_F) -o $(OBDS_O)
 
 clean:
-	@$(MAKE) -C module clean
-	@$(MAKE) -C test clean
+	/bin/rm -f *.o *.bin
