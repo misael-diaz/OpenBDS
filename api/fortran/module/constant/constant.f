@@ -27,6 +27,12 @@ c       easily by adjusting the system LIMIT. We use constants that can be expre
 c       as powers of two because these have exact binary floating-point representations.
         integer(kind = int64), parameter :: NUM_PARTICLES =
      +  2_int64 ** LOG_NUM_PARTICLES
+c       enables computation of particle-particle interactions
+c       NOTE:
+c       Disabled temporarily since we have to yet implement this feature.
+c       Other reasons for disabling it are code profiling and validating the statistics
+c       of the normally-distributed Pseudo Random Number Generator PRNG.
+        logical(kind = int64), parameter :: INTERACT_ENABLE = .false.
 
       end module constant
 
