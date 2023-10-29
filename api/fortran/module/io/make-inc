@@ -1,0 +1,28 @@
+#
+# OpenBDS						October 29, 2023
+#
+# source: api/fortran/module/io/make-inc
+# author: @misael-diaz
+#
+# Synopsis:
+# Defines the Makefile for building the program with GNU make.
+#
+# Copyright (c) 2023 Misael Diaz-Maldonado
+# This file is released under the GNU General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+
+# modules
+CONFIG_MOD   = ../mods/config.mod
+PARTICLE_MOD = ../mods/particle.mod
+MODULES = $(CONFIG_MOD) $(PARTICLE_MOD)
+
+# sources
+IO_F = io.f
+
+# objects
+IO_O = io.o
+
+# output directory the FORTRAN module files *.mod
+MODS = ../mods

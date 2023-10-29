@@ -4,6 +4,7 @@
         use :: config, only: LIMIT
         use :: config, only: LENGTH
         use :: config, only: NUM_SPHERES => NUM_PARTICLES
+        use :: io, only: io__flogger
         use :: force, only: force__Brownian_force
         use :: system, only: system__PBC
         use :: dynamic, only: dynamic__shifter
@@ -23,7 +24,9 @@ c       sphere radius, diameter, and contact-distance
         type, extends(particle_t), public :: sphere_t
           contains
             private
+            procedure :: flogger
             procedure :: updater
+            procedure, public :: flog => flogger
             procedure, public :: update => updater
             final :: destructor
         end type
@@ -234,6 +237,22 @@ c         adjusts the `z'-coordinates so that they fall in the range [-LIMIT, +L
 
           return
         end subroutine grid
+
+
+        function flogger (particles, step) result(status)
+c         Synopsis:
+c         Logs the current particle fields (or properties) to a plain text file.
+c         Forwards the task to IO logger utility.
+          class(sphere_t), intent(in) :: particles
+c         OBDS simulation step number (or identifier)
+          integer(kind = int64), intent(in) :: step
+c         status of the IO operation
+          integer(kind = int64) :: status
+
+          status = io__flogger(particles, step)
+
+          return
+        end function flogger
 
 
         function constructor () result(spheres)
