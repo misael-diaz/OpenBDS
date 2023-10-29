@@ -28,13 +28,16 @@ particles: configs
 systems: particles
 	@$(MAKE) -C system
 
+ios: particles
+	@$(MAKE) -C io
+
 forces: particles PRNGs
 	@$(MAKE) -C force
 
 dynamics: forces
 	@$(MAKE) -C dynamic
 
-spheres: dynamics systems
+spheres: ios dynamics systems
 	@$(MAKE) -C sphere
 
 clean:
@@ -42,6 +45,7 @@ clean:
 	@$(MAKE) -C random clean
 	@$(MAKE) -C particle clean
 	@$(MAKE) -C system clean
+	@$(MAKE) -C io clean
 	@$(MAKE) -C force clean
 	@$(MAKE) -C dynamic clean
 	@$(MAKE) -C sphere clean

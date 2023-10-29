@@ -39,11 +39,13 @@ PARTICLE_O = ../module/particle/particle.o\
 
 SYSTEM_O   = ../module/system/system.o
 
+IO_O       = ../module/io/io.o
+
 FORCE_O    = ../module/force/force.o
 
 DYNAMIC_O  = ../module/dynamic/dynamic.o
 
-OBJS = $(CONFIG_O) $(RANDOM_O) $(PARTICLE_O) $(SYSTEM_O) $(FORCE_O) $(DYNAMIC_O)
+OBJS = $(CONFIG_O) $(RANDOM_O) $(PARTICLE_O) $(SYSTEM_O) $(IO_O) $(FORCE_O) $(DYNAMIC_O)
 
 OBDS_O = OpenBDS.o
 
