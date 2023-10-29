@@ -16,10 +16,10 @@
 
 include make-inc
 
-all: $(CONSTANTS_O)
+all: $(CONSTANT_O)
 
-$(CONSTANTS_O): $(CONSTANTS_F)
-	$(FC) $(FCOPT) -c $(CONSTANTS_F) -o $(CONSTANTS_O) $(FMOD) $(MODS)
+$(CONSTANT_O): $(CONSTANT_F)
+	$(FC) $(FCOPT) -c $(CONSTANT_F) -o $(CONSTANT_O) $(FMOD) $(MODS)
 
 clean:
 	/bin/rm -f *.o

@@ -14,10 +14,10 @@
 #
 
 # sources
-CONSTANTS_F = constant.f
+CONSTANT_F = constant.f
 
 # objects
-CONSTANTS_O = constant.o
+CONSTANT_O = constant.o
 
 # output directory the FORTRAN module files *.mod
 MODS = ../mods
