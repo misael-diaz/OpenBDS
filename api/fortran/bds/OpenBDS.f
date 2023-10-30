@@ -22,9 +22,13 @@ c       initializes the step counters
 
         step = 0_int64
 c       executes the OBDS loop
+c       loop-invariant:
+c       so far we have executed `step' OBDS simulation steps
         do while (step /= steps)
 
           istep = 0_int64
+c         loop-invariant:
+c         so far we have executed `istep' simulation steps consecutively without logging
           do while (istep /= log_steps)
 c           updates the position and orientation of the particles according to the
 c           Brownian and particle-particle interaction forces acting on them
