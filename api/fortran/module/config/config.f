@@ -7,32 +7,72 @@
         public :: LIMIT
         public :: LENGTH
         public :: TIME_STEP
+        public :: NUM_STEPS
+        public :: NUM_LOG_STEPS
         public :: NUM_PARTICLES
         public :: LOG_NUM_PARTICLES
 
-c       system box limits and length
-        real(kind = real64), parameter :: LIMIT = 8.0_real64
+**                                                                    **
+*       system box limits and length                                   *
+        real(kind = real64), parameter :: LIMIT  = 8.0_real64
         real(kind = real64), parameter :: LENGTH = (2.0_real64 * LIMIT)
-c       OBDS time-step
+        real(kind = real64), parameter :: WIDTH  = LENGTH
+        real(kind = real64), parameter :: HEIGHT = LENGTH
+*       NOTE:                                                          *
+*       The particle coordinates are bound to [-LIMIT, +LIMIT].        *
+**                                                                    **
+
+
+**                                                                    **
+*       OBDS time-step, start-time, and end-time of the simulation     *
         real(kind = real64), parameter :: TIME_STEP = 2.0_real64**(-16)
-c       stores log base two of N, log2(N), where `N' is the number of particles
+        real(kind = real64), parameter :: TIME_START = 0.0_real64
+        real(kind = real64), parameter :: TIME_END = 2.0_real64**4
+*       OBDS logging time-step                                         *
+        real(kind = real64), parameter :: TS_LOG = 2.0_real64**(-4)
+        real(kind = real64), parameter :: TIME_STEP_LOG = TS_LOG
+*       number of (simulation) steps                                   *
+        integer(kind = int64), parameter :: NUM_STEPS =
+     +  int( (TIME_END - TIME_START) / TIME_STEP, kind = int64 )
+*       after this number of steps the OBDS code logs data to a file   *
+        integer(kind = int64), parameter :: NUM_LOG_STEPS =
+     +  int(TIME_STEP_LOG / TIME_STEP, kind = int64)
+*       NOTE:
+*       The OBDS code logs the particle fields (or properties) to a    *
+*       plain text file after this (simulation) time interval has      *
+*       elapsed. The logged data is used for post-processing to study  *
+*       suspension properties, such as the Mean Squared Displacement   *
+*       MSD, the diffusivity, the pair distribution function, etc.     *
+**                                                                    **
+
+
+**                                                                    **
+*       stores log base two of N, log2(N), where `N' is #particles     *
         integer(kind = int64), parameter :: LOG_NUM_PARTICLES = 8_int64
-c       defines the number of particles in the system (expressed as a power of two)
-c       NOTE:
-c       The number of particles is a power of two by design. Some of the algorithms that
-c       will be implemented expect the number of particles to be expressible exactly as a
-c       power of two. Change this design constraint only if you know what you are doing.
-c       If all that you want is to achieve a certain volume fraction that can be done more
-c       easily by adjusting the system LIMIT. We use configs that can be expressed
-c       as powers of two because these have exact binary floating-point representations.
+*       defines the number of particles in the system
         integer(kind = int64), parameter :: NUM_PARTICLES =
      +  2_int64 ** LOG_NUM_PARTICLES
-c       enables computation of particle-particle interactions
-c       NOTE:
-c       Disabled temporarily since we have to yet implement this feature.
-c       Other reasons for disabling it are code profiling and validating the statistics
-c       of the normally-distributed Pseudo Random Number Generator PRNG.
+*       NOTE:
+*       The number of particles is a power of two by design. Some of   *
+*       the algorithms that will be implemented expect the number of   *
+*       particles to be expressible exactly as a power of two. Change  *
+*       this design constraint only if you know what you are doing.    *
+*       If all that you want is to achieve a certain volume fraction   *
+*       that can be done more easily by adjusting the system LIMIT. We *
+*       use configs that can be expressed as powers of two because     *
+*       these have exact binary floating-point representations.        *
+**                                                                    **
+
+
+**                                                                    **
+*       enables computation of particle-particle interactions
         logical(kind = int64), parameter :: INTERACT_ENABLE = .false.
+*       NOTE:
+*       Disabled temporarily since we have to yet implement this       *
+*       feature. Other reasons for disabling it are code profiling and *
+*       validating the statistics of the normally-distributed          *
+*       Pseudo Random Number Generator PRNG.                           *
+**                                                                    **
 
       end module config
 

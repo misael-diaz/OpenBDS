@@ -1,42 +1,45 @@
 #define __SUCCESS__  0_int64
 #define __FAILURE__ -1_int64
-
       program OBDS
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
-        use :: config, only: dt => TIME_STEP
+        use :: config, only: NUM_STEPS
+        use :: config, only: NUM_LOG_STEPS
         use :: sphere, only: sphere_t
         implicit none
 c       initializes pointer to collection of spheres
         type(sphere_t), pointer :: spheres => null()
-c       sets the end (or final) time of the simulation 
-        real(kind = real64), parameter :: t_end = 16.0_real64
-c       time interval for logging the particle data
-        real(kind = real64), parameter :: t_log = 2.0_real64**(-4)
-c       sets the number of time steps
-        integer(kind = int64), parameter :: steps = int(t_end / dt,
-     +  kind = int64)
-c       log step
-        integer(kind = int64), parameter :: lstep = int(t_log / dt,
-     +  kind = int64)
-c       initializes the step counter
-        integer(kind = int64) :: step = 0_int64
-        integer(kind = int64) :: status = __SUCCESS__
+c       sets the number of simulation time-steps
+        integer(kind = int64), parameter :: steps = NUM_STEPS
+c       after this many steps the OBDS code logs the particle data to a plain text file
+        integer(kind = int64), parameter :: log_steps = NUM_LOG_STEPS
+c       step counters
+        integer(kind = int64) :: step
+        integer(kind = int64) :: istep
+c       IO status
+        integer(kind = int64) :: status
 
         spheres => sphere_t() ! instantiates the collection of spheres
 
         step = 0_int64
 c       executes the OBDS loop
+c       loop-invariant:
+c       so far we have executed `step' OBDS simulation steps
         do while (step /= steps)
-c         updates the position and orientation of the particles according to the
-c         Brownian and particle-particle interaction forces acting on them
-          call spheres % update()
 
-          if (mod(step + 1_int64, lstep) == 0_int64) then
-            status = spheres % flog(step + 1_int64)
-          end if
+          istep = 0_int64
+c         loop-invariant:
+c         so far we have executed `istep' simulation steps consecutively without logging
+          do while (istep /= log_steps)
+c           updates the position and orientation of the particles according to the
+c           Brownian and particle-particle interaction forces acting on them
+            call spheres % update()
+            istep = istep + 1_int64
+          end do
 
-          if (status == __FAILURE__) then
+          status = spheres % flog(step + log_steps)
+
+          if (STATUS == __FAILURE__) then
 c           TODO:
 c           generate a more useful error message for the user
 c           the most frequent IO error would be that the output directory does not exist
@@ -44,7 +47,7 @@ c           the most frequent IO error would be that the output directory does n
             exit
           end if
 
-          step = step + 1_int64
+          step = step + log_steps
         end do
 
         deallocate(spheres)
