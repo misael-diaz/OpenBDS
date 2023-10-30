@@ -36,7 +36,6 @@ c           Brownian and particle-particle interaction forces acting on them
             istep = istep + 1_int64
           end do
 
-          print *, 'step:', step + log_steps
           status = spheres % flog(step + log_steps)
 
           if (STATUS == __FAILURE__) then
