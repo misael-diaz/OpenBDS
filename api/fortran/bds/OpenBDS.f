@@ -13,10 +13,11 @@ c       sets the number of simulation time-steps
         integer(kind = int64), parameter :: steps = NUM_STEPS
 c       after this many steps the OBDS code logs the particle data to a plain text file
         integer(kind = int64), parameter :: log_steps = NUM_LOG_STEPS
-c       initializes the step counters
-        integer(kind = int64) :: step = 0_int64
-        integer(kind = int64) :: istep = 0_int64
-        integer(kind = int64) :: status = __SUCCESS__
+c       step counters
+        integer(kind = int64) :: step
+        integer(kind = int64) :: istep
+c       IO status
+        integer(kind = int64) :: status
 
         spheres => sphere_t() ! instantiates the collection of spheres
 
