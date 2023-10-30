@@ -7,14 +7,29 @@
         public :: LIMIT
         public :: LENGTH
         public :: TIME_STEP
+        public :: NUM_STEPS
+        public :: NUM_LOG_STEPS
         public :: NUM_PARTICLES
         public :: LOG_NUM_PARTICLES
 
 c       system box limits and length
         real(kind = real64), parameter :: LIMIT = 8.0_real64
         real(kind = real64), parameter :: LENGTH = (2.0_real64 * LIMIT)
-c       OBDS time-step
+c       OBDS time-step, start-time, and end-time of the simulation
         real(kind = real64), parameter :: TIME_STEP = 2.0_real64**(-16)
+        real(kind = real64), parameter :: TIME_START = 0.0_real64
+        real(kind = real64), parameter :: TIME_END = 2.0_real64**4
+c       OBDS logging time-step
+c       NOTE:
+c       OBDS code logs after this (simulation) time interval has elapsed
+        real(kind = real64), parameter :: TS_LOG = 2.0_real64**(-4)
+        real(kind = real64), parameter :: TIME_STEP_LOG = TS_LOG
+c       number of (simulation) steps
+        integer(kind = int64), parameter :: NUM_STEPS =
+     +  int( (TIME_END - TIME_START) / TIME_STEP, kind = int64 )
+c       after this number of steps the OBDS code logs the particle data
+        integer(kind = int64), parameter :: NUM_LOG_STEPS =
+     +  int(TIME_STEP_LOG / TIME_STEP, kind = int64)
 c       stores log base two of N, log2(N), where `N' is the number of particles
         integer(kind = int64), parameter :: LOG_NUM_PARTICLES = 8_int64
 c       defines the number of particles in the system (expressed as a power of two)
