@@ -9,6 +9,7 @@
         implicit none
 c       initializes pointer to collection of spheres
         type(sphere_t), pointer :: spheres => null()
+        real(kind = real64), pointer, contiguous :: tmp(:) => null()
 c       sets the number of simulation time-steps
         integer(kind = int64), parameter :: steps = NUM_STEPS
 c       after this many steps the OBDS code logs the particle data to a plain text file
@@ -21,7 +22,11 @@ c       IO status
 
         spheres => sphere_t() ! instantiates the collection of spheres
 
-        step = 0_int64
+c       fetches the initial step number (NOTE: `sphere_t()' handles this)
+        tmp => spheres % tmp
+        istep = int(tmp(1), kind = int64)
+
+        step = istep
 c       executes the OBDS loop
 c       loop-invariant:
 c       so far we have executed `step' OBDS simulation steps
