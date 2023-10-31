@@ -210,8 +210,8 @@ c         IO status
      +  result(status)
 c         Synopsis:
 c         Logs the particle fields (or properties).
-c         position vector components subject to periodic conditions
 c         Returns the status of this operation to the caller.
+c         position vector components subject to periodic conditions
           real(kind = real64), intent(in) :: x(N)
           real(kind = real64), intent(in) :: y(N)
           real(kind = real64), intent(in) :: z(N)
