@@ -12,13 +12,29 @@ c       GNU FORTRAN Compiler, this is needed because `rename()` is a GNU Extensi
         use :: ifport, only: rename
 #endif
         use :: config, only: N => NUM_PARTICLES
+        use :: config, only: NUM_STEPS
         use :: particle, only: particle_t
         implicit none
         private
         public :: io__flogger
+        public :: io__floader
+        public :: io__fdump_state
+        public :: io__ffetch_state
 
         interface io__flogger
           module procedure flog_base
+        end interface
+
+        interface io__floader
+          module procedure fload_base
+        end interface
+
+        interface io__fdump_state
+          module procedure fdump_state_base
+        end interface
+
+        interface io__ffetch_state
+          module procedure ffetch_state_base
         end interface
 
       contains
@@ -277,6 +293,77 @@ c         d: digits after the decimal place, 16 digits
         end function flogger
 
 
+        function floader (x, y, z,
+     +                    r_x, r_y, r_z,
+     +                    Eax, Eay, Eaz,
+     +                    d_x, d_y, d_z,
+     +                    F_x, F_y, F_z,
+     +                    T_x, T_y, T_z,
+     +                    id, fd)
+     +  result(status)
+c         Synopsis:
+c         Loads the particle fields (or properties) from the data file whose file
+c         descriptor is `fd'.
+c         Returns the status of this operation to the caller.
+c         position vector components subject to periodic conditions
+          real(kind = real64), intent(out) :: x(N)
+          real(kind = real64), intent(out) :: y(N)
+          real(kind = real64), intent(out) :: z(N)
+c         position vector components independent of periodic conditions
+          real(kind = real64), intent(out) :: r_x(N)
+          real(kind = real64), intent(out) :: r_y(N)
+          real(kind = real64), intent(out) :: r_z(N)
+c         Euler angle vector components
+          real(kind = real64), intent(out) :: Eax(N)
+          real(kind = real64), intent(out) :: Eay(N)
+          real(kind = real64), intent(out) :: Eaz(N)
+c         director (or orientation vector) components
+          real(kind = real64), intent(out) :: d_x(N)
+          real(kind = real64), intent(out) :: d_y(N)
+          real(kind = real64), intent(out) :: d_z(N)
+c         force vector components
+          real(kind = real64), intent(out) :: F_x(N)
+          real(kind = real64), intent(out) :: F_y(N)
+          real(kind = real64), intent(out) :: F_z(N)
+c         torque vector components
+          real(kind = real64), intent(out) :: T_x(N)
+          real(kind = real64), intent(out) :: T_y(N)
+          real(kind = real64), intent(out) :: T_z(N)
+c         identifiers IDs
+          real(kind = real64), intent(out) :: id(N)
+c         file descriptor
+          integer(kind = int64), intent(in) :: fd
+c         IO status
+          integer(kind = int64) :: status
+          integer(kind = int64) :: iostat
+c         loop index
+          integer(kind = int64) :: i
+c         format `fmt' specifier, NEw.d
+          character(*), parameter :: fmt = '(SP,19E32.16)'
+c         NOTE:
+c         SP: Sign Print
+c         N: number of values to print
+c         E: exponential (or scientific) format
+c         w: width, 25 positions
+c         d: digits after the decimal place, 16 digits
+
+          do i = 1_int64, N
+            read(unit = fd, fmt = fmt, iostat = iostat)
+     +        x(i), y(i), z(i),      ! position vector
+     +        r_x(i), r_y(i), r_z(i),! `absolute' position vector
+     +        Eax(i), Eay(i), Eaz(i),! Euler angle vector
+     +        d_x(i), d_y(i), d_z(i),! director (or orientation vector)
+     +        F_x(i), F_y(i), F_z(i),! force vector
+     +        T_x(i), T_y(i), T_z(i),! torque vector
+     +        id(i)                  ! identifier ID
+          end do
+
+          status = fstatus(iostat)
+
+          return
+        end function floader
+
+
         function flog (particles, fd) result(status)
 c         Synopsis:
 c         Logs the particle fields (or properties) to the file associated with the
@@ -327,6 +414,56 @@ c         IO status
         end function flog
 
 
+        function fload (particles, fd) result(status)
+c         Synopsis:
+c         Loads the particle fields (or properties) from the datga file associated with
+c         the file descriptor `fd'.
+c         Returns the status of this operation to the caller.
+          class(particle_t), intent(inout), target :: particles
+c         file descriptor
+          integer(kind = int64), intent(in) :: fd
+c         IO status
+          integer(kind = int64) :: status
+          real(kind = real64), pointer, contiguous :: x(:) => null()
+          real(kind = real64), pointer, contiguous :: y(:) => null()
+          real(kind = real64), pointer, contiguous :: z(:) => null()
+          real(kind = real64), pointer, contiguous :: r_x(:) => null()
+          real(kind = real64), pointer, contiguous :: r_y(:) => null()
+          real(kind = real64), pointer, contiguous :: r_z(:) => null()
+          real(kind = real64), pointer, contiguous :: Eax(:) => null()
+          real(kind = real64), pointer, contiguous :: Eay(:) => null()
+          real(kind = real64), pointer, contiguous :: Eaz(:) => null()
+          real(kind = real64), pointer, contiguous :: d_x(:) => null()
+          real(kind = real64), pointer, contiguous :: d_y(:) => null()
+          real(kind = real64), pointer, contiguous :: d_z(:) => null()
+          real(kind = real64), pointer, contiguous :: F_x(:) => null()
+          real(kind = real64), pointer, contiguous :: F_y(:) => null()
+          real(kind = real64), pointer, contiguous :: F_z(:) => null()
+          real(kind = real64), pointer, contiguous :: T_x(:) => null()
+          real(kind = real64), pointer, contiguous :: T_y(:) => null()
+          real(kind = real64), pointer, contiguous :: T_z(:) => null()
+          real(kind = real64), pointer, contiguous :: id(:) => null()
+
+          call bind(x, y, z,
+     +              r_x, r_y, r_z,
+     +              Eax, Eay, Eaz,
+     +              d_x, d_y, d_z,
+     +              F_x, F_y, F_z,
+     +              T_x, T_y, T_z,
+     +              id, particles)
+
+          status = floader(x, y, z,
+     +                     r_x, r_y, r_z,
+     +                     Eax, Eay, Eaz,
+     +                     d_x, d_y, d_z,
+     +                     F_x, F_y, F_z,
+     +                     T_x, T_y, T_z,
+     +                     id, fd)
+
+          return
+        end function fload
+
+
         function flog_base (particles, step) result(status)
 c         Synopsis:
 c         Logs the current particle fields (or properties).
@@ -347,7 +484,9 @@ c         placeholder to store the step number in a string
      +    'run/bds/data/positions/particles-'
 
 c         writes step number to a string of suitable size
-          write(step_str, '(I64)') step
+c         NOTE:
+c         guards against invalid input
+          write(step_str, '(I64)') abs(step)
           step_str = adjustl(step_str)
 
 c         defines the temporary and designated filenames
@@ -364,7 +503,7 @@ c         opens temporary file for writing
 c         logs the (current) particle fields (or properties) to the file
           status = flog(particles, fd)
           if (STATUS == __FAILURE__) then
-            print *, 'OUTPUT ERROR with file: ', trim(tempname)
+            print *, 'WRITE ERROR with file: ', trim(tempname)
             close(fd)
             return
           end if
@@ -390,6 +529,218 @@ c         IO errors).
 
           return
         end function flog_base
+
+
+        function fload_base (particles, step) result(status)
+c         Synopsis:
+c         Loads the current particle fields (or properties) from the data file whose
+c         step number is `step'.
+c         Returns the status of this operation to the caller.
+          class(particle_t), intent(inout) :: particles
+c         OBDS simulation step number (or identifier)
+          integer(kind = int64), intent(in) :: step
+c         file descriptor
+          integer(kind = int64) :: fd
+c         IO status
+          integer(kind = int64) :: status
+c         placeholder to store the step number in a string
+          character(len = 64) :: step_str
+          character(len = __FNAME_LENGTH__) :: filename
+          character(len = *), parameter :: path =
+     +    'run/bds/data/positions/particles-'
+
+c         writes step number to a string of suitable size
+c         NOTE:
+c         guards against invalid input
+          write(step_str, '(I64)') abs(step)
+          step_str = adjustl(step_str)
+
+c         defines the temporary and designated filenames
+          filename = path // trim(step_str) // '.txt'
+
+c         opens data file for reading
+          status = fopen(filename = filename, fd = fd, action = 'r')
+          if (STATUS == __FAILURE__) then
+            print *, 'IO ERROR with file: ', trim(filename)
+            return
+          end if
+
+c         loads the particle fields (or properties) from the file
+          status = fload(particles, fd)
+          if (STATUS == __FAILURE__) then
+            print *, 'READ ERROR with file: ', trim(filename)
+            return
+          end if
+
+c         closes the file
+          status = fclose(fd)
+          if (STATUS == __FAILURE__) then
+            print *, 'UNEXPECTED IO ERROR with file: ', trim(filename)
+            return
+          end if
+
+          return
+        end function fload_base
+
+
+        function fdump_state (state) result(status)
+c         Synopsis:
+c         Dumps the last known system state to the state file, where the `state' is
+c         the last known simulation step number
+c         Returns the status of this operation to the caller.
+          real(kind = real64), intent(in) :: state
+c         file descriptor
+          integer(kind = int64) :: fd
+c         IO status
+          integer(kind = int64) :: status
+          integer(kind = int64) :: iostat
+          integer(kind = int64) :: istate
+c         name of the state file
+          character(len = __FNAME_LENGTH__), parameter :: fname =
+     +    'run/bds/state/state.txt'
+c         format for reading the step number (or state)
+          character(*), parameter :: fmt = '(I64)'
+
+c         tries to open the state file for reading
+          status = fopen(filename = fname, fd = fd, action = 'w')
+          if (status == __FAILURE__) then
+            print *, 'IO ERROR with file: ', trim(fname)
+            return
+          end if
+
+          istate = int(state, kind = int64)
+c         tries to write the state to the state file
+          write(unit = fd, fmt = fmt, iostat = iostat) istate
+
+c         queries the IO status
+          status = fstatus(iostat)
+          if (status == __FAILURE__) then
+            print *, 'WRITE ERROR with file: ', trim(fname)
+            close(fd)
+            return
+          end if
+
+          status = fclose(fd)
+          if (status == __FAILURE__) then
+            print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
+            return
+          end if
+
+          return
+        end function fdump_state
+
+
+        function ffetch_state (state) result(status)
+c         Synopsis:
+c         Fetches the last known state from the state file.
+c         Returns the status of this operation to the caller.
+c         the state is the last known simulation step number
+c         Returns the status of this operation to the caller.
+          real(kind = real64), intent(out) :: state
+c         file descriptor
+          integer(kind = int64) :: fd
+c         IO status
+          integer(kind = int64) :: status
+          integer(kind = int64) :: iostat
+          integer(kind = int64) :: istate
+c         name of the state file
+          character(len = __FNAME_LENGTH__), parameter :: fname =
+     +    'run/bds/state/state.txt'
+c         format for reading the step number (or state)
+          character(*), parameter :: fmt = '(I64)'
+
+c         tries to open the state file for reading
+          status = fopen(filename = fname, fd = fd, action = 'r')
+
+c         NOTE:
+c         if there's no state (IO status is in a failure state) this means that we might
+c         be executing the OBDS code for this first time so we set the OBDS state to its
+c         initial state (zero); otherwise, the state is set to whatever state is stored
+c         in the state file in the next codeblocks
+          if (STATUS == __FAILURE__) then
+            print *, 'IO ERROR with file: ', trim(fname)
+            print *, 'initializing state with its default value'
+            state = 0.0_real64 ! zeros intent(out) argument (default)
+            return
+          end if
+
+c         tries to read the contents of the state file into `state'
+          read(unit = fd, fmt = fmt, iostat = iostat) istate
+
+c         queries the IO status
+          status = fstatus(iostat)
+          if (status == __FAILURE__) then
+            print *, 'UNEXPECTED READ ERROR with file: ', trim(fname)
+            print *, 'initializing state with its default value'
+            state = 0.0_real64 ! zeros intent(out) argument (default)
+            close(fd)
+            return
+          end if
+
+c         sets the state with the fecthed value
+c         NOTE:
+c         applies an upper bound on the `state' (step number) to guard
+c         against invalid inputs
+          state = real( min(istate, NUM_STEPS), kind = real64 )
+
+          status = fclose(fd)
+          if (status == __FAILURE__) then
+            print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
+            return
+          end if
+
+          return
+        end function ffetch_state
+
+
+        function fdump_state_base (particles) result(status)
+c         Synopsis:
+c         Dumps the OBDS state (holds the simulation step number) to the state file.
+c         Returns the status of this operation to the caller.
+c         NOTE:
+c         We can afford to read the `state' of integer kind from the temporary placeholder
+c         of real kind because integers have exact binary floating-point representations.
+          class(particle_t), intent(in), target :: particles
+c         temporary placeholder array
+          real(kind = real64), pointer, contiguous :: tmp(:) => null()
+c         IO status
+          integer(kind = int64) :: status
+c         system state (stands for the simulation step number)
+          real(kind = real64) :: state
+
+          tmp => particles % tmp
+          state = tmp(1)
+
+          status = fdump_state(state)
+
+          return
+        end function fdump_state_base
+
+
+        function ffetch_state_base (particles) result(status)
+c         Synopsis:
+c         Fetches the OBDS state (holds the simulation step number) from the state file.
+c         Returns the status of this operation to the caller.
+          class(particle_t), intent(inout), target :: particles
+c         temporary placeholder array
+          real(kind = real64), pointer, contiguous :: tmp(:) => null()
+c         IO status
+          integer(kind = int64) :: status
+c         system state (stands for the simulation step number)
+          real(kind = real64) :: state
+
+          status = ffetch_state(state)
+
+c         we can afford to commit the state regardless of the IO status because
+c         `ffetch_state()' either yields either the default or the (actual fetched) state;
+c         the caller procedure has been designed to handle either case accordingly
+          if (STATUS == __SUCCESS__ .OR. STATUS == __FAILURE__) then
+            tmp => particles % tmp
+            tmp(1) = state
+          end if
+
+          return
+        end function ffetch_state_base
 
       end module io
 

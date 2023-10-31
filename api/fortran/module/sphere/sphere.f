@@ -1,3 +1,6 @@
+#define __SUCCESS__  0_int64
+#define __FAILURE__ -1_int64
+
       module sphere
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
@@ -5,6 +8,8 @@
         use :: config, only: LENGTH
         use :: config, only: NUM_SPHERES => NUM_PARTICLES
         use :: io, only: io__flogger
+        use :: io, only: io__floader
+        use :: io, only: io__ffetch_state
         use :: force, only: force__Brownian_force
         use :: system, only: system__PBC
         use :: dynamic, only: dynamic__shifter
@@ -255,6 +260,40 @@ c         status of the IO operation
         end function flogger
 
 
+        function floader (particles) result(status)
+c         Synopsis:
+c         Tries to load the particle fields (or properties) from the state file.
+c         Returns the status of the IO operation.
+          class(sphere_t), pointer, intent(inout) :: particles
+          real(kind = real64), pointer, contiguous :: tmp(:) => null()
+c         IO status
+          integer(kind = int64) :: status
+c         the state is the simulation step number
+          integer(kind = int64) :: istate
+
+c         reads the state (since the caller method has fetched it for us)
+          tmp => particles % tmp
+          istate = int(tmp(1), kind = int64)
+c         loads the particle fields (or properties) from the respective state file
+          status = io__floader(particles, istate)
+
+c         NOTE:
+c         We have to inform the user that something went really wrong here, for this is
+c         an unexpected error. There shouldn't be a saved state if there's no state file
+c         containing the system state (particle positions, orientations, forces, etc.).
+          if (STATUS == __FAILURE__) then
+            deallocate(particles)
+            particles => null()
+c           we are displaying `sphere_t()' because we are executing this during
+c           instantiation, the user might be thrown off if we show `floader()' instead;
+c           maybe a backtrace is also generated and that can be of additional help
+            error stop "sphere_t(): IO ERROR while reading state file"
+          end if
+
+          return
+        end function floader
+
+
         function constructor () result(spheres)
 c         Synopsis:
 c         Allocates resources and initializes the spheres.
@@ -271,7 +310,8 @@ c         on the assignment operator that the FORTRAN compiler can synthesize (h
 c         that and have regretted all the time spent trying to figure out why it does not
 c         work and how to fix it). We are open to reconsider our position if the standard
 c         provides a better solution than our workaround in the future.
-          type(sphere_t), pointer :: spheres
+          class(sphere_t), pointer :: spheres
+          integer(kind = int64) :: status
           integer(kind = int64) :: mstat
 
 c         performs sane-checks
@@ -287,8 +327,17 @@ c         memory allocations:
 c         initializations:
           call spheres % initialize()
 
-c         places the spheres in a grid (or lattice) like structure
-          call grid(spheres)
+c         attempts to load last known state
+          status = io__ffetch_state(spheres)
+          if (STATUS == __SUCCESS__) then
+c           loads the particle positions, orientations, etc. from the state file
+            status = floader(spheres)
+            print *, 'sphere_t(): fetched particle states successfully'
+          else
+c           falls back to placing the spheres in a grid (or lattice) like structure
+            print *, 'sphere_t(): falling back to particle stacking'
+            call grid(spheres)
+          end if
 
           return
         end function constructor
