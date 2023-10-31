@@ -3,6 +3,7 @@
 #define __FNAME_LENGTH__ 256
 
       module io
+        use, intrinsic :: iso_fortran_env, only: dp => real64
         use, intrinsic :: iso_fortran_env, only: real64
         use, intrinsic :: iso_fortran_env, only: int64
 #if !defined(__GFORTRAN__)
@@ -21,6 +22,66 @@ c       GNU FORTRAN Compiler, this is needed because `rename()` is a GNU Extensi
         end interface
 
       contains
+
+        subroutine bind (x, y, z,
+     +                   r_x, r_y, r_z,
+     +                   Eax, Eay, Eaz,
+     +                   d_x, d_y, d_z,
+     +                   F_x, F_y, F_z,
+     +                   T_x, T_y, T_z,
+     +                   id, particles)
+c         Synopsis:
+c         Binds pointers to their respective particle fields.
+          class(particle_t), intent(in), target :: particles
+          real(kind = dp), pointer, contiguous, intent(inout) :: x(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: y(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: z(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: r_x(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: r_y(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: r_z(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: Eax(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: Eay(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: Eaz(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: d_x(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: d_y(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: d_z(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: F_x(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: F_y(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: F_z(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: T_x(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: T_y(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: T_z(:)
+          real(kind = dp), pointer, contiguous, intent(inout) :: id(:)
+
+          x => particles % x
+          y => particles % y
+          z => particles % z
+
+          r_x => particles % r_x
+          r_y => particles % r_y
+          r_z => particles % r_z
+
+          Eax => particles % Eax
+          Eay => particles % Eay
+          Eaz => particles % Eaz
+
+          d_x => particles % d_x
+          d_y => particles % d_y
+          d_z => particles % d_z
+
+          F_x => particles % F_x
+          F_y => particles % F_y
+          F_z => particles % F_z
+
+          T_x => particles % T_x
+          T_y => particles % T_y
+          T_z => particles % T_z
+
+          id => particles % id
+
+          return
+        end subroutine bind
+
 
         function fstatus (IOSTAT) result(STATUS)
 c         Synopsis:
@@ -239,31 +300,13 @@ c         IO status
           real(kind = real64), pointer, contiguous :: T_z(:) => null()
           real(kind = real64), pointer, contiguous :: id(:) => null()
 
-          x => particles % x
-          y => particles % y
-          z => particles % z
-
-          r_x => particles % r_x
-          r_y => particles % r_y
-          r_z => particles % r_z
-
-          Eax => particles % Eax
-          Eay => particles % Eay
-          Eaz => particles % Eaz
-
-          d_x => particles % d_x
-          d_y => particles % d_y
-          d_z => particles % d_z
-
-          F_x => particles % F_x
-          F_y => particles % F_y
-          F_z => particles % F_z
-
-          T_x => particles % T_x
-          T_y => particles % T_y
-          T_z => particles % T_z
-
-          id => particles % id
+          call bind(x, y, z,
+     +              r_x, r_y, r_z,
+     +              Eax, Eay, Eaz,
+     +              d_x, d_y, d_z,
+     +              F_x, F_y, F_z,
+     +              T_x, T_y, T_z,
+     +              id, particles)
 
           status = flogger(x, y, z,
      +                     r_x, r_y, r_z,
