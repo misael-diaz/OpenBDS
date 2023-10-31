@@ -338,6 +338,7 @@ c         file descriptor
           integer(kind = int64) :: fd
 c         IO status
           integer(kind = int64) :: status
+          integer(kind = int64) :: iostat
 c         placeholder to store the step number in a string
           character(len = 64) :: step_str
           character(len = __FNAME_LENGTH__) :: tempname
@@ -355,15 +356,24 @@ c         defines the temporary and designated filenames
 
 c         opens temporary file for writing
           status = fopen(tempname, fd)
+          if (STATUS == __FAILURE__) then
+            print *, 'IO ERROR with file: ', trim(tempname)
+            return
+          end if
 
 c         logs the (current) particle fields (or properties) to the file
-          if (STATUS == __SUCCESS__) then
-            status = flog(particles, fd)
+          status = flog(particles, fd)
+          if (STATUS == __FAILURE__) then
+            print *, 'OUTPUT ERROR with file: ', trim(tempname)
+            close(fd)
+            return
           end if
 
 c         closes the file
-          if (STATUS == __SUCCESS__) then
-            status = fclose(fd)
+          status = fclose(fd)
+          if (STATUS == __FAILURE__) then
+            print *, 'UNEXPECTED IO ERROR with file: ', trim(tempname)
+            return
           end if
 
 c         renames file temporary to its designated name (GNU Extension)
@@ -371,8 +381,11 @@ c         NOTE:
 c         This is so that we know for sure during post-processing that the data was
 c         written successfully (we won't need to worry about data corruption due to
 c         IO errors).
-          if (STATUS == __SUCCESS__) then
-            status = int(rename(tempname, filename), kind = int64)
+          iostat = int(rename(tempname, filename), kind = int64)
+          status = fstatus(iostat)
+          if (STATUS == __FAILURE__) then
+            print *, 'UNEXPECTED IO ERROR with file: ', trim(filename)
+            return
           end if
 
           return
