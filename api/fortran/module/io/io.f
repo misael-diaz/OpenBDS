@@ -3,7 +3,7 @@
 #define __FNAME_LENGTH__ 256
 
       module io
-        use, intrinsic :: iso_fortran_env, only: dp => real64
+        use, intrinsic :: iso_fortran_env, only: r8 => real64
         use, intrinsic :: iso_fortran_env, only: real64
         use, intrinsic :: iso_fortran_env, only: int64
 #if !defined(__GFORTRAN__)
@@ -50,31 +50,31 @@ c         Synopsis:
 c         Binds pointers to their respective particle fields.
           class(particle_t), intent(in), target :: particles
 c         position vector components subject to periodic conditions
-          real(kind = dp), pointer, contiguous, intent(inout) :: x(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: y(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: z(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: x(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: y(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: z(:)
 c         position vector components independent of periodic conditions
-          real(kind = dp), pointer, contiguous, intent(inout) :: r_x(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: r_y(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: r_z(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: r_x(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: r_y(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: r_z(:)
 c         Euler angle vector components
-          real(kind = dp), pointer, contiguous, intent(inout) :: Eax(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: Eay(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: Eaz(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: Eax(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: Eay(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: Eaz(:)
 c         director (or orientation vector) components
-          real(kind = dp), pointer, contiguous, intent(inout) :: d_x(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: d_y(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: d_z(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: d_x(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: d_y(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: d_z(:)
 c         force vector components
-          real(kind = dp), pointer, contiguous, intent(inout) :: F_x(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: F_y(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: F_z(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: F_x(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: F_y(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: F_z(:)
 c         torque vector components
-          real(kind = dp), pointer, contiguous, intent(inout) :: T_x(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: T_y(:)
-          real(kind = dp), pointer, contiguous, intent(inout) :: T_z(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: T_x(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: T_y(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: T_z(:)
 c         identifiers IDs
-          real(kind = dp), pointer, contiguous, intent(inout) :: id(:)
+          real(kind = r8), pointer, contiguous, intent(inout) :: id(:)
 
           x => particles % x
           y => particles % y
