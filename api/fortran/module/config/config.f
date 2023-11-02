@@ -1,4 +1,5 @@
       module config
+        use, intrinsic :: iso_fortran_env, only: int32
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
         implicit none
@@ -7,6 +8,7 @@
         public :: LIMIT
         public :: LENGTH
         public :: TIME_STEP
+        public :: WALLTIME
         public :: NUM_STEPS
         public :: NUM_LOG_STEPS
         public :: NUM_PARTICLES
@@ -43,6 +45,19 @@
 *       elapsed. The logged data is used for post-processing to study  *
 *       suspension properties, such as the Mean Squared Displacement   *
 *       MSD, the diffusivity, the pair distribution function, etc.     *
+**                                                                    **
+
+
+**                                                                    **
+*       defines the walltime (alloted runtime for the application in   *
+*       the High Performance Computing facility HPCf in milliseconds)  *
+        integer(kind = int32), parameter :: WALLTIME_HRS = 164_int32
+        integer(kind = int32), parameter :: WALLTIME_SEC = 3600_int32 *
+     +                                      WALLTIME_HRS
+        integer(kind = int32), parameter :: WALLTIME_MILLIS =
+     +                                      1000_int32 * WALLTIME_SEC
+        integer(kind = int32), parameter :: WALLTIME = WALLTIME_MILLIS
+*                                                                      *
 **                                                                    **
 
 
