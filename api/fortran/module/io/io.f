@@ -148,6 +148,32 @@ c         IO status
         end function fopen_wr
 
 
+        function fopen_ow (filename, fd) result(status)
+c         Synopsis:
+c         Opens filename for writing, overwrites the file contents if existing.
+c         On success (failure) the file descriptor `fd' is set (unknown).
+c         Returns the status of this operation to the caller.
+          character(len=__FNAME_LENGTH__), intent(in) :: filename
+c         file descriptor
+          integer(kind = int64), intent(out) :: fd
+c         IO status
+          integer(kind = int64) :: status
+          integer(kind = int64) :: iostat
+
+          open(newunit = fd,
+     +         file = trim(filename),
+     +         form = 'formatted',
+     +         access = 'sequential',
+     +         status = 'unknown',
+     +         action = 'write',
+     +         iostat = iostat)
+
+          status = fstatus(iostat)
+
+          return
+        end function fopen_ow
+
+
         function fopen_rd (filename, fd) result(status)
 c         Synopsis:
 c         Opens filename for reading.
@@ -191,14 +217,16 @@ c         IO status
           if ( present(action) ) then
 
             if (action == 'w') then
-              status = fopen_wr(filename, fd)
+              status = fopen_wr(filename, fd) ! opens for writing
+            else if (action == 'o') then
+              status = fopen_ow(filename, fd) ! opens for overwriting
             else
-              status = fopen_rd(filename, fd)
+              status = fopen_rd(filename, fd) ! opens for reading
             end if
 
           else
 
-            status = fopen_wr(filename, fd)
+            status = fopen_wr(filename, fd)   ! defaults to writing
 
           end if
 
@@ -602,7 +630,7 @@ c         format for reading the step number (or state)
           character(*), parameter :: fmt = '(I64)'
 
 c         tries to open the state file for reading
-          status = fopen(filename = fname, fd = fd, action = 'w')
+          status = fopen(filename = fname, fd = fd, action = 'o')
           if (status == __FAILURE__) then
             print *, 'IO ERROR with file: ', trim(fname)
             return
