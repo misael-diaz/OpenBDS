@@ -611,18 +611,17 @@ c         closes the file
         end function fload_base
 
 
-        function fdump_state (state) result(status)
+        function fdump_state (istate) result(status)
 c         Synopsis:
 c         Dumps the last known system state to the state file, where the `state' is
 c         the last known simulation step number
 c         Returns the status of this operation to the caller.
-          real(kind = real64), intent(in) :: state
+          integer(kind = int64), intent(in) :: istate
 c         file descriptor
           integer(kind = int64) :: fd
 c         IO status
           integer(kind = int64) :: status
           integer(kind = int64) :: iostat
-          integer(kind = int64) :: istate
 c         name of the state file
           character(len = __FNAME_LENGTH__), parameter :: fname =
      +    'run/bds/state/state.txt'
@@ -636,7 +635,6 @@ c         tries to open the state file for reading
             return
           end if
 
-          istate = int(state, kind = int64)
 c         tries to write the state to the state file
           write(unit = fd, fmt = fmt, iostat = iostat) istate
 
@@ -721,25 +719,16 @@ c         against invalid inputs
         end function ffetch_state
 
 
-        function fdump_state_base (particles) result(status)
+        function fdump_state_base (istate) result(status)
 c         Synopsis:
 c         Dumps the OBDS state (holds the simulation step number) to the state file.
 c         Returns the status of this operation to the caller.
-c         NOTE:
-c         We can afford to read the `state' of integer kind from the temporary placeholder
-c         of real kind because integers have exact binary floating-point representations.
-          class(particle_t), intent(in), target :: particles
-c         temporary placeholder array
-          real(kind = real64), pointer, contiguous :: tmp(:) => null()
+c         system state (stands for the simulation step number)
+          integer(kind = int64), intent(in) :: istate
 c         IO status
           integer(kind = int64) :: status
-c         system state (stands for the simulation step number)
-          real(kind = real64) :: state
 
-          tmp => particles % tmp
-          state = tmp(1)
-
-          status = fdump_state(state)
+          status = fdump_state(istate)
 
           return
         end function fdump_state_base
