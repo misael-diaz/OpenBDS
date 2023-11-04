@@ -13,6 +13,28 @@
         public :: NUM_LOG_STEPS
         public :: NUM_PARTICLES
         public :: LOG_NUM_PARTICLES
+        public :: PENDING
+        public :: DONE
+
+
+**                                                                    **
+*       OBDS Job status, either `unknown', `pending', or `done'        *
+        enum, bind(c)
+          enumerator :: UNKNOWN
+          enumerator :: PENDING
+          enumerator :: DONE
+        end enum
+*       NOTE:                                                          *
+*       The `unknown' status is not really dumped by the OBDS code, it *
+*       is dumped by the shell script that submits the code to the HPC *
+*       as a fail-safe mechanism to avert a job-scheduling hell, which *
+*       can happen if an unexpected error occurs (without fail-safe)   *
+*       The `pending' status signals the shell script to submit the    *
+*       job to the HPC because the simulation has not ended yet. The   *
+*       `done' status is dumped by the OBDS code when the simulation   *
+*       finishes, that happens the step counter is equal to NUM_STEPS. *
+**                                                                    **
+
 
 **                                                                    **
 *       system box limits and length                                   *
