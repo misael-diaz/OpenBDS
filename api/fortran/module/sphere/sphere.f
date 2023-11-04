@@ -7,10 +7,14 @@
         use :: config, only: LIMIT
         use :: config, only: LENGTH
         use :: config, only: NUM_SPHERES => NUM_PARTICLES
+        use :: config, only: NUM_STEPS
+        use :: config, only: PENDING
+        use :: config, only: DONE
         use :: io, only: io__flogger
         use :: io, only: io__floader
         use :: io, only: io__ffetch_state
         use :: io, only: io__fdump_state
+        use :: io, only: io__fdump_status
         use :: force, only: force__Brownian_force
         use :: system, only: system__PBC
         use :: dynamic, only: dynamic__shifter
@@ -257,10 +261,20 @@ c         status of the IO operation
           integer(kind = int64) :: istate
 
           status = io__flogger(particles, step)
+          if (status == __FAILURE__) then
+            return
+          end if
 
-          if (status == __SUCCESS__) then
-            istate = step
-            status = io__fdump_state(istate)
+          istate = step
+          status = io__fdump_state(istate)
+          if (status == __FAILURE__) then
+            return
+          end if
+
+          if (step == NUM_STEPS) then
+            status = io__fdump_status(DONE)
+          else
+            status = io__fdump_status(PENDING)
           end if
 
           return

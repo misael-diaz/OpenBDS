@@ -6,6 +6,7 @@
         use, intrinsic :: iso_fortran_env, only: r8 => real64
         use, intrinsic :: iso_fortran_env, only: real64
         use, intrinsic :: iso_fortran_env, only: int64
+        use, intrinsic :: iso_fortran_env, only: int32
 #if !defined(__GFORTRAN__)
 c       uses Intel FORTRAN Portability `IFPORT' Module if we are not compiling with the
 c       GNU FORTRAN Compiler, this is needed because `rename()` is a GNU Extension
@@ -13,6 +14,8 @@ c       GNU FORTRAN Compiler, this is needed because `rename()` is a GNU Extensi
 #endif
         use :: config, only: N => NUM_PARTICLES
         use :: config, only: NUM_STEPS
+        use :: config, only: PENDING
+        use :: config, only: DONE
         use :: particle, only: particle_t
         implicit none
         private
@@ -20,6 +23,7 @@ c       GNU FORTRAN Compiler, this is needed because `rename()` is a GNU Extensi
         public :: io__floader
         public :: io__fdump_state
         public :: io__ffetch_state
+        public :: io__fdump_status
 
         interface io__flogger
           module procedure flog_base
@@ -35,6 +39,10 @@ c       GNU FORTRAN Compiler, this is needed because `rename()` is a GNU Extensi
 
         interface io__ffetch_state
           module procedure ffetch_state_base
+        end interface
+
+        interface io__fdump_status
+          module procedure fdump_status_base
         end interface
 
       contains
@@ -656,6 +664,75 @@ c         queries the IO status
         end function fdump_state
 
 
+        function fdump_status (stat) result(status)
+c         Synopsis:
+c         Dumps the OBDS simulation status to the status file.
+c         Returns the status of this operation to the caller.
+c         NOTE:
+c         We attempt to write first to a temporary file as a fail-safe
+c         mechanism, for the script that schedules this job to the HPC
+c         dumps the `unknown' status and we should only change this if
+c         we are successful in dumping a status. This is done by
+c         renaming the status file from its temporary name to its
+c         designated name. It is better to err on the safe side than
+c         to cause a job-scheduling hell.
+          integer(kind = int32), intent(in) :: stat
+c         file descriptor
+          integer(kind = int64) :: fd
+c         IO status
+          integer(kind = int64) :: status
+          integer(kind = int64) :: iostat
+c         temporary status file
+          character(len = __FNAME_LENGTH__), parameter :: tname =
+     +    'run/bds/status/status.tmp'
+c         designated status file name
+          character(len = __FNAME_LENGTH__), parameter :: fname =
+     +    'run/bds/status/status.txt'
+c         format for writing the status
+          character(*), parameter :: fmt = '(A)'
+
+c         tries to open a new status file for writing
+          status = fopen(filename = tname, fd = fd, action = 'w')
+          if (status == __FAILURE__) then
+            print *, 'IO ERROR with file: ', trim(fname)
+            return
+          end if
+
+c         tries to write the status to the temporary state file
+          select case (stat)
+            case (DONE)
+              write(unit = fd, fmt = fmt, iostat = iostat) 'done'
+            case (PENDING)
+              write(unit = fd, fmt = fmt, iostat = iostat) 'pending'
+            case default
+              write(unit = fd, fmt = fmt, iostat = iostat) 'unknown'
+          end select
+
+c         queries the IO status
+          status = fstatus(iostat)
+          if (status == __FAILURE__) then
+            print *, 'WRITE ERROR with file: ', trim(fname)
+            close(fd)
+            return
+          end if
+
+          status = fclose(fd)
+          if (status == __FAILURE__) then
+            print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
+            return
+          end if
+
+          iostat = int(rename(tname, fname), kind = int64)
+          status = fstatus(iostat)
+          if (STATUS == __FAILURE__) then
+            print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
+            return
+          end if
+
+          return
+        end function fdump_status
+
+
         function ffetch_state (state) result(status)
 c         Synopsis:
 c         Fetches the last known state from the state file.
@@ -758,6 +835,21 @@ c         the caller procedure has been designed to handle either case according
 
           return
         end function ffetch_state_base
+
+
+        function fdump_status_base (stat) result(status)
+c         Synopsis:
+c         Dumps the OBDS status to the status file to implement auto-scheduling.
+c         Returns the status of this operation to the caller.
+c         status of the simulation either (DONE, PENDING, or UNKNOWN)
+          integer(kind = int32), intent(in) :: stat
+c         IO status
+          integer(kind = int64) :: status
+
+          status = fdump_status(stat)
+
+          return
+        end function fdump_status_base
 
       end module io
 
