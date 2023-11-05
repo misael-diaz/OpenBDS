@@ -22,6 +22,9 @@ configs:
 PRNGs:
 	@$(MAKE) -C random
 
+timers: configs
+	@$(MAKE) -C timer
+
 particles: configs
 	@$(MAKE) -C particle
 
@@ -37,11 +40,12 @@ forces: particles PRNGs
 dynamics: forces
 	@$(MAKE) -C dynamic
 
-spheres: ios dynamics systems
+spheres: ios timers dynamics systems
 	@$(MAKE) -C sphere
 
 clean:
 	@$(MAKE) -C config clean
+	@$(MAKE) -C timer clean
 	@$(MAKE) -C random clean
 	@$(MAKE) -C particle clean
 	@$(MAKE) -C system clean

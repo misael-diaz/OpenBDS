@@ -1,5 +1,4 @@
       module config
-        use, intrinsic :: iso_fortran_env, only: int32
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
         implicit none
@@ -72,13 +71,13 @@
 
 **                                                                    **
 *       defines the walltime (alloted runtime for the application in   *
-*       the High Performance Computing facility HPCf in milliseconds)  *
-        integer(kind = int32), parameter :: WALLTIME_HRS = 164_int32
-        integer(kind = int32), parameter :: WALLTIME_SEC = 3600_int32 *
+*       the High Performance Computing facility HPCf in seconds)       *
+        integer(kind = int64), parameter :: WALLTIME_HRS = 164_int64
+        integer(kind = int64), parameter :: WALLTIME_SEC = 3600_int64 *
      +                                      WALLTIME_HRS
-        integer(kind = int32), parameter :: WALLTIME_MILLIS =
-     +                                      1000_int32 * WALLTIME_SEC
-        integer(kind = int32), parameter :: WALLTIME = WALLTIME_MILLIS
+        integer(kind = int64), parameter :: WALLTIME_MILLIS =
+     +                                      1000_int64 * WALLTIME_SEC
+        integer(kind = int64), parameter :: WALLTIME = WALLTIME_SEC
 *                                                                      *
 **                                                                    **
 
