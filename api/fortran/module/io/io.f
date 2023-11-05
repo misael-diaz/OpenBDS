@@ -210,9 +210,10 @@ c         IO status
 
         function fopen (filename, fd, action) result(status)
 c         Synopsis:
-c         Opens filename for writing the default.
+c         Opens new file whose name is filename for writing the default.
 c         If the optional argument `action' is supplied it opens the file for reading if
-c         `action' is `r' and for writting if `action' is `w'.
+c         `action' is `r', for writting if `action' is `w', and for overwritting if
+c         `action' is `o'.
 c         On success (failure) the file descriptor `fd' is set (unknown).
 c         Returns the status of this operation to the caller.
           character(len=__FNAME_LENGTH__), intent(in) :: filename
@@ -225,7 +226,7 @@ c         IO status
           if ( present(action) ) then
 
             if (action == 'w') then
-              status = fopen_wr(filename, fd) ! opens for writing
+              status = fopen_wr(filename, fd) ! opens (new) for writing
             else if (action == 'o') then
               status = fopen_ow(filename, fd) ! opens for overwriting
             else
@@ -234,7 +235,7 @@ c         IO status
 
           else
 
-            status = fopen_wr(filename, fd)   ! defaults to writing
+            status = fopen_wr(filename, fd)   ! defaults to writing new
 
           end if
 
@@ -410,24 +411,31 @@ c         file descriptor
           integer(kind = int64), intent(in) :: fd
 c         IO status
           integer(kind = int64) :: status
+c         position vector components subject to periodic conditions
           real(kind = real64), pointer, contiguous :: x(:) => null()
           real(kind = real64), pointer, contiguous :: y(:) => null()
           real(kind = real64), pointer, contiguous :: z(:) => null()
+c         position vector components independent of periodic conditions
           real(kind = real64), pointer, contiguous :: r_x(:) => null()
           real(kind = real64), pointer, contiguous :: r_y(:) => null()
           real(kind = real64), pointer, contiguous :: r_z(:) => null()
+c         Euler angle vector components
           real(kind = real64), pointer, contiguous :: Eax(:) => null()
           real(kind = real64), pointer, contiguous :: Eay(:) => null()
           real(kind = real64), pointer, contiguous :: Eaz(:) => null()
+c         director (or orientation vector) components
           real(kind = real64), pointer, contiguous :: d_x(:) => null()
           real(kind = real64), pointer, contiguous :: d_y(:) => null()
           real(kind = real64), pointer, contiguous :: d_z(:) => null()
+c         force vector components
           real(kind = real64), pointer, contiguous :: F_x(:) => null()
           real(kind = real64), pointer, contiguous :: F_y(:) => null()
           real(kind = real64), pointer, contiguous :: F_z(:) => null()
+c         torque vector components
           real(kind = real64), pointer, contiguous :: T_x(:) => null()
           real(kind = real64), pointer, contiguous :: T_y(:) => null()
           real(kind = real64), pointer, contiguous :: T_z(:) => null()
+c         identifiers IDs
           real(kind = real64), pointer, contiguous :: id(:) => null()
 
           call bind(x, y, z,
@@ -460,24 +468,31 @@ c         file descriptor
           integer(kind = int64), intent(in) :: fd
 c         IO status
           integer(kind = int64) :: status
+c         position vector components subject to periodic conditions
           real(kind = real64), pointer, contiguous :: x(:) => null()
           real(kind = real64), pointer, contiguous :: y(:) => null()
           real(kind = real64), pointer, contiguous :: z(:) => null()
+c         position vector components independent of periodic conditions
           real(kind = real64), pointer, contiguous :: r_x(:) => null()
           real(kind = real64), pointer, contiguous :: r_y(:) => null()
           real(kind = real64), pointer, contiguous :: r_z(:) => null()
+c         Euler angle vector components
           real(kind = real64), pointer, contiguous :: Eax(:) => null()
           real(kind = real64), pointer, contiguous :: Eay(:) => null()
           real(kind = real64), pointer, contiguous :: Eaz(:) => null()
+c         director (or orientation vector) components
           real(kind = real64), pointer, contiguous :: d_x(:) => null()
           real(kind = real64), pointer, contiguous :: d_y(:) => null()
           real(kind = real64), pointer, contiguous :: d_z(:) => null()
+c         force vector components
           real(kind = real64), pointer, contiguous :: F_x(:) => null()
           real(kind = real64), pointer, contiguous :: F_y(:) => null()
           real(kind = real64), pointer, contiguous :: F_z(:) => null()
+c         torque vector components
           real(kind = real64), pointer, contiguous :: T_x(:) => null()
           real(kind = real64), pointer, contiguous :: T_y(:) => null()
           real(kind = real64), pointer, contiguous :: T_z(:) => null()
+c         identifiers IDs
           real(kind = real64), pointer, contiguous :: id(:) => null()
 
           call bind(x, y, z,
@@ -514,8 +529,11 @@ c         IO status
           integer(kind = int64) :: iostat
 c         placeholder to store the step number in a string
           character(len = 64) :: step_str
+c         temporary filename
           character(len = __FNAME_LENGTH__) :: tempname
+c         designated filename
           character(len = __FNAME_LENGTH__) :: filename
+c         relative path to file
           character(len = *), parameter :: path =
      +    'run/bds/data/particles/particles-'
 
@@ -581,7 +599,9 @@ c         IO status
           integer(kind = int64) :: status
 c         placeholder to store the step number in a string
           character(len = 64) :: step_str
+c         name of data file containing the particle fields (or properties)
           character(len = __FNAME_LENGTH__) :: filename
+c         relative path to file
           character(len = *), parameter :: path =
      +    'run/bds/data/particles/particles-'
 
@@ -591,7 +611,7 @@ c         guards against invalid input
           write(step_str, '(I64)') abs(step)
           step_str = adjustl(step_str)
 
-c         defines the temporary and designated filenames
+c         constructs the name of the data file from the step number
           filename = path // trim(step_str) // '.txt'
 
 c         opens data file for reading
@@ -622,7 +642,7 @@ c         closes the file
         function fdump_state (istate) result(status)
 c         Synopsis:
 c         Dumps the last known system state to the state file, where the `state' is
-c         the last known simulation step number
+c         the last known simulation step number.
 c         Returns the status of this operation to the caller.
           integer(kind = int64), intent(in) :: istate
 c         file descriptor
@@ -636,7 +656,7 @@ c         name of the state file
 c         format for reading the step number (or state)
           character(*), parameter :: fmt = '(I64)'
 
-c         tries to open the state file for reading
+c         tries to open the state file for overwritting
           status = fopen(filename = fname, fd = fd, action = 'o')
           if (status == __FAILURE__) then
             print *, 'IO ERROR with file: ', trim(fname)
@@ -654,6 +674,7 @@ c         queries the IO status
             return
           end if
 
+c         closes the file
           status = fclose(fd)
           if (status == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
@@ -670,7 +691,7 @@ c         Dumps the OBDS simulation status to the status file.
 c         Returns the status of this operation to the caller.
 c         NOTE:
 c         We attempt to write first to a temporary file as a fail-safe
-c         mechanism, for the script that schedules this job to the HPC
+c         mechanism, for the script that schedules this job to the HPC cluster
 c         dumps the `unknown' status and we should only change this if
 c         we are successful in dumping a status. This is done by
 c         renaming the status file from its temporary name to its
@@ -716,12 +737,14 @@ c         queries the IO status
             return
           end if
 
+c         closes the file temporary
           status = fclose(fd)
           if (status == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
             return
           end if
 
+c         commits the status
           iostat = int(rename(tname, fname), kind = int64)
           status = fstatus(iostat)
           if (STATUS == __FAILURE__) then
@@ -737,19 +760,19 @@ c         queries the IO status
 c         Synopsis:
 c         Fetches the last known state from the state file.
 c         Returns the status of this operation to the caller.
-c         the state is the last known simulation step number
-c         Returns the status of this operation to the caller.
+c         state (or step number) stored in a double precision floating-point number
           real(kind = real64), intent(out) :: state
 c         file descriptor
           integer(kind = int64) :: fd
 c         IO status
           integer(kind = int64) :: status
           integer(kind = int64) :: iostat
+c         state (or step number)
           integer(kind = int64) :: istate
 c         name of the state file
           character(len = __FNAME_LENGTH__), parameter :: fname =
      +    'run/bds/state/state.txt'
-c         format for reading the step number (or state)
+c         format for reading the state (or step number)
           character(*), parameter :: fmt = '(I64)'
 
 c         tries to open the state file for reading
@@ -757,7 +780,7 @@ c         tries to open the state file for reading
 
 c         NOTE:
 c         if there's no state (IO status is in a failure state) this means that we might
-c         be executing the OBDS code for this first time so we set the OBDS state to its
+c         be executing the OBDS code for the first time so we set the OBDS state to its
 c         initial state (zero); otherwise, the state is set to whatever state is stored
 c         in the state file in the next codeblocks
           if (STATUS == __FAILURE__) then
@@ -767,7 +790,7 @@ c         in the state file in the next codeblocks
             return
           end if
 
-c         tries to read the contents of the state file into `state'
+c         tries to read the contents of the state file into `istate'
           read(unit = fd, fmt = fmt, iostat = iostat) istate
 
 c         queries the IO status
@@ -783,9 +806,10 @@ c         queries the IO status
 c         sets the state with the fecthed value
 c         NOTE:
 c         applies an upper bound on the `state' (step number) to guard
-c         against invalid inputs
+c         against invalid inputs (even if unlikely)
           state = real( min(istate, NUM_STEPS), kind = real64 )
 
+c         closes the file
           status = fclose(fd)
           if (status == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
