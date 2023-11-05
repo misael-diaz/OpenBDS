@@ -261,13 +261,13 @@ c         status of the IO operation
           integer(kind = int64) :: istate
 
           status = io__flogger(particles, step)
-          if (status == __FAILURE__) then
+          if (STATUS == __FAILURE__) then
             return
           end if
 
           istate = step
           status = io__fdump_state(istate)
-          if (status == __FAILURE__) then
+          if (STATUS == __FAILURE__) then
             return
           end if
 
