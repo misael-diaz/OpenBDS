@@ -658,7 +658,7 @@ c         format for reading the step number (or state)
 
 c         tries to open the state file for overwritting
           status = fopen(filename = fname, fd = fd, action = 'o')
-          if (status == __FAILURE__) then
+          if (STATUS == __FAILURE__) then
             print *, 'IO ERROR with file: ', trim(fname)
             return
           end if
@@ -668,7 +668,7 @@ c         tries to write the state to the state file
 
 c         queries the IO status
           status = fstatus(iostat)
-          if (status == __FAILURE__) then
+          if (STATUS == __FAILURE__) then
             print *, 'WRITE ERROR with file: ', trim(fname)
             close(fd)
             return
@@ -676,7 +676,7 @@ c         queries the IO status
 
 c         closes the file
           status = fclose(fd)
-          if (status == __FAILURE__) then
+          if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
             return
           end if
@@ -714,7 +714,7 @@ c         format for writing the status
 
 c         tries to open a new status file for writing
           status = fopen(filename = tname, fd = fd, action = 'w')
-          if (status == __FAILURE__) then
+          if (STATUS == __FAILURE__) then
             print *, 'IO ERROR with file: ', trim(fname)
             return
           end if
@@ -731,7 +731,7 @@ c         tries to write the status to the temporary state file
 
 c         queries the IO status
           status = fstatus(iostat)
-          if (status == __FAILURE__) then
+          if (STATUS == __FAILURE__) then
             print *, 'WRITE ERROR with file: ', trim(fname)
             close(fd)
             return
@@ -739,7 +739,7 @@ c         queries the IO status
 
 c         closes the file temporary
           status = fclose(fd)
-          if (status == __FAILURE__) then
+          if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
             return
           end if
@@ -795,7 +795,7 @@ c         tries to read the contents of the state file into `istate'
 
 c         queries the IO status
           status = fstatus(iostat)
-          if (status == __FAILURE__) then
+          if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED READ ERROR with file: ', trim(fname)
             print *, 'initializing state with its default value'
             state = 0.0_real64 ! zeros intent(out) argument (default)
@@ -811,7 +811,7 @@ c         against invalid inputs (even if unlikely)
 
 c         closes the file
           status = fclose(fd)
-          if (status == __FAILURE__) then
+          if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
             return
           end if
