@@ -1,54 +1,17 @@
 #define __SUCCESS__  0_int64
 #define __FAILURE__ -1_int64
 
-      module OBDS
-        use, intrinsic :: iso_fortran_env, only: int32
-        implicit none
-        private
-        public :: sane
-
-        interface sane
-          module procedure test_system_clock
-        end interface
-
-        contains
-
-        subroutine test_system_clock ()
-c         Synopsis:
-c         Tests the resolution and range of the system-clock.
-          integer(kind = int32) :: system_clock_count_rate
-          integer(kind = int32) :: system_clock_count_max
-
-          call system_clock(count_rate = system_clock_count_rate)
-          call system_clock(count_max = system_clock_count_max)
-
-          if (system_clock_count_rate /= 1000) then
-            error stop "OBDS::sane(): unexpected system-clock error: "//
-     +      "OBDS code expects a millisecond resolution system-clock"
-          end if
-
-          if (system_clock_count_max /= huge(0)) then
-            error stop "OBDS::sane(): unexpected system-clock error: "//
-     +      "OBDS code expects the max count to be equal to (2**32 - 1)"
-          end if
-
-          return
-        end subroutine test_system_clock
-
-      end module OBDS
-
       program OpenBDS
-        use, intrinsic :: iso_fortran_env, only: int32
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
         use :: config, only: NUM_STEPS
         use :: config, only: NUM_LOG_STEPS
-        use :: config, only: WALLTIME
+        use :: timer,  only: timer_t
         use :: sphere, only: sphere_t
-        use :: OBDS, only: sane
         implicit none
 c       initializes pointer to collection of spheres
         type(sphere_t), pointer :: spheres => null()
+        type(timer_t) :: clock
         real(kind = real64), pointer, contiguous :: tmp(:) => null()
 c       sets the number of simulation time-steps
         integer(kind = int64), parameter :: steps = NUM_STEPS
@@ -59,14 +22,9 @@ c       step counters
         integer(kind = int64) :: istep
 c       IO status
         integer(kind = int64) :: status
-        integer(kind = int32) :: time_elapsed
-        integer(kind = int32) :: time_start
-        integer(kind = int32) :: time_end
 
-c       performs sane-checks
-        call sane()
-
-        call system_clock(count = time_start)
+        clock = timer_t()
+        call clock % t_start()
 
         spheres => sphere_t() ! instantiates the collection of spheres
 
@@ -101,10 +59,9 @@ c           the most frequent IO error would be that the output directory does n
           end if
 
 c         halts execution if the application walltime has been reached
-          call system_clock(count = time_end)
-          time_elapsed = (time_end - time_start)
+          call clock % t_end()
 
-          if (time_elapsed >= WALLTIME) then
+          if ( clock % t_falarm() ) then
 c           TODO:
 c           [ ] dump the pending status to finish the auto-checkpointing implementation
             exit

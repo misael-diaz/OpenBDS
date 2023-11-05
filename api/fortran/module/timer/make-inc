@@ -1,8 +1,7 @@
-#!/usr/bin/make
 #
-# OpenBDS						October 22, 2023
+# OpenBDS						October 21, 2023
 #
-# source: api/fortran/bds/Makefile
+# source: api/fortran/module/timer/make-inc
 # author: @misael-diaz
 #
 # Synopsis:
@@ -14,15 +13,15 @@
 # (at your option) any later version.
 #
 
-include make-inc
+# modules
+CONFIG_MOD   = ../mods/config.mod
+MODULES = $(CONFIG_MOD)
 
-all: $(OBDS_BIN)
+# sources
+TIMER_F = timer.f
 
-$(OBDS_BIN): $(OBDS_O)
-	$(FC) $(FCOPT) $(OBJS) $(OBDS_O) -o $(OBDS_BIN)
+# objects
+TIMER_O = timer.o
 
-$(OBDS_O): $(MODULES) $(OBJS) $(OBDS_F)
-	$(FC) $(INC) $(IMODS) $(FCOPT) -c $(OBDS_F) -o $(OBDS_O)
-
-clean:
-	/bin/rm -f *.o *.mod *.bin
+# output directory the FORTRAN module files *.mod
+MODS = ../mods

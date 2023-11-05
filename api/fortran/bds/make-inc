@@ -32,6 +32,8 @@ OBDS_F = OpenBDS.f
 # objects
 CONFIG_O   = ../module/config/config.o
 
+TIMER_O   = ../module/timer/timer.o
+
 RANDOM_O   = ../module/random/random.o
 
 PARTICLE_O = ../module/particle/particle.o\
@@ -45,7 +47,14 @@ FORCE_O    = ../module/force/force.o
 
 DYNAMIC_O  = ../module/dynamic/dynamic.o
 
-OBJS = $(CONFIG_O) $(RANDOM_O) $(PARTICLE_O) $(SYSTEM_O) $(IO_O) $(FORCE_O) $(DYNAMIC_O)
+OBJS = $(CONFIG_O)\
+       $(TIMER_O)\
+       $(RANDOM_O)\
+       $(PARTICLE_O)\
+       $(SYSTEM_O)\
+       $(IO_O)\
+       $(FORCE_O)\
+       $(DYNAMIC_O)
 
 OBDS_O = OpenBDS.o
 
