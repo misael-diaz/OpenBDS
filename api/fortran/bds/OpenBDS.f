@@ -51,10 +51,6 @@ c           Brownian and particle-particle interaction forces acting on them
           status = spheres % flog(step + log_steps)
 
           if (STATUS == __FAILURE__) then
-c           TODO:
-c           generate a more useful error message for the user
-c           the most frequent IO error would be that the output directory does not exist
-            print *, 'OBDS: IO ERROR'
             exit
           end if
 
@@ -62,8 +58,6 @@ c         halts execution if the application walltime has been reached
           call clock % t_end()
 
           if ( clock % t_falarm() ) then
-c           TODO:
-c           [ ] dump the pending status to finish the auto-checkpointing implementation
             exit
           end if
 
