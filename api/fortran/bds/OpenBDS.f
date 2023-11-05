@@ -1,6 +1,80 @@
 #define __SUCCESS__  0_int64
 #define __FAILURE__ -1_int64
 
+      module OBDS
+        use, intrinsic :: iso_fortran_env, only: int64
+        use, intrinsic :: iso_fortran_env, only: real64
+        use :: config, only: NUM_STEPS
+        use :: config, only: NUM_LOG_STEPS
+        implicit none
+        private
+        public :: sane
+
+        interface sane
+          module procedure sane_checks
+        end interface
+
+      contains
+
+        pure function significand (x) result(res)
+c         Synopsis:
+c         Returns the significand (or the mantissa) of the double precision floating-point
+c         number `x' of kind `real64'.
+          real(kind = real64), intent(in) :: x
+          real(kind = real64) :: res
+
+          res = 2.0_real64 * fraction(x) - 1.0_real64
+
+          return
+        end function significand
+
+
+        pure function is_pow2 (x) result(res)
+c         Synopsis:
+c         Returns true if `x' is an exact power of two (has an exact binary floating-point
+c         representation), returns false otherwise.
+          real(kind = real64), intent(in) :: x
+          logical(kind = int64) :: res
+
+          if (significand(x) == 0.0_real64) then
+            res = .true.
+          else
+            res = .false.
+          end if
+
+          return
+        end function is_pow2
+
+
+        subroutine sane_checks ()
+c         Synopsis:
+c         Performs sane checks.
+c         Checks that the user has adhered to the design contraints on the number of
+c         steps. Note that `NUM_STEPS' must be a multiple of `NUM_LOG_STEPS', for the
+c         OBDS loop to execute the intended number of iterations, otherwise it loops
+c         indefinitely.
+          real(kind = real64), parameter :: NUM_STEPS_REAL64 =
+     +    real(NUM_STEPS, kind = real64)
+          real(kind = real64), parameter :: NUM_LOG_STEPS_REAL64 =
+     +    real(NUM_LOG_STEPS, kind = real64)
+          character(*), parameter :: errmsg1 = 'sane(): '//
+     +    'NUM_STEPS must be an exact power of two'
+          character(*), parameter :: errmsg2 = 'sane(): '//
+     +    'NUM_LOG_STEPS must be an exact power of two'
+
+          if ( .not. is_pow2(NUM_STEPS_REAL64) ) then
+            error stop errmsg1
+          end if
+
+          if ( .not. is_pow2(NUM_LOG_STEPS_REAL64) ) then
+            error stop errmsg2
+          end if
+
+          return
+        end subroutine sane_checks
+
+      end module OBDS
+
       program OpenBDS
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: real64
@@ -8,6 +82,7 @@
         use :: config, only: NUM_LOG_STEPS
         use :: timer,  only: timer_t
         use :: sphere, only: sphere_t
+        use :: OBDS, only: sane
         implicit none
 c       initializes pointer to collection of spheres
         type(sphere_t), pointer :: spheres => null()
@@ -22,6 +97,8 @@ c       step counters
         integer(kind = int64) :: istep
 c       IO status
         integer(kind = int64) :: status
+
+        call sane()
 
         clock = timer_t()
         call clock % t_start()
