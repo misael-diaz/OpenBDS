@@ -517,7 +517,7 @@ c         placeholder to store the step number in a string
           character(len = __FNAME_LENGTH__) :: tempname
           character(len = __FNAME_LENGTH__) :: filename
           character(len = *), parameter :: path =
-     +    'run/bds/data/positions/particles-'
+     +    'run/bds/data/particles/particles-'
 
 c         writes step number to a string of suitable size
 c         NOTE:
@@ -583,7 +583,7 @@ c         placeholder to store the step number in a string
           character(len = 64) :: step_str
           character(len = __FNAME_LENGTH__) :: filename
           character(len = *), parameter :: path =
-     +    'run/bds/data/positions/particles-'
+     +    'run/bds/data/particles/particles-'
 
 c         writes step number to a string of suitable size
 c         NOTE:
