@@ -62,7 +62,7 @@ c         indefinitely.
           character(*), parameter :: errmsg2 = 'sane(): '//
      +    'NUM_LOG_STEPS must be an exact power of two'
           character(*), parameter :: errmsg3 = 'sane(): '//
-     +    'NUM_LOG_STEPS must be less than NUM_STEPS'
+     +    'NUM_LOG_STEPS must be less than or equal to NUM_STEPS'
 
           if ( .not. is_pow2(NUM_STEPS_REAL64) ) then
             error stop errmsg1
