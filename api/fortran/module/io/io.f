@@ -7,7 +7,7 @@
         use, intrinsic :: iso_fortran_env, only: real64
         use, intrinsic :: iso_fortran_env, only: int64
         use, intrinsic :: iso_fortran_env, only: int32
-#if !defined(__GFORTRAN__)
+#if defined(__INTEL_COMPILER)
 c       uses Intel FORTRAN Portability `IFPORT' Module if we are not compiling with the
 c       GNU FORTRAN Compiler, this is needed because `rename()` is a GNU Extension
         use :: ifport, only: rename
