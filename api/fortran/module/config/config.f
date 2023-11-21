@@ -33,11 +33,12 @@
 *       The `unknown' status is not really dumped by the OBDS code, it *
 *       is dumped by the shell script that submits the code to the HPC *
 *       as a fail-safe mechanism to avert a job-scheduling hell, which *
-*       can happen if an unexpected error occurs (without fail-safe)   *
+*       can happen if an unexpected error occurs (without fail-safe).  *
 *       The `pending' status signals the shell script to submit the    *
 *       job to the HPC because the simulation has not ended yet. The   *
 *       `done' status is dumped by the OBDS code when the simulation   *
-*       finishes, that happens the step counter is equal to NUM_STEPS. *
+*       finishes, that happens when the step counter is equal to the   *
+*       total number of steps, NUM_STEPS.                              *
 **                                                                    **
 
 
@@ -103,9 +104,7 @@
 *       particles to be expressible exactly as a power of two. Change  *
 *       this design constraint only if you know what you are doing.    *
 *       If all that you want is to achieve a certain volume fraction   *
-*       that can be done more easily by adjusting the system LIMIT. We *
-*       use configs that can be expressed as powers of two because     *
-*       these have exact binary floating-point representations.        *
+*       that can be done more easily by adjusting the system LIMIT.    *
 **                                                                    **
 
 
