@@ -56,12 +56,25 @@ c           bindings:
             procedure, public :: initialize => initializer
 c           updates the particle positions and orientations
             procedure(iupdate), deferred, public :: update
+c           implements inteparticle interactions
+            procedure(icallback), deferred, public :: callback
         end type particle_t
 
         abstract interface
           subroutine iupdate (particles)
             import particle_t
+            implicit none
             class(particle_t), intent(inout) :: particles
+          end subroutine
+        end interface
+
+        abstract interface
+          pure subroutine icallback (particles, i)
+            use, intrinsic :: iso_fortran_env, only: int64
+            import particle_t
+            implicit none
+            class(particle_t), intent(inout) :: particles
+            integer(kind = int64), intent(in) :: i
           end subroutine
         end interface
 
@@ -178,7 +191,7 @@ c         size torque vector
           integer(kind = int64), parameter :: size_t_y = N
           integer(kind = int64), parameter :: size_t_z = N
 c         size temporary placeholder
-          integer(kind = int64), parameter :: size_tmp = N
+          integer(kind = int64), parameter :: size_tmp = 12_int64 * N
 c         size Verlet neighbor-list (NOTE: we shall allocate more later)
           integer(kind = int64), parameter :: size_Vnl = N
 c         size particle identifiers IDs

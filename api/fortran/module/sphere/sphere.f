@@ -6,6 +6,10 @@
         use, intrinsic :: iso_fortran_env, only: real64
         use :: config, only: LIMIT
         use :: config, only: LENGTH
+        use :: config, only: INTERACT_ENABLE
+        use :: config, only: RADIUS => SPH_RADIUS
+        use :: config, only: DIAMETER => SPH_DIAMETER
+        use :: config, only: CONTACT => SPH_CONTACT
         use :: config, only: NUM_SPHERES => NUM_PARTICLES
         use :: config, only: NUM_STEPS
         use :: config, only: PENDING
@@ -15,21 +19,14 @@
         use :: io, only: io__ffetch_state
         use :: io, only: io__fdump_state
         use :: io, only: io__fdump_status
+        use :: force, only: force__brute_force
         use :: force, only: force__Brownian_force
+        use :: force, only: force__callback_SLJ_handler
         use :: system, only: system__PBC
         use :: dynamic, only: dynamic__shifter
         use :: particle, only: particle_t
         implicit none
         private
-        save
-
-c       parameters:
-
-c       sphere radius, diameter, and contact-distance
-        real(kind = real64), parameter :: RADIUS = 1.0_real64
-        real(kind = real64), parameter :: DIAMETER = 2.0_real64 * RADIUS
-        real(kind = real64), parameter :: CONTACT = DIAMETER
-
 
         type, extends(particle_t), public :: sphere_t
           contains
@@ -38,6 +35,7 @@ c       sphere radius, diameter, and contact-distance
             procedure :: updater
             procedure, public :: flog => flogger
             procedure, public :: update => updater
+            procedure, public :: callback
             final :: destructor
         end type
 
@@ -373,11 +371,26 @@ c         computes Brownian forces
           call force__Brownian_force(particles)
 c         shifts particles Brownianly
           call dynamic__shifter(particles)
+          if (INTERACT_ENABLE) then
+            call force__brute_force(particles)
+            call dynamic__shifter(particles)
+          end if
 c         applies Periodic Boundary Conditions
           call system__PBC(particles)
 
           return
         end subroutine updater
+
+
+        pure subroutine callback (particles, i)
+c         enables Shifted Lennard-Jones SLJ particle-particle interactions
+          class(sphere_t), intent(inout) :: particles
+          integer(kind = int64), intent(in) :: i
+
+          call force__callback_SLJ_handler(particles, i)
+
+          return
+        end subroutine callback
 
 
         subroutine destructor (spheres)

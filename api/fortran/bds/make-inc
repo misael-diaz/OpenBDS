@@ -34,6 +34,8 @@ CONFIG_O   = ../module/config/config.o
 
 TIMER_O   = ../module/timer/timer.o
 
+VECTOR_O   = ../module/vector/vector.o
+
 RANDOM_O   = ../module/random/random.o
 
 PARTICLE_O = ../module/particle/particle.o\
@@ -49,6 +51,7 @@ DYNAMIC_O  = ../module/dynamic/dynamic.o
 
 OBJS = $(CONFIG_O)\
        $(TIMER_O)\
+       $(VECTOR_O)\
        $(RANDOM_O)\
        $(PARTICLE_O)\
        $(SYSTEM_O)\
