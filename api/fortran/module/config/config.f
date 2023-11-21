@@ -4,6 +4,7 @@
         implicit none
         private
         save
+        public :: CLAMP
         public :: LIMIT
         public :: LENGTH
         public :: TIME_STEP
@@ -12,6 +13,11 @@
         public :: NUM_LOG_STEPS
         public :: NUM_PARTICLES
         public :: LOG_NUM_PARTICLES
+        public :: SPH_RADIUS
+        public :: SPH_DIAMETER
+        public :: SPH_CONTACT
+        public :: SPH_INTERACT_RANGE
+        public :: INTERACT_ENABLE
         public :: PENDING
         public :: DONE
 
@@ -60,6 +66,9 @@
 *       after this number of steps the OBDS code logs data to a file   *
         integer(kind = int64), parameter :: NUM_LOG_STEPS =
      +  int(TIME_STEP_LOG / TIME_STEP, kind = int64)
+*       clamp value, no force component shall exceed this value
+        real(kind = real64), parameter :: CLAMP =
+     +  0.0625_real64 / TIME_STEP
 *       NOTE:
 *       The OBDS code logs the particle fields (or properties) to a    *
 *       plain text file after this (simulation) time interval has      *
@@ -101,12 +110,19 @@
 
 
 **                                                                    **
-*       enables computation of particle-particle interactions
-        logical(kind = int64), parameter :: INTERACT_ENABLE = .false.
+*       defines the sphere radius, diameter, and contact distance      *
+        real(kind = real64), parameter :: SPH_RADIUS = 1.0_real64
+        real(kind = real64), parameter :: SPH_DIAMETER =
+     +                                    2.0_real64 * SPH_RADIUS
+        real(kind = real64), parameter :: SPH_CONTACT = SPH_DIAMETER
+*       defines the interaction range for spheres                      *
+        real(kind = real64), parameter :: SPH_INTERACT_RANGE =
+     +                                    1.5_real64 * SPH_CONTACT
+*       enables computation of particle-particle interactions          *
+        logical(kind = int64), parameter :: INTERACT_ENABLE = .true.
 *       NOTE:
-*       Disabled temporarily since we have to yet implement this       *
-*       feature. Other reasons for disabling it are code profiling and *
-*       validating the statistics of the normally-distributed          *
+*       Reasons for disabling particle interactions are code profiling *
+*       and validating the statistics of the normally-distributed      *
 *       Pseudo Random Number Generator PRNG.                           *
 **                                                                    **
 
