@@ -1,5 +1,5 @@
       module random
-        use, intrinsic :: iso_fortran_env, only: real64
+        use, intrinsic :: iso_fortran_env, only: r8 => real64
         use :: ieee_arithmetic, only: ieee_positive_inf
         use :: ieee_arithmetic, only: ieee_value
         implicit none
@@ -16,7 +16,7 @@
 c         Synopsis:
 c         Returns a uniformly distributed pseudo-random number in [0, 1).
 c         Forwards its task to the intrinsic `random_number()'.
-          real(kind = real64) :: x
+          real(r8) :: x
 
           call random_number(x)
 
@@ -28,30 +28,30 @@ c         Forwards its task to the intrinsic `random_number()'.
 c         Synopsis:
 c         Implements Böx-Muller's method.
 c         Yields a Normal (or Gaussian) Pseudo-Random Deviate (or Number).
-          real(kind = real64) :: positive_infinity
-          real(kind = real64) :: x1
-          real(kind = real64) :: x2
-          real(kind = real64) :: r
-          real(kind = real64) :: x
+          real(r8) :: positive_infinity
+          real(r8) :: x1
+          real(r8) :: x2
+          real(r8) :: r
+          real(r8) :: x
 
-          positive_infinity = ieee_value(0.0_real64,
+          positive_infinity = ieee_value(0.0_r8,
      +                                   ieee_positive_inf)
           r = positive_infinity
 c         NOTE: compiled with gfortran's -Wno-compare-reals, consider that if `r'
 c         is equal to zero that means that furand()'s underlying PRNG is bogus.
-          do while (r == 0.0_real64 .or. r > 1.0_real64)
+          do while (r == 0.0_r8 .or. r > 1.0_r8)
 
             x1 = furand()
             x2 = furand()
 
-            x1 = 2.0_real64 * x1 - 1.0_real64
-            x2 = 2.0_real64 * x2 - 1.0_real64
+            x1 = 2.0_r8 * x1 - 1.0_r8
+            x2 = 2.0_r8 * x2 - 1.0_r8
 
             r = x1**2 + x2**2
 
           end do
 
-          r = sqrt( ( -2.0_real64 * log(r) ) / r )
+          r = sqrt( ( -2.0_r8 * log(r) ) / r )
 
           x1 = r * x1
           x2 = r * x2

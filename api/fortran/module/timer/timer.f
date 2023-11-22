@@ -1,14 +1,14 @@
       module timer
-        use, intrinsic :: iso_fortran_env, only: int64
+        use, intrinsic :: iso_fortran_env, only: i8 => int64
         use :: config, only: WALLTIME ! OBDS App WALLTIME [seconds]
         implicit none
         private
 
         type, public :: timer_t
           private
-          integer(kind = int64) :: resolution = 0_int64
-          integer(kind = int64) :: time_start = 0_int64
-          integer(kind = int64) :: time_end   = 0_int64
+          integer(i8) :: resolution = 0_i8
+          integer(i8) :: time_start = 0_i8
+          integer(i8) :: time_end   = 0_i8
           contains
             private
             procedure :: t_fgetetime => timer_fgetetime
@@ -27,7 +27,7 @@
       contains
 
         function ftime () result(t)
-          integer(kind = int64) :: t
+          integer(i8) :: t
 
           call system_clock(count = t)
 
@@ -36,7 +36,7 @@
 
         subroutine timer_start (this)
           class(timer_t), intent(inout) :: this
-          integer(kind = int64) :: time_start
+          integer(i8) :: time_start
 
           time_start = ftime()
           call this % t_start_setter(time_start)
@@ -47,7 +47,7 @@
 
         subroutine timer_end (this)
           class(timer_t), intent(inout) :: this
-          integer(kind = int64) :: time_end
+          integer(i8) :: time_end
 
           time_end = ftime()
           call this % t_end_setter(time_end)
@@ -58,7 +58,7 @@
 
         pure subroutine timer_start_setter (this, time_start)
           class(timer_t), intent(inout) :: this
-          integer(kind = int64), intent(in) :: time_start
+          integer(i8), intent(in) :: time_start
 
           this % time_start = time_start
 
@@ -68,7 +68,7 @@
 
         pure subroutine timer_end_setter (this, time_end)
           class(timer_t), intent(inout) :: this
-          integer(kind = int64), intent(in) :: time_end
+          integer(i8), intent(in) :: time_end
 
           this % time_end = time_end
 
@@ -78,10 +78,10 @@
 
         pure function timer_fgetetime (this) result(etime)
           class(timer_t), intent(in) :: this
-          integer(kind = int64) :: etime
-          integer(kind = int64) :: time_start
-          integer(kind = int64) :: time_end
-          integer(kind = int64) :: time_elapsed
+          integer(i8) :: etime
+          integer(i8) :: time_start
+          integer(i8) :: time_end
+          integer(i8) :: time_elapsed
 
           time_start = this % time_start
           time_end = this % time_end
@@ -96,10 +96,10 @@
 c         Synopsis:
 c         Sets the alarm if the walltime has been reached.
           class(timer_t), intent(in) :: this
-          logical(kind = int64) :: enabled
-          integer(kind = int64) :: resolution
-          integer(kind = int64) :: time_elapsed
-          integer(kind = int64) :: wtime
+          logical(i8) :: enabled
+          integer(i8) :: resolution
+          integer(i8) :: time_elapsed
+          integer(i8) :: wtime
 
           time_elapsed = this % t_fgetetime()
 
@@ -118,12 +118,12 @@ c         converts seconds to whatever time-unit (millis, us, ns) `system_clock(
 
         function constructor () result(timer)
           type(timer_t) :: timer
-          integer(kind = int64) :: system_clock__resolution
+          integer(i8) :: system_clock__resolution
 
           call system_clock(count_rate = system_clock__resolution)
           timer % resolution = system_clock__resolution
-          timer % time_start = 0_int64
-          timer % time_end   = 0_int64
+          timer % time_start = 0_i8
+          timer % time_end   = 0_i8
 
           return
         end function constructor

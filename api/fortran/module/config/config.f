@@ -1,6 +1,6 @@
       module config
-        use, intrinsic :: iso_fortran_env, only: int64
-        use, intrinsic :: iso_fortran_env, only: real64
+        use, intrinsic :: iso_fortran_env, only: i8 => int64
+        use, intrinsic :: iso_fortran_env, only: r8 => real64
         implicit none
         private
         save
@@ -44,10 +44,10 @@
 
 **                                                                    **
 *       system box limits and length                                   *
-        real(kind = real64), parameter :: LIMIT  = 8.0_real64
-        real(kind = real64), parameter :: LENGTH = (2.0_real64 * LIMIT)
-        real(kind = real64), parameter :: WIDTH  = LENGTH
-        real(kind = real64), parameter :: HEIGHT = LENGTH
+        real(r8), parameter :: LIMIT  = 8.0_r8
+        real(r8), parameter :: LENGTH = (2.0_r8 * LIMIT)
+        real(r8), parameter :: WIDTH  = LENGTH
+        real(r8), parameter :: HEIGHT = LENGTH
 *       NOTE:                                                          *
 *       The particle coordinates are bound to [-LIMIT, +LIMIT].        *
 **                                                                    **
@@ -55,21 +55,20 @@
 
 **                                                                    **
 *       OBDS time-step, start-time, and end-time of the simulation     *
-        real(kind = real64), parameter :: TIME_STEP = 2.0_real64**(-16)
-        real(kind = real64), parameter :: TIME_START = 0.0_real64
-        real(kind = real64), parameter :: TIME_END = 2.0_real64**4
+        real(r8), parameter :: TIME_STEP = 2.0_r8**(-16)
+        real(r8), parameter :: TIME_START = 0.0_r8
+        real(r8), parameter :: TIME_END = 2.0_r8**4
 *       OBDS logging time-step                                         *
-        real(kind = real64), parameter :: TS_LOG = 2.0_real64**(-4)
-        real(kind = real64), parameter :: TIME_STEP_LOG = TS_LOG
+        real(r8), parameter :: TS_LOG = 2.0_r8**(-4)
+        real(r8), parameter :: TIME_STEP_LOG = TS_LOG
 *       number of (simulation) steps                                   *
-        integer(kind = int64), parameter :: NUM_STEPS =
-     +  int( (TIME_END - TIME_START) / TIME_STEP, kind = int64 )
+        integer(i8), parameter :: NUM_STEPS =
+     +  int( (TIME_END - TIME_START) / TIME_STEP, i8 )
 *       after this number of steps the OBDS code logs data to a file   *
-        integer(kind = int64), parameter :: NUM_LOG_STEPS =
-     +  int(TIME_STEP_LOG / TIME_STEP, kind = int64)
+        integer(i8), parameter :: NUM_LOG_STEPS =
+     +  int(TIME_STEP_LOG / TIME_STEP, i8)
 *       clamp value, no force component shall exceed this value
-        real(kind = real64), parameter :: CLAMP =
-     +  0.0625_real64 / TIME_STEP
+        real(r8), parameter :: CLAMP = 0.0625_r8 / TIME_STEP
 *       NOTE:
 *       The OBDS code logs the particle fields (or properties) to a    *
 *       plain text file after this (simulation) time interval has      *
@@ -82,22 +81,21 @@
 **                                                                    **
 *       defines the walltime (alloted runtime for the application in   *
 *       the High Performance Computing facility HPCf in seconds)       *
-        integer(kind = int64), parameter :: WALLTIME_HRS = 164_int64
-        integer(kind = int64), parameter :: WALLTIME_SEC = 3600_int64 *
-     +                                      WALLTIME_HRS
-        integer(kind = int64), parameter :: WALLTIME_MILLIS =
-     +                                      1000_int64 * WALLTIME_SEC
-        integer(kind = int64), parameter :: WALLTIME = WALLTIME_SEC
+        integer(i8), parameter :: WALLTIME_HRS = 164_i8
+        integer(i8), parameter :: WALLTIME_SEC = 3600_i8 * WALLTIME_HRS
+        integer(i8), parameter :: WTS = WALLTIME_SEC
+        integer(i8), parameter :: WALLTIME_MILLIS = 1000_i8 * WTS
+        integer(i8), parameter :: WALLTIME = WALLTIME_SEC
 *                                                                      *
 **                                                                    **
 
 
 **                                                                    **
 *       stores log base two of N, log2(N), where `N' is #particles     *
-        integer(kind = int64), parameter :: LOG_NUM_PARTICLES = 8_int64
+        integer(i8), parameter :: LOG_NUM_PARTICLES = 8_i8
+        integer(i8), parameter :: LNP = LOG_NUM_PARTICLES
 *       defines the number of particles in the system
-        integer(kind = int64), parameter :: NUM_PARTICLES =
-     +  2_int64 ** LOG_NUM_PARTICLES
+        integer(i8), parameter :: NUM_PARTICLES = 2_i8 ** LNP
 *       NOTE:
 *       The number of particles is a power of two by design. Some of   *
 *       the algorithms that will be implemented expect the number of   *
@@ -110,15 +108,13 @@
 
 **                                                                    **
 *       defines the sphere radius, diameter, and contact distance      *
-        real(kind = real64), parameter :: SPH_RADIUS = 1.0_real64
-        real(kind = real64), parameter :: SPH_DIAMETER =
-     +                                    2.0_real64 * SPH_RADIUS
-        real(kind = real64), parameter :: SPH_CONTACT = SPH_DIAMETER
+        real(r8), parameter :: SPH_RADIUS = 1.0_r8
+        real(r8), parameter :: SPH_DIAMETER = 2.0_r8 * SPH_RADIUS
+        real(r8), parameter :: SPH_CONTACT = SPH_DIAMETER
 *       defines the interaction range for spheres                      *
-        real(kind = real64), parameter :: SPH_INTERACT_RANGE =
-     +                                    1.5_real64 * SPH_CONTACT
+        real(r8), parameter :: SPH_INTERACT_RANGE = 1.5_r8 * SPH_CONTACT
 *       enables computation of particle-particle interactions          *
-        logical(kind = int64), parameter :: INTERACT_ENABLE = .true.
+        logical(i8), parameter :: INTERACT_ENABLE = .true.
 *       NOTE:
 *       Reasons for disabling particle interactions are code profiling *
 *       and validating the statistics of the normally-distributed      *

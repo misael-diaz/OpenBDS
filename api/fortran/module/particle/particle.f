@@ -1,9 +1,9 @@
-#define __PASS__  0_int64
-#define __FAIL__ -1_int64
+#define __PASS__  0_i8
+#define __FAIL__ -1_i8
 
       module particle
-        use, intrinsic :: iso_fortran_env, only: int64
-        use, intrinsic :: iso_fortran_env, only: real64
+        use, intrinsic :: iso_fortran_env, only: i8 => int64
+        use, intrinsic :: iso_fortran_env, only: r8 => real64
         use :: config, only: LOG_NUM_PARTICLES
         use :: config, only: NUM_PARTICLES
         use :: config, only: TIME_STEP
@@ -13,41 +13,41 @@
 
         type, abstract, public :: particle_t
 c         position vector components (subjected to periodic conditions)
-          real(kind = real64), pointer, contiguous :: x(:) => null()
-          real(kind = real64), pointer, contiguous :: y(:) => null()
-          real(kind = real64), pointer, contiguous :: z(:) => null()
+          real(r8), pointer, contiguous :: x(:) => null()
+          real(r8), pointer, contiguous :: y(:) => null()
+          real(r8), pointer, contiguous :: z(:) => null()
 c         Verlet displacement vector components
-          real(kind = real64), pointer, contiguous :: Vdx(:) => null()
-          real(kind = real64), pointer, contiguous :: Vdy(:) => null()
-          real(kind = real64), pointer, contiguous :: Vdz(:) => null()
+          real(r8), pointer, contiguous :: Vdx(:) => null()
+          real(r8), pointer, contiguous :: Vdy(:) => null()
+          real(r8), pointer, contiguous :: Vdz(:) => null()
 c         position vector components (periodic conditions independent)
-          real(kind = real64), pointer, contiguous :: r_x(:) => null()
-          real(kind = real64), pointer, contiguous :: r_y(:) => null()
-          real(kind = real64), pointer, contiguous :: r_z(:) => null()
+          real(r8), pointer, contiguous :: r_x(:) => null()
+          real(r8), pointer, contiguous :: r_y(:) => null()
+          real(r8), pointer, contiguous :: r_z(:) => null()
 c         Euler angle vector components
-          real(kind = real64), pointer, contiguous :: Eax(:) => null()
-          real(kind = real64), pointer, contiguous :: Eay(:) => null()
-          real(kind = real64), pointer, contiguous :: Eaz(:) => null()
+          real(r8), pointer, contiguous :: Eax(:) => null()
+          real(r8), pointer, contiguous :: Eay(:) => null()
+          real(r8), pointer, contiguous :: Eaz(:) => null()
 c         orientation (or director) vector components
-          real(kind = real64), pointer, contiguous :: d_x(:) => null()
-          real(kind = real64), pointer, contiguous :: d_y(:) => null()
-          real(kind = real64), pointer, contiguous :: d_z(:) => null()
+          real(r8), pointer, contiguous :: d_x(:) => null()
+          real(r8), pointer, contiguous :: d_y(:) => null()
+          real(r8), pointer, contiguous :: d_z(:) => null()
 c         force vector components
-          real(kind = real64), pointer, contiguous :: f_x(:) => null()
-          real(kind = real64), pointer, contiguous :: f_y(:) => null()
-          real(kind = real64), pointer, contiguous :: f_z(:) => null()
+          real(r8), pointer, contiguous :: f_x(:) => null()
+          real(r8), pointer, contiguous :: f_y(:) => null()
+          real(r8), pointer, contiguous :: f_z(:) => null()
 c         torque vector components
-          real(kind = real64), pointer, contiguous :: t_x(:) => null()
-          real(kind = real64), pointer, contiguous :: t_y(:) => null()
-          real(kind = real64), pointer, contiguous :: t_z(:) => null()
+          real(r8), pointer, contiguous :: t_x(:) => null()
+          real(r8), pointer, contiguous :: t_y(:) => null()
+          real(r8), pointer, contiguous :: t_z(:) => null()
 c         temporary placeholder
-          real(kind = real64), pointer, contiguous :: tmp(:) => null()
+          real(r8), pointer, contiguous :: tmp(:) => null()
 c         Verlet neighbor-list
-          real(kind = real64), pointer, contiguous :: Vnl(:) => null()
+          real(r8), pointer, contiguous :: Vnl(:) => null()
 c         particle identifiers IDs
-          real(kind = real64), pointer, contiguous :: id(:) => null()
+          real(r8), pointer, contiguous :: id(:) => null()
 c         data placeholder
-          real(kind = real64), pointer, contiguous :: data(:) => null()
+          real(r8), pointer, contiguous :: data(:) => null()
           contains
             private
 c           memory allocations and initializations
@@ -70,19 +70,19 @@ c           implements inteparticle interactions
 
         abstract interface
           pure subroutine icallback (particles, i)
-            use, intrinsic :: iso_fortran_env, only: int64
+            use, intrinsic :: iso_fortran_env, only: i8 => int64
             import particle_t
             implicit none
             class(particle_t), intent(inout) :: particles
-            integer(kind = int64), intent(in) :: i
+            integer(i8), intent(in) :: i
           end subroutine
         end interface
 
       contains
 
         pure function test (t) result(outcome)
-          logical(kind = int64), intent(in) :: t
-          integer(kind = int64) :: outcome
+          logical(i8), intent(in) :: t
+          integer(i8) :: outcome
 
           if (t) then
             outcome = __PASS__
@@ -97,17 +97,17 @@ c           implements inteparticle interactions
         subroutine sane ()
 c         Synopsis:
 c         Complains if the module parameters in `config` are illegal.
-          integer(kind = int64), parameter :: N = NUM_PARTICLES
-          integer(kind = int64), parameter :: LOG_N = LOG_NUM_PARTICLES
-          integer(kind = int64), parameter :: E = LOG_N ! Exponent
-          real(kind = real64), parameter :: L = LIMIT
-          real(kind = real64), parameter :: T = TIME_STEP
+          integer(i8), parameter :: N = NUM_PARTICLES
+          integer(i8), parameter :: LOG_N = LOG_NUM_PARTICLES
+          integer(i8), parameter :: E = LOG_N ! Exponent
+          real(r8), parameter :: L = LIMIT
+          real(r8), parameter :: T = TIME_STEP
 c         tests that the number of particles is an exact power of two
-          logical(kind = int64), parameter :: t1 = (N == 2_int64 ** E)
+          logical(i8), parameter :: t1 = (N == 2_i8 ** E)
 c         tests that the system limit is positive
-          logical(kind = int64), parameter :: t2 = (L > 0.0_real64)
+          logical(i8), parameter :: t2 = (L > 0.0_r8)
 c         tests that the time-step is positive
-          logical(kind = int64), parameter :: t3 = (T > 0.0_real64)
+          logical(i8), parameter :: t3 = (T > 0.0_r8)
 c         defines the error messages
           character(*), parameter :: e1 = "particle::sane(): " //
      +    "IllegalParameterError: the number of particles is not a " //
@@ -137,12 +137,12 @@ c         defines the error messages
 c         Synopsis:
 c         implements a std::iota C++ like method
 c         fills array `x' with values in symmetric range [1, numel]
-          integer(kind = int64), parameter :: numel = NUM_PARTICLES
-          real(kind = real64), intent(out) :: x(numel)
-          integer(kind = int64) :: i
+          integer(i8), parameter :: numel = NUM_PARTICLES
+          real(r8), intent(out) :: x(numel)
+          integer(i8) :: i
 
           do i = 1, numel
-            x(i) = real(i, kind = real64)
+            x(i) = real(i, kind = r8)
           end do
 
           return
@@ -160,44 +160,44 @@ c         NOTES:
 c         The constructor of the extending classes must invoke this subroutine, as you
 c         would do in C++ or Java.
           class(particle_t), intent(inout) :: particles
-          real(kind = real64), pointer, contiguous :: id(:) => null()
-          integer(kind = int64), parameter :: N = NUM_PARTICLES
+          real(r8), pointer, contiguous :: id(:) => null()
+          integer(i8), parameter :: N = NUM_PARTICLES
 c         size position vector
-          integer(kind = int64), parameter :: size_x = N
-          integer(kind = int64), parameter :: size_y = N
-          integer(kind = int64), parameter :: size_z = N
+          integer(i8), parameter :: size_x = N
+          integer(i8), parameter :: size_y = N
+          integer(i8), parameter :: size_z = N
 c         size Verlet displacement vector
-          integer(kind = int64), parameter :: size_Vdx = N
-          integer(kind = int64), parameter :: size_Vdy = N
-          integer(kind = int64), parameter :: size_Vdz = N
+          integer(i8), parameter :: size_Vdx = N
+          integer(i8), parameter :: size_Vdy = N
+          integer(i8), parameter :: size_Vdz = N
 c         size absolute position vector
-          integer(kind = int64), parameter :: size_r_x = N
-          integer(kind = int64), parameter :: size_r_y = N
-          integer(kind = int64), parameter :: size_r_z = N
+          integer(i8), parameter :: size_r_x = N
+          integer(i8), parameter :: size_r_y = N
+          integer(i8), parameter :: size_r_z = N
 c         size Euler angle vector
-          integer(kind = int64), parameter :: size_Eax = N
-          integer(kind = int64), parameter :: size_Eay = N
-          integer(kind = int64), parameter :: size_Eaz = N
+          integer(i8), parameter :: size_Eax = N
+          integer(i8), parameter :: size_Eay = N
+          integer(i8), parameter :: size_Eaz = N
 c         size director (or orientation) vector
-          integer(kind = int64), parameter :: size_d_x = N
-          integer(kind = int64), parameter :: size_d_y = N
-          integer(kind = int64), parameter :: size_d_z = N
+          integer(i8), parameter :: size_d_x = N
+          integer(i8), parameter :: size_d_y = N
+          integer(i8), parameter :: size_d_z = N
 c         size force vector
-          integer(kind = int64), parameter :: size_f_x = N
-          integer(kind = int64), parameter :: size_f_y = N
-          integer(kind = int64), parameter :: size_f_z = N
+          integer(i8), parameter :: size_f_x = N
+          integer(i8), parameter :: size_f_y = N
+          integer(i8), parameter :: size_f_z = N
 c         size torque vector
-          integer(kind = int64), parameter :: size_t_x = N
-          integer(kind = int64), parameter :: size_t_y = N
-          integer(kind = int64), parameter :: size_t_z = N
+          integer(i8), parameter :: size_t_x = N
+          integer(i8), parameter :: size_t_y = N
+          integer(i8), parameter :: size_t_z = N
 c         size temporary placeholder
-          integer(kind = int64), parameter :: size_tmp = 12_int64 * N
+          integer(i8), parameter :: size_tmp = 12_i8 * N
 c         size Verlet neighbor-list (NOTE: we shall allocate more later)
-          integer(kind = int64), parameter :: size_Vnl = N
+          integer(i8), parameter :: size_Vnl = N
 c         size particle identifiers IDs
-          integer(kind = int64), parameter :: size_id = N
+          integer(i8), parameter :: size_id = N
 c         sizes position vector
-          integer(kind = int64), parameter :: size_data = size_x +
+          integer(i8), parameter :: size_data = size_x +
      +                                                    size_y +
      +                                                    size_z +
 c         sizes Verlet displacement vector
@@ -231,24 +231,24 @@ c         sizes Verlet neighbor-list
 c         sizes particle identifiers IDs
      +                                                    size_id
 c         memory allocation status
-          integer(kind = int64) :: mstat
+          integer(i8) :: mstat
 c         size
-          integer(kind = int64) :: sz
+          integer(i8) :: sz
 
 c         complains if module `config' has illegal values
           call sane()
 
 c         allocates memory for the particle data
           allocate(particles % data(size_data), stat = mstat)
-          if (mstat /= 0_int64) then
+          if (mstat /= 0_i8) then
             error stop "particle::initializer(): allocation error"
           end if
 
 c         initializes the particle data with zeros
-          particles % data = 0.0_real64
+          particles % data = 0.0_r8
 
 c         position vector binding
-          sz = 0_int64
+          sz = 0_i8
           particles % x => particles % data(sz + 1:sz + size_x)
 
           sz = sz + size_x

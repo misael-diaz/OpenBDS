@@ -1,5 +1,5 @@
       module system
-        use, intrinsic :: iso_fortran_env, only: real64
+        use, intrinsic :: iso_fortran_env, only: r8 => real64
         use :: config, only: N => NUM_PARTICLES
         use :: config, only: L => LENGTH
         use :: particle, only: particle_t
@@ -16,7 +16,7 @@
         pure subroutine update_position_vector_component (x)
 c         Synopsis:
 c         Updates the position vector component by applying periodic boundary conditions.
-          real(kind = real64), intent(inout) :: x(N)
+          real(r8), intent(inout) :: x(N)
 
           x = x - anint(x / L) * L
 
@@ -27,9 +27,9 @@ c         Updates the position vector component by applying periodic boundary co
         pure subroutine update_position_vector (x, y, z)
 c         Synopsis:
 c         Updates the position vectors by applying periodic boundary conditions.
-          real(kind = real64), intent(inout) :: x(N)
-          real(kind = real64), intent(inout) :: y(N)
-          real(kind = real64), intent(inout) :: z(N)
+          real(r8), intent(inout) :: x(N)
+          real(r8), intent(inout) :: y(N)
+          real(r8), intent(inout) :: z(N)
 
           call update_position_vector_component(x)
           call update_position_vector_component(y)
@@ -44,9 +44,9 @@ c         Synopsis:
 c         Updates the position vectors of the particles by applying periodic boundary
 c         conditions.
           class(particle_t), intent(inout), target :: particles
-          real(kind = real64), pointer, contiguous :: x(:)
-          real(kind = real64), pointer, contiguous :: y(:)
-          real(kind = real64), pointer, contiguous :: z(:)
+          real(r8), pointer, contiguous :: x(:)
+          real(r8), pointer, contiguous :: y(:)
+          real(r8), pointer, contiguous :: z(:)
 
           x => particles % x
           y => particles % y

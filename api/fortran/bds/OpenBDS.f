@@ -1,9 +1,9 @@
-#define __SUCCESS__  0_int64
-#define __FAILURE__ -1_int64
+#define __SUCCESS__  0_i8
+#define __FAILURE__ -1_i8
 
       module OBDS
-        use, intrinsic :: iso_fortran_env, only: int64
-        use, intrinsic :: iso_fortran_env, only: real64
+        use, intrinsic :: iso_fortran_env, only: i8 => int64
+        use, intrinsic :: iso_fortran_env, only: r8 => real64
         use :: config, only: NUM_STEPS
         use :: config, only: NUM_LOG_STEPS
         implicit none
@@ -19,11 +19,11 @@
         pure function significand (x) result(res)
 c         Synopsis:
 c         Returns the significand (or the mantissa) of the double precision floating-point
-c         number `x' of kind `real64'.
-          real(kind = real64), intent(in) :: x
-          real(kind = real64) :: res
+c         number `x' of kind `r8'.
+          real(r8), intent(in) :: x
+          real(r8) :: res
 
-          res = 2.0_real64 * fraction(x) - 1.0_real64
+          res = 2.0_r8 * fraction(x) - 1.0_r8
 
           return
         end function significand
@@ -33,10 +33,10 @@ c         number `x' of kind `real64'.
 c         Synopsis:
 c         Returns true if `x' is an exact power of two (has an exact binary floating-point
 c         representation), returns false otherwise.
-          real(kind = real64), intent(in) :: x
-          logical(kind = int64) :: res
+          real(r8), intent(in) :: x
+          logical(i8) :: res
 
-          if (significand(x) == 0.0_real64) then
+          if (significand(x) == 0.0_r8) then
             res = .true.
           else
             res = .false.
@@ -53,10 +53,9 @@ c         Checks that the user has adhered to the design contraints on the numbe
 c         steps. Note that `NUM_STEPS' must be a multiple of `NUM_LOG_STEPS', for the
 c         OBDS loop to execute the intended number of iterations, otherwise it loops
 c         indefinitely.
-          real(kind = real64), parameter :: NUM_STEPS_REAL64 =
-     +    real(NUM_STEPS, kind = real64)
-          real(kind = real64), parameter :: NUM_LOG_STEPS_REAL64 =
-     +    real(NUM_LOG_STEPS, kind = real64)
+          real(r8), parameter :: NUM_STEPS_R8 = real(NUM_STEPS, kind=r8)
+          real(r8), parameter :: NUM_LOG_STEPS_R8 = real(NUM_LOG_STEPS,
+     +    kind = r8)
           character(*), parameter :: errmsg1 = 'sane(): '//
      +    'NUM_STEPS must be an exact power of two'
           character(*), parameter :: errmsg2 = 'sane(): '//
@@ -64,11 +63,11 @@ c         indefinitely.
           character(*), parameter :: errmsg3 = 'sane(): '//
      +    'NUM_LOG_STEPS must be less than or equal to NUM_STEPS'
 
-          if ( .not. is_pow2(NUM_STEPS_REAL64) ) then
+          if ( .not. is_pow2(NUM_STEPS_R8) ) then
             error stop errmsg1
           end if
 
-          if ( .not. is_pow2(NUM_LOG_STEPS_REAL64) ) then
+          if ( .not. is_pow2(NUM_LOG_STEPS_R8) ) then
             error stop errmsg2
           end if
 
@@ -82,8 +81,8 @@ c         indefinitely.
       end module OBDS
 
       program OpenBDS
-        use, intrinsic :: iso_fortran_env, only: int64
-        use, intrinsic :: iso_fortran_env, only: real64
+        use, intrinsic :: iso_fortran_env, only: i8 => int64
+        use, intrinsic :: iso_fortran_env, only: r8 => real64
         use :: config, only: NUM_STEPS
         use :: config, only: NUM_LOG_STEPS
         use :: timer,  only: timer_t
@@ -93,16 +92,16 @@ c         indefinitely.
 c       initializes pointer to collection of spheres
         type(sphere_t), pointer :: spheres => null()
         type(timer_t) :: clock
-        real(kind = real64), pointer, contiguous :: tmp(:) => null()
+        real(r8), pointer, contiguous :: tmp(:) => null()
 c       sets the number of simulation time-steps
-        integer(kind = int64), parameter :: steps = NUM_STEPS
+        integer(i8), parameter :: steps = NUM_STEPS
 c       after this many steps the OBDS code logs the particle data to a plain text file
-        integer(kind = int64), parameter :: log_steps = NUM_LOG_STEPS
+        integer(i8), parameter :: log_steps = NUM_LOG_STEPS
 c       step counters
-        integer(kind = int64) :: step
-        integer(kind = int64) :: istep
+        integer(i8) :: step
+        integer(i8) :: istep
 c       IO status
-        integer(kind = int64) :: status
+        integer(i8) :: status
 
         call sane()
 
@@ -113,7 +112,7 @@ c       IO status
 
 c       fetches the initial step number (NOTE: `sphere_t()' handles this)
         tmp => spheres % tmp
-        istep = int(tmp(1), kind = int64)
+        istep = int(tmp(1), kind = i8)
 
         step = istep
 c       executes the OBDS loop
@@ -121,14 +120,14 @@ c       loop-invariant:
 c       so far we have executed `step' OBDS simulation steps
         do while (step /= steps)
 
-          istep = 0_int64
+          istep = 0_i8
 c         loop-invariant:
 c         so far we have executed `istep' simulation steps consecutively without logging
           do while (istep /= log_steps)
 c           updates the position and orientation of the particles according to the
 c           Brownian and particle-particle interaction forces acting on them
             call spheres % update()
-            istep = istep + 1_int64
+            istep = istep + 1_i8
           end do
 
           status = spheres % flog(step + log_steps)

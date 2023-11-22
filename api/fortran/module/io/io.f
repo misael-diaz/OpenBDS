@@ -1,12 +1,11 @@
-#define __SUCCESS__  0_int64
-#define __FAILURE__ -1_int64
+#define __SUCCESS__  0_i8
+#define __FAILURE__ -1_i8
 #define __FNAME_LENGTH__ 256
 
       module io
         use, intrinsic :: iso_fortran_env, only: r8 => real64
-        use, intrinsic :: iso_fortran_env, only: real64
-        use, intrinsic :: iso_fortran_env, only: int64
-        use, intrinsic :: iso_fortran_env, only: int32
+        use, intrinsic :: iso_fortran_env, only: i8 => int64
+        use, intrinsic :: iso_fortran_env, only: i4 => int32
 #if defined(__INTEL_COMPILER)
 c       uses Intel FORTRAN Portability `IFPORT' Module if we are not compiling with the
 c       GNU FORTRAN Compiler, this is needed because `rename()` is a GNU Extension
@@ -58,31 +57,31 @@ c         Synopsis:
 c         Binds pointers to their respective particle fields.
           class(particle_t), intent(in), target :: particles
 c         position vector components subject to periodic conditions
-          real(kind = r8), pointer, contiguous, intent(inout) :: x(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: y(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: z(:)
+          real(r8), pointer, contiguous, intent(inout) :: x(:)
+          real(r8), pointer, contiguous, intent(inout) :: y(:)
+          real(r8), pointer, contiguous, intent(inout) :: z(:)
 c         position vector components independent of periodic conditions
-          real(kind = r8), pointer, contiguous, intent(inout) :: r_x(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: r_y(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: r_z(:)
+          real(r8), pointer, contiguous, intent(inout) :: r_x(:)
+          real(r8), pointer, contiguous, intent(inout) :: r_y(:)
+          real(r8), pointer, contiguous, intent(inout) :: r_z(:)
 c         Euler angle vector components
-          real(kind = r8), pointer, contiguous, intent(inout) :: Eax(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: Eay(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: Eaz(:)
+          real(r8), pointer, contiguous, intent(inout) :: Eax(:)
+          real(r8), pointer, contiguous, intent(inout) :: Eay(:)
+          real(r8), pointer, contiguous, intent(inout) :: Eaz(:)
 c         director (or orientation vector) components
-          real(kind = r8), pointer, contiguous, intent(inout) :: d_x(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: d_y(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: d_z(:)
+          real(r8), pointer, contiguous, intent(inout) :: d_x(:)
+          real(r8), pointer, contiguous, intent(inout) :: d_y(:)
+          real(r8), pointer, contiguous, intent(inout) :: d_z(:)
 c         force vector components
-          real(kind = r8), pointer, contiguous, intent(inout) :: F_x(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: F_y(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: F_z(:)
+          real(r8), pointer, contiguous, intent(inout) :: F_x(:)
+          real(r8), pointer, contiguous, intent(inout) :: F_y(:)
+          real(r8), pointer, contiguous, intent(inout) :: F_z(:)
 c         torque vector components
-          real(kind = r8), pointer, contiguous, intent(inout) :: T_x(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: T_y(:)
-          real(kind = r8), pointer, contiguous, intent(inout) :: T_z(:)
+          real(r8), pointer, contiguous, intent(inout) :: T_x(:)
+          real(r8), pointer, contiguous, intent(inout) :: T_y(:)
+          real(r8), pointer, contiguous, intent(inout) :: T_z(:)
 c         identifiers IDs
-          real(kind = r8), pointer, contiguous, intent(inout) :: id(:)
+          real(r8), pointer, contiguous, intent(inout) :: id(:)
 
           x => particles % x
           y => particles % y
@@ -117,8 +116,8 @@ c         identifiers IDs
         function fstatus (IOSTAT) result(STATUS)
 c         Synopsis:
 c         Sets `STATUS' based on the value stored in `IOSTAT'.
-          integer(kind = int64), intent(in) :: IOSTAT
-          integer(kind = int64) :: STATUS
+          integer(i8), intent(in) :: IOSTAT
+          integer(i8) :: STATUS
 
           if (IOSTAT == __SUCCESS__) then
             STATUS = __SUCCESS__
@@ -137,10 +136,10 @@ c         On success (failure) the file descriptor `fd' is set (unknown).
 c         Returns the status of this operation to the caller.
           character(len=__FNAME_LENGTH__), intent(in) :: filename
 c         file descriptor
-          integer(kind = int64), intent(out) :: fd
+          integer(i8), intent(out) :: fd
 c         IO status
-          integer(kind = int64) :: status
-          integer(kind = int64) :: iostat
+          integer(i8) :: status
+          integer(i8) :: iostat
 
           open(newunit = fd,
      +         file = trim(filename),
@@ -163,10 +162,10 @@ c         On success (failure) the file descriptor `fd' is set (unknown).
 c         Returns the status of this operation to the caller.
           character(len=__FNAME_LENGTH__), intent(in) :: filename
 c         file descriptor
-          integer(kind = int64), intent(out) :: fd
+          integer(i8), intent(out) :: fd
 c         IO status
-          integer(kind = int64) :: status
-          integer(kind = int64) :: iostat
+          integer(i8) :: status
+          integer(i8) :: iostat
 
           open(newunit = fd,
      +         file = trim(filename),
@@ -189,10 +188,10 @@ c         On success (failure) the file descriptor `fd' is set (unknown).
 c         Returns the status of this operation to the caller.
           character(len=__FNAME_LENGTH__), intent(in) :: filename
 c         file descriptor
-          integer(kind = int64), intent(out) :: fd
+          integer(i8), intent(out) :: fd
 c         IO status
-          integer(kind = int64) :: status
-          integer(kind = int64) :: iostat
+          integer(i8) :: status
+          integer(i8) :: iostat
 
           open(newunit = fd,
      +         file = trim(filename),
@@ -218,9 +217,9 @@ c         On success (failure) the file descriptor `fd' is set (unknown).
 c         Returns the status of this operation to the caller.
           character(len=__FNAME_LENGTH__), intent(in) :: filename
 c         file descriptor
-          integer(kind = int64), intent(out) :: fd
+          integer(i8), intent(out) :: fd
 c         IO status
-          integer(kind = int64) :: status
+          integer(i8) :: status
           character(len=1), intent(in), optional :: action
 
           if ( present(action) ) then
@@ -247,10 +246,10 @@ c         IO status
 c         Synopsis:
 c         Closes the file associated with the file descriptor `fd'.
 c         Returns the status of this operation to the caller.
-          integer(kind = int64), intent(in) :: fd
+          integer(i8), intent(in) :: fd
 c         IO status
-          integer(kind = int64) :: status
-          integer(kind = int64) :: iostat
+          integer(i8) :: status
+          integer(i8) :: iostat
 
           close(unit = fd, iostat = iostat)
 
@@ -272,38 +271,38 @@ c         Synopsis:
 c         Logs the particle fields (or properties).
 c         Returns the status of this operation to the caller.
 c         position vector components subject to periodic conditions
-          real(kind = real64), intent(in) :: x(N)
-          real(kind = real64), intent(in) :: y(N)
-          real(kind = real64), intent(in) :: z(N)
+          real(r8), intent(in) :: x(N)
+          real(r8), intent(in) :: y(N)
+          real(r8), intent(in) :: z(N)
 c         position vector components independent of periodic conditions
-          real(kind = real64), intent(in) :: r_x(N)
-          real(kind = real64), intent(in) :: r_y(N)
-          real(kind = real64), intent(in) :: r_z(N)
+          real(r8), intent(in) :: r_x(N)
+          real(r8), intent(in) :: r_y(N)
+          real(r8), intent(in) :: r_z(N)
 c         Euler angle vector components
-          real(kind = real64), intent(in) :: Eax(N)
-          real(kind = real64), intent(in) :: Eay(N)
-          real(kind = real64), intent(in) :: Eaz(N)
+          real(r8), intent(in) :: Eax(N)
+          real(r8), intent(in) :: Eay(N)
+          real(r8), intent(in) :: Eaz(N)
 c         director (or orientation vector) components
-          real(kind = real64), intent(in) :: d_x(N)
-          real(kind = real64), intent(in) :: d_y(N)
-          real(kind = real64), intent(in) :: d_z(N)
+          real(r8), intent(in) :: d_x(N)
+          real(r8), intent(in) :: d_y(N)
+          real(r8), intent(in) :: d_z(N)
 c         force vector components
-          real(kind = real64), intent(in) :: F_x(N)
-          real(kind = real64), intent(in) :: F_y(N)
-          real(kind = real64), intent(in) :: F_z(N)
+          real(r8), intent(in) :: F_x(N)
+          real(r8), intent(in) :: F_y(N)
+          real(r8), intent(in) :: F_z(N)
 c         torque vector components
-          real(kind = real64), intent(in) :: T_x(N)
-          real(kind = real64), intent(in) :: T_y(N)
-          real(kind = real64), intent(in) :: T_z(N)
+          real(r8), intent(in) :: T_x(N)
+          real(r8), intent(in) :: T_y(N)
+          real(r8), intent(in) :: T_z(N)
 c         identifiers IDs
-          real(kind = real64), intent(in) :: id(N)
+          real(r8), intent(in) :: id(N)
 c         file descriptor
-          integer(kind = int64), intent(in) :: fd
+          integer(i8), intent(in) :: fd
 c         IO status
-          integer(kind = int64) :: status
-          integer(kind = int64) :: iostat
+          integer(i8) :: status
+          integer(i8) :: iostat
 c         loop index
-          integer(kind = int64) :: i
+          integer(i8) :: i
 c         format `fmt' specifier, NEw.d
           character(*), parameter :: fmt = '(SP,19E32.16)'
 c         NOTE:
@@ -313,7 +312,7 @@ c         E: exponential (or scientific) format
 c         w: width, 25 positions
 c         d: digits after the decimal place, 16 digits
 
-          do i = 1_int64, N
+          do i = 1_i8, N
             write(unit = fd, fmt = fmt, iostat = iostat)
      +        x(i), y(i), z(i),      ! position vector
      +        r_x(i), r_y(i), r_z(i),! `absolute' position vector
@@ -343,38 +342,38 @@ c         Loads the particle fields (or properties) from the data file whose fil
 c         descriptor is `fd'.
 c         Returns the status of this operation to the caller.
 c         position vector components subject to periodic conditions
-          real(kind = real64), intent(out) :: x(N)
-          real(kind = real64), intent(out) :: y(N)
-          real(kind = real64), intent(out) :: z(N)
+          real(r8), intent(out) :: x(N)
+          real(r8), intent(out) :: y(N)
+          real(r8), intent(out) :: z(N)
 c         position vector components independent of periodic conditions
-          real(kind = real64), intent(out) :: r_x(N)
-          real(kind = real64), intent(out) :: r_y(N)
-          real(kind = real64), intent(out) :: r_z(N)
+          real(r8), intent(out) :: r_x(N)
+          real(r8), intent(out) :: r_y(N)
+          real(r8), intent(out) :: r_z(N)
 c         Euler angle vector components
-          real(kind = real64), intent(out) :: Eax(N)
-          real(kind = real64), intent(out) :: Eay(N)
-          real(kind = real64), intent(out) :: Eaz(N)
+          real(r8), intent(out) :: Eax(N)
+          real(r8), intent(out) :: Eay(N)
+          real(r8), intent(out) :: Eaz(N)
 c         director (or orientation vector) components
-          real(kind = real64), intent(out) :: d_x(N)
-          real(kind = real64), intent(out) :: d_y(N)
-          real(kind = real64), intent(out) :: d_z(N)
+          real(r8), intent(out) :: d_x(N)
+          real(r8), intent(out) :: d_y(N)
+          real(r8), intent(out) :: d_z(N)
 c         force vector components
-          real(kind = real64), intent(out) :: F_x(N)
-          real(kind = real64), intent(out) :: F_y(N)
-          real(kind = real64), intent(out) :: F_z(N)
+          real(r8), intent(out) :: F_x(N)
+          real(r8), intent(out) :: F_y(N)
+          real(r8), intent(out) :: F_z(N)
 c         torque vector components
-          real(kind = real64), intent(out) :: T_x(N)
-          real(kind = real64), intent(out) :: T_y(N)
-          real(kind = real64), intent(out) :: T_z(N)
+          real(r8), intent(out) :: T_x(N)
+          real(r8), intent(out) :: T_y(N)
+          real(r8), intent(out) :: T_z(N)
 c         identifiers IDs
-          real(kind = real64), intent(out) :: id(N)
+          real(r8), intent(out) :: id(N)
 c         file descriptor
-          integer(kind = int64), intent(in) :: fd
+          integer(i8), intent(in) :: fd
 c         IO status
-          integer(kind = int64) :: status
-          integer(kind = int64) :: iostat
+          integer(i8) :: status
+          integer(i8) :: iostat
 c         loop index
-          integer(kind = int64) :: i
+          integer(i8) :: i
 c         format `fmt' specifier, NEw.d
           character(*), parameter :: fmt = '(SP,19E32.16)'
 c         NOTE:
@@ -384,7 +383,7 @@ c         E: exponential (or scientific) format
 c         w: width, 25 positions
 c         d: digits after the decimal place, 16 digits
 
-          do i = 1_int64, N
+          do i = 1_i8, N
             read(unit = fd, fmt = fmt, iostat = iostat)
      +        x(i), y(i), z(i),      ! position vector
      +        r_x(i), r_y(i), r_z(i),! `absolute' position vector
@@ -408,35 +407,35 @@ c         file descriptor `fd'.
 c         Returns the status of this operation to the caller.
           class(particle_t), intent(in), target :: particles
 c         file descriptor
-          integer(kind = int64), intent(in) :: fd
+          integer(i8), intent(in) :: fd
 c         IO status
-          integer(kind = int64) :: status
+          integer(i8) :: status
 c         position vector components subject to periodic conditions
-          real(kind = real64), pointer, contiguous :: x(:) => null()
-          real(kind = real64), pointer, contiguous :: y(:) => null()
-          real(kind = real64), pointer, contiguous :: z(:) => null()
+          real(r8), pointer, contiguous :: x(:) => null()
+          real(r8), pointer, contiguous :: y(:) => null()
+          real(r8), pointer, contiguous :: z(:) => null()
 c         position vector components independent of periodic conditions
-          real(kind = real64), pointer, contiguous :: r_x(:) => null()
-          real(kind = real64), pointer, contiguous :: r_y(:) => null()
-          real(kind = real64), pointer, contiguous :: r_z(:) => null()
+          real(r8), pointer, contiguous :: r_x(:) => null()
+          real(r8), pointer, contiguous :: r_y(:) => null()
+          real(r8), pointer, contiguous :: r_z(:) => null()
 c         Euler angle vector components
-          real(kind = real64), pointer, contiguous :: Eax(:) => null()
-          real(kind = real64), pointer, contiguous :: Eay(:) => null()
-          real(kind = real64), pointer, contiguous :: Eaz(:) => null()
+          real(r8), pointer, contiguous :: Eax(:) => null()
+          real(r8), pointer, contiguous :: Eay(:) => null()
+          real(r8), pointer, contiguous :: Eaz(:) => null()
 c         director (or orientation vector) components
-          real(kind = real64), pointer, contiguous :: d_x(:) => null()
-          real(kind = real64), pointer, contiguous :: d_y(:) => null()
-          real(kind = real64), pointer, contiguous :: d_z(:) => null()
+          real(r8), pointer, contiguous :: d_x(:) => null()
+          real(r8), pointer, contiguous :: d_y(:) => null()
+          real(r8), pointer, contiguous :: d_z(:) => null()
 c         force vector components
-          real(kind = real64), pointer, contiguous :: F_x(:) => null()
-          real(kind = real64), pointer, contiguous :: F_y(:) => null()
-          real(kind = real64), pointer, contiguous :: F_z(:) => null()
+          real(r8), pointer, contiguous :: F_x(:) => null()
+          real(r8), pointer, contiguous :: F_y(:) => null()
+          real(r8), pointer, contiguous :: F_z(:) => null()
 c         torque vector components
-          real(kind = real64), pointer, contiguous :: T_x(:) => null()
-          real(kind = real64), pointer, contiguous :: T_y(:) => null()
-          real(kind = real64), pointer, contiguous :: T_z(:) => null()
+          real(r8), pointer, contiguous :: T_x(:) => null()
+          real(r8), pointer, contiguous :: T_y(:) => null()
+          real(r8), pointer, contiguous :: T_z(:) => null()
 c         identifiers IDs
-          real(kind = real64), pointer, contiguous :: id(:) => null()
+          real(r8), pointer, contiguous :: id(:) => null()
 
           call bind(x, y, z,
      +              r_x, r_y, r_z,
@@ -465,35 +464,35 @@ c         the file descriptor `fd'.
 c         Returns the status of this operation to the caller.
           class(particle_t), intent(inout), target :: particles
 c         file descriptor
-          integer(kind = int64), intent(in) :: fd
+          integer(i8), intent(in) :: fd
 c         IO status
-          integer(kind = int64) :: status
+          integer(i8) :: status
 c         position vector components subject to periodic conditions
-          real(kind = real64), pointer, contiguous :: x(:) => null()
-          real(kind = real64), pointer, contiguous :: y(:) => null()
-          real(kind = real64), pointer, contiguous :: z(:) => null()
+          real(r8), pointer, contiguous :: x(:) => null()
+          real(r8), pointer, contiguous :: y(:) => null()
+          real(r8), pointer, contiguous :: z(:) => null()
 c         position vector components independent of periodic conditions
-          real(kind = real64), pointer, contiguous :: r_x(:) => null()
-          real(kind = real64), pointer, contiguous :: r_y(:) => null()
-          real(kind = real64), pointer, contiguous :: r_z(:) => null()
+          real(r8), pointer, contiguous :: r_x(:) => null()
+          real(r8), pointer, contiguous :: r_y(:) => null()
+          real(r8), pointer, contiguous :: r_z(:) => null()
 c         Euler angle vector components
-          real(kind = real64), pointer, contiguous :: Eax(:) => null()
-          real(kind = real64), pointer, contiguous :: Eay(:) => null()
-          real(kind = real64), pointer, contiguous :: Eaz(:) => null()
+          real(r8), pointer, contiguous :: Eax(:) => null()
+          real(r8), pointer, contiguous :: Eay(:) => null()
+          real(r8), pointer, contiguous :: Eaz(:) => null()
 c         director (or orientation vector) components
-          real(kind = real64), pointer, contiguous :: d_x(:) => null()
-          real(kind = real64), pointer, contiguous :: d_y(:) => null()
-          real(kind = real64), pointer, contiguous :: d_z(:) => null()
+          real(r8), pointer, contiguous :: d_x(:) => null()
+          real(r8), pointer, contiguous :: d_y(:) => null()
+          real(r8), pointer, contiguous :: d_z(:) => null()
 c         force vector components
-          real(kind = real64), pointer, contiguous :: F_x(:) => null()
-          real(kind = real64), pointer, contiguous :: F_y(:) => null()
-          real(kind = real64), pointer, contiguous :: F_z(:) => null()
+          real(r8), pointer, contiguous :: F_x(:) => null()
+          real(r8), pointer, contiguous :: F_y(:) => null()
+          real(r8), pointer, contiguous :: F_z(:) => null()
 c         torque vector components
-          real(kind = real64), pointer, contiguous :: T_x(:) => null()
-          real(kind = real64), pointer, contiguous :: T_y(:) => null()
-          real(kind = real64), pointer, contiguous :: T_z(:) => null()
+          real(r8), pointer, contiguous :: T_x(:) => null()
+          real(r8), pointer, contiguous :: T_y(:) => null()
+          real(r8), pointer, contiguous :: T_z(:) => null()
 c         identifiers IDs
-          real(kind = real64), pointer, contiguous :: id(:) => null()
+          real(r8), pointer, contiguous :: id(:) => null()
 
           call bind(x, y, z,
      +              r_x, r_y, r_z,
@@ -521,12 +520,12 @@ c         Logs the current particle fields (or properties).
 c         Returns the status of this operation to the caller.
           class(particle_t), intent(in) :: particles
 c         OBDS simulation step number (or identifier)
-          integer(kind = int64), intent(in) :: step
+          integer(i8), intent(in) :: step
 c         file descriptor
-          integer(kind = int64) :: fd
+          integer(i8) :: fd
 c         IO status
-          integer(kind = int64) :: status
-          integer(kind = int64) :: iostat
+          integer(i8) :: status
+          integer(i8) :: iostat
 c         placeholder to store the step number in a string
           character(len = 64) :: step_str
 c         temporary filename
@@ -574,7 +573,7 @@ c         NOTE:
 c         This is so that we know for sure during post-processing that the data was
 c         written successfully (we won't need to worry about data corruption due to
 c         IO errors).
-          iostat = int(rename(tempname, filename), kind = int64)
+          iostat = int(rename(tempname, filename), kind = i8)
           status = fstatus(iostat)
           if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(filename)
@@ -592,11 +591,11 @@ c         step number is `step'.
 c         Returns the status of this operation to the caller.
           class(particle_t), intent(inout) :: particles
 c         OBDS simulation step number (or identifier)
-          integer(kind = int64), intent(in) :: step
+          integer(i8), intent(in) :: step
 c         file descriptor
-          integer(kind = int64) :: fd
+          integer(i8) :: fd
 c         IO status
-          integer(kind = int64) :: status
+          integer(i8) :: status
 c         placeholder to store the step number in a string
           character(len = 64) :: step_str
 c         name of data file containing the particle fields (or properties)
@@ -644,12 +643,12 @@ c         Synopsis:
 c         Dumps the last known system state to the state file, where the `state' is
 c         the last known simulation step number.
 c         Returns the status of this operation to the caller.
-          integer(kind = int64), intent(in) :: istate
+          integer(i8), intent(in) :: istate
 c         file descriptor
-          integer(kind = int64) :: fd
+          integer(i8) :: fd
 c         IO status
-          integer(kind = int64) :: status
-          integer(kind = int64) :: iostat
+          integer(i8) :: status
+          integer(i8) :: iostat
 c         name of the state file
           character(len = __FNAME_LENGTH__), parameter :: fname =
      +    'run/bds/state/state.txt'
@@ -697,12 +696,12 @@ c         we are successful in dumping a status. This is done by
 c         renaming the status file from its temporary name to its
 c         designated name. It is better to err on the safe side than
 c         to cause a job-scheduling hell.
-          integer(kind = int32), intent(in) :: stat
+          integer(i4), intent(in) :: stat
 c         file descriptor
-          integer(kind = int64) :: fd
+          integer(i8) :: fd
 c         IO status
-          integer(kind = int64) :: status
-          integer(kind = int64) :: iostat
+          integer(i8) :: status
+          integer(i8) :: iostat
 c         temporary status file
           character(len = __FNAME_LENGTH__), parameter :: tname =
      +    'run/bds/status/status.tmp'
@@ -745,7 +744,7 @@ c         closes the file temporary
           end if
 
 c         commits the status
-          iostat = int(rename(tname, fname), kind = int64)
+          iostat = int(rename(tname, fname), kind = i8)
           status = fstatus(iostat)
           if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
@@ -761,14 +760,14 @@ c         Synopsis:
 c         Fetches the last known state from the state file.
 c         Returns the status of this operation to the caller.
 c         state (or step number) stored in a double precision floating-point number
-          real(kind = real64), intent(out) :: state
+          real(r8), intent(out) :: state
 c         file descriptor
-          integer(kind = int64) :: fd
+          integer(i8) :: fd
 c         IO status
-          integer(kind = int64) :: status
-          integer(kind = int64) :: iostat
+          integer(i8) :: status
+          integer(i8) :: iostat
 c         state (or step number)
-          integer(kind = int64) :: istate
+          integer(i8) :: istate
 c         name of the state file
           character(len = __FNAME_LENGTH__), parameter :: fname =
      +    'run/bds/state/state.txt'
@@ -786,7 +785,7 @@ c         in the state file in the next codeblocks
           if (STATUS == __FAILURE__) then
             print *, 'IO ERROR with file: ', trim(fname)
             print *, 'initializing state with its default value'
-            state = 0.0_real64 ! zeros intent(out) argument (default)
+            state = 0.0_r8 ! zeros intent(out) argument (default)
             return
           end if
 
@@ -798,7 +797,7 @@ c         queries the IO status
           if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED READ ERROR with file: ', trim(fname)
             print *, 'initializing state with its default value'
-            state = 0.0_real64 ! zeros intent(out) argument (default)
+            state = 0.0_r8 ! zeros intent(out) argument (default)
             close(fd)
             return
           end if
@@ -807,7 +806,7 @@ c         sets the state with the fecthed value
 c         NOTE:
 c         applies an upper bound on the `state' (step number) to guard
 c         against invalid inputs (even if unlikely)
-          state = real( min(istate, NUM_STEPS), kind = real64 )
+          state = real( min(istate, NUM_STEPS), kind = r8 )
 
 c         closes the file
           status = fclose(fd)
@@ -825,9 +824,9 @@ c         Synopsis:
 c         Dumps the OBDS state (holds the simulation step number) to the state file.
 c         Returns the status of this operation to the caller.
 c         system state (stands for the simulation step number)
-          integer(kind = int64), intent(in) :: istate
+          integer(i8), intent(in) :: istate
 c         IO status
-          integer(kind = int64) :: status
+          integer(i8) :: status
 
           status = fdump_state(istate)
 
@@ -841,11 +840,11 @@ c         Fetches the OBDS state (holds the simulation step number) from the sta
 c         Returns the status of this operation to the caller.
           class(particle_t), intent(inout), target :: particles
 c         temporary placeholder array
-          real(kind = real64), pointer, contiguous :: tmp(:) => null()
+          real(r8), pointer, contiguous :: tmp(:) => null()
 c         IO status
-          integer(kind = int64) :: status
+          integer(i8) :: status
 c         system state (stands for the simulation step number)
-          real(kind = real64) :: state
+          real(r8) :: state
 
           status = ffetch_state(state)
 
@@ -866,9 +865,9 @@ c         Synopsis:
 c         Dumps the OBDS status to the status file to implement auto-scheduling.
 c         Returns the status of this operation to the caller.
 c         status of the simulation either (DONE, PENDING, or UNKNOWN)
-          integer(kind = int32), intent(in) :: stat
+          integer(i4), intent(in) :: stat
 c         IO status
-          integer(kind = int64) :: status
+          integer(i8) :: status
 
           status = fdump_status(stat)
 
