@@ -12,6 +12,9 @@
 *backup*
 *pycache*
 *TODO*
+# roaming
+*plotMSD.py
+*genpovs2.py
 # old
 old/TODO.txt
 old/Vector.for-flipped
