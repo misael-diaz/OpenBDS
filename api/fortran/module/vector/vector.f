@@ -1,5 +1,5 @@
       module vector
-        use, intrinsic :: iso_fortran_env, only: real64
+        use, intrinsic :: iso_fortran_env, only: r8 => real64
         use :: config, only: N => NUM_PARTICLES
         implicit none
         private
@@ -29,12 +29,12 @@
         pure subroutine vec (x, y, z, v_x, v_y, v_z)
 c         Synopsis:
 c         Vectorizer.
-          real(kind = real64), intent(in) :: x
-          real(kind = real64), intent(in) :: y
-          real(kind = real64), intent(in) :: z
-          real(kind = real64), intent(out) :: v_x(N)
-          real(kind = real64), intent(out) :: v_y(N)
-          real(kind = real64), intent(out) :: v_z(N)
+          real(r8), intent(in) :: x
+          real(r8), intent(in) :: y
+          real(r8), intent(in) :: z
+          real(r8), intent(out) :: v_x(N)
+          real(r8), intent(out) :: v_y(N)
+          real(r8), intent(out) :: v_z(N)
 
           v_x = x
           v_y = y
@@ -47,9 +47,9 @@ c         Vectorizer.
         elemental subroutine add_elem (x1, x2, x3)
 c         Synopsis:
 c         Implements vector addition.
-          real(kind = real64), intent(in) :: x1
-          real(kind = real64), intent(in) :: x2
-          real(kind = real64), intent(out) :: x3
+          real(r8), intent(in) :: x1
+          real(r8), intent(in) :: x2
+          real(r8), intent(out) :: x3
           
           x3 = (x1 + x2)
 
@@ -60,9 +60,9 @@ c         Implements vector addition.
         elemental subroutine diff_elem (x1, x2, x3)
 c         Synopsis:
 c         Implements vector difference.
-          real(kind = real64), intent(in) :: x1
-          real(kind = real64), intent(in) :: x2
-          real(kind = real64), intent(out) :: x3
+          real(r8), intent(in) :: x1
+          real(r8), intent(in) :: x2
+          real(r8), intent(out) :: x3
 
           x3 = (x2 - x1)
 
@@ -74,11 +74,11 @@ c         Implements vector difference.
 c         Synopsis:
 c         Implements vector norm.
 c         vector components
-          real(kind = real64), intent(in) :: x
-          real(kind = real64), intent(in) :: y
-          real(kind = real64), intent(in) :: z
+          real(r8), intent(in) :: x
+          real(r8), intent(in) :: y
+          real(r8), intent(in) :: z
 c         squared vector norm
-          real(kind = real64), intent(out) :: vn
+          real(r8), intent(out) :: vn
 
           vn = x**2 + y**2 + z**2
 
@@ -100,17 +100,17 @@ c         squared vector norm
 c         Synopsis:
 c         Implements vector addition.
 c         components of vector v1
-          real(kind = real64), intent(in) :: u_x(N)
-          real(kind = real64), intent(in) :: u_y(N)
-          real(kind = real64), intent(in) :: u_z(N)
+          real(r8), intent(in) :: u_x(N)
+          real(r8), intent(in) :: u_y(N)
+          real(r8), intent(in) :: u_z(N)
 c         components of vector v2
-          real(kind = real64), intent(in) :: v_x(N)
-          real(kind = real64), intent(in) :: v_y(N)
-          real(kind = real64), intent(in) :: v_z(N)
+          real(r8), intent(in) :: v_x(N)
+          real(r8), intent(in) :: v_y(N)
+          real(r8), intent(in) :: v_z(N)
 c         components of vector v3
-          real(kind = real64), intent(out) :: w_x(N)
-          real(kind = real64), intent(out) :: w_y(N)
-          real(kind = real64), intent(out) :: w_z(N)
+          real(r8), intent(out) :: w_x(N)
+          real(r8), intent(out) :: w_y(N)
+          real(r8), intent(out) :: w_z(N)
 
           call add_elem(u_x, v_x, w_x)
           call add_elem(u_y, v_y, w_y)
@@ -135,17 +135,17 @@ c         Synopsis:
 c         Synopsis:
 c         Implements vector difference.
 c         components of vector v1
-          real(kind = real64), intent(in) :: u_x(N)
-          real(kind = real64), intent(in) :: u_y(N)
-          real(kind = real64), intent(in) :: u_z(N)
+          real(r8), intent(in) :: u_x(N)
+          real(r8), intent(in) :: u_y(N)
+          real(r8), intent(in) :: u_z(N)
 c         components of vector v2
-          real(kind = real64), intent(in) :: v_x(N)
-          real(kind = real64), intent(in) :: v_y(N)
-          real(kind = real64), intent(in) :: v_z(N)
+          real(r8), intent(in) :: v_x(N)
+          real(r8), intent(in) :: v_y(N)
+          real(r8), intent(in) :: v_z(N)
 c         components of vector v3
-          real(kind = real64), intent(out) :: w_x(N)
-          real(kind = real64), intent(out) :: w_y(N)
-          real(kind = real64), intent(out) :: w_z(N)
+          real(r8), intent(out) :: w_x(N)
+          real(r8), intent(out) :: w_y(N)
+          real(r8), intent(out) :: w_z(N)
 
           call diff_elem(u_x, v_x, w_x)
           call diff_elem(u_y, v_y, w_y)
@@ -159,13 +159,13 @@ c         components of vector v3
 c         Synopsis:
 c         Implements vector norm.
 c         vector components
-          real(kind = real64), intent(in) :: x(N)
-          real(kind = real64), intent(in) :: y(N)
-          real(kind = real64), intent(in) :: z(N)
+          real(r8), intent(in) :: x(N)
+          real(r8), intent(in) :: y(N)
+          real(r8), intent(in) :: z(N)
 c         array temporary storing the squares (that is, x**2 + y**2 + z**2)
-          real(kind = real64), intent(out) :: squares(N)
+          real(r8), intent(out) :: squares(N)
 c         vector norm
-          real(kind = real64), intent(out) :: vnorm(N)
+          real(r8), intent(out) :: vnorm(N)
 
           call norm_elem(x, y, z, squares)
 

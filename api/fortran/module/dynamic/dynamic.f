@@ -1,5 +1,5 @@
       module dynamic
-        use, intrinsic :: iso_fortran_env, only: real64
+        use, intrinsic :: iso_fortran_env, only: r8 => real64
         use :: config, only: dt => TIME_STEP
         use :: config, only: N => NUM_PARTICLES
         use :: particle, only: particle_t
@@ -18,9 +18,9 @@ c         Synopsis:
 c         Shifts the particles in the direction of the Brownian force.
 c         NOTE:
 c         This only applies to spheres. The isotropic hydrodynamic resistance is implied.
-          real(kind = real64), intent(in) :: mobility
-          real(kind = real64), intent(out) :: x(N)
-          real(kind = real64), intent(in) :: F_x(N)
+          real(r8), intent(in) :: mobility
+          real(r8), intent(out) :: x(N)
+          real(r8), intent(in) :: F_x(N)
 
           x = x + mobility * F_x
 
@@ -35,14 +35,14 @@ c         NOTE:
 c         This code only applies to spheres. We shall overload this method later
 c         with a callback, as in the clang API, to handle anisotropic particles.
           class(particle_t), intent(inout), target :: particles
-          real(kind = real64), pointer, contiguous :: x(:) => null()
-          real(kind = real64), pointer, contiguous :: y(:) => null()
-          real(kind = real64), pointer, contiguous :: z(:) => null()
-          real(kind = real64), pointer, contiguous :: F_x(:) => null()
-          real(kind = real64), pointer, contiguous :: F_y(:) => null()
-          real(kind = real64), pointer, contiguous :: F_z(:) => null()
-          real(kind = real64), parameter :: m = sqrt(2.0_real64 * dt)
-          real(kind = real64), parameter :: mobility = m
+          real(r8), pointer, contiguous :: x(:) => null()
+          real(r8), pointer, contiguous :: y(:) => null()
+          real(r8), pointer, contiguous :: z(:) => null()
+          real(r8), pointer, contiguous :: F_x(:) => null()
+          real(r8), pointer, contiguous :: F_y(:) => null()
+          real(r8), pointer, contiguous :: F_z(:) => null()
+          real(r8), parameter :: m = sqrt(2.0_r8 * dt)
+          real(r8), parameter :: mobility = m
 
           F_x => particles % F_x
           F_y => particles % F_y
