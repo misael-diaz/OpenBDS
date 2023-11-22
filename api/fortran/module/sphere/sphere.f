@@ -23,6 +23,7 @@
         use :: force, only: force__Brownian_force
         use :: force, only: force__callback_SLJ_handler
         use :: system, only: system__PBC
+        use :: dynamic, only: dynamic__translator
         use :: dynamic, only: dynamic__shifter
         use :: particle, only: particle_t
         implicit none
@@ -363,17 +364,17 @@ c           falls back to placing the spheres in a grid (or lattice) like struct
 
         subroutine updater (particles)
 c         Synopsis:
-c         Implements non-interacting Brownian spheres.
+c         Implements Brownian spheres.
           class(sphere_t), intent(inout) :: particles
 
+          if (INTERACT_ENABLE) then
+            call force__brute_force(particles)
+            call dynamic__translator(particles)
+          end if
 c         computes Brownian forces
           call force__Brownian_force(particles)
 c         shifts particles Brownianly
           call dynamic__shifter(particles)
-          if (INTERACT_ENABLE) then
-            call force__brute_force(particles)
-            call dynamic__shifter(particles)
-          end if
 c         applies Periodic Boundary Conditions
           call system__PBC(particles)
 
