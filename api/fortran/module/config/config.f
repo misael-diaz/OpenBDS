@@ -68,8 +68,7 @@
         integer(i8), parameter :: NUM_LOG_STEPS =
      +  int(TIME_STEP_LOG / TIME_STEP, i8)
 *       clamp value, no force component shall exceed this value
-        real(r8), parameter :: CLAMP =
-     +  0.0625_r8 / TIME_STEP
+        real(r8), parameter :: CLAMP = 0.0625_r8 / TIME_STEP
 *       NOTE:
 *       The OBDS code logs the particle fields (or properties) to a    *
 *       plain text file after this (simulation) time interval has      *
@@ -83,10 +82,9 @@
 *       defines the walltime (alloted runtime for the application in   *
 *       the High Performance Computing facility HPCf in seconds)       *
         integer(i8), parameter :: WALLTIME_HRS = 164_i8
-        integer(i8), parameter :: WALLTIME_SEC = 3600_i8 *
-     +                                      WALLTIME_HRS
-        integer(i8), parameter :: WALLTIME_MILLIS =
-     +                                      1000_i8 * WALLTIME_SEC
+        integer(i8), parameter :: WALLTIME_SEC = 3600_i8 * WALLTIME_HRS
+        integer(i8), parameter :: WTS = WALLTIME_SEC
+        integer(i8), parameter :: WALLTIME_MILLIS = 1000_i8 * WTS
         integer(i8), parameter :: WALLTIME = WALLTIME_SEC
 *                                                                      *
 **                                                                    **
@@ -95,9 +93,9 @@
 **                                                                    **
 *       stores log base two of N, log2(N), where `N' is #particles     *
         integer(i8), parameter :: LOG_NUM_PARTICLES = 8_i8
+        integer(i8), parameter :: LNP = LOG_NUM_PARTICLES
 *       defines the number of particles in the system
-        integer(i8), parameter :: NUM_PARTICLES =
-     +  2_i8 ** LOG_NUM_PARTICLES
+        integer(i8), parameter :: NUM_PARTICLES = 2_i8 ** LNP
 *       NOTE:
 *       The number of particles is a power of two by design. Some of   *
 *       the algorithms that will be implemented expect the number of   *
@@ -111,12 +109,10 @@
 **                                                                    **
 *       defines the sphere radius, diameter, and contact distance      *
         real(r8), parameter :: SPH_RADIUS = 1.0_r8
-        real(r8), parameter :: SPH_DIAMETER =
-     +                                    2.0_r8 * SPH_RADIUS
+        real(r8), parameter :: SPH_DIAMETER = 2.0_r8 * SPH_RADIUS
         real(r8), parameter :: SPH_CONTACT = SPH_DIAMETER
 *       defines the interaction range for spheres                      *
-        real(r8), parameter :: SPH_INTERACT_RANGE =
-     +                                    1.5_r8 * SPH_CONTACT
+        real(r8), parameter :: SPH_INTERACT_RANGE = 1.5_r8 * SPH_CONTACT
 *       enables computation of particle-particle interactions          *
         logical(i8), parameter :: INTERACT_ENABLE = .true.
 *       NOTE:
