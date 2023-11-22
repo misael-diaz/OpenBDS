@@ -6,14 +6,19 @@
         implicit none
         private
         public :: dynamic__shifter
+        public :: dynamic__translator
 
         interface dynamic__shifter
           module procedure shift
         end interface
 
+        interface dynamic__translator
+          module procedure translate
+        end interface
+
       contains
 
-        subroutine shifter (mobility, x, F_x)
+        pure subroutine shifter (mobility, x, F_x)
 c         Synopsis:
 c         Shifts the particles in the direction of the Brownian force.
 c         NOTE:
@@ -28,19 +33,19 @@ c         This only applies to spheres. The isotropic hydrodynamic resistance is
         end subroutine shifter
 
 
-        subroutine shift (particles)
+        pure subroutine shift (particles)
 c         Synopsis:
 c         Shifts the particles position by the action of the Brownian forces.
 c         NOTE:
 c         This code only applies to spheres. We shall overload this method later
 c         with a callback, as in the clang API, to handle anisotropic particles.
           class(particle_t), intent(inout), target :: particles
-          real(r8), pointer, contiguous :: x(:) => null()
-          real(r8), pointer, contiguous :: y(:) => null()
-          real(r8), pointer, contiguous :: z(:) => null()
-          real(r8), pointer, contiguous :: F_x(:) => null()
-          real(r8), pointer, contiguous :: F_y(:) => null()
-          real(r8), pointer, contiguous :: F_z(:) => null()
+          real(r8), pointer, contiguous :: x(:)
+          real(r8), pointer, contiguous :: y(:)
+          real(r8), pointer, contiguous :: z(:)
+          real(r8), pointer, contiguous :: F_x(:)
+          real(r8), pointer, contiguous :: F_y(:)
+          real(r8), pointer, contiguous :: F_z(:)
           real(r8), parameter :: m = sqrt(2.0_r8 * dt)
           real(r8), parameter :: mobility = m
 
@@ -77,6 +82,53 @@ c         updates the Verlet displacement vector:
 
           return
         end subroutine shift
+
+
+        pure subroutine translate (particles)
+c         Synopsis:
+c         Shifts the particles position by the action of deterministic forces.
+          class(particle_t), intent(inout), target :: particles
+          real(r8), pointer, contiguous :: x(:)
+          real(r8), pointer, contiguous :: y(:)
+          real(r8), pointer, contiguous :: z(:)
+          real(r8), pointer, contiguous :: F_x(:)
+          real(r8), pointer, contiguous :: F_y(:)
+          real(r8), pointer, contiguous :: F_z(:)
+          real(r8), parameter :: mobility = dt
+
+          F_x => particles % F_x
+          F_y => particles % F_y
+          F_z => particles % F_z
+
+c         updates the position vector subjected to periodic boundaries:
+          x => particles % x
+          y => particles % y
+          z => particles % z
+
+          call shifter(mobility, x, F_x)
+          call shifter(mobility, y, F_y)
+          call shifter(mobility, z, F_z)
+
+c         updates the position vector independent of periodic boundaries:
+          x => particles % r_x
+          y => particles % r_y
+          z => particles % r_z
+
+          call shifter(mobility, x, F_x)
+          call shifter(mobility, y, F_y)
+          call shifter(mobility, z, F_z)
+
+c         updates the Verlet displacement vector:
+          x => particles % Vdx
+          y => particles % Vdy
+          z => particles % Vdz
+
+          call shifter(mobility, x, F_x)
+          call shifter(mobility, y, F_y)
+          call shifter(mobility, z, F_z)
+
+          return
+        end subroutine translate
 
       end module dynamic
 
