@@ -20,6 +20,8 @@
         public :: INTERACT_ENABLE
         public :: PENDING
         public :: DONE
+        public :: BROWNIAN
+        public :: DETERMINISTIC
 
 
 **                                                                    **
@@ -39,6 +41,16 @@
 *       `done' status is dumped by the OBDS code when the simulation   *
 *       finishes, that happens when the step counter is equal to the   *
 *       total number of steps, NUM_STEPS.                              *
+**                                                                    **
+
+
+**                                                                    **
+*       Brownian and deterministic modes of translation                *
+        enum, bind(c)
+          enumerator :: BROWNIAN
+          enumerator :: DETERMINISTIC
+        end enum
+*                                                                      *
 **                                                                    **
 
 

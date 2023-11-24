@@ -12,6 +12,8 @@
         use :: config, only: CONTACT => SPH_CONTACT
         use :: config, only: NUM_SPHERES => NUM_PARTICLES
         use :: config, only: NUM_STEPS
+        use :: config, only: DETERMINISTIC
+        use :: config, only: BROWNIAN
         use :: config, only: PENDING
         use :: config, only: DONE
         use :: io, only: io__flogger
@@ -24,7 +26,6 @@
         use :: force, only: force__callback_SLJ_handler
         use :: system, only: system__PBC
         use :: dynamic, only: dynamic__translator
-        use :: dynamic, only: dynamic__shifter
         use :: particle, only: particle_t
         implicit none
         private
@@ -369,13 +370,11 @@ c         Implements Brownian spheres.
 
           if (INTERACT_ENABLE) then
             call force__brute_force(particles)
-            call dynamic__translator(particles)
+            call dynamic__translator(particles, MODE = DETERMINISTIC)
           end if
-c         computes Brownian forces
+
           call force__Brownian_force(particles)
-c         shifts particles Brownianly
-          call dynamic__shifter(particles)
-c         applies Periodic Boundary Conditions
+          call dynamic__translator(particles, MODE = BROWNIAN)
           call system__PBC(particles)
 
           return
