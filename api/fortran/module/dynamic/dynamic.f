@@ -24,7 +24,7 @@ c         Shifts the particles in the direction of the Brownian force.
 c         NOTE:
 c         This only applies to spheres. The isotropic hydrodynamic resistance is implied.
           real(r8), intent(in) :: mobility
-          real(r8), intent(out) :: x(N)
+          real(r8), intent(inout) :: x(N)
           real(r8), intent(in) :: F_x(N)
 
           x = x + mobility * F_x
