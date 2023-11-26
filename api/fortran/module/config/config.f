@@ -22,6 +22,7 @@
         public :: DONE
         public :: BROWNIAN
         public :: DETERMINISTIC
+        public :: ISOTROPIC
 
 
 **                                                                    **
@@ -50,6 +51,13 @@
           enumerator :: BROWNIAN
           enumerator :: DETERMINISTIC
         end enum
+*                                                                      *
+**                                                                    **
+
+
+**                                                                    **
+*      isotropic | anistropic particle microhydrodynamics              *
+       logical(i8), parameter :: ISOTROPIC = .true.
 *                                                                      *
 **                                                                    **
 
