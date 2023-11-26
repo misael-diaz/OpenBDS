@@ -135,9 +135,7 @@ c         Opens filename for writing.
 c         On success (failure) the file descriptor `fd' is set (unknown).
 c         Returns the status of this operation to the caller.
           character(len=__FNAME_LENGTH__), intent(in) :: filename
-c         file descriptor
           integer(i8), intent(out) :: fd
-c         IO status
           integer(i8) :: status
           integer(i8) :: iostat
 
@@ -161,9 +159,7 @@ c         Opens filename for writing, overwrites the file contents if existing.
 c         On success (failure) the file descriptor `fd' is set (unknown).
 c         Returns the status of this operation to the caller.
           character(len=__FNAME_LENGTH__), intent(in) :: filename
-c         file descriptor
           integer(i8), intent(out) :: fd
-c         IO status
           integer(i8) :: status
           integer(i8) :: iostat
 
@@ -187,9 +183,7 @@ c         Opens filename for reading.
 c         On success (failure) the file descriptor `fd' is set (unknown).
 c         Returns the status of this operation to the caller.
           character(len=__FNAME_LENGTH__), intent(in) :: filename
-c         file descriptor
           integer(i8), intent(out) :: fd
-c         IO status
           integer(i8) :: status
           integer(i8) :: iostat
 
@@ -209,16 +203,14 @@ c         IO status
 
         function fopen (filename, fd, action) result(status)
 c         Synopsis:
-c         Opens new file whose name is filename for writing the default.
+c         Opens new file whose name is filename for writing (the default).
 c         If the optional argument `action' is supplied it opens the file for reading if
 c         `action' is `r', for writting if `action' is `w', and for overwritting if
 c         `action' is `o'.
 c         On success (failure) the file descriptor `fd' is set (unknown).
 c         Returns the status of this operation to the caller.
           character(len=__FNAME_LENGTH__), intent(in) :: filename
-c         file descriptor
           integer(i8), intent(out) :: fd
-c         IO status
           integer(i8) :: status
           character(len=1), intent(in), optional :: action
 
@@ -247,7 +239,6 @@ c         Synopsis:
 c         Closes the file associated with the file descriptor `fd'.
 c         Returns the status of this operation to the caller.
           integer(i8), intent(in) :: fd
-c         IO status
           integer(i8) :: status
           integer(i8) :: iostat
 
@@ -296,12 +287,9 @@ c         torque vector components
           real(r8), intent(in) :: T_z(N)
 c         identifiers IDs
           real(r8), intent(in) :: id(N)
-c         file descriptor
           integer(i8), intent(in) :: fd
-c         IO status
           integer(i8) :: status
           integer(i8) :: iostat
-c         loop index
           integer(i8) :: i
 c         format `fmt' specifier, NEw.d
           character(*), parameter :: fmt = '(SP,19E32.16)'
@@ -314,13 +302,13 @@ c         d: digits after the decimal place, 16 digits
 
           do i = 1_i8, N
             write(unit = fd, fmt = fmt, iostat = iostat)
-     +        x(i), y(i), z(i),      ! position vector
-     +        r_x(i), r_y(i), r_z(i),! `absolute' position vector
-     +        Eax(i), Eay(i), Eaz(i),! Euler angle vector
-     +        d_x(i), d_y(i), d_z(i),! director (or orientation vector)
-     +        F_x(i), F_y(i), F_z(i),! force vector
-     +        T_x(i), T_y(i), T_z(i),! torque vector
-     +        id(i)                  ! identifier ID
+     +        x(i), y(i), z(i),
+     +        r_x(i), r_y(i), r_z(i),
+     +        Eax(i), Eay(i), Eaz(i),
+     +        d_x(i), d_y(i), d_z(i),
+     +        F_x(i), F_y(i), F_z(i),
+     +        T_x(i), T_y(i), T_z(i),
+     +        id(i)
           end do
 
           status = fstatus(iostat)
@@ -367,12 +355,9 @@ c         torque vector components
           real(r8), intent(out) :: T_z(N)
 c         identifiers IDs
           real(r8), intent(out) :: id(N)
-c         file descriptor
           integer(i8), intent(in) :: fd
-c         IO status
           integer(i8) :: status
           integer(i8) :: iostat
-c         loop index
           integer(i8) :: i
 c         format `fmt' specifier, NEw.d
           character(*), parameter :: fmt = '(SP,19E32.16)'
@@ -385,13 +370,13 @@ c         d: digits after the decimal place, 16 digits
 
           do i = 1_i8, N
             read(unit = fd, fmt = fmt, iostat = iostat)
-     +        x(i), y(i), z(i),      ! position vector
-     +        r_x(i), r_y(i), r_z(i),! `absolute' position vector
-     +        Eax(i), Eay(i), Eaz(i),! Euler angle vector
-     +        d_x(i), d_y(i), d_z(i),! director (or orientation vector)
-     +        F_x(i), F_y(i), F_z(i),! force vector
-     +        T_x(i), T_y(i), T_z(i),! torque vector
-     +        id(i)                  ! identifier ID
+     +        x(i), y(i), z(i),
+     +        r_x(i), r_y(i), r_z(i),
+     +        Eax(i), Eay(i), Eaz(i),
+     +        d_x(i), d_y(i), d_z(i),
+     +        F_x(i), F_y(i), F_z(i),
+     +        T_x(i), T_y(i), T_z(i),
+     +        id(i)
           end do
 
           status = fstatus(iostat)
@@ -406,9 +391,7 @@ c         Logs the particle fields (or properties) to the file associated with t
 c         file descriptor `fd'.
 c         Returns the status of this operation to the caller.
           class(particle_t), intent(in), target :: particles
-c         file descriptor
           integer(i8), intent(in) :: fd
-c         IO status
           integer(i8) :: status
 c         position vector components subject to periodic conditions
           real(r8), pointer, contiguous :: x(:) => null()
@@ -463,9 +446,7 @@ c         Loads the particle fields (or properties) from the datga file associat
 c         the file descriptor `fd'.
 c         Returns the status of this operation to the caller.
           class(particle_t), intent(inout), target :: particles
-c         file descriptor
           integer(i8), intent(in) :: fd
-c         IO status
           integer(i8) :: status
 c         position vector components subject to periodic conditions
           real(r8), pointer, contiguous :: x(:) => null()
@@ -528,32 +509,23 @@ c         IO status
           integer(i8) :: iostat
 c         placeholder to store the step number in a string
           character(len = 64) :: step_str
-c         temporary filename
           character(len = __FNAME_LENGTH__) :: tempname
-c         designated filename
           character(len = __FNAME_LENGTH__) :: filename
-c         relative path to file
           character(len = *), parameter :: path =
      +    'run/bds/data/particles/particles-'
 
-c         writes step number to a string of suitable size
-c         NOTE:
-c         guards against invalid input
           write(step_str, '(I64)') abs(step)
           step_str = adjustl(step_str)
 
-c         defines the temporary and designated filenames
           tempname = path // trim(step_str) // '.tmp'
           filename = path // trim(step_str) // '.txt'
 
-c         opens temporary file for writing
           status = fopen(tempname, fd)
           if (STATUS == __FAILURE__) then
             print *, 'IO ERROR with file: ', trim(tempname)
             return
           end if
 
-c         logs the (current) particle fields (or properties) to the file
           status = flog(particles, fd)
           if (STATUS == __FAILURE__) then
             print *, 'WRITE ERROR with file: ', trim(tempname)
@@ -561,7 +533,6 @@ c         logs the (current) particle fields (or properties) to the file
             return
           end if
 
-c         closes the file
           status = fclose(fd)
           if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(tempname)
@@ -598,36 +569,27 @@ c         IO status
           integer(i8) :: status
 c         placeholder to store the step number in a string
           character(len = 64) :: step_str
-c         name of data file containing the particle fields (or properties)
           character(len = __FNAME_LENGTH__) :: filename
-c         relative path to file
           character(len = *), parameter :: path =
      +    'run/bds/data/particles/particles-'
 
-c         writes step number to a string of suitable size
-c         NOTE:
-c         guards against invalid input
           write(step_str, '(I64)') abs(step)
           step_str = adjustl(step_str)
 
-c         constructs the name of the data file from the step number
           filename = path // trim(step_str) // '.txt'
 
-c         opens data file for reading
           status = fopen(filename = filename, fd = fd, action = 'r')
           if (STATUS == __FAILURE__) then
             print *, 'IO ERROR with file: ', trim(filename)
             return
           end if
 
-c         loads the particle fields (or properties) from the file
           status = fload(particles, fd)
           if (STATUS == __FAILURE__) then
             print *, 'READ ERROR with file: ', trim(filename)
             return
           end if
 
-c         closes the file
           status = fclose(fd)
           if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(filename)
@@ -649,23 +611,18 @@ c         file descriptor
 c         IO status
           integer(i8) :: status
           integer(i8) :: iostat
-c         name of the state file
           character(len = __FNAME_LENGTH__), parameter :: fname =
      +    'run/bds/state/state.txt'
-c         format for reading the step number (or state)
           character(*), parameter :: fmt = '(I64)'
 
-c         tries to open the state file for overwritting
           status = fopen(filename = fname, fd = fd, action = 'o')
           if (STATUS == __FAILURE__) then
             print *, 'IO ERROR with file: ', trim(fname)
             return
           end if
 
-c         tries to write the state to the state file
           write(unit = fd, fmt = fmt, iostat = iostat) istate
 
-c         queries the IO status
           status = fstatus(iostat)
           if (STATUS == __FAILURE__) then
             print *, 'WRITE ERROR with file: ', trim(fname)
@@ -673,7 +630,6 @@ c         queries the IO status
             return
           end if
 
-c         closes the file
           status = fclose(fd)
           if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
@@ -708,17 +664,14 @@ c         temporary status file
 c         designated status file name
           character(len = __FNAME_LENGTH__), parameter :: fname =
      +    'run/bds/status/status.txt'
-c         format for writing the status
           character(*), parameter :: fmt = '(A)'
 
-c         tries to open a new status file for writing
           status = fopen(filename = tname, fd = fd, action = 'w')
           if (STATUS == __FAILURE__) then
             print *, 'IO ERROR with file: ', trim(fname)
             return
           end if
 
-c         tries to write the status to the temporary state file
           select case (stat)
             case (DONE)
               write(unit = fd, fmt = fmt, iostat = iostat) 'done'
@@ -728,7 +681,6 @@ c         tries to write the status to the temporary state file
               write(unit = fd, fmt = fmt, iostat = iostat) 'unknown'
           end select
 
-c         queries the IO status
           status = fstatus(iostat)
           if (STATUS == __FAILURE__) then
             print *, 'WRITE ERROR with file: ', trim(fname)
@@ -736,14 +688,12 @@ c         queries the IO status
             return
           end if
 
-c         closes the file temporary
           status = fclose(fd)
           if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
             return
           end if
 
-c         commits the status
           iostat = int(rename(tname, fname), kind = i8)
           status = fstatus(iostat)
           if (STATUS == __FAILURE__) then
@@ -768,13 +718,10 @@ c         IO status
           integer(i8) :: iostat
 c         state (or step number)
           integer(i8) :: istate
-c         name of the state file
           character(len = __FNAME_LENGTH__), parameter :: fname =
      +    'run/bds/state/state.txt'
-c         format for reading the state (or step number)
           character(*), parameter :: fmt = '(I64)'
 
-c         tries to open the state file for reading
           status = fopen(filename = fname, fd = fd, action = 'r')
 
 c         NOTE:
@@ -789,10 +736,8 @@ c         in the state file in the next codeblocks
             return
           end if
 
-c         tries to read the contents of the state file into `istate'
           read(unit = fd, fmt = fmt, iostat = iostat) istate
 
-c         queries the IO status
           status = fstatus(iostat)
           if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED READ ERROR with file: ', trim(fname)
@@ -802,13 +747,11 @@ c         queries the IO status
             return
           end if
 
-c         sets the state with the fecthed value
 c         NOTE:
 c         applies an upper bound on the `state' (step number) to guard
 c         against invalid inputs (even if unlikely)
-          state = real( min(istate, NUM_STEPS), kind = r8 )
+          state = real( min(abs(istate), NUM_STEPS), kind = r8 )
 
-c         closes the file
           status = fclose(fd)
           if (STATUS == __FAILURE__) then
             print *, 'UNEXPECTED IO ERROR with file: ', trim(fname)
@@ -823,9 +766,7 @@ c         closes the file
 c         Synopsis:
 c         Dumps the OBDS state (holds the simulation step number) to the state file.
 c         Returns the status of this operation to the caller.
-c         system state (stands for the simulation step number)
           integer(i8), intent(in) :: istate
-c         IO status
           integer(i8) :: status
 
           status = fdump_state(istate)
@@ -839,17 +780,15 @@ c         Synopsis:
 c         Fetches the OBDS state (holds the simulation step number) from the state file.
 c         Returns the status of this operation to the caller.
           class(particle_t), intent(inout), target :: particles
-c         temporary placeholder array
           real(r8), pointer, contiguous :: tmp(:) => null()
-c         IO status
           integer(i8) :: status
-c         system state (stands for the simulation step number)
           real(r8) :: state
 
           status = ffetch_state(state)
 
-c         we can afford to commit the state regardless of the IO status because
-c         `ffetch_state()' either yields either the default or the (actual fetched) state;
+c         NOTE:
+c         we can afford to write the state regardless of the IO status because
+c         `ffetch_state()' yields either the default or the (actual fetched) state;
 c         the caller procedure has been designed to handle either case accordingly
           if (STATUS == __SUCCESS__ .OR. STATUS == __FAILURE__) then
             tmp => particles % tmp
@@ -866,7 +805,6 @@ c         Dumps the OBDS status to the status file to implement auto-scheduling.
 c         Returns the status of this operation to the caller.
 c         status of the simulation either (DONE, PENDING, or UNKNOWN)
           integer(i4), intent(in) :: stat
-c         IO status
           integer(i8) :: status
 
           status = fdump_status(stat)
