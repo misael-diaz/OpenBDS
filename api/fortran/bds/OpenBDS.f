@@ -51,11 +51,9 @@ c         representation), returns false otherwise.
 
         subroutine sane_checks (particles)
 c         Synopsis:
-c         Performs sane checks.
-c         Checks that the user has adhered to the design contraints on the number of
-c         steps. Note that `NUM_STEPS' must be a multiple of `NUM_LOG_STEPS', for the
-c         OBDS loop to execute the intended number of iterations, otherwise it loops
-c         indefinitely.
+c         Checks that configuration parameters adhere to the design contraints.
+c         Note that `NUM_STEPS' must be a multiple of `NUM_LOG_STEPS' so that the
+c         main OBDS loop does not execute indefinitely.
           class(particle_t), pointer, intent(inout) :: particles
           type(sphere_t) :: spheres
           real(r8), parameter :: NUM_STEPS_R8 = real(NUM_STEPS, kind=r8)
