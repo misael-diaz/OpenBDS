@@ -50,17 +50,14 @@ c         data placeholder
           real(r8), pointer, contiguous :: data(:) => null()
           contains
             private
-c           memory allocations and initializations
             procedure :: initializer
-c           bindings:
             procedure, public :: initialize => initializer
-c           updates the particle positions and orientations
             procedure(iupdate), deferred, public :: update
-c           implements inteparticle interactions
             procedure(icallback), deferred, public :: callback
         end type particle_t
 
         abstract interface
+c         updates the particle positions and orientations
           subroutine iupdate (particles)
             import particle_t
             implicit none
@@ -69,6 +66,7 @@ c           implements inteparticle interactions
         end interface
 
         abstract interface
+c         defines the inteparticle force (and torque) computations on the ith-particle
           pure subroutine icallback (particles, i)
             use, intrinsic :: iso_fortran_env, only: i8 => int64
             import particle_t
@@ -102,13 +100,9 @@ c         Complains if the module parameters in `config` are illegal.
           integer(i8), parameter :: E = LOG_N ! Exponent
           real(r8), parameter :: L = LIMIT
           real(r8), parameter :: T = TIME_STEP
-c         tests that the number of particles is an exact power of two
           logical(i8), parameter :: t1 = (N == 2_i8 ** E)
-c         tests that the system limit is positive
           logical(i8), parameter :: t2 = (L > 0.0_r8)
-c         tests that the time-step is positive
           logical(i8), parameter :: t3 = (T > 0.0_r8)
-c         defines the error messages
           character(*), parameter :: e1 = "particle::sane(): " //
      +    "IllegalParameterError: the number of particles is not a " //
      +    "power of two"
@@ -151,7 +145,6 @@ c         fills array `x' with values in symmetric range [1, numel]
 
         subroutine initializer (particles)
 c         Synopsis:
-c         Particles Initializer.
 c         In the Object-Oriented Programming OOP sense this subroutine initializes the
 c         core of the particle objects (though bear in mind that we are handling them
 c         as a collection and not as individual objects so that we can ultimately write
@@ -162,89 +155,86 @@ c         would do in C++ or Java.
           class(particle_t), intent(inout) :: particles
           real(r8), pointer, contiguous :: id(:) => null()
           integer(i8), parameter :: N = NUM_PARTICLES
-c         size position vector
+c         size of the components of the position vector
           integer(i8), parameter :: size_x = N
           integer(i8), parameter :: size_y = N
           integer(i8), parameter :: size_z = N
-c         size Verlet displacement vector
+c         size of the components of the Verlet displacement vector
           integer(i8), parameter :: size_Vdx = N
           integer(i8), parameter :: size_Vdy = N
           integer(i8), parameter :: size_Vdz = N
-c         size absolute position vector
+c         size of the components of the absolute position vector
           integer(i8), parameter :: size_r_x = N
           integer(i8), parameter :: size_r_y = N
           integer(i8), parameter :: size_r_z = N
-c         size Euler angle vector
+c         size of the components of the Euler angle vector
           integer(i8), parameter :: size_Eax = N
           integer(i8), parameter :: size_Eay = N
           integer(i8), parameter :: size_Eaz = N
-c         size director (or orientation) vector
+c         size of the components of the director (or orientation) vector
           integer(i8), parameter :: size_d_x = N
           integer(i8), parameter :: size_d_y = N
           integer(i8), parameter :: size_d_z = N
-c         size force vector
+c         size of the components of the force vector
           integer(i8), parameter :: size_f_x = N
           integer(i8), parameter :: size_f_y = N
           integer(i8), parameter :: size_f_z = N
-c         size torque vector
+c         size of the components of the torque vector
           integer(i8), parameter :: size_t_x = N
           integer(i8), parameter :: size_t_y = N
           integer(i8), parameter :: size_t_z = N
-c         size temporary placeholder
+c         size of the temporary placeholder
           integer(i8), parameter :: size_tmp = 12_i8 * N
-c         size Verlet neighbor-list (NOTE: we shall allocate more later)
+c         size of the Verlet neighbor-list (NOTE: we shall allocate more later)
           integer(i8), parameter :: size_Vnl = N
-c         size particle identifiers IDs
+c         size of the particle identifiers IDs
           integer(i8), parameter :: size_id = N
-c         sizes position vector
-          integer(i8), parameter :: size_data = size_x +
-     +                                                    size_y +
-     +                                                    size_z +
-c         sizes Verlet displacement vector
-     +                                                    size_Vdx +
-     +                                                    size_Vdy +
-     +                                                    size_Vdz +
-c         sizes absolute position vector
-     +                                                    size_r_x +
-     +                                                    size_r_y +
-     +                                                    size_r_z +
-c         sizes Euler angle vector
-     +                                                    size_Eax +
-     +                                                    size_Eay +
-     +                                                    size_Eaz +
-c         sizes director (or orientation) vector
-     +                                                    size_d_x +
-     +                                                    size_d_y +
-     +                                                    size_d_z +
-c         sizes force vector
-     +                                                    size_f_x +
-     +                                                    size_f_y +
-     +                                                    size_f_z +
-c         sizes torque vector
-     +                                                    size_t_x +
-     +                                                    size_t_y +
-     +                                                    size_t_z +
-c         sizes temporary placeholder
-     +                                                    size_tmp +
-c         sizes Verlet neighbor-list
-     +                                                    size_Vnl +
-c         sizes particle identifiers IDs
-     +                                                    size_id
-c         memory allocation status
+c         size of the whole contiguous data block that holds the particle fields
+          integer(i8), parameter :: size_data =
+c         sizes the components of the position vector
+     +                                          size_x +
+     +                                          size_y +
+     +                                          size_z +
+c         sizes the components of the Verlet displacement vector
+     +                                          size_Vdx +
+     +                                          size_Vdy +
+     +                                          size_Vdz +
+c         sizes the components of the absolute position vector
+     +                                          size_r_x +
+     +                                          size_r_y +
+     +                                          size_r_z +
+c         sizes the components of the Euler angle vector
+     +                                          size_Eax +
+     +                                          size_Eay +
+     +                                          size_Eaz +
+c         sizes the components of the director (or orientation) vector
+     +                                          size_d_x +
+     +                                          size_d_y +
+     +                                          size_d_z +
+c         sizes the components of the force vector
+     +                                          size_f_x +
+     +                                          size_f_y +
+     +                                          size_f_z +
+c         sizes the components of the torque vector
+     +                                          size_t_x +
+     +                                          size_t_y +
+     +                                          size_t_z +
+c         sizes the temporary placeholder
+     +                                          size_tmp +
+c         sizes the Verlet neighbor-list
+     +                                          size_Vnl +
+c         sizes the particle identifiers IDs
+     +                                          size_id
           integer(i8) :: mstat
-c         size
-          integer(i8) :: sz
+          integer(i8) :: sz ! size
 
-c         complains if module `config' has illegal values
           call sane()
 
-c         allocates memory for the particle data
           allocate(particles % data(size_data), stat = mstat)
           if (mstat /= 0_i8) then
             error stop "particle::initializer(): allocation error"
           end if
 
-c         initializes the particle data with zeros
           particles % data = 0.0_r8
 
 c         position vector binding
@@ -331,6 +321,7 @@ c         particle identifier IDs binding
 
 c         assigns unique IDs to the particles
           id => particles % id
+
           call iota(id)
 
           return
