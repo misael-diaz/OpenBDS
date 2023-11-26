@@ -70,7 +70,7 @@ c           position vectors
         end interface
 
         interface
-c         shifts the particles position vectors
+c         shifts all the position vectors of the particles
           pure module subroutine translate (T_ARG)
 c           particle mobility (either Brownian or deterministic)
             real(r8), intent(in) :: mob
