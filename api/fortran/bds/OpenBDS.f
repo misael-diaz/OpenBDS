@@ -6,6 +6,9 @@
         use, intrinsic :: iso_fortran_env, only: r8 => real64
         use :: config, only: NUM_STEPS
         use :: config, only: NUM_LOG_STEPS
+        use :: config, only: ISOTROPIC
+        use :: particle, only: particle_t
+        use :: sphere, only: sphere_t
         implicit none
         private
         public :: sane
@@ -46,16 +49,19 @@ c         representation), returns false otherwise.
         end function is_pow2
 
 
-        subroutine sane_checks ()
+        subroutine sane_checks (particles)
 c         Synopsis:
 c         Performs sane checks.
 c         Checks that the user has adhered to the design contraints on the number of
 c         steps. Note that `NUM_STEPS' must be a multiple of `NUM_LOG_STEPS', for the
 c         OBDS loop to execute the intended number of iterations, otherwise it loops
 c         indefinitely.
+          class(particle_t), pointer, intent(inout) :: particles
+          type(sphere_t) :: spheres
           real(r8), parameter :: NUM_STEPS_R8 = real(NUM_STEPS, kind=r8)
           real(r8), parameter :: NUM_LOG_STEPS_R8 = real(NUM_LOG_STEPS,
      +    kind = r8)
+          logical(i8), parameter :: ANISOTROPIC = .not. ISOTROPIC
           character(*), parameter :: errmsg1 = 'sane(): '//
      +    'NUM_STEPS must be an exact power of two'
           character(*), parameter :: errmsg2 = 'sane(): '//
@@ -75,6 +81,18 @@ c         indefinitely.
             error stop errmsg3
           end if
 
+          block
+          character(*), parameter :: errmsg = 'sane(): '//
+     +    'config error, spheres must be configured as isotropic'
+            if ( same_type_as(particles, spheres) ) then
+              if (ANISOTROPIC) then
+                deallocate(particles)
+                particles => null()
+                error stop errmsg
+              end if
+            end if
+          end block
+
           return
         end subroutine sane_checks
 
@@ -86,10 +104,12 @@ c         indefinitely.
         use :: config, only: NUM_STEPS
         use :: config, only: NUM_LOG_STEPS
         use :: timer,  only: timer_t
+        use :: particle, only: particle_t
         use :: sphere, only: sphere_t
         use :: OBDS, only: sane
         implicit none
-c       initializes pointer to collection of spheres
+c       initializes pointers
+        class(particle_t), pointer :: particles => null()
         type(sphere_t), pointer :: spheres => null()
         type(timer_t) :: clock
         real(r8), pointer, contiguous :: tmp(:) => null()
@@ -103,12 +123,12 @@ c       step counters
 c       IO status
         integer(i8) :: status
 
-        call sane()
-
         clock = timer_t()
         call clock % t_start()
 
         spheres => sphere_t() ! instantiates the collection of spheres
+        particles => spheres
+        call sane(particles)
 
 c       fetches the initial step number (NOTE: `sphere_t()' handles this)
         tmp => spheres % tmp
@@ -147,6 +167,7 @@ c         halts execution if the application walltime has been reached
         end do
 
         deallocate(spheres)
+        particles => null()
         spheres => null()
 
       end program OpenBDS
