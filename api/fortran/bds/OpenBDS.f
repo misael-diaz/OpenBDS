@@ -108,44 +108,37 @@ c         indefinitely.
         use :: sphere, only: sphere_t
         use :: OBDS, only: sane
         implicit none
-c       initializes pointers
         class(particle_t), pointer :: particles => null()
         type(sphere_t), pointer :: spheres => null()
         type(timer_t) :: clock
         real(r8), pointer, contiguous :: tmp(:) => null()
-c       sets the number of simulation time-steps
         integer(i8), parameter :: steps = NUM_STEPS
-c       after this many steps the OBDS code logs the particle data to a plain text file
         integer(i8), parameter :: log_steps = NUM_LOG_STEPS
-c       step counters
         integer(i8) :: step
         integer(i8) :: istep
-c       IO status
         integer(i8) :: status
 
         clock = timer_t()
         call clock % t_start()
 
-        spheres => sphere_t() ! instantiates the collection of spheres
+        spheres => sphere_t()
         particles => spheres
         call sane(particles)
 
-c       fetches the initial step number (NOTE: `sphere_t()' handles this)
+c       fetches the initial step (NOTE: the `sphere_t()' constructor handles this)
         tmp => spheres % tmp
         istep = int(tmp(1), kind = i8)
 
-        step = istep
 c       executes the OBDS loop
 c       loop-invariant:
 c       so far we have executed `step' OBDS simulation steps
+        step = istep
         do while (step /= steps)
 
-          istep = 0_i8
 c         loop-invariant:
 c         so far we have executed `istep' simulation steps consecutively without logging
+          istep = 0_i8
           do while (istep /= log_steps)
-c           updates the position and orientation of the particles according to the
-c           Brownian and particle-particle interaction forces acting on them
             call spheres % update()
             istep = istep + 1_i8
           end do
@@ -156,10 +149,9 @@ c           Brownian and particle-particle interaction forces acting on them
             exit
           end if
 
-c         halts execution if the application walltime has been reached
           call clock % t_end()
 
-          if ( clock % t_falarm() ) then
+          if ( clock % t_falarm() ) then ! halts execution upon walltime
             exit
           end if
 
