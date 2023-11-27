@@ -55,33 +55,40 @@ c         Checks that configuration parameters adhere to the design contraints.
 c         Note that `NUM_STEPS' must be a multiple of `NUM_LOG_STEPS' so that the
 c         main OBDS loop does not execute indefinitely.
           class(particle_t), pointer, intent(inout) :: particles
-          type(sphere_t) :: spheres
-          real(r8), parameter :: NUM_STEPS_R8 = real(NUM_STEPS, kind=r8)
-          real(r8), parameter :: NUM_LOG_STEPS_R8 = real(NUM_LOG_STEPS,
-     +    kind = r8)
-          logical(i8), parameter :: ANISOTROPIC = .not. ISOTROPIC
-          character(*), parameter :: errmsg1 = 'sane(): '//
-     +    'NUM_STEPS must be an exact power of two'
-          character(*), parameter :: errmsg2 = 'sane(): '//
-     +    'NUM_LOG_STEPS must be an exact power of two'
-          character(*), parameter :: errmsg3 = 'sane(): '//
-     +    'NUM_LOG_STEPS must be less than or equal to NUM_STEPS'
-
-          if ( .not. is_pow2(NUM_STEPS_R8) ) then
-            error stop errmsg1
-          end if
-
-          if ( .not. is_pow2(NUM_LOG_STEPS_R8) ) then
-            error stop errmsg2
-          end if
-
-          if (NUM_LOG_STEPS > NUM_STEPS) then
-            error stop errmsg3
-          end if
 
           block
-          character(*), parameter :: errmsg = 'sane(): '//
-     +    'config error, spheres must be configured as isotropic'
+            real(r8), parameter :: NUM_STEPS_R8 = real(NUM_STEPS,
+     +      kind = r8)
+            character(*), parameter :: errmsg = 'sane(): '//
+     +      'NUM_STEPS must be an exact power of two'
+            if ( .not. is_pow2(NUM_STEPS_R8) ) then
+              error stop errmsg
+            end if
+          end block
+
+          block
+            real(r8), parameter :: NLS_R8 = real(NUM_LOG_STEPS,
+     +      kind = r8)
+            character(*), parameter :: errmsg = 'sane(): '//
+     +      'NUM_LOG_STEPS must be an exact power of two'
+            if ( .not. is_pow2(NLS_R8) ) then
+              error stop errmsg
+            end if
+          end block
+
+          block
+            character(*), parameter :: errmsg = 'sane(): '//
+     +      'NUM_LOG_STEPS must be less than or equal to NUM_STEPS'
+            if (NUM_LOG_STEPS > NUM_STEPS) then
+              error stop errmsg
+            end if
+          end block
+
+          block
+            type(sphere_t) :: spheres
+            logical(i8), parameter :: ANISOTROPIC = .not. ISOTROPIC
+            character(*), parameter :: errmsg = 'sane(): '//
+     +      'config error, spheres must be configured as isotropic'
             if ( same_type_as(particles, spheres) ) then
               if (ANISOTROPIC) then
                 deallocate(particles)
