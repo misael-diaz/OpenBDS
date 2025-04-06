@@ -20,6 +20,35 @@ have done in the propietary codebases that I have contributed.
 My main motivation for doing this is to apply in FORTRAN what I have learned from working
 with Java, C/C++, and Python.
 
+## Review
+
+In this section I review my own work. A lot has happened since the last time I worked
+on this code and this gives me the opportunity to weight on my decisions and the work
+done. The first bad decision was the introduction of two languages to the project, it
+started as a project entirely written in Fortran and then started adding C code but not
+with the intention of extending the existing code. The reason was that I could write
+code faster in C/C++ with my editor of choice, vim of course, than Fortran all because
+of the brackets because these allow for editing blocks of code at once. So I decided to
+rewrite the code in C only to add Fortran code because most of my colleauges are Fortran
+programmers but in the end none had the time to contribute. Eventually I dedicated my
+time to other projects and this one is this state.
+
+The other thing that was bad was that I made the mistake of not wanting to repeat myself
+and so the code started to become harder to navigate. Nowadays I don't mind repeating
+myself until it gets to a point where it makes sense to partition the code and by that
+time it's easier to see what to partition.
+
+Some of the issues that I wanted to address was the particle overlap that's present in
+the videos. This can be fixed easily by adding a repulsive force that grows
+logarithmically with the overlapped distance (and only when there's overlap of course).
+
+The implementation of the minimum image is terrible even though it has a linear time
+complexity. We can do the same with few lines of code and without math library calls.
+
+There's more I could say but I am going to stop at this point, I think that anyone
+reading this would realize that the code needs plenty of improvement but at least is a
+working code and that is a good staring point.
+
 ## Compilation
 
 Instructions to compile the source code with GNU Make. Some degree of familiarity with the
