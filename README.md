@@ -42,8 +42,9 @@ Some of the issues that I wanted to address was the particle overlap that's pres
 the videos. This can be fixed easily by adding a repulsive force that grows
 logarithmically with the overlapped distance (and only when there's overlap of course).
 
-The implementation of the minimum image is terrible even though it has a linear time
-complexity. We can do the same with few lines of code and without math library calls.
+The implementation of the minimum image is terrible, not worse than the typical
+quadratic brute force computation in terms of the time complexity.
+We can do the same with few lines of code and without math library calls.
 
 There's more I could say but I am going to stop at this point, I think that anyone
 reading this would realize that the code needs plenty of improvement but at least is a
