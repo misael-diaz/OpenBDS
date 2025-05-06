@@ -1,36 +1,11 @@
-*.smod
 *.log
 *.err
 *.txt
 *.swp
+*.swo
 *.mod
 *.bin
 *.pov
 *.png
 *.so
 *.o
-*backup*
-*pycache*
-*TODO*
-# roaming
-*plotMSD.py
-*genpovs2.py
-# old
-old/TODO.txt
-old/Vector.for-flipped
-old/Vector_int32_t_implementations.for-flipped
-old/compile.err
-old/modules/structs/dynamic/Makefile-backup
-old/modules/structs/dynamic/c-fortran-interoperable/
-old/modules/structs/dynamic/flist/
-old/modules/structs/dynamic/iterator/
-old/modules/structs/dynamic/link/
-old/modules/structs/dynamic/list-backup/
-old/modules/structs/dynamic/list/
-old/prototype/
-old/tests/clang/
-old/tests/modules/structs/dynamic/c-fortran-interoperable/
-old/tests/modules/structs/dynamic/flist/
-old/tests/modules/structs/dynamic/link/
-old/tests/modules/structs/dynamic/list-backup/
-old/tests/modules/structs/dynamic/list/
