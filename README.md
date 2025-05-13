@@ -5,7 +5,7 @@ Implements a Brownian Dynamics Simulator BDS in modern FORTRAN and C.
 The higher level Object-Oriented Programming OOP code is written in FORTRAN and everything
 else is written in C.
 
-This is a work in progress, contributions are welcomed.
+This project is not under development for the time being.
 
 ## Motivation
 
@@ -31,7 +31,7 @@ code faster in C/C++ with my editor of choice, vim of course, than Fortran all b
 of the brackets because these allow for editing blocks of code at once. So I decided to
 rewrite the code in C only to add Fortran code because most of my colleauges are Fortran
 programmers but in the end none had the time to contribute. Eventually I dedicated my
-time to other projects and this one is this state.
+time to other projects and this one is in this state.
 
 The other thing that was bad was that I made the mistake of not wanting to repeat myself
 and so the code started to become harder to navigate. Nowadays I don't mind repeating
@@ -48,7 +48,9 @@ We can do the same with few lines of code and without math library calls.
 
 There's more I could say but I am going to stop at this point, I think that anyone
 reading this would realize that the code needs plenty of improvement but at least is a
-working code and that is a good staring point.
+working code and that is a staring point.
+
+And last but not least the code here is no longer representative of the code I write.
 
 ## Compilation
 
